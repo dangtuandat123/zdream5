@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { DiscoverApps } from "@/components/gallery/DiscoverApps";
 import { StatsSection } from "@/components/home/StatsSection";
+import { FeaturesGuide } from "@/components/home/FeaturesGuide";
+import { PricingSection } from "@/components/home/PricingSection";
 import { StudioWorkspace } from "@/components/studio/StudioWorkspace";
 
 function App() {
@@ -11,7 +13,7 @@ function App() {
     <Layout onNavigate={setCurrentView}>
       {currentView === 'home' ? (
         <>
-          <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center relative z-10 w-full">
+          <div id="hero" className="flex flex-col items-center justify-center min-h-screen px-4 text-center relative z-10 w-full pt-16">
             <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 flex items-center justify-center">
               <div className="absolute top-[5%] left-[0%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-[#FF0055]/50 md:bg-[#FF0055]/50 rounded-full blur-[100px] md:blur-[120px] mix-blend-screen"></div>
               <div className="absolute bottom-[20%] right-[-10%] w-[130vw] h-[130vw] md:w-[45vw] md:h-[45vw] bg-[#7700FF]/50 rounded-full blur-[100px] md:blur-[130px] mix-blend-screen"></div>
@@ -66,8 +68,14 @@ function App() {
           {/* Gallery Section replacing GalleryGrid */}
           <DiscoverApps />
 
+          {/* Features / Capabilities */}
+          <FeaturesGuide />
+
           {/* Stats Section */}
           <StatsSection />
+
+          {/* Pricing Section */}
+          <PricingSection />
         </>
       ) : (
         <StudioWorkspace />

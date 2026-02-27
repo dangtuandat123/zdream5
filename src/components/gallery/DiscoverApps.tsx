@@ -71,7 +71,7 @@ const DISCOVER_ITEMS = [
 
 export function DiscoverApps() {
     return (
-        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-32 mb-20 z-10 relative">
+        <div id="gallery" className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-32 mb-20 z-10 relative">
             <div className="flex items-end justify-between mb-8">
                 <div>
                     <h2 className="text-4xl font-heading font-bold mb-2">Khám phá tác phẩm</h2>
