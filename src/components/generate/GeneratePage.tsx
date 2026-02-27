@@ -6,7 +6,6 @@ import {
     Settings2,
     ArrowUp,
     Sparkles,
-    Loader2,
     Trash2,
     RotateCcw,
     ZoomIn,
@@ -17,12 +16,17 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Spinner } from "@/components/ui/spinner"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import {
     Select,
     SelectContent,
@@ -35,14 +39,18 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
     Dialog,
     DialogContent,
     DialogTitle,
 } from "@/components/ui/dialog"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { ScrollArea } from "@/components/ui/scroll-area"
 
 // === Types ===
 interface GeneratedImage {
@@ -51,11 +59,12 @@ interface GeneratedImage {
     prompt: string
     model: string
     style: string
-    aspectRatio: string
+    aspectRatio: number
+    aspectLabel: string
     createdAt: Date
 }
 
-// Ảnh demo cho simulate
+// Ảnh demo
 const DEMO_URLS = [
     "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1200&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
@@ -63,12 +72,12 @@ const DEMO_URLS = [
     "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1200&auto=format&fit=crop",
 ]
 
-// Aspect ratio configs
+// Aspect ratio configs — value dùng cho AspectRatio component
 const ASPECT_RATIOS = [
-    { value: "1:1", label: "1:1", icon: Square, css: "aspect-square" },
-    { value: "16:9", label: "16:9", icon: RectangleHorizontal, css: "aspect-video" },
-    { value: "9:16", label: "9:16", icon: RectangleVertical, css: "aspect-[9/16]" },
-    { value: "4:3", label: "4:3", icon: RectangleHorizontal, css: "aspect-[4/3]" },
+    { value: "1", label: "1:1", ratio: 1, icon: Square },
+    { value: "16/9", label: "16:9", ratio: 16 / 9, icon: RectangleHorizontal },
+    { value: "9/16", label: "9:16", ratio: 9 / 16, icon: RectangleVertical },
+    { value: "4/3", label: "4:3", ratio: 4 / 3, icon: RectangleHorizontal },
 ]
 
 export function GeneratePage() {
@@ -81,10 +90,14 @@ export function GeneratePage() {
     // Settings
     const [model, setModel] = useState("sdxl")
     const [style, setStyle] = useState("photorealistic")
-    const [aspectRatio, setAspectRatio] = useState("1:1")
+    const [aspectRatioValue, setAspectRatioValue] = useState("1")
     const [creativity, setCreativity] = useState([75])
     const [highRes, setHighRes] = useState(false)
     const [imageCount, setImageCount] = useState("1")
+
+    // Helper
+    const getAspectRatio = (value: string) =>
+        ASPECT_RATIOS.find((r) => r.value === value) || ASPECT_RATIOS[0]
 
     // === Handlers ===
     const handleGenerate = useCallback(() => {
@@ -92,8 +105,8 @@ export function GeneratePage() {
         setIsGenerating(true)
 
         const count = parseInt(imageCount)
+        const ar = getAspectRatio(aspectRatioValue)
 
-        // Simulate API: tạo N ảnh
         setTimeout(() => {
             const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
                 id: `img-${Date.now()}-${i}`,
@@ -101,14 +114,15 @@ export function GeneratePage() {
                 prompt: prompt.trim(),
                 model,
                 style,
-                aspectRatio,
+                aspectRatio: ar.ratio,
+                aspectLabel: ar.label,
                 createdAt: new Date(),
             }))
 
             setImages((prev) => [...newImages, ...prev])
             setIsGenerating(false)
         }, 2500)
-    }, [prompt, isGenerating, imageCount, images.length, model, style, aspectRatio])
+    }, [prompt, isGenerating, imageCount, images.length, model, style, aspectRatioValue])
 
     const handleDelete = useCallback((id: string) => {
         setImages((prev) => prev.filter((img) => img.id !== id))
@@ -119,89 +133,89 @@ export function GeneratePage() {
         setPrompt(img.prompt)
         setModel(img.model)
         setStyle(img.style)
-        setAspectRatio(img.aspectRatio)
+        setSelectedImage(null)
     }, [])
-
-    const getAspectCss = (ratio: string) =>
-        ASPECT_RATIOS.find((r) => r.value === ratio)?.css || "aspect-square"
 
     return (
         <TooltipProvider>
-            <div className="relative flex h-full w-full flex-col overflow-hidden">
-                {/* === CANVAS AREA === */}
-                <ScrollArea className="flex-1 pb-36">
-                    <div className="p-4 lg:p-6">
-                        {/* Empty State */}
-                        {images.length === 0 && !isGenerating && (
-                            <div className="flex flex-col items-center justify-center text-center py-32 max-w-md mx-auto space-y-6 opacity-60">
-                                <div className="flex size-20 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20">
-                                    <Sparkles className="size-10 text-primary" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-medium tracking-tight">Bắt đầu sáng tạo</h3>
-                                    <p className="text-muted-foreground">
-                                        Nhập mô tả vào thanh lệnh phía dưới để AI tạo ảnh cho bạn.
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+            <div className="relative flex flex-1 flex-col">
+                {/* Nền gradient giống hero section landing page */}
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                    <div className="absolute top-[5%] left-[10%] w-[40vw] h-[40vw] bg-[#FF0055]/30 rounded-full blur-[120px]" />
+                    <div className="absolute bottom-[10%] right-[0%] w-[45vw] h-[45vw] bg-[#7700FF]/30 rounded-full blur-[130px]" />
+                    <div className="absolute top-[30%] left-[40%] w-[35vw] h-[35vw] bg-[#00D4FF]/20 rounded-full blur-[140px]" />
+                </div>
 
-                        {/* Loading Skeletons — hiện ngay trên đầu grid khi đang generate */}
-                        {isGenerating && (
-                            <div className="mb-4">
-                                <div className={`grid gap-4 ${parseInt(imageCount) > 1
-                                    ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3"
-                                    : "grid-cols-1 max-w-2xl mx-auto"
-                                    }`}>
-                                    {Array.from({ length: parseInt(imageCount) }).map((_, i) => (
-                                        <div
-                                            key={`skeleton-${i}`}
-                                            className={`relative rounded-xl border bg-background/50 overflow-hidden ${getAspectCss(aspectRatio)}`}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-primary/5 animate-pulse" />
+                {/* === CANVAS AREA === */}
+                <div className="relative z-10 flex-1 p-4 lg:p-6">
+                    {/* Empty State — sử dụng shadcn Empty component */}
+                    {images.length === 0 && !isGenerating && (
+                        <Empty className="py-24 border-0">
+                            <EmptyHeader>
+                                <EmptyMedia>
+                                    <Sparkles className="size-10 text-primary" />
+                                </EmptyMedia>
+                                <EmptyTitle>Bắt đầu sáng tạo</EmptyTitle>
+                                <EmptyDescription>
+                                    Nhập mô tả vào thanh lệnh phía dưới để AI tạo ảnh cho bạn.
+                                </EmptyDescription>
+                            </EmptyHeader>
+                        </Empty>
+                    )}
+
+                    {/* Loading Skeletons — AspectRatio + Skeleton */}
+                    {isGenerating && (
+                        <div className={`mb-4 grid gap-4 ${parseInt(imageCount) > 1
+                            ? "grid-cols-2 lg:grid-cols-3"
+                            : "grid-cols-1 max-w-2xl mx-auto"
+                            }`}>
+                            {Array.from({ length: parseInt(imageCount) }).map((_, i) => (
+                                <Card key={`skeleton-${i}`} className="overflow-hidden">
+                                    <CardContent className="p-0">
+                                        <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
+                                            <Skeleton className="h-full w-full rounded-none" />
                                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                                                <Loader2 className="size-8 animate-spin text-primary/40" />
+                                                <Spinner className="size-8 text-primary/40" />
                                                 {i === 0 && (
-                                                    <p className="text-xs text-muted-foreground animate-pulse px-4 text-center truncate max-w-[200px]">
+                                                    <p className="text-xs text-muted-foreground px-4 text-center truncate max-w-[200px]">
                                                         {prompt.slice(0, 50)}...
                                                     </p>
                                                 )}
                                             </div>
-                                        </div>
-                                    ))}
+                                        </AspectRatio>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Image Gallery Grid */}
+                    {images.length > 0 && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <LayoutGrid className="size-4 text-muted-foreground" />
+                                    <span className="text-sm font-medium">{images.length} ảnh</span>
                                 </div>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-xs text-muted-foreground"
+                                    onClick={() => setImages([])}
+                                >
+                                    Xoá tất cả
+                                </Button>
                             </div>
-                        )}
 
-                        {/* Image Gallery Grid */}
-                        {images.length > 0 && (
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <LayoutGrid className="size-4 text-muted-foreground" />
-                                        <span className="text-sm font-medium">{images.length} ảnh</span>
-                                    </div>
-                                    {images.length > 0 && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-xs text-muted-foreground"
-                                            onClick={() => setImages([])}
-                                        >
-                                            Xoá tất cả
-                                        </Button>
-                                    )}
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                                    {images.map((img) => (
-                                        <div
-                                            key={img.id}
-                                            className="group relative cursor-pointer rounded-xl border bg-background overflow-hidden transition-all hover:shadow-lg hover:border-primary/30"
-                                            onClick={() => setSelectedImage(img)}
-                                        >
-                                            {/* Image */}
-                                            <div className={`relative ${getAspectCss(img.aspectRatio)}`}>
+                            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
+                                {images.map((img) => (
+                                    <Card
+                                        key={img.id}
+                                        className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-primary/30"
+                                        onClick={() => setSelectedImage(img)}
+                                    >
+                                        <CardContent className="p-0 relative">
+                                            <AspectRatio ratio={img.aspectRatio}>
                                                 <img
                                                     src={img.url}
                                                     alt={img.prompt}
@@ -212,14 +226,14 @@ export function GeneratePage() {
                                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
 
                                                 {/* Hover Actions */}
-                                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-200">
+                                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                                     <Tooltip>
                                                         <TooltipTrigger asChild>
                                                             <Button
                                                                 size="icon"
                                                                 variant="secondary"
-                                                                className="size-7 rounded-full backdrop-blur-md bg-background/80"
-                                                                onClick={(e) => { e.stopPropagation(); /* download logic */ }}
+                                                                className="size-7 rounded-full"
+                                                                onClick={(e) => { e.stopPropagation() }}
                                                             >
                                                                 <Download className="size-3.5" />
                                                             </Button>
@@ -231,7 +245,7 @@ export function GeneratePage() {
                                                             <Button
                                                                 size="icon"
                                                                 variant="secondary"
-                                                                className="size-7 rounded-full backdrop-blur-md bg-background/80"
+                                                                className="size-7 rounded-full"
                                                                 onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
                                                             >
                                                                 <Trash2 className="size-3.5" />
@@ -241,33 +255,29 @@ export function GeneratePage() {
                                                     </Tooltip>
                                                 </div>
 
-                                                {/* Hover Zoom Icon */}
+                                                {/* Hover Zoom */}
                                                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                    <div className="flex size-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
-                                                        <ZoomIn className="size-5 text-white" />
-                                                    </div>
+                                                    <ZoomIn className="size-6 text-white drop-shadow-md" />
                                                 </div>
 
-                                                {/* Aspect Ratio Badge */}
+                                                {/* Aspect Badge */}
                                                 <Badge
                                                     variant="secondary"
-                                                    className="absolute bottom-2 left-2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md bg-background/80"
+                                                    className="absolute bottom-2 left-2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
                                                 >
-                                                    {img.aspectRatio}
+                                                    {img.aspectLabel}
                                                 </Badge>
-                                            </div>
-
-                                            {/* Card Footer */}
-                                            <div className="p-2.5">
-                                                <p className="text-xs text-muted-foreground truncate">{img.prompt}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                            </AspectRatio>
+                                        </CardContent>
+                                        <CardFooter className="p-2.5">
+                                            <p className="text-xs text-muted-foreground truncate">{img.prompt}</p>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
                             </div>
-                        )}
-                    </div>
-                </ScrollArea>
+                        </div>
+                    )}
+                </div>
 
                 {/* === IMAGE VIEWER DIALOG === */}
                 <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
@@ -275,8 +285,8 @@ export function GeneratePage() {
                         <DialogTitle className="sr-only">Xem ảnh chi tiết</DialogTitle>
                         {selectedImage && (
                             <div className="flex flex-col lg:flex-row">
-                                {/* Image */}
-                                <div className="flex-1 flex items-center justify-center bg-black/5 dark:bg-white/5 min-h-[300px] lg:min-h-[500px] p-4">
+                                {/* Ảnh */}
+                                <div className="flex-1 flex items-center justify-center bg-muted/30 min-h-[300px] lg:min-h-[500px] p-4">
                                     <img
                                         src={selectedImage.url}
                                         alt={selectedImage.prompt}
@@ -303,7 +313,7 @@ export function GeneratePage() {
                                             </div>
                                             <div>
                                                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tỷ lệ</Label>
-                                                <p className="text-xs font-medium mt-0.5">{selectedImage.aspectRatio}</p>
+                                                <p className="text-xs font-medium mt-0.5">{selectedImage.aspectLabel}</p>
                                             </div>
                                             <div>
                                                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thời gian</Label>
@@ -314,7 +324,6 @@ export function GeneratePage() {
                                         </div>
                                     </div>
 
-                                    {/* Actions */}
                                     <div className="flex flex-col gap-2 mt-auto">
                                         <Button size="sm" className="w-full">
                                             <Download className="mr-2 size-4" /> Tải xuống
@@ -323,23 +332,10 @@ export function GeneratePage() {
                                             <Share2 className="mr-2 size-4" /> Chia sẻ
                                         </Button>
                                         <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="flex-1"
-                                                onClick={() => {
-                                                    handleRegenerate(selectedImage)
-                                                    setSelectedImage(null)
-                                                }}
-                                            >
+                                            <Button size="sm" variant="ghost" className="flex-1" onClick={() => handleRegenerate(selectedImage)}>
                                                 <RotateCcw className="mr-2 size-3.5" /> Tạo lại
                                             </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="ghost"
-                                                className="flex-1 text-destructive hover:text-destructive"
-                                                onClick={() => handleDelete(selectedImage.id)}
-                                            >
+                                            <Button size="sm" variant="ghost" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDelete(selectedImage.id)}>
                                                 <Trash2 className="mr-2 size-3.5" /> Xoá
                                             </Button>
                                         </div>
@@ -350,185 +346,171 @@ export function GeneratePage() {
                     </DialogContent>
                 </Dialog>
 
-                {/* === FLOATING PROMPT BAR === */}
-                <div className="absolute bottom-6 left-1/2 w-full max-w-3xl -translate-x-1/2 px-4 z-50">
-                    <div className="flex flex-col rounded-[24px] border border-border/50 bg-background/80 backdrop-blur-2xl p-2 shadow-2xl transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-background/95">
-                        {/* Textarea */}
-                        <Textarea
-                            placeholder="Mô tả ý tưởng của bạn..."
-                            className="min-h-[56px] max-h-[120px] w-full resize-none border-0 bg-transparent px-4 py-2.5 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault()
-                                    handleGenerate()
-                                }
-                            }}
-                        />
+                {/* === PROMPT BAR — sticky dính đáy viewport === */}
+                <div className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 py-3">
+                    <Card className="bg-card border shadow-lg ring-1 ring-border">
+                        <CardContent className="p-2">
+                            <Textarea
+                                placeholder="Mô tả ý tưởng của bạn..."
+                                className="min-h-[56px] max-h-[120px] w-full resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
+                                value={prompt}
+                                onChange={(e) => setPrompt(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault()
+                                        handleGenerate()
+                                    }
+                                }}
+                            />
+                            <Separator className="my-1" />
 
-                        {/* Control Bar */}
-                        <div className="flex items-center justify-between px-2 pt-1.5 border-t border-border/30">
-                            <div className="flex items-center gap-1.5">
-                                {/* Settings Popover */}
-                                <Popover>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <PopoverTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                    <Settings2 className="size-4" />
-                                                </Button>
-                                            </PopoverTrigger>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top">Cài đặt</TooltipContent>
-                                    </Tooltip>
+                            <div className="flex items-center justify-between px-1 pt-1">
+                                <div className="flex items-center gap-1.5">
+                                    {/* Settings Popover */}
+                                    <Popover>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-8 rounded-full">
+                                                        <Settings2 className="size-4" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Cài đặt</TooltipContent>
+                                        </Tooltip>
 
-                                    <PopoverContent side="top" align="start" className="w-[320px] p-4 rounded-xl">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2 font-medium text-sm">
-                                                <Wand2 className="size-4 text-primary" />
-                                                Thông số kiến tạo
-                                            </div>
-                                            <Separator />
-
-                                            {/* Aspect Ratio */}
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Tỷ lệ khung hình</Label>
-                                                <ToggleGroup
-                                                    type="single"
-                                                    value={aspectRatio}
-                                                    onValueChange={(v) => v && setAspectRatio(v)}
-                                                    className="grid grid-cols-4 gap-1.5"
-                                                >
-                                                    {ASPECT_RATIOS.map((ar) => (
-                                                        <ToggleGroupItem
-                                                            key={ar.value}
-                                                            value={ar.value}
-                                                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                                                        >
-                                                            <ar.icon className="size-4" />
-                                                            {ar.label}
-                                                        </ToggleGroupItem>
-                                                    ))}
-                                                </ToggleGroup>
-                                            </div>
-
-                                            {/* Image Count */}
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Số lượng ảnh</Label>
-                                                <ToggleGroup
-                                                    type="single"
-                                                    value={imageCount}
-                                                    onValueChange={(v) => v && setImageCount(v)}
-                                                    className="grid grid-cols-4 gap-1.5"
-                                                >
-                                                    {["1", "2", "3", "4"].map((n) => (
-                                                        <ToggleGroupItem
-                                                            key={n}
-                                                            value={n}
-                                                            className="rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                                                        >
-                                                            {n}
-                                                        </ToggleGroupItem>
-                                                    ))}
-                                                </ToggleGroup>
-                                            </div>
-
-                                            {/* Style */}
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Phong cách</Label>
-                                                <Select value={style} onValueChange={setStyle}>
-                                                    <SelectTrigger className="h-8">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="photorealistic">Chân thực</SelectItem>
-                                                        <SelectItem value="anime">Anime</SelectItem>
-                                                        <SelectItem value="digital-art">Digital Art</SelectItem>
-                                                        <SelectItem value="3d-render">3D Render</SelectItem>
-                                                        <SelectItem value="watercolor">Màu nước</SelectItem>
-                                                        <SelectItem value="oil-painting">Sơn dầu</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            {/* Creativity */}
-                                            <div className="space-y-3">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sáng tạo</Label>
-                                                    <span className="text-xs font-medium">{creativity[0]}%</span>
+                                        <PopoverContent side="top" align="start" className="w-[320px] p-4">
+                                            <div className="space-y-4">
+                                                <div className="flex items-center gap-2 font-medium text-sm">
+                                                    <Wand2 className="size-4 text-primary" />
+                                                    Thông số kiến tạo
                                                 </div>
-                                                <Slider value={creativity} onValueChange={setCreativity} max={100} step={1} />
-                                            </div>
+                                                <Separator />
 
-                                            {/* High-res */}
-                                            <div className="flex items-center justify-between">
-                                                <Label htmlFor="hr" className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">HD (2x)</Label>
-                                                <Switch id="hr" checked={highRes} onCheckedChange={setHighRes} />
-                                            </div>
-                                        </div>
-                                    </PopoverContent>
-                                </Popover>
+                                                {/* Aspect Ratio */}
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Tỷ lệ khung hình</Label>
+                                                    <ToggleGroup
+                                                        type="single"
+                                                        value={aspectRatioValue}
+                                                        onValueChange={(v) => v && setAspectRatioValue(v)}
+                                                        className="grid grid-cols-4 gap-1.5"
+                                                    >
+                                                        {ASPECT_RATIOS.map((ar) => (
+                                                            <ToggleGroupItem
+                                                                key={ar.value}
+                                                                value={ar.value}
+                                                                className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                            >
+                                                                <ar.icon className="size-4" />
+                                                                {ar.label}
+                                                            </ToggleGroupItem>
+                                                        ))}
+                                                    </ToggleGroup>
+                                                </div>
 
-                                {/* Quick Model Selector */}
-                                <Select value={model} onValueChange={setModel}>
-                                    <SelectTrigger className="h-7 border-none bg-muted/50 hover:bg-muted text-[11px] font-medium rounded-full px-3 w-auto min-w-[120px] shadow-none">
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="size-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                {/* Số lượng */}
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Số lượng ảnh</Label>
+                                                    <ToggleGroup
+                                                        type="single"
+                                                        value={imageCount}
+                                                        onValueChange={(v) => v && setImageCount(v)}
+                                                        className="grid grid-cols-4 gap-1.5"
+                                                    >
+                                                        {["1", "2", "3", "4"].map((n) => (
+                                                            <ToggleGroupItem
+                                                                key={n}
+                                                                value={n}
+                                                                className="rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                                            >
+                                                                {n}
+                                                            </ToggleGroupItem>
+                                                        ))}
+                                                    </ToggleGroup>
+                                                </div>
+
+                                                {/* Style */}
+                                                <div className="space-y-2">
+                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Phong cách</Label>
+                                                    <Select value={style} onValueChange={setStyle}>
+                                                        <SelectTrigger className="h-8">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="photorealistic">Chân thực</SelectItem>
+                                                            <SelectItem value="anime">Anime</SelectItem>
+                                                            <SelectItem value="digital-art">Digital Art</SelectItem>
+                                                            <SelectItem value="3d-render">3D Render</SelectItem>
+                                                            <SelectItem value="watercolor">Màu nước</SelectItem>
+                                                            <SelectItem value="oil-painting">Sơn dầu</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+
+                                                {/* Creativity */}
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sáng tạo</Label>
+                                                        <span className="text-xs font-medium">{creativity[0]}%</span>
+                                                    </div>
+                                                    <Slider value={creativity} onValueChange={setCreativity} max={100} step={1} />
+                                                </div>
+
+                                                {/* High-res */}
+                                                <div className="flex items-center justify-between">
+                                                    <Label htmlFor="hr" className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">HD (2x)</Label>
+                                                    <Switch id="hr" checked={highRes} onCheckedChange={setHighRes} />
+                                                </div>
+                                            </div>
+                                        </PopoverContent>
+                                    </Popover>
+
+                                    {/* Model Select */}
+                                    <Select value={model} onValueChange={setModel}>
+                                        <SelectTrigger className="h-7 border-none bg-muted/50 hover:bg-muted text-[11px] font-medium rounded-full px-3 w-auto min-w-[120px] shadow-none">
                                             <SelectValue />
-                                        </div>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
-                                        <SelectItem value="dalle3">DALL·E 3</SelectItem>
-                                        <SelectItem value="midjourney">Midjourney V6</SelectItem>
-                                        <SelectItem value="flux">Flux Pro</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
+                                            <SelectItem value="dalle3">DALL·E 3</SelectItem>
+                                            <SelectItem value="midjourney">Midjourney V6</SelectItem>
+                                            <SelectItem value="flux">Flux Pro</SelectItem>
+                                        </SelectContent>
+                                    </Select>
 
-                                {/* Quick Aspect Ratio */}
+                                    {/* Quick info badges */}
+                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal">
+                                        {getAspectRatio(aspectRatioValue).label}
+                                    </Badge>
+                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal">
+                                        ×{imageCount}
+                                    </Badge>
+                                </div>
+
+                                {/* Generate */}
                                 <Tooltip>
                                     <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-7 px-2 rounded-full text-[11px] text-muted-foreground">
-                                            {ASPECT_RATIOS.find(r => r.value === aspectRatio)?.label}
+                                        <Button
+                                            size="icon"
+                                            className="size-9 rounded-full"
+                                            disabled={isGenerating || !prompt.trim()}
+                                            onClick={handleGenerate}
+                                        >
+                                            {isGenerating ? (
+                                                <Spinner className="size-4" />
+                                            ) : (
+                                                <ArrowUp className="size-4" />
+                                            )}
                                         </Button>
                                     </TooltipTrigger>
-                                    <TooltipContent side="top">Tỷ lệ khung hình</TooltipContent>
-                                </Tooltip>
-
-                                {/* Quick Count */}
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-7 px-2 rounded-full text-[11px] text-muted-foreground">
-                                            ×{imageCount}
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top">Số lượng ảnh mỗi lần tạo</TooltipContent>
+                                    <TooltipContent side="top">
+                                        Tạo ảnh <span className="text-muted-foreground text-[10px] ml-1">Enter</span>
+                                    </TooltipContent>
                                 </Tooltip>
                             </div>
-
-                            {/* Generate Button */}
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        size="icon"
-                                        className="size-9 rounded-full bg-primary hover:scale-105 transition-transform"
-                                        disabled={isGenerating || !prompt.trim()}
-                                        onClick={handleGenerate}
-                                    >
-                                        {isGenerating ? (
-                                            <Loader2 className="size-4 animate-spin" />
-                                        ) : (
-                                            <ArrowUp className="size-4" />
-                                        )}
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="top">
-                                    Tạo ảnh <span className="text-muted-foreground text-[10px] ml-1">Enter</span>
-                                </TooltipContent>
-                            </Tooltip>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </TooltipProvider>
