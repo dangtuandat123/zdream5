@@ -57,11 +57,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {/* Logo & Toggle */}
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem className="relative flex items-center">
+          <SidebarMenuItem className="group/header relative flex items-center">
             {/* Logo - Ẩn khi sidebar collapsed VÀ đang được hover */}
             <SidebarMenuButton
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5 transition-opacity duration-200 group-data-[collapsible=icon]:group-hover:opacity-0"
+              className="data-[slot=sidebar-menu-button]:!p-1.5 transition-opacity duration-200 group-data-[collapsible=icon]:group-hover/header:opacity-0"
             >
               <Link to="/">
                 <div className="flex aspect-square size-5 items-center justify-center rounded bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white">
@@ -71,8 +71,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuButton>
 
-            {/* Trigger - Nằm đè lên Logo, chỉ hiện khi sidebar collapsed VÀ đang được hover */}
-            <SidebarTrigger className="absolute left-1 opacity-0 transition-opacity duration-200 group-data-[collapsible=icon]:group-hover:opacity-100" />
+            {/* 
+                Trigger Button:
+                - Lúc to (expanded): Nằm bên phải (ml-auto), hiện bình thường
+                - Lúc nhỏ (collapsed): Bị mờ đi (opacity-0) VÀ tự chuyển thành absolute đè lên logo
+                - Lúc nhỏ VÀ hover: Hiện lên lại (opacity-100)
+            */}
+            <SidebarTrigger className="ml-auto transition-all duration-200 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:left-1 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:group-hover/header:opacity-100" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
