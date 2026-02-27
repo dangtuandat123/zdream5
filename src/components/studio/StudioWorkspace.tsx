@@ -4,6 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wand2, Upload, Settings2, Image as ImageIcon, Download, Share2 } from "lucide-react";
 
 export function StudioWorkspace() {
@@ -19,129 +23,130 @@ export function StudioWorkspace() {
     };
 
     return (
-        <div className="flex-1 flex flex-col md:flex-row w-full max-w-[1600px] mx-auto p-4 gap-6 h-[calc(100vh-5rem)]">
+        <div className="flex flex-1 flex-col gap-4 md:flex-row">
             {/* Left Canvas Area */}
-            <div className="flex-1 glass-panel rounded-3xl overflow-hidden relative flex flex-col">
-                <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
-                    <h2 className="font-heading font-semibold text-white/80 flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" /> Bảng vẽ
-                    </h2>
+            <Card className="flex flex-1 flex-col">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <ImageIcon className="h-4 w-4" /> Bảng vẽ
+                    </CardTitle>
                     {generatedImg && (
                         <div className="flex gap-2">
-                            <Button size="sm" variant="ghost" className="text-white/70 hover:text-white">
-                                <Share2 className="w-4 h-4 mr-2" /> Chia sẻ
+                            <Button size="sm" variant="ghost">
+                                <Share2 className="mr-2 h-4 w-4" /> Chia sẻ
                             </Button>
-                            <Button size="sm" className="bg-white text-black hover:bg-gray-200">
-                                <Download className="w-4 h-4 mr-2" /> Tải xuống
+                            <Button size="sm">
+                                <Download className="mr-2 h-4 w-4" /> Tải xuống
                             </Button>
                         </div>
                     )}
-                </div>
-
-                <div className="flex-1 flex items-center justify-center p-8 relative overflow-hidden">
+                </CardHeader>
+                <CardContent className="flex flex-1 items-center justify-center p-8">
                     {isGenerating ? (
-                        <div className="flex flex-col items-center gap-4 animate-pulse">
-                            <div className="w-16 h-16 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-                            <p className="font-medium text-purple-300">Đang tổng hợp điểm ảnh...</p>
+                        <div className="flex flex-col items-center gap-4">
+                            <Skeleton className="h-64 w-64 rounded-xl" />
+                            <Skeleton className="h-4 w-48" />
                         </div>
                     ) : generatedImg ? (
                         <img
                             src={generatedImg}
                             alt="Generated Art"
-                            className="max-w-full max-h-full object-contain rounded-xl shadow-2xl animate-fade-in"
+                            className="max-h-full max-w-full rounded-xl object-contain"
                         />
                     ) : (
-                        <div className="text-center text-white/40 max-w-md">
-                            <div className="w-24 h-24 mx-auto mb-6 bg-white/5 rounded-full flex items-center justify-center">
-                                <ImageIcon className="w-10 h-10 text-white/20" />
+                        <div className="flex flex-col items-center gap-3 text-center text-muted-foreground">
+                            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                                <ImageIcon className="h-8 w-8" />
                             </div>
-                            <p className="text-lg mb-2">Bảng vẽ của bạn đang trống</p>
+                            <p className="text-base font-medium">Bảng vẽ của bạn đang trống</p>
                             <p className="text-sm">Sử dụng bảng điều khiển để tạo nên kiệt tác đầu tiên của bạn.</p>
                         </div>
                     )}
-                </div>
-            </div>
+                </CardContent>
+            </Card>
 
             {/* Right/Bottom Generation Console */}
-            <div className="w-full md:w-[400px] lg:w-[450px] shrink-0 glass-panel rounded-3xl flex flex-col overflow-hidden">
-                <div className="p-4 border-b border-white/10 bg-black/20">
-                    <h2 className="font-heading font-semibold text-white flex items-center gap-2">
-                        <Settings2 className="w-4 h-4" /> Bảng điều khiển
-                    </h2>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-6">
+            <Card className="w-full shrink-0 md:w-[400px] lg:w-[450px]">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <Settings2 className="h-4 w-4" /> Bảng điều khiển
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
                     <Tabs defaultValue="text" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-white/5 p-1 rounded-xl mb-6">
-                            <TabsTrigger value="text" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white transition-all">
-                                Văn bản
-                            </TabsTrigger>
-                            <TabsTrigger value="image" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white transition-all">
-                                Ảnh mẫu
-                            </TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="text">Văn bản</TabsTrigger>
+                            <TabsTrigger value="image">Ảnh mẫu</TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="text" className="space-y-6">
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium text-white/80">Câu lệnh</label>
+                        <TabsContent value="text" className="mt-4 space-y-4">
+                            <div className="space-y-2">
+                                <Label>Câu lệnh</Label>
                                 <Textarea
                                     placeholder="VD: Một thành phố tương lai với ô tô bay, phong cách cyberpunk, độ chi tiết cao..."
-                                    className="min-h-[120px] bg-black/40 border-white/10 text-white placeholder:text-white/30 resize-none focus-visible:ring-purple-500/50 rounded-xl"
+                                    className="min-h-[120px] resize-none"
                                 />
                             </div>
                         </TabsContent>
 
-                        <TabsContent value="image" className="space-y-6">
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium text-white/80">Ảnh gốc</label>
-                                <div className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:bg-white/5 transition-colors cursor-pointer group">
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                        <Upload className="w-6 h-6 text-white/60 group-hover:text-white" />
-                                    </div>
-                                    <p className="text-sm font-medium text-white/80 mb-1">Nhấp để tải lên hoặc kéo & thả</p>
-                                    <p className="text-xs text-white/40">SVG, PNG, JPG hoặc GIF (tối đa 10MB)</p>
-                                </div>
+                        <TabsContent value="image" className="mt-4 space-y-4">
+                            <div className="space-y-2">
+                                <Label>Ảnh gốc</Label>
+                                <Card className="cursor-pointer border-dashed transition-colors hover:bg-accent">
+                                    <CardContent className="flex flex-col items-center gap-3 p-6 text-center">
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                                            <Upload className="h-5 w-5 text-muted-foreground" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-medium">Nhấp để tải lên hoặc kéo & thả</p>
+                                            <p className="text-xs text-muted-foreground">SVG, PNG, JPG hoặc GIF (tối đa 10MB)</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             </div>
-                            <div className="space-y-3">
-                                <label className="text-sm font-medium text-white/80">Câu lệnh chỉnh sửa</label>
+                            <div className="space-y-2">
+                                <Label>Câu lệnh chỉnh sửa</Label>
                                 <Textarea
                                     placeholder="Chúng ta nên chỉnh sửa bức ảnh này thế nào?"
-                                    className="min-h-[80px] bg-black/40 border-white/10 text-white placeholder:text-white/30 resize-none focus-visible:ring-purple-500/50 rounded-xl"
+                                    className="min-h-[80px] resize-none"
                                 />
                             </div>
                         </TabsContent>
                     </Tabs>
 
-                    <div className="mt-8 space-y-6 pt-6 border-t border-white/10">
-                        <div className="space-y-4">
+                    <Separator />
+
+                    {/* Settings */}
+                    <div className="space-y-4">
+                        <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-white/80">Độ sáng tạo</label>
-                                <span className="text-xs text-white/50">80%</span>
+                                <Label>Độ sáng tạo</Label>
+                                <span className="text-xs text-muted-foreground">80%</span>
                             </div>
-                            <Slider defaultValue={[80]} max={100} step={1} className="w-full" />
+                            <Slider defaultValue={[80]} max={100} step={1} />
                         </div>
 
-                        <div className="flex items-center justify-between pt-2">
-                            <label className="text-sm font-medium text-white/80">Độ phân giải cao</label>
-                            <Switch />
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="high-res">Độ phân giải cao</Label>
+                            <Switch id="high-res" />
                         </div>
                     </div>
-                </div>
-
-                <div className="p-4 border-t border-white/10 bg-black/40">
+                </CardContent>
+                <CardFooter>
                     <Button
-                        className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-90 text-white font-bold h-12 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]"
+                        className="w-full"
+                        size="lg"
                         onClick={handleGenerate}
                         disabled={isGenerating}
                     >
                         {isGenerating ? "Đang tạo..." : (
                             <>
-                                <Wand2 className="w-5 h-5 mr-2" /> Tạo tác phẩm
+                                <Wand2 className="mr-2 h-5 w-5" /> Tạo tác phẩm
                             </>
                         )}
                     </Button>
-                </div>
-            </div>
+                </CardFooter>
+            </Card>
         </div>
     );
 }

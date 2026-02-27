@@ -5,7 +5,9 @@ import { Register } from "@/components/auth/Register";
 import { AppShell } from "@/components/layout/AppShell";
 import { Layout } from "@/components/layout/Layout";
 import { Dashboard } from "@/components/dashboard/Dashboard";
-import { StudioWorkspace } from "@/components/studio/StudioWorkspace";
+import { GeneratePage } from "@/components/generate/GeneratePage";
+import { TemplatesPage } from "@/components/templates/TemplatesPage";
+import { TemplateDetailPage } from "@/components/templates/TemplateDetailPage";
 import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute";
 
 function App() {
@@ -18,24 +20,24 @@ function App() {
           <Route path="/" element={<LandingPage />} />
         </Route>
 
-        {/* Auth Routes (No layout, full screen) protected from logged-in users */}
+        {/* Auth Routes (No layout, full screen) */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
 
-        {/* Protected App Routes with AppShell */}
+        {/* Protected App Routes with Sidebar Shell */}
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AppShell />}>
             <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="studio" element={<StudioWorkspace />} />
-            <Route path="billing" element={<div className="p-8 text-white/50 text-center mt-20">Trang quản lý gói cước (Coming Soon)</div>} />
-            <Route path="settings" element={<div className="p-8 text-white/50 text-center mt-20">Trang cài đặt (Coming Soon)</div>} />
+            <Route path="generate" element={<GeneratePage />} />
+            <Route path="templates" element={<TemplatesPage />} />
+            <Route path="templates/:id" element={<TemplateDetailPage />} />
           </Route>
         </Route>
 
-        {/* Fallback route */}
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
