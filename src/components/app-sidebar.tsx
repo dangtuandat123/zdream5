@@ -7,14 +7,10 @@ import {
   LayoutDashboardIcon,
   WandIcon,
   LayoutGridIcon,
-  SearchIcon,
-  StarIcon,
-  ClockIcon,
-  GiftIcon,
   ZapIcon,
-  ChevronDownIcon,
   SettingsIcon,
   HelpCircleIcon,
+  ChevronDownIcon
 } from "lucide-react"
 
 import { NavUser } from "@/components/nav-user"
@@ -24,12 +20,10 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import {
@@ -58,7 +52,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem className="group/header relative flex items-center">
-            {/* Logo - Ẩn khi sidebar collapsed VÀ đang được hover */}
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5 transition-opacity duration-200 group-data-[collapsible=icon]:group-hover/header:opacity-0"
@@ -71,79 +64,51 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </Link>
             </SidebarMenuButton>
 
-            {/* 
-                Trigger Button:
-                - Lúc to (expanded): Nằm bên phải (ml-auto), hiện bình thường
-                - Lúc nhỏ (collapsed): Bị mờ đi (opacity-0) VÀ tự chuyển thành absolute đè lên logo
-                - Lúc nhỏ VÀ hover: Hiện lên lại (opacity-100)
-            */}
             <SidebarTrigger className="ml-auto transition-all duration-200 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:left-1 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:group-hover/header:opacity-100" />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* Workspace Selector — giống "Tuấn's Lovable" */}
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton tooltip="Chọn không gian">
-                    <Avatar className="size-5 rounded-md">
-                      <AvatarFallback className="rounded-md text-[10px] bg-primary text-primary-foreground">
-                        N
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="truncate font-medium">Nhà Sáng Tạo</span>
-                    <ChevronDownIcon className="ml-auto size-4" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="start" side="right">
-                  <DropdownMenuItem>Không gian cá nhân</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Tạo không gian mới</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      {/* Nav chính — Home, Search */}
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                isActive={location.pathname.includes("dashboard")}
-                tooltip="Trang chủ"
-              >
-                <Link to="/app/dashboard">
-                  <LayoutDashboardIcon />
-                  <span>Trang chủ</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip="Tìm kiếm">
-                <SearchIcon />
-                <span>Tìm kiếm</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      <SidebarSeparator />
-
+      {/* Menu chính */}
       <SidebarContent>
-        {/* Group: Tạo ảnh — giống "Projects" */}
         <SidebarGroup>
-          <SidebarGroupLabel>Tạo ảnh</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Workspace Selector */}
+              <SidebarMenuItem className="mb-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <SidebarMenuButton tooltip="Chọn không gian">
+                      <Avatar className="size-5 rounded-md">
+                        <AvatarFallback className="rounded-md text-[10px] bg-primary text-primary-foreground">
+                          N
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="truncate font-medium">Nhà Sáng Tạo</span>
+                      <ChevronDownIcon className="ml-auto size-4" />
+                    </SidebarMenuButton>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="start" side="right">
+                    <DropdownMenuItem>Không gian cá nhân</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Tạo không gian mới</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </SidebarMenuItem>
+
+              {/* Main Links */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={location.pathname.includes("dashboard")}
+                  tooltip="Trang chủ"
+                >
+                  <Link to="/app/dashboard">
+                    <LayoutDashboardIcon />
+                    <span>Trang chủ</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -168,53 +133,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Yêu thích">
-                  <StarIcon />
-                  <span>Yêu thích</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Group: Gần đây — giống "Recents" */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Gần đây</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Cyberpunk City">
-                  <ClockIcon />
-                  <span>Cyberpunk Cityscape</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Anime Portrait">
-                  <ClockIcon />
-                  <span>Anime Portrait</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Spacer */}
         <div className="mt-auto" />
 
-        {/* Bottom CTA — giống "Share Lovable" + "Upgrade to Pro" */}
+        {/* Bottom Actions */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Chia sẻ">
-                  <GiftIcon />
-                  <div className="grid flex-1 text-left leading-tight">
-                    <span className="truncate text-sm font-medium">Chia sẻ Nexus Art</span>
-                    <span className="truncate text-xs text-muted-foreground">100 💎 / lượt giới thiệu</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton tooltip="Nâng cấp Pro">
                   <ZapIcon />
@@ -224,14 +152,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   </div>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* Secondary nav — Settings, Help */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Cài đặt">
                   <Link to="/app/settings">
@@ -251,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: User avatar + dropdown */}
+      {/* Footer */}
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>

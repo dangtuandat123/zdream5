@@ -1,18 +1,12 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { SearchIcon, ImageIcon } from "lucide-react"
+import { SearchIcon, ImageIcon, SparklesIcon } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 const CATEGORIES = ["Tất cả", "Chân dung", "Phong cảnh", "Anime", "3D", "Logo", "Sản phẩm"]
 
@@ -45,79 +39,90 @@ export function TemplatesPage() {
     return (
         <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Mẫu thiết kế</h1>
-                <p className="text-muted-foreground">
-                    Chọn một mẫu, tải ảnh gốc lên và AI sẽ tạo ảnh theo phong cách mẫu cho bạn.
-                </p>
-            </div>
-
-            {/* Search & Filter */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="relative flex-1">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="space-y-1">
+                    <h1 className="text-2xl font-semibold tracking-tight">Mẫu thiết kế</h1>
+                    <p className="text-sm text-muted-foreground">
+                        Chọn mẫu → Tải ảnh lên → Nhận ảnh mới theo phong cách mẫu
+                    </p>
+                </div>
+                <div className="relative w-full sm:w-[280px]">
                     <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Tìm kiếm mẫu..."
-                        className="pl-9"
+                        placeholder="Tìm mẫu..."
+                        className="pl-9 h-9"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder="Danh mục" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {CATEGORIES.map((cat) => (
-                            <SelectItem key={cat} value={cat}>
-                                {cat}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
             </div>
 
+            {/* Category Filter — nằm ngang, chọn nhanh bằng ToggleGroup */}
+            <ToggleGroup
+                type="single"
+                value={category}
+                onValueChange={(v) => v && setCategory(v)}
+                className="flex flex-wrap justify-start gap-1"
+            >
+                {CATEGORIES.map((cat) => (
+                    <ToggleGroupItem
+                        key={cat}
+                        value={cat}
+                        className="rounded-full px-4 text-xs h-8 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                    >
+                        {cat}
+                    </ToggleGroupItem>
+                ))}
+            </ToggleGroup>
+
             {/* Results count */}
-            <p className="text-sm text-muted-foreground">
-                {filteredTemplates.length} mẫu được tìm thấy
+            <p className="text-xs text-muted-foreground -mt-2">
+                {filteredTemplates.length} mẫu
             </p>
 
             {/* Template Grid */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {filteredTemplates.map((template) => (
-                    <Card
+                    <Link
                         key={template.id}
-                        className="group overflow-hidden transition-colors hover:border-primary/50"
+                        to={`/app/templates/${template.id}`}
+                        className="group"
                     >
-                        <CardContent className="p-0">
-                            <div className="flex aspect-square items-center justify-center bg-muted transition-colors group-hover:bg-muted/80">
-                                <ImageIcon className="size-10 text-muted-foreground" />
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex-col items-start gap-2 p-3">
-                            <div className="w-full">
-                                <p className="text-sm font-medium truncate">{template.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{template.description}</p>
-                            </div>
-                            <div className="flex w-full items-center justify-between">
-                                <Badge variant="secondary" className="text-[10px]">{template.category}</Badge>
-                                <Button size="sm" variant="ghost" className="h-7 text-xs" asChild>
-                                    <Link to={`/app/templates/${template.id}`}>Chọn</Link>
-                                </Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
+                        <Card className="overflow-hidden transition-all hover:shadow-md hover:border-primary/30">
+                            <CardContent className="p-0">
+                                <div className="relative flex aspect-[4/3] items-center justify-center bg-muted transition-colors group-hover:bg-muted/70">
+                                    <ImageIcon className="size-10 text-muted-foreground/30" />
+                                    {/* Hover overlay */}
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                        <div className="flex items-center gap-2 text-white text-sm font-medium">
+                                            <SparklesIcon className="size-4" />
+                                            Sử dụng mẫu
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-3 space-y-1">
+                                    <p className="text-sm font-medium truncate">{template.name}</p>
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-xs text-muted-foreground truncate">{template.description}</p>
+                                        <Badge variant="secondary" className="text-[10px] shrink-0 ml-2">
+                                            {template.category}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 ))}
             </div>
 
             {filteredTemplates.length === 0 && (
                 <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
-                    <div className="flex size-16 items-center justify-center rounded-full bg-muted">
+                    <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
                         <SearchIcon className="size-6 text-muted-foreground" />
                     </div>
                     <p className="text-base font-medium">Không tìm thấy mẫu nào</p>
                     <p className="text-sm text-muted-foreground">Thử thay đổi từ khóa hoặc danh mục.</p>
-                    <Button variant="outline" onClick={() => { setSearch(""); setCategory("Tất cả") }}>
+                    <Button variant="outline" size="sm" onClick={() => { setSearch(""); setCategory("Tất cả") }}>
                         Xoá bộ lọc
                     </Button>
                 </div>
