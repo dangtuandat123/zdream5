@@ -15,21 +15,21 @@ function App() {
         <>
           <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center relative z-10 w-full">
             <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 flex items-center justify-center">
-              <div className="absolute top-[10%] left-[20%] w-[40vw] h-[40vw] bg-[#FF0055]/50 rounded-full blur-[120px] mix-blend-screen"></div>
-              <div className="absolute bottom-[20%] right-[15%] w-[45vw] h-[45vw] bg-[#7700FF]/50 rounded-full blur-[130px] mix-blend-screen"></div>
-              <div className="absolute top-[30%] text-center w-[50vw] h-[50vw] bg-[#00D4FF]/40 rounded-full blur-[140px] mix-blend-screen pointer-events-none"></div>
-              <div className="absolute top-[40%] text-center w-[30vw] h-[30vw] bg-[#FF00AA]/30 rounded-full blur-[100px] mix-blend-screen pointer-events-none"></div>
+              <div className="absolute top-[5%] left-[0%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-[#FF0055]/50 md:bg-[#FF0055]/50 rounded-full blur-[100px] md:blur-[120px] mix-blend-screen"></div>
+              <div className="absolute bottom-[20%] right-[-10%] w-[130vw] h-[130vw] md:w-[45vw] md:h-[45vw] bg-[#7700FF]/50 rounded-full blur-[100px] md:blur-[130px] mix-blend-screen"></div>
+              <div className="absolute top-[20%] text-center w-[140vw] h-[140vw] md:w-[50vw] md:h-[50vw] bg-[#00D4FF]/40 rounded-full blur-[110px] md:blur-[140px] mix-blend-screen pointer-events-none"></div>
+              <div className="absolute top-[40%] text-center w-[100vw] h-[100vw] md:w-[30vw] md:h-[30vw] bg-[#FF00AA]/30 rounded-full blur-[80px] md:blur-[100px] mix-blend-screen pointer-events-none"></div>
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-sans font-bold mb-4 tracking-tight text-white !leading-tight">
+            <h1 className="text-4xl md:text-5xl lg:text-7xl font-heading font-bold mb-4 tracking-tight text-white !leading-[1.1]">
               Build something Lovable
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/80 max-w-2xl mb-12 font-medium">
+            <p className="text-lg md:text-xl lg:text-2xl text-white/80 max-w-2xl mb-10 md:mb-12 font-medium px-4">
               Create apps and websites by chatting with AI
             </p>
 
-            <div className="w-full max-w-[800px] bg-[#222222]/95 backdrop-blur-xl rounded-[24px] p-2 flex flex-col justify-between min-h-[140px] border border-white/5 shadow-2xl transition-all focus-within:ring-1 focus-within:ring-white/20 relative z-20">
+            <div className="w-full max-w-[800px] bg-[#222222]/95 backdrop-blur-xl rounded-[20px] md:rounded-[24px] p-2 flex flex-col justify-between min-h-[110px] md:min-h-[140px] border border-white/5 shadow-2xl transition-all focus-within:ring-1 focus-within:ring-white/20 relative z-20">
               <div className="px-4 pt-3 flex-1">
                 <input
                   type="text"
