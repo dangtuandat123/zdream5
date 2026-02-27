@@ -9,46 +9,46 @@ export function Footer() {
                             Nexus Art
                         </h3>
                         <p className="text-sm text-white/50 font-light mb-4 max-w-xs">
-                            Empowering creators with boundless AI generation. Build stunning realities at the speed of thought.
+                            Tiếp sức cho các nhà sáng tạo với công nghệ AI không giới hạn. Xây dựng những thực tại tuyệt mỹ với tốc độ của tư duy.
                         </p>
                     </div>
 
                     {/* Product Links */}
                     <div>
-                        <h4 className="font-semibold text-white mb-4">Product</h4>
+                        <h4 className="font-semibold text-white mb-4">Sản phẩm</h4>
                         <ul className="space-y-3">
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Studio Workspace</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">API Access</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Pricing</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Changelog</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Không gian Sáng tạo</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Truy cập API</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Bảng giá</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Nhật ký Cập nhật</a></li>
                         </ul>
                     </div>
 
                     {/* Resources Links */}
                     <div>
-                        <h4 className="font-semibold text-white mb-4">Resources</h4>
+                        <h4 className="font-semibold text-white mb-4">Tài nguyên</h4>
                         <ul className="space-y-3">
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Documentation</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Community Prompt Guide</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Help Center</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Tài liệu tham khảo</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Cộng đồng Prompt</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Trung tâm Trợ giúp</a></li>
                             <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Blog</a></li>
                         </ul>
                     </div>
 
                     {/* Legal Links */}
                     <div>
-                        <h4 className="font-semibold text-white mb-4">Legal</h4>
+                        <h4 className="font-semibold text-white mb-4">Pháp lý</h4>
                         <ul className="space-y-3">
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Terms of Service</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Privacy Policy</a></li>
-                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Cookie Policy</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Điều khoản Dịch vụ</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Chính sách Bảo mật</a></li>
+                            <li><a href="#" className="text-sm text-white/50 hover:text-white transition-colors">Chính sách Cookie</a></li>
                         </ul>
                     </div>
                 </div>
 
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs text-white/40">
-                        © 2026 Nexus AI Art Studio. All rights reserved.
+                        © 2026 Nexus AI Art Studio. Đã đăng ký Bản quyền.
                     </p>
                     <div className="flex gap-4">
                         {/* Social mockups */}

@@ -39,13 +39,13 @@ export function Navbar({ onNavigate }: { onNavigate?: (view: 'home' | 'studio') 
                     <div className="hidden md:block">
                         <div className="ml-10 flex items-baseline space-x-4">
                             <span onClick={() => onNavigate?.('home')} className="text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer flex items-center gap-2">
-                                <LayoutDashboard className="w-4 h-4" /> Discover
+                                <LayoutDashboard className="w-4 h-4" /> Khám phá
                             </span>
                             <span onClick={() => onNavigate?.('studio')} className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer flex items-center gap-2">
-                                <ImageIcon className="w-4 h-4" /> Studio
+                                <ImageIcon className="w-4 h-4" /> Sáng tạo
                             </span>
                             <span className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer flex items-center gap-2">
-                                <History className="w-4 h-4" /> History
+                                <History className="w-4 h-4" /> Lịch sử
                             </span>
                         </div>
                     </div>
@@ -55,7 +55,7 @@ export function Navbar({ onNavigate }: { onNavigate?: (view: 'home' | 'studio') 
                             <User className="w-4 h-4" />
                         </Button>
                         <Button className="hidden sm:flex bg-white text-black hover:bg-gray-200 font-semibold shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all hover:shadow-[0_0_25px_rgba(255,255,255,0.5)]">
-                            Pro Upgrade
+                            Nâng cấp Pro
                         </Button>
                     </div>
                 </div>

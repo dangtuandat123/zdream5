@@ -2,8 +2,6 @@ import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { DiscoverApps } from "@/components/gallery/DiscoverApps";
 import { StatsSection } from "@/components/home/StatsSection";
-import { FeaturesSection } from "@/components/home/FeaturesSection";
-import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { StudioWorkspace } from "@/components/studio/StudioWorkspace";
 
 function App() {
@@ -22,11 +20,11 @@ function App() {
             </div>
 
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-heading font-bold mb-4 tracking-tight text-white !leading-[1.1]">
-              Build something Lovable
+              Sáng tạo không giới hạn
             </h1>
 
             <p className="text-lg md:text-xl lg:text-2xl text-white/80 max-w-2xl mb-10 md:mb-12 font-medium px-4">
-              Create apps and websites by chatting with AI
+              Tạo ứng dụng và trang web chỉ bằng cách trò chuyện với AI
             </p>
 
             <div className="w-full max-w-[800px] bg-[#222222]/95 backdrop-blur-xl rounded-[20px] md:rounded-[24px] p-2 flex flex-col justify-between min-h-[110px] md:min-h-[140px] border border-white/5 shadow-2xl transition-all focus-within:ring-1 focus-within:ring-white/20 relative z-20">
@@ -34,7 +32,7 @@ function App() {
                 <input
                   type="text"
                   className="flex rounded-md border border-input transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm w-full bg-transparent border-none text-[15px] font-medium text-white placeholder:text-white/50 focus-visible:ring-0 shadow-none h-auto p-0"
-                  placeholder="Ask Lovable to create a landing page for"
+                  placeholder="Yêu cầu AI tạo một trang web cho..."
                 />
               </div>
 
@@ -45,7 +43,7 @@ function App() {
 
                 <div className="flex items-center gap-2">
                   <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 shadow py-2 rounded-full bg-[#3B59DF] hover:bg-[#3B59DF]/90 text-white text-xs px-4 h-8 font-medium">
-                    Plan
+                    Lên kế hoạch
                   </button>
                   <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:bg-accent w-8 h-8 text-white/50 hover:text-white rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mic w-4 h-4" aria-hidden="true">
@@ -70,12 +68,6 @@ function App() {
 
           {/* Stats Section */}
           <StatsSection />
-
-          {/* Features Section */}
-          <FeaturesSection />
-
-          {/* Testimonials Section */}
-          <TestimonialsSection />
         </>
       ) : (
         <StudioWorkspace />

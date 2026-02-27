@@ -6,7 +6,7 @@ const DISCOVER_ITEMS = [
         id: 1,
         img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop",
         title: "Iconstack",
-        desc: "50,000+ Free SVG Icons",
+        desc: "Hơn 50,000 biểu tượng SVG miễn phí",
         likes: 979,
         logo: "I"
     },
@@ -14,7 +14,7 @@ const DISCOVER_ITEMS = [
         id: 2,
         img: "https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=800&auto=format&fit=crop",
         title: "Attendflow",
-        desc: "Event marketing made simple",
+        desc: "Tiếp thị sự kiện trở nên đơn giản",
         likes: 710,
         logo: "AF"
     },
@@ -22,7 +22,7 @@ const DISCOVER_ITEMS = [
         id: 3,
         img: "https://images.unsplash.com/photo-1574169208507-84376144848b?q=80&w=800&auto=format&fit=crop",
         title: "creativable",
-        desc: "All-in-one CRM, AI Assistant, t...",
+        desc: "CRM All-in-one, Trợ lý AI, v.v...",
         likes: 456,
         logo: "C"
     },
@@ -30,7 +30,7 @@ const DISCOVER_ITEMS = [
         id: 4,
         img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop",
         title: "Pilates Circle by Cult",
-        desc: "Move, full circle.",
+        desc: "Chuyển động toàn diện.",
         likes: 419,
         logo: "P"
     },
@@ -38,7 +38,7 @@ const DISCOVER_ITEMS = [
         id: 5,
         img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800&auto=format&fit=crop",
         title: "Opux AI",
-        desc: "Every successful app starts h...",
+        desc: "Mọi ứng dụng thành công đều bắt đầ...",
         likes: 369,
         logo: "O"
     },
@@ -46,7 +46,7 @@ const DISCOVER_ITEMS = [
         id: 6,
         img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop",
         title: "NeuroTunes AI",
-        desc: "Adaptive music streaming eng...",
+        desc: "Công cụ phát nhạc thích ứng...",
         likes: 283,
         logo: "N",
         isVideo: true
@@ -55,7 +55,7 @@ const DISCOVER_ITEMS = [
         id: 7,
         img: "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=800&auto=format&fit=crop",
         title: "Schedra",
-        desc: "All-in-One Content Creation Pl...",
+        desc: "Nền tảng tạo nội dung tất cả trong m...",
         likes: 195,
         logo: "S"
     },
@@ -63,7 +63,7 @@ const DISCOVER_ITEMS = [
         id: 8,
         img: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop",
         title: "Createspace",
-        desc: "AI Media Made Simple",
+        desc: "Truyền thông AI thật đơn giản",
         likes: 163,
         logo: "CS"
     },
@@ -74,11 +74,11 @@ export function DiscoverApps() {
         <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mt-32 mb-20 z-10 relative">
             <div className="flex items-end justify-between mb-8">
                 <div>
-                    <h2 className="text-4xl font-heading font-bold mb-2">Discover creations</h2>
-                    <p className="text-xl text-white/70">Explore what others are building</p>
+                    <h2 className="text-4xl font-heading font-bold mb-2">Khám phá tác phẩm</h2>
+                    <p className="text-xl text-white/70">Xem những gì người khác đang sáng tạo</p>
                 </div>
                 <Button variant="outline" className="text-white border-white/20 hover:bg-white/10 bg-transparent rounded-lg px-6">
-                    View all
+                    Xem tất cả
                 </Button>
             </div>
 

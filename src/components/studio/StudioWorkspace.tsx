@@ -24,15 +24,15 @@ export function StudioWorkspace() {
             <div className="flex-1 glass-panel rounded-3xl overflow-hidden relative flex flex-col">
                 <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20">
                     <h2 className="font-heading font-semibold text-white/80 flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" /> Canvas
+                        <ImageIcon className="w-4 h-4" /> Bảng vẽ
                     </h2>
                     {generatedImg && (
                         <div className="flex gap-2">
                             <Button size="sm" variant="ghost" className="text-white/70 hover:text-white">
-                                <Share2 className="w-4 h-4 mr-2" /> Share
+                                <Share2 className="w-4 h-4 mr-2" /> Chia sẻ
                             </Button>
                             <Button size="sm" className="bg-white text-black hover:bg-gray-200">
-                                <Download className="w-4 h-4 mr-2" /> Download
+                                <Download className="w-4 h-4 mr-2" /> Tải xuống
                             </Button>
                         </div>
                     )}
@@ -42,7 +42,7 @@ export function StudioWorkspace() {
                     {isGenerating ? (
                         <div className="flex flex-col items-center gap-4 animate-pulse">
                             <div className="w-16 h-16 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-                            <p className="font-medium text-purple-300">Synthesizing pixels...</p>
+                            <p className="font-medium text-purple-300">Đang tổng hợp điểm ảnh...</p>
                         </div>
                     ) : generatedImg ? (
                         <img
@@ -55,8 +55,8 @@ export function StudioWorkspace() {
                             <div className="w-24 h-24 mx-auto mb-6 bg-white/5 rounded-full flex items-center justify-center">
                                 <ImageIcon className="w-10 h-10 text-white/20" />
                             </div>
-                            <p className="text-lg mb-2">Your canvas is empty</p>
-                            <p className="text-sm">Use the console to generate your first masterpiece.</p>
+                            <p className="text-lg mb-2">Bảng vẽ của bạn đang trống</p>
+                            <p className="text-sm">Sử dụng bảng điều khiển để tạo nên kiệt tác đầu tiên của bạn.</p>
                         </div>
                     )}
                 </div>
@@ -66,7 +66,7 @@ export function StudioWorkspace() {
             <div className="w-full md:w-[400px] lg:w-[450px] shrink-0 glass-panel rounded-3xl flex flex-col overflow-hidden">
                 <div className="p-4 border-b border-white/10 bg-black/20">
                     <h2 className="font-heading font-semibold text-white flex items-center gap-2">
-                        <Settings2 className="w-4 h-4" /> Generation Console
+                        <Settings2 className="w-4 h-4" /> Bảng điều khiển
                     </h2>
                 </div>
 
@@ -74,18 +74,18 @@ export function StudioWorkspace() {
                     <Tabs defaultValue="text" className="w-full">
                         <TabsList className="grid w-full grid-cols-2 bg-white/5 p-1 rounded-xl mb-6">
                             <TabsTrigger value="text" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white transition-all">
-                                Text Prompt
+                                Văn bản
                             </TabsTrigger>
                             <TabsTrigger value="image" className="rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white transition-all">
-                                Image Template
+                                Ảnh mẫu
                             </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="text" className="space-y-6">
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-white/80">Prompt</label>
+                                <label className="text-sm font-medium text-white/80">Câu lệnh</label>
                                 <Textarea
-                                    placeholder="e.g., A futuristic city with flying cars, cyberpunk style, high detail..."
+                                    placeholder="VD: Một thành phố tương lai với ô tô bay, phong cách cyberpunk, độ chi tiết cao..."
                                     className="min-h-[120px] bg-black/40 border-white/10 text-white placeholder:text-white/30 resize-none focus-visible:ring-purple-500/50 rounded-xl"
                                 />
                             </div>
@@ -93,19 +93,19 @@ export function StudioWorkspace() {
 
                         <TabsContent value="image" className="space-y-6">
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-white/80">Base Image</label>
+                                <label className="text-sm font-medium text-white/80">Ảnh gốc</label>
                                 <div className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:bg-white/5 transition-colors cursor-pointer group">
                                     <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
                                         <Upload className="w-6 h-6 text-white/60 group-hover:text-white" />
                                     </div>
-                                    <p className="text-sm font-medium text-white/80 mb-1">Click to upload or drag & drop</p>
-                                    <p className="text-xs text-white/40">SVG, PNG, JPG or GIF (max. 10MB)</p>
+                                    <p className="text-sm font-medium text-white/80 mb-1">Nhấp để tải lên hoặc kéo & thả</p>
+                                    <p className="text-xs text-white/40">SVG, PNG, JPG hoặc GIF (tối đa 10MB)</p>
                                 </div>
                             </div>
                             <div className="space-y-3">
-                                <label className="text-sm font-medium text-white/80">Modification Prompt</label>
+                                <label className="text-sm font-medium text-white/80">Câu lệnh chỉnh sửa</label>
                                 <Textarea
-                                    placeholder="How should we modify this image?"
+                                    placeholder="Chúng ta nên chỉnh sửa bức ảnh này thế nào?"
                                     className="min-h-[80px] bg-black/40 border-white/10 text-white placeholder:text-white/30 resize-none focus-visible:ring-purple-500/50 rounded-xl"
                                 />
                             </div>
@@ -115,14 +115,14 @@ export function StudioWorkspace() {
                     <div className="mt-8 space-y-6 pt-6 border-t border-white/10">
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <label className="text-sm font-medium text-white/80">Creativity / Creativity</label>
+                                <label className="text-sm font-medium text-white/80">Độ sáng tạo</label>
                                 <span className="text-xs text-white/50">80%</span>
                             </div>
                             <Slider defaultValue={[80]} max={100} step={1} className="w-full" />
                         </div>
 
                         <div className="flex items-center justify-between pt-2">
-                            <label className="text-sm font-medium text-white/80">High Resolution</label>
+                            <label className="text-sm font-medium text-white/80">Độ phân giải cao</label>
                             <Switch />
                         </div>
                     </div>
@@ -134,9 +134,9 @@ export function StudioWorkspace() {
                         onClick={handleGenerate}
                         disabled={isGenerating}
                     >
-                        {isGenerating ? "Generating..." : (
+                        {isGenerating ? "Đang tạo..." : (
                             <>
-                                <Wand2 className="w-5 h-5 mr-2" /> Generate Art
+                                <Wand2 className="w-5 h-5 mr-2" /> Tạo tác phẩm
                             </>
                         )}
                     </Button>
