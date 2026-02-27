@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
@@ -62,6 +62,7 @@ interface GeneratedImage {
     aspectRatio: number
     aspectLabel: string
     createdAt: Date
+    isNew?: boolean
 }
 
 // Ảnh demo
@@ -117,10 +118,21 @@ export function GeneratePage() {
                 aspectRatio: ar.ratio,
                 aspectLabel: ar.label,
                 createdAt: new Date(),
+                isNew: true,
             }))
 
             setImages((prev) => [...newImages, ...prev])
             setIsGenerating(false)
+
+            // Tự tắt highlight sau 5 giây
+            const newIds = newImages.map((img) => img.id)
+            setTimeout(() => {
+                setImages((prev) =>
+                    prev.map((img) =>
+                        newIds.includes(img.id) ? { ...img, isNew: false } : img
+                    )
+                )
+            }, 5000)
         }, 2500)
     }, [prompt, isGenerating, imageCount, images.length, model, style, aspectRatioValue])
 
@@ -141,9 +153,9 @@ export function GeneratePage() {
             <div className="relative flex flex-1 flex-col">
                 {/* Nền gradient giống hero section landing page */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute top-[5%] left-[10%] w-[40vw] h-[40vw] bg-[#FF0055]/30 rounded-full blur-[120px]" />
-                    <div className="absolute bottom-[10%] right-[0%] w-[45vw] h-[45vw] bg-[#7700FF]/30 rounded-full blur-[130px]" />
-                    <div className="absolute top-[30%] left-[40%] w-[35vw] h-[35vw] bg-[#00D4FF]/20 rounded-full blur-[140px]" />
+                    <div className="absolute top-[5%] left-[0%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-[#FF0055]/50 md:bg-[#FF0055]/30 rounded-full blur-[100px] md:blur-[120px]" />
+                    <div className="absolute bottom-[10%] right-[-10%] w-[130vw] h-[130vw] md:w-[45vw] md:h-[45vw] bg-[#7700FF]/50 md:bg-[#7700FF]/30 rounded-full blur-[100px] md:blur-[130px]" />
+                    <div className="absolute top-[30%] left-[30%] w-[100vw] h-[100vw] md:w-[35vw] md:h-[35vw] bg-[#00D4FF]/30 md:bg-[#00D4FF]/20 rounded-full blur-[80px] md:blur-[140px]" />
                 </div>
 
                 {/* === CANVAS AREA === */}
@@ -170,20 +182,20 @@ export function GeneratePage() {
                             : "grid-cols-1 max-w-2xl mx-auto"
                             }`}>
                             {Array.from({ length: parseInt(imageCount) }).map((_, i) => (
-                                <Card key={`skeleton-${i}`} className="overflow-hidden">
-                                    <CardContent className="p-0">
+                                <Card key={`skeleton-${i}`} className="overflow-hidden p-0">
+                                    <div className="relative">
                                         <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
-                                            <Skeleton className="h-full w-full rounded-none" />
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                                                <Spinner className="size-8 text-primary/40" />
-                                                {i === 0 && (
-                                                    <p className="text-xs text-muted-foreground px-4 text-center truncate max-w-[200px]">
-                                                        {prompt.slice(0, 50)}...
-                                                    </p>
-                                                )}
-                                            </div>
+                                            <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
                                         </AspectRatio>
-                                    </CardContent>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                                            <Spinner className="size-8 text-primary/40" />
+                                            {i === 0 && (
+                                                <p className="text-xs text-muted-foreground px-4 text-center truncate max-w-[200px]">
+                                                    {prompt.slice(0, 50)}...
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
                                 </Card>
                             ))}
                         </div>
@@ -207,71 +219,75 @@ export function GeneratePage() {
                                 </Button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-4">
+                            {/* Masonry layout — CSS columns cho mixed aspect ratios */}
+                            <div className="columns-2 gap-3 lg:columns-3 xl:columns-4">
                                 {images.map((img) => (
                                     <Card
                                         key={img.id}
-                                        className="group cursor-pointer overflow-hidden transition-all hover:shadow-lg hover:border-primary/30"
+                                        className={`group mb-3 cursor-pointer overflow-hidden break-inside-avoid transition-all hover:shadow-lg hover:border-primary/30 p-0 ${img.isNew
+                                            ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-95 duration-500"
+                                            : ""
+                                            }`}
                                         onClick={() => setSelectedImage(img)}
                                     >
-                                        <CardContent className="p-0 relative">
+                                        {/* Wrapper relative cho cả ảnh + overlay */}
+                                        <div className="relative">
                                             <AspectRatio ratio={img.aspectRatio}>
                                                 <img
                                                     src={img.url}
                                                     alt={img.prompt}
-                                                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                                    className="absolute inset-0 h-full w-full rounded-t-xl object-cover"
                                                 />
-
-                                                {/* Hover Overlay */}
-                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
-
-                                                {/* Hover Actions */}
-                                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                size="icon"
-                                                                variant="secondary"
-                                                                className="size-7 rounded-full"
-                                                                onClick={(e) => { e.stopPropagation() }}
-                                                            >
-                                                                <Download className="size-3.5" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom">Tải xuống</TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                size="icon"
-                                                                variant="secondary"
-                                                                className="size-7 rounded-full"
-                                                                onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                            >
-                                                                <Trash2 className="size-3.5" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent side="bottom">Xoá</TooltipContent>
-                                                    </Tooltip>
-                                                </div>
-
-                                                {/* Hover Zoom */}
-                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                    <ZoomIn className="size-6 text-white drop-shadow-md" />
-                                                </div>
-
-                                                {/* Aspect Badge */}
-                                                <Badge
-                                                    variant="secondary"
-                                                    className="absolute bottom-2 left-2 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    {img.aspectLabel}
-                                                </Badge>
                                             </AspectRatio>
-                                        </CardContent>
-                                        <CardFooter className="p-2.5">
-                                            <p className="text-xs text-muted-foreground truncate">{img.prompt}</p>
-                                        </CardFooter>
+
+                                            {/* Hover Overlay */}
+                                            <div className="absolute inset-0 rounded-t-xl bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
+
+                                            {/* Hover Actions */}
+                                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="secondary"
+                                                            className="size-7 rounded-full"
+                                                            onClick={(e) => { e.stopPropagation() }}
+                                                        >
+                                                            <Download className="size-3.5" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="bottom">Tải xuống</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="secondary"
+                                                            className="size-7 rounded-full"
+                                                            onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
+                                                        >
+                                                            <Trash2 className="size-3.5" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="bottom">Xoá</TooltipContent>
+                                                </Tooltip>
+                                            </div>
+
+                                            {/* Hover Zoom */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                <ZoomIn className="size-6 text-white drop-shadow-md" />
+                                            </div>
+
+                                            {/* Bottom gradient + prompt text + badge */}
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-6">
+                                                <div className="flex items-end justify-between gap-2">
+                                                    <p className="text-xs text-white/90 truncate">{img.prompt}</p>
+                                                    <Badge variant="secondary" className="shrink-0 text-[10px]">
+                                                        {img.aspectLabel}
+                                                    </Badge>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </Card>
                                 ))}
                             </div>
