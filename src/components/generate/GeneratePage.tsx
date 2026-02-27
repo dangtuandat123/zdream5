@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo } from "react"
 import {
     Wand2,
     Download,
@@ -13,6 +13,7 @@ import {
     RectangleHorizontal,
     RectangleVertical,
     Square,
+    RefreshCw,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -55,6 +56,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 // === Types ===
 interface GeneratedImage {
     id: string
+    batchId: string
     url: string
     prompt: string
     model: string
@@ -62,6 +64,17 @@ interface GeneratedImage {
     aspectRatio: number
     aspectLabel: string
     createdAt: Date
+    isNew?: boolean
+}
+
+interface Batch {
+    batchId: string
+    prompt: string
+    model: string
+    style: string
+    aspectLabel: string
+    createdAt: Date
+    images: GeneratedImage[]
     isNew?: boolean
 }
 
@@ -100,6 +113,28 @@ export function GeneratePage() {
     const getAspectRatio = (value: string) =>
         ASPECT_RATIOS.find((r) => r.value === value) || ASPECT_RATIOS[0]
 
+    // Nhóm ảnh theo batch
+    const batches = useMemo(() => {
+        const map = new Map<string, Batch>()
+        for (const img of images) {
+            if (!map.has(img.batchId)) {
+                map.set(img.batchId, {
+                    batchId: img.batchId,
+                    prompt: img.prompt,
+                    model: img.model,
+                    style: img.style,
+                    aspectLabel: img.aspectLabel,
+                    createdAt: img.createdAt,
+                    images: [],
+                    isNew: img.isNew,
+                })
+            }
+            map.get(img.batchId)!.images.push(img)
+        }
+        return Array.from(map.values())
+    }, [images])
+
+
     // === Handlers ===
     const handleGenerate = useCallback(() => {
         if (!prompt.trim() || isGenerating) return
@@ -107,10 +142,12 @@ export function GeneratePage() {
 
         const count = parseInt(imageCount)
         const ar = getAspectRatio(aspectRatioValue)
+        const batchId = `batch-${Date.now()}`
 
         setTimeout(() => {
             const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
                 id: `img-${Date.now()}-${i}`,
+                batchId,
                 url: DEMO_URLS[(images.length + i) % DEMO_URLS.length],
                 prompt: prompt.trim(),
                 model,
@@ -175,39 +212,34 @@ export function GeneratePage() {
                         </Empty>
                     )}
 
-                    {/* Loading Skeletons — AspectRatio + Skeleton */}
+                    {/* Loading Skeleton — hiển thị như 1 batch đang tạo */}
                     {isGenerating && (
-                        <div className={`mb-4 grid gap-4 ${parseInt(imageCount) > 1
-                            ? "grid-cols-2 lg:grid-cols-3"
-                            : "grid-cols-1 max-w-2xl mx-auto"
-                            }`}>
-                            {Array.from({ length: parseInt(imageCount) }).map((_, i) => (
-                                <Card key={`skeleton-${i}`} className="overflow-hidden p-0">
-                                    <div className="relative">
-                                        <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
-                                            <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
-                                        </AspectRatio>
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                                            <Spinner className="size-8 text-primary/40" />
-                                            {i === 0 && (
-                                                <p className="text-xs text-muted-foreground px-4 text-center truncate max-w-[200px]">
-                                                    {prompt.slice(0, 50)}...
-                                                </p>
-                                            )}
+                        <div className="mb-6">
+                            <Card className="overflow-hidden p-0 ring-2 ring-primary/30 shadow-[0_0_15px_rgba(168,85,247,0.2)] animate-in fade-in-0 duration-300">
+                                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
+                                    <Spinner className="size-4 text-primary" />
+                                    <p className="text-sm text-muted-foreground truncate">{prompt.slice(0, 80)}</p>
+                                </div>
+                                <div className={`grid gap-0.5 grid-cols-2 md:grid-cols-4`}>
+                                    {Array.from({ length: parseInt(imageCount) }).map((_, i) => (
+                                        <div key={`skeleton-${i}`} className="relative">
+                                            <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
+                                                <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
+                                            </AspectRatio>
                                         </div>
-                                    </div>
-                                </Card>
-                            ))}
+                                    ))}
+                                </div>
+                            </Card>
                         </div>
                     )}
 
-                    {/* Image Gallery Grid */}
-                    {images.length > 0 && (
+                    {/* Batch Gallery — nhóm theo lần tạo */}
+                    {batches.length > 0 && (
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <LayoutGrid className="size-4 text-muted-foreground" />
-                                    <span className="text-sm font-medium">{images.length} ảnh</span>
+                                    <span className="text-sm font-medium">{images.length} ảnh · {batches.length} lần tạo</span>
                                 </div>
                                 <Button
                                     variant="ghost"
@@ -219,74 +251,92 @@ export function GeneratePage() {
                                 </Button>
                             </div>
 
-                            {/* Masonry layout — CSS columns cho mixed aspect ratios */}
-                            <div className="columns-2 gap-3 lg:columns-3 xl:columns-4">
-                                {images.map((img) => (
+                            {/* Danh sách batch — full width */}
+                            <div className="space-y-4">
+                                {batches.map((batch) => (
                                     <Card
-                                        key={img.id}
-                                        className={`group mb-3 cursor-pointer overflow-hidden break-inside-avoid transition-all hover:shadow-lg hover:border-primary/30 p-0 ${img.isNew
-                                            ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-95 duration-500"
+                                        key={batch.batchId}
+                                        className={`overflow-hidden p-0 transition-all ${batch.isNew
+                                            ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-[0.98] duration-500"
                                             : ""
                                             }`}
-                                        onClick={() => setSelectedImage(img)}
                                     >
-                                        {/* Wrapper relative cho cả ảnh + overlay */}
-                                        <div className="relative">
-                                            <AspectRatio ratio={img.aspectRatio}>
-                                                <img
-                                                    src={img.url}
-                                                    alt={img.prompt}
-                                                    className="absolute inset-0 h-full w-full rounded-t-xl object-cover"
-                                                />
-                                            </AspectRatio>
-
-                                            {/* Hover Overlay */}
-                                            <div className="absolute inset-0 rounded-t-xl bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
-
-                                            {/* Hover Actions */}
-                                            <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="secondary"
-                                                            className="size-7 rounded-full"
-                                                            onClick={(e) => { e.stopPropagation() }}
-                                                        >
-                                                            <Download className="size-3.5" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="bottom">Tải xuống</TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="secondary"
-                                                            className="size-7 rounded-full"
-                                                            onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                        >
-                                                            <Trash2 className="size-3.5" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="bottom">Xoá</TooltipContent>
-                                                </Tooltip>
-                                            </div>
-
-                                            {/* Hover Zoom */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                <ZoomIn className="size-6 text-white drop-shadow-md" />
-                                            </div>
-
-                                            {/* Bottom gradient + prompt text + badge */}
-                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2.5 pt-6">
-                                                <div className="flex items-end justify-between gap-2">
-                                                    <p className="text-xs text-white/90 truncate">{img.prompt}</p>
-                                                    <Badge variant="secondary" className="shrink-0 text-[10px]">
-                                                        {img.aspectLabel}
+                                        {/* Batch header — prompt + metadata */}
+                                        <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border/50">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-sm font-medium truncate">{batch.prompt}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <Badge variant="outline" className="text-[10px] h-5 rounded-full font-normal">
+                                                        {batch.model.toUpperCase()}
                                                     </Badge>
+                                                    <Badge variant="outline" className="text-[10px] h-5 rounded-full font-normal">
+                                                        {batch.aspectLabel}
+                                                    </Badge>
+                                                    <span className="text-[10px] text-muted-foreground">
+                                                        {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                    </span>
                                                 </div>
                                             </div>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-7 shrink-0 rounded-full"
+                                                        onClick={() => handleRegenerate(batch.images[0])}
+                                                    >
+                                                        <RefreshCw className="size-3.5" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="left">Tạo lại</TooltipContent>
+                                            </Tooltip>
+                                        </div>
+
+                                        {/* Batch images — grid 2-col cho 2+ ảnh */}
+                                        <div className="grid gap-0.5 grid-cols-2 md:grid-cols-4">
+                                            {batch.images.map((img) => (
+                                                <div
+                                                    key={img.id}
+                                                    className="group/img relative cursor-pointer"
+                                                    onClick={() => setSelectedImage(img)}
+                                                >
+                                                    <AspectRatio ratio={img.aspectRatio}>
+                                                        <img
+                                                            src={img.url}
+                                                            alt={img.prompt}
+                                                            className="absolute inset-0 h-full w-full object-cover"
+                                                        />
+                                                    </AspectRatio>
+
+                                                    {/* Hover overlay */}
+                                                    <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200" />
+
+                                                    {/* Hover actions */}
+                                                    <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
+                                                        <Button
+                                                            size="icon"
+                                                            variant="secondary"
+                                                            className="size-6 rounded-full"
+                                                            onClick={(e) => { e.stopPropagation() }}
+                                                        >
+                                                            <Download className="size-3" />
+                                                        </Button>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="secondary"
+                                                            className="size-6 rounded-full"
+                                                            onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
+                                                        >
+                                                            <Trash2 className="size-3" />
+                                                        </Button>
+                                                    </div>
+
+                                                    {/* Hover zoom */}
+                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                        <ZoomIn className="size-5 text-white drop-shadow-md" />
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </Card>
                                 ))}
