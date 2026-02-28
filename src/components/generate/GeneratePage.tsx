@@ -678,7 +678,7 @@ export function GeneratePage() {
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
                 {/* === PROMPT BAR — Giao diện chuẩn LLM (Gemini/ChatGPT style) === */}
                 <div className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-6 pt-4">
-                    <div className="relative flex flex-col w-full bg-muted/40 hover:bg-muted/50 focus-within:bg-muted/50 transition-colors border border-border/50 shadow-sm rounded-[28px] backdrop-blur-md">
+                    <div className="relative flex flex-col w-full bg-muted/70 hover:bg-muted/90 focus-within:bg-muted/90 transition-colors border border-border/50 shadow-sm rounded-[28px] backdrop-blur-md">
 
                         {/* 1. Preview Ảnh Tham Chiếu (Top) */}
                         {referenceImages.length > 0 && (
