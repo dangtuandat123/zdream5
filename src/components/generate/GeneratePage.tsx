@@ -380,10 +380,10 @@ export function GeneratePage() {
                 </div>
 
                 {/* === CANVAS AREA === */}
-                <div className="relative z-10 flex-1 p-4 lg:p-6">
+                <div className="relative z-10 flex-1 flex flex-col p-4 lg:p-6">
                     {/* Empty State — Nghệ thuật & Tương lai (Liquid Glass Portal) */}
                     {images.length === 0 && !isGenerating && (
-                        <div className="flex flex-col items-center justify-center w-full min-h-[50vh] sm:min-h-[60vh] animate-in fade-in zoom-in-[0.98] duration-1000 -mt-10">
+                        <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in zoom-in-[0.98] duration-1000 -mt-10">
 
                             {/* Animated Liquid Portal */}
                             <div className="relative size-48 sm:size-56 mb-8 group">
