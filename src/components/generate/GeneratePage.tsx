@@ -497,12 +497,17 @@ export function GeneratePage() {
                                                 }`}
                                         >
                                             {/* Compact header — 1 dòng prompt + metadata + actions */}
-                                            <div className="flex items-center gap-3 px-3 py-2">
+                                            <div className="flex items-start sm:items-center gap-3 px-3 py-3">
                                                 <div className="bg-muted/50 p-1.5 rounded-full shrink-0">
                                                     <Wand2 className="size-3.5 text-muted-foreground" />
                                                 </div>
 
-                                                <p className="text-sm font-medium truncate flex-1 min-w-0">{batch.prompt}</p>
+                                                <p
+                                                    className="text-sm font-medium line-clamp-2 flex-1 min-w-0 break-words leading-snug"
+                                                    title={batch.prompt}
+                                                >
+                                                    {batch.prompt}
+                                                </p>
 
                                                 <div className="flex items-center gap-1.5 shrink-0">
                                                     <span className="text-[10px] text-muted-foreground hidden sm:inline">
@@ -619,9 +624,11 @@ export function GeneratePage() {
                                 {/* Info Panel */}
                                 <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 flex flex-col gap-5 bg-background overflow-y-auto">
                                     <div className="space-y-3">
-                                        <div>
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Prompt</Label>
-                                            <p className="text-sm mt-1 leading-relaxed">{selectedImage.prompt}</p>
+                                        <div className="flex flex-col gap-2">
+                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
+                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent break-words whitespace-pre-wrap shadow-inner border border-foreground/5">
+                                                {selectedImage.prompt}
+                                            </div>
                                         </div>
                                         <Separator />
                                         {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
