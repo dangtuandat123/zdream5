@@ -19,11 +19,11 @@ import {
     Link,
     Upload,
     Check,
+    Plus,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
+import { Card } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -676,39 +676,46 @@ export function GeneratePage() {
                 </Dialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                <div className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 py-3">
-                    <Card className="bg-card border shadow-lg ring-1 ring-border">
-                        <CardContent className="p-2">
-                            {/* Chỗ Preview Ảnh Tham Chiếu trực tiếp trong khung nhập */}
-                            {referenceImages.length > 0 && (
-                                <div className="px-3 pt-3 pb-2 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50">
-                                    {referenceImages.map((src, idx) => (
-                                        <div key={idx} className="relative shrink-0 group/ref">
-                                            <img
-                                                src={src}
-                                                alt={`Reference ${idx + 1}`}
-                                                className="h-16 w-16 rounded-md object-cover ring-1 ring-border/50 bg-muted/30"
-                                            />
-                                            {/* Đánh số thứ tự ảnh */}
-                                            <div className="absolute top-1 left-1 bg-white text-black border border-black text-[9px] font-bold h-4 w-4 rounded-[4px] shadow-sm flex items-center justify-center z-10">
-                                                {idx + 1}
-                                            </div>
-                                            <button
-                                                onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
-                                                className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
-                                            >
-                                                <X className="size-3 text-muted-foreground" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                {/* === PROMPT BAR — Giao diện chuẩn LLM (Gemini/ChatGPT style) === */}
+                <div className="sticky bottom-0 z-50 mx-auto w-full max-w-4xl px-4 py-4 pb-6 bg-gradient-to-t from-background via-background/95 to-transparent">
+                    <div className="relative flex flex-col w-full bg-muted/40 hover:bg-muted/50 focus-within:bg-muted/50 transition-colors border border-border/50 shadow-sm rounded-[28px]">
 
-                            <Textarea
-                                placeholder="Mô tả ý tưởng của bạn..."
-                                className="min-h-[56px] max-h-[120px] w-full resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50"
+                        {/* 1. Preview Ảnh Tham Chiếu (Top) */}
+                        {referenceImages.length > 0 && (
+                            <div className="px-4 pt-4 pb-1 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50">
+                                {referenceImages.map((src, idx) => (
+                                    <div key={idx} className="relative shrink-0 group/ref">
+                                        <img
+                                            src={src}
+                                            alt={`Reference ${idx + 1}`}
+                                            className="h-16 w-16 rounded-xl object-cover ring-1 ring-border/50 bg-muted/30"
+                                        />
+                                        <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
+                                            {idx + 1}
+                                        </div>
+                                        <button
+                                            onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
+                                            className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
+                                        >
+                                            <X className="size-3 text-muted-foreground" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* 2. Text Input (Middle) */}
+                        <div className="flex items-end px-2 pt-2 pb-1">
+                            <textarea
+                                placeholder="Mô tả ý tưởng kiến tạo của bạn..."
+                                className="w-full min-h-[44px] max-h-[35vh] resize-none border-0 bg-transparent py-2.5 px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50"
+                                rows={1}
                                 value={prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
+                                onChange={(e) => {
+                                    setPrompt(e.target.value)
+                                    e.target.style.height = 'auto'
+                                    e.target.style.height = e.target.scrollHeight + 'px'
+                                }}
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter" && !e.shiftKey) {
                                         e.preventDefault()
@@ -716,161 +723,160 @@ export function GeneratePage() {
                                     }
                                 }}
                             />
+                        </div>
 
-                            <div className="flex items-center justify-between px-1 pt-1">
-                                <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto scrollbar-none pr-2">
-                                    {/* Nút đính kèm ảnh tham chiếu */}
-                                    {/* Nút đính kèm ảnh tham chiếu */}
-                                    {isMobile ? (
-                                        <Drawer open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <DrawerTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                            <ImageIcon className="size-4" />
-                                                        </Button>
-                                                    </DrawerTrigger>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
-                                            </Tooltip>
-                                            <DrawerContent>
-                                                <DrawerHeader className="text-left px-4">
-                                                    <DrawerTitle className="text-sm flex items-center gap-2">
-                                                        <ImageIcon className="size-4 text-primary" />
-                                                        Cung cấp ảnh tham chiếu
-                                                    </DrawerTitle>
-                                                    <DrawerDescription className="text-xs">
-                                                        AI sẽ dùng các ảnh này để làm hình mẫu.
-                                                    </DrawerDescription>
-                                                </DrawerHeader>
-                                                {renderReferenceImageContent()}
-                                            </DrawerContent>
-                                        </Drawer>
-                                    ) : (
-                                        <Popover open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <PopoverTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                            <ImageIcon className="size-4" />
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
-                                            </Tooltip>
-                                            <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-                                                <div className="p-4 border-b border-border/50">
-                                                    <div className="flex items-center gap-2 font-medium text-sm">
-                                                        <ImageIcon className="size-4 text-primary" />
-                                                        Cung cấp ảnh tham chiếu
-                                                    </div>
-                                                    <p className="text-xs text-muted-foreground mt-1">
-                                                        AI sẽ dùng các ảnh này để làm hình mẫu (Image-to-Image / ControlNet).
-                                                    </p>
+                        {/* 3. Tools & Send Button (Bottom) */}
+                        <div className="flex items-center justify-between px-3 pb-3">
+                            <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pr-2">
+                                {/* Image Upload */}
+                                {isMobile ? (
+                                    <Drawer open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <DrawerTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground hover:text-foreground">
+                                                        <Plus className="size-5" />
+                                                    </Button>
+                                                </DrawerTrigger>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Đính kèm ảnh</TooltipContent>
+                                        </Tooltip>
+                                        <DrawerContent>
+                                            <DrawerHeader className="text-left px-4">
+                                                <DrawerTitle className="text-sm flex items-center gap-2">
+                                                    <ImageIcon className="size-4 text-primary" />
+                                                    Cung cấp ảnh tham chiếu
+                                                </DrawerTitle>
+                                                <DrawerDescription className="text-xs">
+                                                    AI sẽ dùng các ảnh này để làm hình mẫu.
+                                                </DrawerDescription>
+                                            </DrawerHeader>
+                                            {renderReferenceImageContent()}
+                                        </DrawerContent>
+                                    </Drawer>
+                                ) : (
+                                    <Popover open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground hover:text-foreground">
+                                                        <Plus className="size-5" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Đính kèm ảnh</TooltipContent>
+                                        </Tooltip>
+                                        <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+                                            <div className="p-4 border-b border-border/50">
+                                                <div className="flex items-center gap-2 font-medium text-sm">
+                                                    <ImageIcon className="size-4 text-primary" />
+                                                    Cung cấp ảnh tham chiếu
                                                 </div>
-                                                {renderReferenceImageContent()}
-                                            </PopoverContent>
-                                        </Popover>
-                                    )}
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    AI sẽ dùng các ảnh này để làm phân tích (Image-to-Image / ControlNet).
+                                                </p>
+                                            </div>
+                                            {renderReferenceImageContent()}
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
 
-                                    {/* Settings Popover */}
-                                    {/* Settings Popover/Drawer */}
-                                    {isMobile ? (
-                                        <Drawer>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <DrawerTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                            <Settings2 className="size-4" />
-                                                        </Button>
-                                                    </DrawerTrigger>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">Cài đặt</TooltipContent>
-                                            </Tooltip>
-                                            <DrawerContent>
-                                                <DrawerHeader className="text-left px-4">
-                                                    <DrawerTitle className="text-sm flex items-center gap-2">
-                                                        <Wand2 className="size-4 text-primary" />
-                                                        Thông số kiến tạo
-                                                    </DrawerTitle>
-                                                    <DrawerDescription className="text-xs">
-                                                        Tuỳ chỉnh chi tiết hình ảnh được tạo.
-                                                    </DrawerDescription>
-                                                </DrawerHeader>
-                                                {renderSettingsContent()}
-                                            </DrawerContent>
-                                        </Drawer>
-                                    ) : (
-                                        <Popover>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <PopoverTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                            <Settings2 className="size-4" />
-                                                        </Button>
-                                                    </PopoverTrigger>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="top">Cài đặt</TooltipContent>
-                                            </Tooltip>
-                                            <PopoverContent side="top" align="start" className="w-[320px] p-0">
-                                                <div className="p-4 border-b border-border/50">
-                                                    <div className="flex items-center gap-2 font-medium text-sm">
-                                                        <Wand2 className="size-4 text-primary" />
-                                                        Thông số kiến tạo
-                                                    </div>
+                                {/* Settings */}
+                                {isMobile ? (
+                                    <Drawer>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <DrawerTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground hover:text-foreground">
+                                                        <Settings2 className="size-[18px]" />
+                                                    </Button>
+                                                </DrawerTrigger>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Cài đặt kiến tạo</TooltipContent>
+                                        </Tooltip>
+                                        <DrawerContent>
+                                            <DrawerHeader className="text-left px-4">
+                                                <DrawerTitle className="text-sm flex items-center gap-2">
+                                                    <Wand2 className="size-4 text-primary" />
+                                                    Thông số kiến tạo
+                                                </DrawerTitle>
+                                                <DrawerDescription className="text-xs">
+                                                    Tuỳ chỉnh chi tiết hình ảnh được sinh ra.
+                                                </DrawerDescription>
+                                            </DrawerHeader>
+                                            {renderSettingsContent()}
+                                        </DrawerContent>
+                                    </Drawer>
+                                ) : (
+                                    <Popover>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground hover:text-foreground">
+                                                        <Settings2 className="size-[18px]" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Cài đặt kiến tạo</TooltipContent>
+                                        </Tooltip>
+                                        <PopoverContent side="top" align="start" className="w-[320px] p-0">
+                                            <div className="p-4 border-b border-border/50">
+                                                <div className="flex items-center gap-2 font-medium text-sm">
+                                                    <Wand2 className="size-4 text-primary" />
+                                                    Thông số kiến tạo
                                                 </div>
-                                                {renderSettingsContent()}
-                                            </PopoverContent>
-                                        </Popover>
-                                    )}
+                                            </div>
+                                            {renderSettingsContent()}
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
 
-                                    {/* Model Select (Desktop Only) */}
-                                    <div className="hidden sm:block">
-                                        <Select value={model} onValueChange={setModel}>
-                                            <SelectTrigger className="h-7 border-none bg-muted/50 hover:bg-muted text-[11px] font-medium rounded-full px-3 w-auto min-w-[120px] shadow-none">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
-                                                <SelectItem value="dalle3">DALL·E 3</SelectItem>
-                                                <SelectItem value="midjourney">Midjourney V6</SelectItem>
-                                                <SelectItem value="flux">Flux Pro</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-
-                                    {/* Quick info badges (Desktop Only) */}
-                                    <Badge variant="outline" className="hidden sm:inline-flex text-[10px] h-6 rounded-full font-normal px-2.5 py-0 items-center justify-center shrink-0">
-                                        <span className="translate-y-[1px]">{getAspectRatio(aspectRatioValue).label}</span>
-                                    </Badge>
-                                    <Badge variant="outline" className="hidden sm:inline-flex text-[10px] h-6 rounded-full font-normal px-2.5 py-0 items-center justify-center shrink-0">
-                                        <span className="translate-y-[1px]">×{imageCount}</span>
-                                    </Badge>
+                                {/* Model Select (Desktop) */}
+                                <div className="hidden sm:block ml-1">
+                                    <Select value={model} onValueChange={setModel}>
+                                        <SelectTrigger className="h-8 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
+                                            <SelectItem value="dalle3">DALL·E 3</SelectItem>
+                                            <SelectItem value="midjourney">Midjourney V6</SelectItem>
+                                            <SelectItem value="flux">Flux Pro</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
 
-                                {/* Generate */}
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Button
-                                            size="icon"
-                                            className="size-9 rounded-full"
-                                            disabled={isGenerating || !prompt.trim()}
-                                            onClick={handleGenerate}
-                                        >
-                                            {isGenerating ? (
-                                                <Spinner className="size-4" />
-                                            ) : (
-                                                <ArrowUp className="size-4" />
-                                            )}
-                                        </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top">
-                                        Tạo ảnh <span className="text-muted-foreground text-[10px] ml-1">Enter</span>
-                                    </TooltipContent>
-                                </Tooltip>
+                                {/* Badges */}
+                                <Badge variant="secondary" className="hidden lg:inline-flex text-[10px] h-6 rounded-full font-medium px-2.5 bg-background/50 border-border/50">
+                                    {getAspectRatio(aspectRatioValue).label}
+                                </Badge>
+                                <Badge variant="secondary" className="hidden lg:inline-flex text-[10px] h-6 rounded-full font-medium px-2 bg-background/50 border-border/50">
+                                    ×{imageCount}
+                                </Badge>
                             </div>
-                        </CardContent>
-                    </Card>
+
+                            {/* Send Action */}
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        size="icon"
+                                        className={`size-10 rounded-full transition-all duration-300 ${prompt.trim() ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                                        disabled={isGenerating || !prompt.trim()}
+                                        onClick={handleGenerate}
+                                    >
+                                        {isGenerating ? (
+                                            <Spinner className="size-4" />
+                                        ) : (
+                                            <ArrowUp className="size-[18px]" />
+                                        )}
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">
+                                    Tạo ảnh <span className="text-muted-foreground ml-1">↵</span>
+                                </TooltipContent>
+                            </Tooltip>
+                        </div>
+                    </div>
                 </div>
             </div>
         </TooltipProvider >
