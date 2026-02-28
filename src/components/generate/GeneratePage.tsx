@@ -461,7 +461,6 @@ export function GeneratePage() {
                                     }
                                 }}
                             />
-                            <Separator className="my-1" />
 
                             <div className="flex items-center justify-between px-1 pt-1">
                                 <div className="flex items-center gap-1.5">
@@ -612,6 +611,6 @@ export function GeneratePage() {
                     </Card>
                 </div>
             </div>
-        </TooltipProvider>
+        </TooltipProvider >
     )
 }
