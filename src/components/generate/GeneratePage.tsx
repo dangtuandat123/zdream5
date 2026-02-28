@@ -381,42 +381,43 @@ export function GeneratePage() {
 
                 {/* === CANVAS AREA === */}
                 <div className="relative z-10 flex-1 p-4 lg:p-6">
-                    {/* Empty State — Nghệ thuật & Tương lai */}
+                    {/* Empty State — Nghệ thuật & Tương lai (Liquid Glass Portal) */}
                     {images.length === 0 && !isGenerating && (
-                        <div className="flex flex-col items-center justify-center w-full min-h-[50vh] sm:min-h-[60vh] animate-in fade-in zoom-in-[0.98] duration-1000">
-                            {/* Icon Container with glowing aura */}
-                            <div className="relative mb-8 sm:mb-10 group">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50 blur-2xl rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-700 animate-pulse" />
-                                <div className="relative flex items-center justify-center p-6 sm:p-7 bg-background/50 border border-foreground/5 rounded-full backdrop-blur-xl shadow-2xl ring-1 ring-white/5">
-                                    <Sparkles className="size-12 sm:size-14 text-primary opacity-90 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+                        <div className="flex flex-col items-center justify-center w-full min-h-[50vh] sm:min-h-[60vh] animate-in fade-in zoom-in-[0.98] duration-1000 -mt-10">
+
+                            {/* Animated Liquid Portal */}
+                            <div className="relative size-48 sm:size-56 mb-8 group">
+                                {/* Glow layers */}
+                                <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/40 transition-colors duration-1000" />
+
+                                {/* Liquid spinning blobs */}
+                                <div className="absolute inset-2 z-0 rounded-[40%_60%_70%_30%] bg-gradient-to-br from-blue-500/40 via-purple-500/40 to-pink-500/40 dark:from-blue-600/40 dark:via-purple-600/40 dark:to-pink-600/40 blur-md animate-[spin_8s_linear_infinite]" />
+                                <div className="absolute inset-0 z-0 rounded-[60%_40%_30%_70%] bg-gradient-to-bl from-pink-500/40 via-purple-500/40 to-cyan-500/40 dark:from-pink-600/40 dark:via-purple-600/40 dark:to-cyan-600/40 blur-md animate-[spin_12s_linear_infinite_reverse]" />
+
+                                {/* Glass core */}
+                                <div className="absolute inset-3 z-10 rounded-[40%_50%_60%_50%] backdrop-blur-xl border border-white/20 dark:border-white/10 bg-white/10 dark:bg-black/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] flex items-center justify-center animate-[spin_15s_linear_infinite]">
+                                    <div className="animate-[spin_15s_linear_infinite_reverse] w-full h-full flex flex-col items-center justify-center pointer-events-none">
+                                        {/* Căn bằng nội dung nằm im trong khi viền xoay */}
+                                        <span className="text-xl sm:text-2xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/50 uppercase ml-1">
+                                            ZDream
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Title with Gradient */}
-                            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-5 sm:mb-6 text-center">
-                                Khơi nguồn <br className="sm:hidden" />
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 drop-shadow-sm pb-1 ml-0 sm:ml-3">
-                                    Sáng tạo
-                                </span>
+                            {/* Cinematic Typography */}
+                            <h2 className="text-2xl sm:text-4xl font-medium tracking-tight text-center mb-4">
+                                Khung vẽ trống rỗng.
+                                <br className="sm:hidden" />
+                                <span className="text-muted-foreground font-light"> Tâm trí vô hạn.</span>
                             </h2>
 
-                            {/* Description */}
-                            <p className="text-muted-foreground text-center max-w-lg text-sm sm:text-base leading-relaxed px-4">
-                                Hãy mô tả bất kỳ điều gì bạn muốn thấy. ZDream sẽ sử dụng AI để hiện thực hóa những ý tưởng điên rồ nhất của bạn thành kiệt tác nghệ thuật.
+                            <p className="text-muted-foreground/80 text-center max-w-sm sm:max-w-md text-sm sm:text-base leading-relaxed font-light">
+                                Đánh thức trí tưởng tượng. Viết ra bất kỳ điều gì, chúng tôi sẽ vẽ nó thành hiện thực.
                             </p>
 
-                            {/* Prompt Example Pills */}
-                            <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4">
-                                {["Thành phố tương lai neon", "Mèo du hành thời gian", "Tranh sơn dầu phục hưng"].map((suggestion, i) => (
-                                    <div
-                                        key={i}
-                                        className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-muted/30 hover:bg-muted/50 border border-foreground/5 backdrop-blur-md text-xs sm:text-sm text-foreground/80 transition-all cursor-default flex items-center gap-2"
-                                    >
-                                        <Wand2 className="size-3 sm:size-3.5 text-primary/70" />
-                                        {suggestion}
-                                    </div>
-                                ))}
-                            </div>
+                            {/* Elegant decorative line */}
+                            <div className="mt-12 w-12 h-[1px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
                         </div>
                     )}
 
