@@ -621,18 +621,18 @@ export function GeneratePage() {
                                 {/* Ảnh */}
                                 <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
                                     {/* Khối Ảnh Chính có Native Zoom (react-medium-image-zoom) */}
-                                    <div className="relative group max-w-full max-h-full flex items-center justify-center rounded-xl md:rounded-2xl">
+                                    <div className="relative group max-w-full max-h-full rounded-xl md:rounded-2xl">
                                         <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
                                             <img
                                                 src={selectedImage.url}
                                                 alt={selectedImage.prompt}
-                                                className="w-auto h-auto max-w-full max-h-full object-contain rounded-xl md:rounded-2xl drop-shadow-2xl shadow-foreground/5 shadow-2xl ring-1 ring-border/10"
+                                                className="block w-auto h-auto max-w-full max-h-[75vh] lg:max-h-[80vh] object-contain rounded-xl md:rounded-2xl drop-shadow-2xl shadow-foreground/5 shadow-2xl ring-1 ring-border/10"
                                             />
                                         </Zoom>
 
                                         {/* Hover Overlay khi chưa zoom */}
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/10 rounded-xl md:rounded-2xl pointer-events-none">
-                                            <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[3px] bg-foreground/5 rounded-xl md:rounded-2xl pointer-events-none">
+                                            <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-opacity duration-300">
                                                 <Maximize2 className="size-4" />
                                                 Xem chuẩn gốc
                                             </div>
