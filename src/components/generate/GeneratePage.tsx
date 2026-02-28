@@ -487,7 +487,9 @@ export function GeneratePage() {
                                         >
                                             {/* Compact header — 1 dòng prompt + metadata + actions */}
                                             <div className="flex items-center gap-3 px-3 py-2">
-                                                <Wand2 className="size-3.5 text-muted-foreground shrink-0" />
+                                                <div className="bg-muted/50 p-1.5 rounded-full shrink-0">
+                                                    <Wand2 className="size-3.5 text-muted-foreground" />
+                                                </div>
 
                                                 <p className="text-sm font-medium truncate flex-1 min-w-0">{batch.prompt}</p>
 
@@ -509,61 +511,73 @@ export function GeneratePage() {
                                                 </div>
                                             </div>
 
-                                            {/* Hiển thị ảnh tham chiếu (nếu có) */}
-                                            {batch.referenceImages && batch.referenceImages.length > 0 && (
-                                                <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto scrollbar-none items-center">
-                                                    <ImageIcon className="size-3 text-muted-foreground shrink-0" />
-                                                    {batch.referenceImages.map((src, i) => (
-                                                        <img key={i} src={src} className="size-6 rounded object-cover ring-1 ring-border/50 shrink-0" alt="ref" />
+                                            {/* Media container */}
+                                            <div className="px-1 pb-1 flex flex-col gap-1">
+                                                {/* Hiển thị ảnh tham chiếu (nếu có) */}
+                                                {batch.referenceImages && batch.referenceImages.length > 0 && (
+                                                    <div className="flex gap-1 overflow-x-auto scrollbar-none">
+                                                        {batch.referenceImages.map((src, i) => (
+                                                            <div key={i} className="relative shrink-0 group/ref">
+                                                                <img
+                                                                    src={src}
+                                                                    className={`h-16 w-16 sm:h-20 sm:w-20 object-cover ring-1 ring-border/10 bg-muted/30 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
+                                                                    alt="ref"
+                                                                />
+                                                                <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] text-white font-medium flex items-center gap-1 shadow-sm">
+                                                                    <ImageIcon className="size-2.5" />
+                                                                    Input
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Image grid */}
+                                                <div className={`grid gap-1 ${gridClass}`}>
+                                                    {batch.images.map((img) => (
+                                                        <div
+                                                            key={img.id}
+                                                            className="group/img relative cursor-pointer overflow-hidden rounded-lg"
+                                                            onClick={() => setSelectedImage(img)}
+                                                        >
+                                                            <AspectRatio ratio={img.aspectRatio}>
+                                                                <img
+                                                                    src={img.url}
+                                                                    alt={img.prompt}
+                                                                    className="absolute inset-0 h-full w-full object-cover"
+                                                                />
+                                                            </AspectRatio>
+
+                                                            {/* Hover overlay */}
+                                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
+
+                                                            {/* Hover actions */}
+                                                            <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="secondary"
+                                                                    className="size-6 rounded-full"
+                                                                    onClick={(e) => { e.stopPropagation() }}
+                                                                >
+                                                                    <Download className="size-3" />
+                                                                </Button>
+                                                                <Button
+                                                                    size="icon"
+                                                                    variant="secondary"
+                                                                    className="size-6 rounded-full"
+                                                                    onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
+                                                                >
+                                                                    <Trash2 className="size-3" />
+                                                                </Button>
+                                                            </div>
+
+                                                            {/* Hover zoom */}
+                                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                                <ZoomIn className="size-5 text-white drop-shadow-md" />
+                                                            </div>
+                                                        </div>
                                                     ))}
                                                 </div>
-                                            )}
-
-                                            {/* Image grid */}
-                                            <div className={`grid gap-1 px-1 pb-1 ${gridClass}`}>
-                                                {batch.images.map((img) => (
-                                                    <div
-                                                        key={img.id}
-                                                        className="group/img relative cursor-pointer overflow-hidden rounded-lg"
-                                                        onClick={() => setSelectedImage(img)}
-                                                    >
-                                                        <AspectRatio ratio={img.aspectRatio}>
-                                                            <img
-                                                                src={img.url}
-                                                                alt={img.prompt}
-                                                                className="absolute inset-0 h-full w-full object-cover"
-                                                            />
-                                                        </AspectRatio>
-
-                                                        {/* Hover overlay */}
-                                                        <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
-
-                                                        {/* Hover actions */}
-                                                        <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
-                                                            <Button
-                                                                size="icon"
-                                                                variant="secondary"
-                                                                className="size-6 rounded-full"
-                                                                onClick={(e) => { e.stopPropagation() }}
-                                                            >
-                                                                <Download className="size-3" />
-                                                            </Button>
-                                                            <Button
-                                                                size="icon"
-                                                                variant="secondary"
-                                                                className="size-6 rounded-full"
-                                                                onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                            >
-                                                                <Trash2 className="size-3" />
-                                                            </Button>
-                                                        </div>
-
-                                                        {/* Hover zoom */}
-                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                            <ZoomIn className="size-5 text-white drop-shadow-md" />
-                                                        </div>
-                                                    </div>
-                                                ))}
                                             </div>
                                         </Card>
                                     )
