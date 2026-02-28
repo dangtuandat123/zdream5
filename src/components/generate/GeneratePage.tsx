@@ -212,26 +212,54 @@ export function GeneratePage() {
                         </Empty>
                     )}
 
-                    {/* Loading Skeleton — hiển thị như 1 batch đang tạo */}
-                    {isGenerating && (
-                        <div className="mb-6">
-                            <Card className="overflow-hidden p-0 ring-2 ring-primary/30 shadow-[0_0_15px_rgba(168,85,247,0.2)] animate-in fade-in-0 duration-300">
-                                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
-                                    <Spinner className="size-4 text-primary" />
-                                    <p className="text-sm text-muted-foreground truncate">{prompt.slice(0, 80)}</p>
-                                </div>
-                                <div className={`grid gap-0.5 grid-cols-2 md:grid-cols-4`}>
-                                    {Array.from({ length: parseInt(imageCount) }).map((_, i) => (
-                                        <div key={`skeleton-${i}`} className="relative">
-                                            <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
-                                                <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
-                                            </AspectRatio>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        </div>
-                    )}
+                    {/* Loading Skeleton — giống batch card nhưng đang shimmer */}
+                    {isGenerating && (() => {
+                        const count = parseInt(imageCount)
+                        const skeletonGrid = count === 1
+                            ? "grid-cols-1 max-w-sm"
+                            : count === 2
+                                ? "grid-cols-2 max-w-2xl"
+                                : count === 3
+                                    ? "grid-cols-3"
+                                    : "grid-cols-2 md:grid-cols-4"
+
+                        return (
+                            <div className="mb-6">
+                                <Card className="overflow-hidden p-0 bg-card/50 backdrop-blur-sm ring-2 ring-primary/40 shadow-[0_0_20px_rgba(168,85,247,0.25)] animate-in fade-in-0 duration-500">
+                                    {/* Header giống batch card */}
+                                    <div className="flex items-center gap-3 px-3 py-2">
+                                        <Spinner className="size-3.5 text-primary shrink-0" />
+
+                                        <p className="text-sm font-medium truncate flex-1 min-w-0 text-muted-foreground">
+                                            {prompt.slice(0, 80)}
+                                        </p>
+
+                                        <span className="text-[10px] text-primary/60 shrink-0 animate-pulse">
+                                            Đang tạo...
+                                        </span>
+                                    </div>
+
+                                    {/* Grid skeleton ảnh */}
+                                    <div className={`grid gap-1 px-1 pb-1 ${skeletonGrid}`}>
+                                        {Array.from({ length: count }).map((_, i) => (
+                                            <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
+                                                <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
+                                                    <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
+                                                    {/* Shimmer gradient overlay */}
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
+                                                </AspectRatio>
+
+                                                {/* Centered icon placeholder */}
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <Sparkles className="size-5 text-primary/20 animate-pulse" />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card>
+                            </div>
+                        )
+                    })()}
 
                     {/* Batch Gallery — nhóm theo lần tạo */}
                     {batches.length > 0 && (
@@ -257,7 +285,7 @@ export function GeneratePage() {
                                     // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
                                     const count = batch.images.length
                                     const gridClass = count === 1
-                                        ? "grid-cols-1 max-w-xs"
+                                        ? "grid-cols-1 max-w-sm"
                                         : count === 2
                                             ? "grid-cols-2 max-w-2xl"
                                             : count === 3
