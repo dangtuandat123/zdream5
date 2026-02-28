@@ -620,7 +620,7 @@ export function GeneratePage() {
                                     <img
                                         src={selectedImage.url}
                                         alt={selectedImage.prompt}
-                                        className="w-full h-full object-contain drop-shadow-md"
+                                        className="w-auto h-auto max-w-full max-h-full object-contain rounded-xl md:rounded-2xl drop-shadow-2xl shadow-foreground/5 shadow-2xl ring-1 ring-border/10"
                                     />
                                 </div>
 
