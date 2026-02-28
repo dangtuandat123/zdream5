@@ -48,6 +48,15 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import {
+    Drawer,
+    DrawerContent,
+    DrawerDescription,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer"
+import { useIsMobile } from "@/hooks/use-mobile"
+import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
@@ -103,6 +112,7 @@ const ASPECT_RATIOS = [
 
 export function GeneratePage() {
     // === State ===
+    const isMobile = useIsMobile()
     const [isGenerating, setIsGenerating] = useState(false)
     const [prompt, setPrompt] = useState("")
     const [images, setImages] = useState<GeneratedImage[]>([])
@@ -214,6 +224,146 @@ export function GeneratePage() {
             setRefImageUrlInput("")
         }
     }
+
+    const renderReferenceImageContent = () => (
+        <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
+            <Tabs defaultValue="upload" className="w-full">
+                <div className="px-4 pt-3 pb-2">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="upload" className="text-xs"><Upload className="size-3 mr-1.5" /> Tải lên</TabsTrigger>
+                        <TabsTrigger value="url" className="text-xs"><Link className="size-3 mr-1.5" /> Link URL</TabsTrigger>
+                    </TabsList>
+                </div>
+                <TabsContent value="upload" className="p-4 pt-0 m-0">
+                    <label
+                        htmlFor="ref-image-upload"
+                        className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                    >
+                        <Upload className="size-5 text-muted-foreground mb-2" />
+                        <span className="text-xs text-muted-foreground font-medium">Chọn ảnh từ máy</span>
+                        <input
+                            id="ref-image-upload"
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handleFileUpload}
+                        />
+                    </label>
+                </TabsContent>
+                <TabsContent value="url" className="p-4 pt-0 m-0">
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="https://example.com/image.jpg"
+                            className="h-8 text-xs"
+                            value={refImageUrlInput}
+                            onChange={(e) => setRefImageUrlInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                        />
+                        <Button size="icon" className="size-8 shrink-0" onClick={handleUrlSubmit}>
+                            <Check className="size-4" />
+                        </Button>
+                    </div>
+                </TabsContent>
+            </Tabs>
+        </div>
+    )
+
+    const renderSettingsContent = () => (
+        <div className="space-y-4 px-4 pb-6 pt-4 overflow-y-auto no-scrollbar max-h-[70vh]">
+            {/* Model Select (Mobile Only) */}
+            <div className="space-y-2 sm:hidden">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Model</Label>
+                <Select value={model} onValueChange={setModel}>
+                    <SelectTrigger className="h-8">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
+                        <SelectItem value="dalle3">DALL·E 3</SelectItem>
+                        <SelectItem value="midjourney">Midjourney V6</SelectItem>
+                        <SelectItem value="flux">Flux Pro</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* Aspect Ratio */}
+            <div className="space-y-2">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Tỷ lệ khung hình</Label>
+                <ToggleGroup
+                    type="single"
+                    value={aspectRatioValue}
+                    onValueChange={(v) => v && setAspectRatioValue(v)}
+                    className="grid grid-cols-4 gap-1.5"
+                >
+                    {ASPECT_RATIOS.map((ar) => (
+                        <ToggleGroupItem
+                            key={ar.value}
+                            value={ar.value}
+                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                        >
+                            <ar.icon className="size-4" />
+                            {ar.label}
+                        </ToggleGroupItem>
+                    ))}
+                </ToggleGroup>
+            </div>
+
+            {/* Số lượng */}
+            <div className="space-y-2">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Số lượng ảnh</Label>
+                <ToggleGroup
+                    type="single"
+                    value={imageCount}
+                    onValueChange={(v) => v && setImageCount(v)}
+                    className="grid grid-cols-4 gap-1.5"
+                >
+                    {["1", "2", "3", "4"].map((n) => (
+                        <ToggleGroupItem
+                            key={n}
+                            value={n}
+                            className="rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                        >
+                            {n}
+                        </ToggleGroupItem>
+                    ))}
+                </ToggleGroup>
+            </div>
+
+            {/* Style */}
+            <div className="space-y-2">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Phong cách</Label>
+                <Select value={style} onValueChange={setStyle}>
+                    <SelectTrigger className="h-8">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="photorealistic">Chân thực</SelectItem>
+                        <SelectItem value="anime">Anime</SelectItem>
+                        <SelectItem value="digital-art">Digital Art</SelectItem>
+                        <SelectItem value="3d-render">3D Render</SelectItem>
+                        <SelectItem value="watercolor">Màu nước</SelectItem>
+                        <SelectItem value="oil-painting">Sơn dầu</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* Creativity */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sáng tạo</Label>
+                    <span className="text-xs font-medium">{creativity[0]}%</span>
+                </div>
+                <Slider value={creativity} onValueChange={setCreativity} max={100} step={1} />
+            </div>
+
+            {/* High-res */}
+            <div className="flex items-center justify-between">
+                <Label htmlFor="hr" className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">HD (2x)</Label>
+                <Switch id="hr" checked={highRes} onCheckedChange={setHighRes} />
+            </div>
+        </div>
+    )
 
     return (
         <TooltipProvider>
@@ -410,25 +560,25 @@ export function GeneratePage() {
 
                 {/* === IMAGE VIEWER DIALOG === */}
                 <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-                    <DialogContent className="max-w-4xl w-full p-0 overflow-hidden gap-0">
+                    <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl">
                         <DialogTitle className="sr-only">Xem ảnh chi tiết</DialogTitle>
                         {selectedImage && (
-                            <div className="flex flex-col lg:flex-row">
+                            <div className="flex flex-col lg:flex-row h-full overflow-hidden">
                                 {/* Ảnh */}
-                                <div className="flex-1 flex items-center justify-center bg-muted/30 min-h-[300px] lg:min-h-[500px] p-4">
+                                <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
                                     <img
                                         src={selectedImage.url}
                                         alt={selectedImage.prompt}
-                                        className="max-h-[70vh] max-w-full object-contain rounded-lg"
+                                        className="w-full h-full object-contain drop-shadow-md"
                                     />
                                 </div>
 
                                 {/* Info Panel */}
-                                <div className="w-full lg:w-[280px] border-t lg:border-t-0 lg:border-l p-4 flex flex-col gap-4">
+                                <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 flex flex-col gap-5 bg-background overflow-y-auto">
                                     <div className="space-y-3">
                                         <div>
                                             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Prompt</Label>
-                                            <p className="text-sm mt-1">{selectedImage.prompt}</p>
+                                            <p className="text-sm mt-1 leading-relaxed">{selectedImage.prompt}</p>
                                         </div>
                                         <Separator />
                                         <div className="grid grid-cols-2 gap-3">
@@ -489,9 +639,13 @@ export function GeneratePage() {
                                                 alt={`Reference ${idx + 1}`}
                                                 className="h-16 w-16 rounded-md object-cover ring-1 ring-border/50 bg-muted/30"
                                             />
+                                            {/* Đánh số thứ tự ảnh */}
+                                            <div className="absolute top-1 left-1 bg-white text-black border border-black text-[9px] font-bold h-4 w-4 rounded-[4px] shadow-sm flex items-center justify-center z-10">
+                                                {idx + 1}
+                                            </div>
                                             <button
                                                 onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
-                                                className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-0 group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
+                                                className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
                                             >
                                                 <X className="size-3 text-muted-foreground" />
                                             </button>
@@ -514,190 +668,132 @@ export function GeneratePage() {
                             />
 
                             <div className="flex items-center justify-between px-1 pt-1">
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5 flex-nowrap overflow-x-auto scrollbar-none pr-2">
                                     {/* Nút đính kèm ảnh tham chiếu */}
-                                    <Popover open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                        <ImageIcon className="size-4" />
-                                                    </Button>
-                                                </PopoverTrigger>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
-                                        </Tooltip>
-
-                                        <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-                                            <div className="p-4 border-b border-border/50">
-                                                <div className="flex items-center gap-2 font-medium text-sm">
-                                                    <ImageIcon className="size-4 text-primary" />
-                                                    Cung cấp ảnh tham chiếu
-                                                </div>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    AI sẽ dùng các ảnh này để làm hình mẫu (Image-to-Image / ControlNet).
-                                                </p>
-                                            </div>
-                                            <Tabs defaultValue="upload" className="w-full">
-                                                <div className="px-4 pt-3 pb-2">
-                                                    <TabsList className="grid w-full grid-cols-2">
-                                                        <TabsTrigger value="upload" className="text-xs"><Upload className="size-3 mr-1.5" /> Tải lên</TabsTrigger>
-                                                        <TabsTrigger value="url" className="text-xs"><Link className="size-3 mr-1.5" /> Link URL</TabsTrigger>
-                                                    </TabsList>
-                                                </div>
-                                                <TabsContent value="upload" className="p-4 pt-0 m-0">
-                                                    <label
-                                                        htmlFor="ref-image-upload"
-                                                        className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
-                                                    >
-                                                        <Upload className="size-5 text-muted-foreground mb-2" />
-                                                        <span className="text-xs text-muted-foreground font-medium">Chọn ảnh từ máy</span>
-                                                        <input
-                                                            id="ref-image-upload"
-                                                            type="file"
-                                                            accept="image/*"
-                                                            multiple
-                                                            className="hidden"
-                                                            onChange={handleFileUpload}
-                                                        />
-                                                    </label>
-                                                </TabsContent>
-                                                <TabsContent value="url" className="p-4 pt-0 m-0">
-                                                    <div className="flex gap-2">
-                                                        <Input
-                                                            placeholder="https://example.com/image.jpg"
-                                                            className="h-8 text-xs"
-                                                            value={refImageUrlInput}
-                                                            onChange={(e) => setRefImageUrlInput(e.target.value)}
-                                                            onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
-                                                        />
-                                                        <Button size="icon" className="size-8 shrink-0" onClick={handleUrlSubmit}>
-                                                            <Check className="size-4" />
+                                    {/* Nút đính kèm ảnh tham chiếu */}
+                                    {isMobile ? (
+                                        <Drawer open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <DrawerTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
+                                                            <ImageIcon className="size-4" />
                                                         </Button>
+                                                    </DrawerTrigger>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
+                                            </Tooltip>
+                                            <DrawerContent>
+                                                <DrawerHeader className="text-left px-4">
+                                                    <DrawerTitle className="text-sm flex items-center gap-2">
+                                                        <ImageIcon className="size-4 text-primary" />
+                                                        Cung cấp ảnh tham chiếu
+                                                    </DrawerTitle>
+                                                    <DrawerDescription className="text-xs">
+                                                        AI sẽ dùng các ảnh này để làm hình mẫu.
+                                                    </DrawerDescription>
+                                                </DrawerHeader>
+                                                {renderReferenceImageContent()}
+                                            </DrawerContent>
+                                        </Drawer>
+                                    ) : (
+                                        <Popover open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <PopoverTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
+                                                            <ImageIcon className="size-4" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
+                                            </Tooltip>
+                                            <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+                                                <div className="p-4 border-b border-border/50">
+                                                    <div className="flex items-center gap-2 font-medium text-sm">
+                                                        <ImageIcon className="size-4 text-primary" />
+                                                        Cung cấp ảnh tham chiếu
                                                     </div>
-                                                </TabsContent>
-                                            </Tabs>
-                                        </PopoverContent>
-                                    </Popover>
+                                                    <p className="text-xs text-muted-foreground mt-1">
+                                                        AI sẽ dùng các ảnh này để làm hình mẫu (Image-to-Image / ControlNet).
+                                                    </p>
+                                                </div>
+                                                {renderReferenceImageContent()}
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
 
                                     {/* Settings Popover */}
-                                    <Popover>
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <PopoverTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="size-8 rounded-full">
-                                                        <Settings2 className="size-4" />
-                                                    </Button>
-                                                </PopoverTrigger>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="top">Cài đặt</TooltipContent>
-                                        </Tooltip>
-
-                                        <PopoverContent side="top" align="start" className="w-[320px] p-4">
-                                            <div className="space-y-4">
-                                                <div className="flex items-center gap-2 font-medium text-sm">
-                                                    <Wand2 className="size-4 text-primary" />
-                                                    Thông số kiến tạo
-                                                </div>
-                                                <Separator />
-
-                                                {/* Aspect Ratio */}
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Tỷ lệ khung hình</Label>
-                                                    <ToggleGroup
-                                                        type="single"
-                                                        value={aspectRatioValue}
-                                                        onValueChange={(v) => v && setAspectRatioValue(v)}
-                                                        className="grid grid-cols-4 gap-1.5"
-                                                    >
-                                                        {ASPECT_RATIOS.map((ar) => (
-                                                            <ToggleGroupItem
-                                                                key={ar.value}
-                                                                value={ar.value}
-                                                                className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                                                            >
-                                                                <ar.icon className="size-4" />
-                                                                {ar.label}
-                                                            </ToggleGroupItem>
-                                                        ))}
-                                                    </ToggleGroup>
-                                                </div>
-
-                                                {/* Số lượng */}
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Số lượng ảnh</Label>
-                                                    <ToggleGroup
-                                                        type="single"
-                                                        value={imageCount}
-                                                        onValueChange={(v) => v && setImageCount(v)}
-                                                        className="grid grid-cols-4 gap-1.5"
-                                                    >
-                                                        {["1", "2", "3", "4"].map((n) => (
-                                                            <ToggleGroupItem
-                                                                key={n}
-                                                                value={n}
-                                                                className="rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                                                            >
-                                                                {n}
-                                                            </ToggleGroupItem>
-                                                        ))}
-                                                    </ToggleGroup>
-                                                </div>
-
-                                                {/* Style */}
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Phong cách</Label>
-                                                    <Select value={style} onValueChange={setStyle}>
-                                                        <SelectTrigger className="h-8">
-                                                            <SelectValue />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectItem value="photorealistic">Chân thực</SelectItem>
-                                                            <SelectItem value="anime">Anime</SelectItem>
-                                                            <SelectItem value="digital-art">Digital Art</SelectItem>
-                                                            <SelectItem value="3d-render">3D Render</SelectItem>
-                                                            <SelectItem value="watercolor">Màu nước</SelectItem>
-                                                            <SelectItem value="oil-painting">Sơn dầu</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-
-                                                {/* Creativity */}
-                                                <div className="space-y-3">
-                                                    <div className="flex items-center justify-between">
-                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sáng tạo</Label>
-                                                        <span className="text-xs font-medium">{creativity[0]}%</span>
+                                    {/* Settings Popover/Drawer */}
+                                    {isMobile ? (
+                                        <Drawer>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <DrawerTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
+                                                            <Settings2 className="size-4" />
+                                                        </Button>
+                                                    </DrawerTrigger>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top">Cài đặt</TooltipContent>
+                                            </Tooltip>
+                                            <DrawerContent>
+                                                <DrawerHeader className="text-left px-4">
+                                                    <DrawerTitle className="text-sm flex items-center gap-2">
+                                                        <Wand2 className="size-4 text-primary" />
+                                                        Thông số kiến tạo
+                                                    </DrawerTitle>
+                                                    <DrawerDescription className="text-xs">
+                                                        Tuỳ chỉnh chi tiết hình ảnh được tạo.
+                                                    </DrawerDescription>
+                                                </DrawerHeader>
+                                                {renderSettingsContent()}
+                                            </DrawerContent>
+                                        </Drawer>
+                                    ) : (
+                                        <Popover>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <PopoverTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="size-8 rounded-full">
+                                                            <Settings2 className="size-4" />
+                                                        </Button>
+                                                    </PopoverTrigger>
+                                                </TooltipTrigger>
+                                                <TooltipContent side="top">Cài đặt</TooltipContent>
+                                            </Tooltip>
+                                            <PopoverContent side="top" align="start" className="w-[320px] p-0">
+                                                <div className="p-4 border-b border-border/50">
+                                                    <div className="flex items-center gap-2 font-medium text-sm">
+                                                        <Wand2 className="size-4 text-primary" />
+                                                        Thông số kiến tạo
                                                     </div>
-                                                    <Slider value={creativity} onValueChange={setCreativity} max={100} step={1} />
                                                 </div>
+                                                {renderSettingsContent()}
+                                            </PopoverContent>
+                                        </Popover>
+                                    )}
 
-                                                {/* High-res */}
-                                                <div className="flex items-center justify-between">
-                                                    <Label htmlFor="hr" className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">HD (2x)</Label>
-                                                    <Switch id="hr" checked={highRes} onCheckedChange={setHighRes} />
-                                                </div>
-                                            </div>
-                                        </PopoverContent>
-                                    </Popover>
+                                    {/* Model Select (Desktop Only) */}
+                                    <div className="hidden sm:block">
+                                        <Select value={model} onValueChange={setModel}>
+                                            <SelectTrigger className="h-7 border-none bg-muted/50 hover:bg-muted text-[11px] font-medium rounded-full px-3 w-auto min-w-[120px] shadow-none">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
+                                                <SelectItem value="dalle3">DALL·E 3</SelectItem>
+                                                <SelectItem value="midjourney">Midjourney V6</SelectItem>
+                                                <SelectItem value="flux">Flux Pro</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
 
-                                    {/* Model Select */}
-                                    <Select value={model} onValueChange={setModel}>
-                                        <SelectTrigger className="h-7 border-none bg-muted/50 hover:bg-muted text-[11px] font-medium rounded-full px-3 w-auto min-w-[120px] shadow-none">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
-                                            <SelectItem value="dalle3">DALL·E 3</SelectItem>
-                                            <SelectItem value="midjourney">Midjourney V6</SelectItem>
-                                            <SelectItem value="flux">Flux Pro</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-
-                                    {/* Quick info badges */}
-                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal px-2.5 py-0 inline-flex items-center justify-center">
+                                    {/* Quick info badges (Desktop Only) */}
+                                    <Badge variant="outline" className="hidden sm:inline-flex text-[10px] h-6 rounded-full font-normal px-2.5 py-0 items-center justify-center shrink-0">
                                         <span className="translate-y-[1px]">{getAspectRatio(aspectRatioValue).label}</span>
                                     </Badge>
-                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal px-2.5 py-0 inline-flex items-center justify-center">
+                                    <Badge variant="outline" className="hidden sm:inline-flex text-[10px] h-6 rounded-full font-normal px-2.5 py-0 items-center justify-center shrink-0">
                                         <span className="translate-y-[1px]">×{imageCount}</span>
                                     </Badge>
                                 </div>
