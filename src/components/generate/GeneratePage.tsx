@@ -401,7 +401,7 @@ export function GeneratePage() {
                     {isGenerating && (() => {
                         const count = parseInt(imageCount)
                         const skeletonGrid = count === 1
-                            ? "grid-cols-1 max-w-sm"
+                            ? "grid-cols-1 max-w-sm sm:max-w-md"
                             : count === 2
                                 ? "grid-cols-2 max-w-2xl"
                                 : count === 3
@@ -425,21 +425,23 @@ export function GeneratePage() {
                                     </div>
 
                                     {/* Grid skeleton ảnh */}
-                                    <div className={`grid gap-1 px-1 pb-1 ${skeletonGrid}`}>
-                                        {Array.from({ length: count }).map((_, i) => (
-                                            <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
-                                                <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
-                                                    <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
-                                                    {/* Shimmer gradient overlay */}
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
-                                                </AspectRatio>
+                                    <div className="px-1 pb-1">
+                                        <div className={`grid gap-1 ${skeletonGrid}`}>
+                                            {Array.from({ length: count }).map((_, i) => (
+                                                <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
+                                                    <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
+                                                        <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
+                                                        {/* Shimmer gradient overlay */}
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
+                                                    </AspectRatio>
 
-                                                {/* Centered icon placeholder */}
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <Sparkles className="size-5 text-primary/20 animate-pulse" />
+                                                    {/* Centered icon placeholder */}
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <Sparkles className="size-5 text-primary/20 animate-pulse" />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
                                     </div>
                                 </Card>
                             </div>
@@ -470,7 +472,7 @@ export function GeneratePage() {
                                     // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
                                     const count = batch.images.length
                                     const gridClass = count === 1
-                                        ? "grid-cols-1 max-w-sm"
+                                        ? "grid-cols-1 max-w-sm sm:max-w-md"
                                         : count === 2
                                             ? "grid-cols-2 max-w-2xl"
                                             : count === 3
