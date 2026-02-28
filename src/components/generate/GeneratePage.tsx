@@ -467,13 +467,13 @@ export function GeneratePage() {
                             {/* Danh sách batch — full width */}
                             <div className="space-y-4">
                                 {batches.map((batch) => {
-                                    // Grid cột thông minh: Tính tổng cả ảnh tham chiếu và ảnh AI sinh
-                                    const totalCount = batch.images.length + (batch.referenceImages?.length || 0)
-                                    const gridClass = totalCount === 1
+                                    // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
+                                    const count = batch.images.length
+                                    const gridClass = count === 1
                                         ? "grid-cols-1 max-w-sm"
-                                        : totalCount === 2
+                                        : count === 2
                                             ? "grid-cols-2 max-w-2xl"
-                                            : totalCount === 3
+                                            : count === 3
                                                 ? "grid-cols-3"
                                                 : "grid-cols-2 md:grid-cols-4"
 
@@ -513,28 +513,30 @@ export function GeneratePage() {
 
                                             {/* Media container */}
                                             <div className="px-1 pb-1">
-                                                {/* Unified Image grid (Input + Output mix) */}
-                                                <div className={`grid gap-1 ${gridClass}`}>
-                                                    {/* 1. Hiển thị ảnh tham chiếu (Input) */}
-                                                    {batch.referenceImages && batch.referenceImages.map((src, i) => (
-                                                        <div
-                                                            key={`ref-${i}`}
-                                                            className="group/ref relative overflow-hidden rounded-lg bg-muted/20"
-                                                        >
-                                                            <AspectRatio ratio={batch.images[0]?.aspectRatio || 1}>
+                                                {/* Hiển thị ảnh tham chiếu (Input) độc lập phía trên lưới Output */}
+                                                {batch.referenceImages && batch.referenceImages.length > 0 && (
+                                                    <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
+                                                        {batch.referenceImages.map((src, i) => (
+                                                            <div
+                                                                key={`ref-${i}`}
+                                                                className={`group/ref relative shrink-0 overflow-hidden bg-muted/20 w-32 max-h-32 aspect-square ring-1 ring-border/10 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
+                                                            >
                                                                 <img
                                                                     src={src}
-                                                                    className="absolute inset-0 h-full w-full object-cover opacity-90 transition-transform duration-500 group-hover/ref:scale-[1.02]"
+                                                                    className="absolute inset-0 h-full w-full object-cover opacity-95 transition-transform duration-500 group-hover/ref:scale-[1.02]"
                                                                     alt="ref"
                                                                 />
-                                                            </AspectRatio>
-                                                            {/* Nhãn dán Input cho trực quan */}
-                                                            <div className="absolute top-1.5 left-1.5 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] text-white font-medium flex items-center gap-1 shadow-sm">
-                                                                <ImageIcon className="size-2.5" />
-                                                                Input
+                                                                <div className="absolute top-1.5 left-1.5 bg-black/60 text-white backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] font-medium flex items-center gap-1 shadow-sm">
+                                                                    <ImageIcon className="size-2.5" />
+                                                                    Input
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    ))}
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {/* Image grid (Output) */}
+                                                <div className={`grid gap-1 ${gridClass}`}>
                                                     {batch.images.map((img) => (
                                                         <div
                                                             key={img.id}
