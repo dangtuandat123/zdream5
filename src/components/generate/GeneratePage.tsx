@@ -616,7 +616,10 @@ export function GeneratePage() {
                                         {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
                                             <>
                                                 <div>
-                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
+                                                        <Badge variant="secondary" className="h-4 px-1.5 text-[9px] rounded-sm font-medium">{selectedImage.referenceImages.length}</Badge>
+                                                    </div>
                                                     <div className="grid grid-cols-5 gap-2 mt-2">
                                                         {selectedImage.referenceImages.map((src, i) => (
                                                             <div key={i} className="aspect-square relative group">
