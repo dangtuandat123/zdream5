@@ -9,6 +9,8 @@ import {
     Trash2,
     RotateCcw,
     ZoomIn,
+    ZoomOut,
+    Maximize2,
     RectangleHorizontal,
     RectangleVertical,
     Square,
@@ -121,6 +123,7 @@ export function GeneratePage() {
     const [referenceImages, setReferenceImages] = useState<string[]>([])
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
+    const [isZoomed, setIsZoomed] = useState(false)
 
     // Settings
     const [model, setModel] = useState("sdxl")
@@ -610,18 +613,50 @@ export function GeneratePage() {
                 </div>
 
                 {/* === IMAGE VIEWER DIALOG === */}
-                <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+                <Dialog open={!!selectedImage} onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedImage(null)
+                        setIsZoomed(false)
+                    }
+                }}>
                     <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl">
                         <DialogTitle className="sr-only">Xem ảnh chi tiết</DialogTitle>
                         {selectedImage && (
                             <div className="flex flex-col lg:flex-row h-full overflow-hidden">
                                 {/* Ảnh */}
-                                <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
-                                    <img
-                                        src={selectedImage.url}
-                                        alt={selectedImage.prompt}
-                                        className="w-auto h-auto max-w-full max-h-full object-contain rounded-xl md:rounded-2xl drop-shadow-2xl shadow-foreground/5 shadow-2xl ring-1 ring-border/10"
-                                    />
+                                <div className={`flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative transition-all duration-300 ${isZoomed ? "p-0" : "p-4 lg:p-8"}`}>
+                                    {/* Khối Ảnh Chính có Zoom In/Out Native */}
+                                    <div
+                                        className={`relative group ${isZoomed ? "cursor-zoom-out w-full h-full overflow-auto custom-scrollbar flex" : "cursor-zoom-in w-auto h-auto max-w-full max-h-full"}`}
+                                        onClick={() => setIsZoomed(!isZoomed)}
+                                        title={isZoomed ? "Thu nhỏ lại" : "Nhấp để phóng to vùng nhìn (Native Zoom)"}
+                                    >
+                                        <img
+                                            src={selectedImage.url}
+                                            alt={selectedImage.prompt}
+                                            className={`m-auto transition-all duration-500 ${isZoomed ? "max-w-none max-h-none object-none rounded-none shadow-none" : "w-auto h-auto max-w-full max-h-full object-contain rounded-xl md:rounded-2xl drop-shadow-2xl shadow-foreground/5 shadow-2xl ring-1 ring-border/10 group-hover:scale-[1.01]"}`}
+                                        />
+
+                                        {/* Hover Overlay khi chưa zoom */}
+                                        {!isZoomed && (
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/10 rounded-xl md:rounded-2xl pointer-events-none">
+                                                <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                                    <Maximize2 className="size-4" />
+                                                    Xem bản gốc
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Floating hint khi đã zoom */}
+                                        {isZoomed && (
+                                            <div className="fixed top-6 left-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
+                                                <div className="bg-background/40 hover:bg-background/80 text-foreground backdrop-blur-md px-3 py-1.5 rounded-full font-medium text-xs flex items-center gap-1.5 shadow-xl ring-1 ring-border/50 transition-colors">
+                                                    <ZoomOut className="size-3.5" />
+                                                    Nhấp để thu nhỏ
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Info Panel */}
