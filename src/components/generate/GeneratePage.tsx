@@ -14,6 +14,11 @@ import {
     RectangleVertical,
     Square,
     RefreshCw,
+    ImageIcon,
+    X,
+    Link,
+    Upload,
+    Check,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -23,6 +28,8 @@ import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
@@ -100,6 +107,9 @@ export function GeneratePage() {
     const [prompt, setPrompt] = useState("")
     const [images, setImages] = useState<GeneratedImage[]>([])
     const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null)
+    const [referenceImages, setReferenceImages] = useState<string[]>([])
+    const [refImageUrlInput, setRefImageUrlInput] = useState("")
+    const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
 
     // Settings
     const [model, setModel] = useState("sdxl")
@@ -184,6 +194,26 @@ export function GeneratePage() {
         setStyle(img.style)
         setSelectedImage(null)
     }, [])
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || [])
+        if (files.length > 0) {
+            const urls = files.map(file => URL.createObjectURL(file))
+            setReferenceImages(prev => [...prev, ...urls])
+            setIsImagePopoverOpen(false) // Tự động đóng Popover khi chọn xong file từ máy
+        }
+        // Cho phép chọn lại file vừa xoá
+        if (e.target) {
+            e.target.value = ""
+        }
+    }
+
+    const handleUrlSubmit = () => {
+        if (refImageUrlInput.trim()) {
+            setReferenceImages(prev => [...prev, refImageUrlInput.trim()])
+            setRefImageUrlInput("")
+        }
+    }
 
     return (
         <TooltipProvider>
@@ -449,6 +479,27 @@ export function GeneratePage() {
                 <div className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 py-3">
                     <Card className="bg-card border shadow-lg ring-1 ring-border">
                         <CardContent className="p-2">
+                            {/* Chỗ Preview Ảnh Tham Chiếu trực tiếp trong khung nhập */}
+                            {referenceImages.length > 0 && (
+                                <div className="px-3 pt-2 pb-1 flex flex-wrap gap-2">
+                                    {referenceImages.map((src, idx) => (
+                                        <div key={idx} className="relative inline-block group/ref">
+                                            <img
+                                                src={src}
+                                                alt={`Reference ${idx + 1}`}
+                                                className="h-16 w-16 rounded-md object-cover ring-1 ring-border/50 bg-muted/30"
+                                            />
+                                            <button
+                                                onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
+                                                className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-0 group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
+                                            >
+                                                <X className="size-3 text-muted-foreground" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
                             <Textarea
                                 placeholder="Mô tả ý tưởng của bạn..."
                                 className="min-h-[56px] max-h-[120px] w-full resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
@@ -464,6 +515,71 @@ export function GeneratePage() {
 
                             <div className="flex items-center justify-between px-1 pt-1">
                                 <div className="flex items-center gap-1.5">
+                                    {/* Nút đính kèm ảnh tham chiếu */}
+                                    <Popover open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <PopoverTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="size-8 rounded-full">
+                                                        <ImageIcon className="size-4" />
+                                                    </Button>
+                                                </PopoverTrigger>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
+                                        </Tooltip>
+
+                                        <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+                                            <div className="p-4 border-b border-border/50">
+                                                <div className="flex items-center gap-2 font-medium text-sm">
+                                                    <ImageIcon className="size-4 text-primary" />
+                                                    Cung cấp ảnh tham chiếu
+                                                </div>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    AI sẽ dùng các ảnh này để làm hình mẫu (Image-to-Image / ControlNet).
+                                                </p>
+                                            </div>
+                                            <Tabs defaultValue="upload" className="w-full">
+                                                <div className="px-4 pt-3 pb-2">
+                                                    <TabsList className="grid w-full grid-cols-2">
+                                                        <TabsTrigger value="upload" className="text-xs"><Upload className="size-3 mr-1.5" /> Tải lên</TabsTrigger>
+                                                        <TabsTrigger value="url" className="text-xs"><Link className="size-3 mr-1.5" /> Link URL</TabsTrigger>
+                                                    </TabsList>
+                                                </div>
+                                                <TabsContent value="upload" className="p-4 pt-0 m-0">
+                                                    <label
+                                                        htmlFor="ref-image-upload"
+                                                        className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                                                    >
+                                                        <Upload className="size-5 text-muted-foreground mb-2" />
+                                                        <span className="text-xs text-muted-foreground font-medium">Chọn ảnh từ máy</span>
+                                                        <input
+                                                            id="ref-image-upload"
+                                                            type="file"
+                                                            accept="image/*"
+                                                            multiple
+                                                            className="hidden"
+                                                            onChange={handleFileUpload}
+                                                        />
+                                                    </label>
+                                                </TabsContent>
+                                                <TabsContent value="url" className="p-4 pt-0 m-0">
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            placeholder="https://example.com/image.jpg"
+                                                            className="h-8 text-xs"
+                                                            value={refImageUrlInput}
+                                                            onChange={(e) => setRefImageUrlInput(e.target.value)}
+                                                            onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                                                        />
+                                                        <Button size="icon" className="size-8 shrink-0" onClick={handleUrlSubmit}>
+                                                            <Check className="size-4" />
+                                                        </Button>
+                                                    </div>
+                                                </TabsContent>
+                                            </Tabs>
+                                        </PopoverContent>
+                                    </Popover>
+
                                     {/* Settings Popover */}
                                     <Popover>
                                         <Tooltip>
@@ -578,11 +694,11 @@ export function GeneratePage() {
                                     </Select>
 
                                     {/* Quick info badges */}
-                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal">
-                                        {getAspectRatio(aspectRatioValue).label}
+                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal px-2.5 py-0 inline-flex items-center justify-center">
+                                        <span className="translate-y-[1px]">{getAspectRatio(aspectRatioValue).label}</span>
                                     </Badge>
-                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal">
-                                        ×{imageCount}
+                                    <Badge variant="outline" className="text-[10px] h-6 rounded-full font-normal px-2.5 py-0 inline-flex items-center justify-center">
+                                        <span className="translate-y-[1px]">×{imageCount}</span>
                                     </Badge>
                                 </div>
 
