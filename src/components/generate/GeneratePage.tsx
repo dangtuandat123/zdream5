@@ -9,7 +9,6 @@ import {
     Trash2,
     RotateCcw,
     ZoomIn,
-    LayoutGrid,
     RectangleHorizontal,
     RectangleVertical,
     Square,
@@ -451,21 +450,6 @@ export function GeneratePage() {
                     {/* Batch Gallery — nhóm theo lần tạo */}
                     {batches.length > 0 && (
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <LayoutGrid className="size-4 text-muted-foreground" />
-                                    <span className="text-sm font-medium">{images.length} ảnh · {batches.length} lần tạo</span>
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="text-xs text-muted-foreground"
-                                    onClick={() => setImages([])}
-                                >
-                                    Xoá tất cả
-                                </Button>
-                            </div>
-
                             {/* Danh sách batch — full width */}
                             <div className="space-y-4">
                                 {batches.map((batch) => {
