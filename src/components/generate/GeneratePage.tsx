@@ -681,7 +681,7 @@ export function GeneratePage() {
                         <CardContent className="p-2">
                             {/* Chỗ Preview Ảnh Tham Chiếu trực tiếp trong khung nhập */}
                             {referenceImages.length > 0 && (
-                                <div className="px-3 pt-3 pb-2 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border/50 hover:[&::-webkit-scrollbar-thumb]:bg-border">
+                                <div className="px-3 pt-3 pb-2 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50">
                                     {referenceImages.map((src, idx) => (
                                         <div key={idx} className="relative shrink-0 group/ref">
                                             <img
@@ -706,7 +706,7 @@ export function GeneratePage() {
 
                             <Textarea
                                 placeholder="Mô tả ý tưởng của bạn..."
-                                className="min-h-[56px] max-h-[120px] w-full resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50"
+                                className="min-h-[56px] max-h-[120px] w-full resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0 placeholder:text-muted-foreground/50 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50"
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}
                                 onKeyDown={(e) => {
