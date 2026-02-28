@@ -629,7 +629,7 @@ export function GeneratePage() {
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2">
                                             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
-                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent break-all whitespace-pre-wrap shadow-inner border border-foreground/5">
+                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-all whitespace-pre-wrap shadow-inner border border-foreground/5">
                                                 {selectedImage.prompt}
                                             </div>
                                         </div>
@@ -734,7 +734,7 @@ export function GeneratePage() {
                             <div className="flex items-end px-2 pt-2 pb-1">
                                 <textarea
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full min-h-[44px] max-h-[35vh] resize-none border-0 bg-transparent py-2.5 px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50"
+                                    className="w-full min-h-[44px] max-h-[35vh] resize-none border-0 bg-transparent py-2.5 px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar"
                                     rows={1}
                                     value={prompt}
                                     onChange={(e) => {
