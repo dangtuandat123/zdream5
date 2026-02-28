@@ -625,7 +625,7 @@ export function GeneratePage() {
                                 </div>
 
                                 {/* Info Panel */}
-                                <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 flex flex-col gap-5 bg-background overflow-y-auto">
+                                <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto">
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2">
                                             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
