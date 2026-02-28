@@ -519,7 +519,7 @@ export function GeneratePage() {
                                                         {batch.referenceImages.map((src, i) => (
                                                             <div
                                                                 key={`ref-${i}`}
-                                                                className={`group/ref relative shrink-0 overflow-hidden bg-muted/20 w-32 max-h-32 aspect-square ring-1 ring-border/10 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
+                                                                className={`group/ref relative shrink-0 overflow-hidden bg-muted/20 w-20 sm:w-24 aspect-square ring-1 ring-border/10 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
                                                             >
                                                                 <img
                                                                     src={src}
