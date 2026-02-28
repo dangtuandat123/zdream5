@@ -23,8 +23,8 @@ import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
@@ -253,93 +253,98 @@ export function GeneratePage() {
 
                             {/* Danh sách batch — full width */}
                             <div className="space-y-4">
-                                {batches.map((batch) => (
-                                    <Card
-                                        key={batch.batchId}
-                                        className={`overflow-hidden p-0 transition-all ${batch.isNew
-                                            ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-[0.98] duration-500"
-                                            : ""
-                                            }`}
-                                    >
-                                        {/* Batch header — prompt + metadata */}
-                                        <div className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border/50">
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-sm font-medium truncate">{batch.prompt}</p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <Badge variant="outline" className="text-[10px] h-5 rounded-full font-normal">
-                                                        {batch.model.toUpperCase()}
-                                                    </Badge>
-                                                    <Badge variant="outline" className="text-[10px] h-5 rounded-full font-normal">
-                                                        {batch.aspectLabel}
-                                                    </Badge>
-                                                    <span className="text-[10px] text-muted-foreground">
+                                {batches.map((batch) => {
+                                    // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
+                                    const count = batch.images.length
+                                    const gridClass = count === 1
+                                        ? "grid-cols-1 max-w-xs"
+                                        : count === 2
+                                            ? "grid-cols-2 max-w-2xl"
+                                            : count === 3
+                                                ? "grid-cols-3"
+                                                : "grid-cols-2 md:grid-cols-4"
+
+                                    return (
+                                        <Card
+                                            key={batch.batchId}
+                                            className={`overflow-hidden p-0 bg-card/50 backdrop-blur-sm transition-all ${batch.isNew
+                                                ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-[0.98] duration-500"
+                                                : ""
+                                                }`}
+                                        >
+                                            {/* Compact header — 1 dòng prompt + metadata + actions */}
+                                            <div className="flex items-center gap-3 px-3 py-2">
+                                                <Wand2 className="size-3.5 text-muted-foreground shrink-0" />
+
+                                                <p className="text-sm font-medium truncate flex-1 min-w-0">{batch.prompt}</p>
+
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                                                        {batch.model.toUpperCase()} · {batch.aspectLabel}
+                                                    </span>
+                                                    <span className="text-[10px] text-muted-foreground/60">
                                                         {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                                                     </span>
-                                                </div>
-                                            </div>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="size-7 shrink-0 rounded-full"
+                                                        className="size-6 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
                                                         onClick={() => handleRegenerate(batch.images[0])}
                                                     >
-                                                        <RefreshCw className="size-3.5" />
+                                                        <RefreshCw className="size-3" />
                                                     </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent side="left">Tạo lại</TooltipContent>
-                                            </Tooltip>
-                                        </div>
-
-                                        {/* Batch images — grid 2-col cho 2+ ảnh */}
-                                        <div className="grid gap-0.5 grid-cols-2 md:grid-cols-4">
-                                            {batch.images.map((img) => (
-                                                <div
-                                                    key={img.id}
-                                                    className="group/img relative cursor-pointer"
-                                                    onClick={() => setSelectedImage(img)}
-                                                >
-                                                    <AspectRatio ratio={img.aspectRatio}>
-                                                        <img
-                                                            src={img.url}
-                                                            alt={img.prompt}
-                                                            className="absolute inset-0 h-full w-full object-cover"
-                                                        />
-                                                    </AspectRatio>
-
-                                                    {/* Hover overlay */}
-                                                    <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200" />
-
-                                                    {/* Hover actions */}
-                                                    <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
-                                                        <Button
-                                                            size="icon"
-                                                            variant="secondary"
-                                                            className="size-6 rounded-full"
-                                                            onClick={(e) => { e.stopPropagation() }}
-                                                        >
-                                                            <Download className="size-3" />
-                                                        </Button>
-                                                        <Button
-                                                            size="icon"
-                                                            variant="secondary"
-                                                            className="size-6 rounded-full"
-                                                            onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                        >
-                                                            <Trash2 className="size-3" />
-                                                        </Button>
-                                                    </div>
-
-                                                    {/* Hover zoom */}
-                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                        <ZoomIn className="size-5 text-white drop-shadow-md" />
-                                                    </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </Card>
-                                ))}
+                                            </div>
+
+                                            {/* Image grid */}
+                                            <div className={`grid gap-1 px-1 pb-1 ${gridClass}`}>
+                                                {batch.images.map((img) => (
+                                                    <div
+                                                        key={img.id}
+                                                        className="group/img relative cursor-pointer overflow-hidden rounded-lg"
+                                                        onClick={() => setSelectedImage(img)}
+                                                    >
+                                                        <AspectRatio ratio={img.aspectRatio}>
+                                                            <img
+                                                                src={img.url}
+                                                                alt={img.prompt}
+                                                                className="absolute inset-0 h-full w-full object-cover"
+                                                            />
+                                                        </AspectRatio>
+
+                                                        {/* Hover overlay */}
+                                                        <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
+
+                                                        {/* Hover actions */}
+                                                        <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
+                                                            <Button
+                                                                size="icon"
+                                                                variant="secondary"
+                                                                className="size-6 rounded-full"
+                                                                onClick={(e) => { e.stopPropagation() }}
+                                                            >
+                                                                <Download className="size-3" />
+                                                            </Button>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="secondary"
+                                                                className="size-6 rounded-full"
+                                                                onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
+                                                            >
+                                                                <Trash2 className="size-3" />
+                                                            </Button>
+                                                        </div>
+
+                                                        {/* Hover zoom */}
+                                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                            <ZoomIn className="size-5 text-white drop-shadow-md" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </Card>
+                                    )
+                                })}
                             </div>
                         </div>
                     )}
