@@ -497,17 +497,20 @@ export function GeneratePage() {
                                                 }`}
                                         >
                                             {/* Compact header — 1 dòng prompt + metadata + actions */}
-                                            <div className="flex items-start sm:items-center gap-3 px-3 py-3">
+                                            <div className="flex items-start sm:items-center w-full min-w-0 gap-3 px-3 py-3">
                                                 <div className="bg-muted/50 p-1.5 rounded-full shrink-0">
                                                     <Wand2 className="size-3.5 text-muted-foreground" />
                                                 </div>
 
-                                                <p
-                                                    className="text-sm font-medium line-clamp-2 flex-1 min-w-0 break-words leading-snug"
-                                                    title={batch.prompt}
-                                                >
-                                                    {batch.prompt}
-                                                </p>
+                                                {/* Wrap in flex-1 min-w-0 to absolutely trap overflow bounds */}
+                                                <div className="flex-1 min-w-0">
+                                                    <p
+                                                        className="text-sm font-medium line-clamp-2 break-all text-ellipsis leading-snug"
+                                                        title={batch.prompt}
+                                                    >
+                                                        {batch.prompt}
+                                                    </p>
+                                                </div>
 
                                                 <div className="flex items-center gap-1.5 shrink-0">
                                                     <span className="text-[10px] text-muted-foreground hidden sm:inline">
@@ -626,7 +629,7 @@ export function GeneratePage() {
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2">
                                             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
-                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent break-words whitespace-pre-wrap shadow-inner border border-foreground/5">
+                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent break-all whitespace-pre-wrap shadow-inner border border-foreground/5">
                                                 {selectedImage.prompt}
                                             </div>
                                         </div>
