@@ -80,6 +80,7 @@ interface GeneratedImage {
     aspectRatio: number
     aspectLabel: string
     createdAt: Date
+    referenceImages?: string[]
     isNew?: boolean
 }
 
@@ -91,6 +92,7 @@ interface Batch {
     aspectLabel: string
     createdAt: Date
     images: GeneratedImage[]
+    referenceImages?: string[]
     isNew?: boolean
 }
 
@@ -146,6 +148,7 @@ export function GeneratePage() {
                     aspectLabel: img.aspectLabel,
                     createdAt: img.createdAt,
                     images: [],
+                    referenceImages: img.referenceImages,
                     isNew: img.isNew,
                 })
             }
@@ -165,6 +168,7 @@ export function GeneratePage() {
         const batchId = `batch-${Date.now()}`
 
         setTimeout(() => {
+            const currentRefs = [...referenceImages]
             const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
                 id: `img-${Date.now()}-${i}`,
                 batchId,
@@ -175,6 +179,7 @@ export function GeneratePage() {
                 aspectRatio: ar.ratio,
                 aspectLabel: ar.label,
                 createdAt: new Date(),
+                referenceImages: currentRefs.length > 0 ? currentRefs : undefined,
                 isNew: true,
             }))
 
@@ -504,6 +509,16 @@ export function GeneratePage() {
                                                 </div>
                                             </div>
 
+                                            {/* Hiển thị ảnh tham chiếu (nếu có) */}
+                                            {batch.referenceImages && batch.referenceImages.length > 0 && (
+                                                <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto scrollbar-none items-center">
+                                                    <ImageIcon className="size-3 text-muted-foreground shrink-0" />
+                                                    {batch.referenceImages.map((src, i) => (
+                                                        <img key={i} src={src} className="size-6 rounded object-cover ring-1 ring-border/50 shrink-0" alt="ref" />
+                                                    ))}
+                                                </div>
+                                            )}
+
                                             {/* Image grid */}
                                             <div className={`grid gap-1 px-1 pb-1 ${gridClass}`}>
                                                 {batch.images.map((img) => (
@@ -581,6 +596,19 @@ export function GeneratePage() {
                                             <p className="text-sm mt-1 leading-relaxed">{selectedImage.prompt}</p>
                                         </div>
                                         <Separator />
+                                        {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
+                                            <>
+                                                <div>
+                                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {selectedImage.referenceImages.map((src, i) => (
+                                                            <img key={i} src={src} className="size-16 rounded-md object-cover ring-1 ring-border/50" alt="ref" />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <Separator />
+                                            </>
+                                        )}
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
                                                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Model</Label>
