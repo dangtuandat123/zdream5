@@ -617,9 +617,11 @@ export function GeneratePage() {
                                             <>
                                                 <div>
                                                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
-                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                    <div className="grid grid-cols-5 gap-2 mt-2">
                                                         {selectedImage.referenceImages.map((src, i) => (
-                                                            <img key={i} src={src} className="size-16 rounded-md object-cover ring-1 ring-border/50" alt="ref" />
+                                                            <div key={i} className="aspect-square relative group">
+                                                                <img src={src} className="absolute inset-0 w-full h-full rounded-md object-cover ring-1 ring-border/50" alt="ref" />
+                                                            </div>
                                                         ))}
                                                     </div>
                                                 </div>
