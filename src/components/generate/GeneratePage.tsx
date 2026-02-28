@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
+
 import {
     Select,
     SelectContent,
@@ -381,19 +381,43 @@ export function GeneratePage() {
 
                 {/* === CANVAS AREA === */}
                 <div className="relative z-10 flex-1 p-4 lg:p-6">
-                    {/* Empty State — sử dụng shadcn Empty component */}
+                    {/* Empty State — Nghệ thuật & Tương lai */}
                     {images.length === 0 && !isGenerating && (
-                        <Empty className="py-24 border-0">
-                            <EmptyHeader>
-                                <EmptyMedia>
-                                    <Sparkles className="size-10 text-primary" />
-                                </EmptyMedia>
-                                <EmptyTitle>Bắt đầu sáng tạo</EmptyTitle>
-                                <EmptyDescription>
-                                    Nhập mô tả vào thanh lệnh phía dưới để AI tạo ảnh cho bạn.
-                                </EmptyDescription>
-                            </EmptyHeader>
-                        </Empty>
+                        <div className="flex flex-col items-center justify-center w-full min-h-[50vh] sm:min-h-[60vh] animate-in fade-in zoom-in-[0.98] duration-1000">
+                            {/* Icon Container with glowing aura */}
+                            <div className="relative mb-8 sm:mb-10 group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/50 via-purple-500/50 to-pink-500/50 blur-2xl rounded-full opacity-40 group-hover:opacity-60 transition-opacity duration-700 animate-pulse" />
+                                <div className="relative flex items-center justify-center p-6 sm:p-7 bg-background/50 border border-foreground/5 rounded-full backdrop-blur-xl shadow-2xl ring-1 ring-white/5">
+                                    <Sparkles className="size-12 sm:size-14 text-primary opacity-90 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />
+                                </div>
+                            </div>
+
+                            {/* Title with Gradient */}
+                            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-5 sm:mb-6 text-center">
+                                Khơi nguồn <br className="sm:hidden" />
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 drop-shadow-sm pb-1 ml-0 sm:ml-3">
+                                    Sáng tạo
+                                </span>
+                            </h2>
+
+                            {/* Description */}
+                            <p className="text-muted-foreground text-center max-w-lg text-sm sm:text-base leading-relaxed px-4">
+                                Hãy mô tả bất kỳ điều gì bạn muốn thấy. ZDream sẽ sử dụng AI để hiện thực hóa những ý tưởng điên rồ nhất của bạn thành kiệt tác nghệ thuật.
+                            </p>
+
+                            {/* Prompt Example Pills */}
+                            <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4">
+                                {["Thành phố tương lai neon", "Mèo du hành thời gian", "Tranh sơn dầu phục hưng"].map((suggestion, i) => (
+                                    <div
+                                        key={i}
+                                        className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-muted/30 hover:bg-muted/50 border border-foreground/5 backdrop-blur-md text-xs sm:text-sm text-foreground/80 transition-all cursor-default flex items-center gap-2"
+                                    >
+                                        <Wand2 className="size-3 sm:size-3.5 text-primary/70" />
+                                        {suggestion}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
 
                     {/* Loading Skeleton — giống batch card nhưng đang shimmer */}
