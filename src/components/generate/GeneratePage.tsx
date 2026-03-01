@@ -496,12 +496,12 @@ export function GeneratePage() {
                         {isGenerating && (() => {
                             const count = parseInt(imageCount)
                             const skeletonGrid = count === 1
-                                ? "grid-cols-1 max-w-xs mx-auto"
+                                ? "grid-cols-1 max-w-md mx-auto"
                                 : count === 2
-                                    ? "grid-cols-2 max-w-2xl"
+                                    ? "grid-cols-2"
                                     : count === 3
                                         ? "grid-cols-3"
-                                        : "grid-cols-2 md:grid-cols-4"
+                                        : "grid-cols-2"
 
                             return (
                                 <div className="mb-6">
@@ -521,7 +521,7 @@ export function GeneratePage() {
 
                                         {/* Grid skeleton ảnh */}
                                         <div className="px-1 pb-1">
-                                            <div className={`grid gap-1 ${skeletonGrid}`}>
+                                            <div className={`grid gap-1.5 ${skeletonGrid}`}>
                                                 {Array.from({ length: count }).map((_, i) => (
                                                     <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
                                                         <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
@@ -549,15 +549,15 @@ export function GeneratePage() {
                                 {/* Danh sách batch — full width */}
                                 <div className="space-y-4">
                                     {batches.map((batch) => {
-                                        // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
                                         const count = batch.images.length
+                                        // Grid thông minh: 1 ảnh → full-width showcase, 2 → 2 cột, 3 → 3 cột, 4 → 2x2
                                         const gridClass = count === 1
-                                            ? "grid-cols-1 max-w-xs mx-auto"
+                                            ? "grid-cols-1 max-w-md mx-auto"
                                             : count === 2
-                                                ? "grid-cols-2 max-w-2xl"
+                                                ? "grid-cols-2"
                                                 : count === 3
                                                     ? "grid-cols-3"
-                                                    : "grid-cols-2 md:grid-cols-4"
+                                                    : "grid-cols-2"
 
                                         return (
                                             <Card
@@ -602,7 +602,7 @@ export function GeneratePage() {
                                                 </div>
 
                                                 {/* Media container */}
-                                                <div className="px-1 pb-1">
+                                                <div className="px-1.5 pb-1.5">
                                                     {/* Hiển thị ảnh tham chiếu (Input) độc lập phía trên lưới Output */}
                                                     {batch.referenceImages && batch.referenceImages.length > 0 && (
                                                         <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
@@ -626,11 +626,11 @@ export function GeneratePage() {
                                                     )}
 
                                                     {/* Image grid (Output) */}
-                                                    <div className={`grid gap-1 ${gridClass}`}>
+                                                    <div className={`grid gap-1.5 ${gridClass}`}>
                                                         {batch.images.map((img) => (
                                                             <div
                                                                 key={img.id}
-                                                                className="group/img relative cursor-pointer overflow-hidden rounded-lg"
+                                                                className={`group/img relative cursor-pointer overflow-hidden ${count === 1 ? 'rounded-xl' : 'rounded-lg'}`}
                                                                 onClick={() => setSelectedImage(img)}
                                                             >
                                                                 <AspectRatio ratio={img.aspectRatio}>
