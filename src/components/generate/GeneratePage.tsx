@@ -449,234 +449,236 @@ export function GeneratePage() {
                     <div className="absolute top-[30%] left-[30%] w-[100vw] h-[100vw] md:w-[35vw] md:h-[35vw] bg-[#00D4FF]/30 md:bg-[#00D4FF]/20 rounded-full blur-[80px] md:blur-[140px]" />
                 </div>
 
-                {/* === CANVAS AREA === */}
-                <div className="relative z-10 flex-1 flex flex-col p-4 lg:p-6">
-                    {/* Empty State — Nghệ thuật & Tương lai (Liquid Glass Portal) */}
-                    {images.length === 0 && !isGenerating && (
-                        <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in zoom-in-[0.98] duration-1000 -mt-10">
+                {/* === CANVAS AREA — Gallery chiếm 60% bề ngang desktop, full-width mobile === */}
+                <div className="relative z-10 flex-1 flex flex-col items-center p-4 lg:p-6">
+                    <div className="w-full lg:w-[70%] flex flex-col flex-1">
+                        {/* Empty State — Nghệ thuật & Tương lai (Liquid Glass Portal) */}
+                        {images.length === 0 && !isGenerating && (
+                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in zoom-in-[0.98] duration-1000 -mt-10">
 
-                            {/* Animated Liquid Portal */}
-                            <div className="relative size-48 sm:size-56 mb-8 group">
-                                {/* Glow layers */}
-                                <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/40 transition-colors duration-1000" />
+                                {/* Animated Liquid Portal */}
+                                <div className="relative size-48 sm:size-56 mb-8 group">
+                                    {/* Glow layers */}
+                                    <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/40 transition-colors duration-1000" />
 
-                                {/* Liquid spinning blobs */}
-                                <div className="absolute inset-2 z-0 rounded-[40%_60%_70%_30%] bg-gradient-to-br from-blue-500/40 via-purple-500/40 to-pink-500/40 dark:from-blue-600/40 dark:via-purple-600/40 dark:to-pink-600/40 blur-md animate-[spin_8s_linear_infinite]" />
-                                <div className="absolute inset-0 z-0 rounded-[60%_40%_30%_70%] bg-gradient-to-bl from-pink-500/40 via-purple-500/40 to-cyan-500/40 dark:from-pink-600/40 dark:via-purple-600/40 dark:to-cyan-600/40 blur-md animate-[spin_12s_linear_infinite_reverse]" />
+                                    {/* Liquid spinning blobs */}
+                                    <div className="absolute inset-2 z-0 rounded-[40%_60%_70%_30%] bg-gradient-to-br from-blue-500/40 via-purple-500/40 to-pink-500/40 dark:from-blue-600/40 dark:via-purple-600/40 dark:to-pink-600/40 blur-md animate-[spin_8s_linear_infinite]" />
+                                    <div className="absolute inset-0 z-0 rounded-[60%_40%_30%_70%] bg-gradient-to-bl from-pink-500/40 via-purple-500/40 to-cyan-500/40 dark:from-pink-600/40 dark:via-purple-600/40 dark:to-cyan-600/40 blur-md animate-[spin_12s_linear_infinite_reverse]" />
 
-                                {/* Glass core */}
-                                <div className="absolute inset-3 z-10 rounded-[40%_50%_60%_50%] backdrop-blur-xl border border-white/20 dark:border-white/10 bg-white/10 dark:bg-black/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] flex items-center justify-center animate-[spin_15s_linear_infinite]">
-                                    <div className="animate-[spin_15s_linear_infinite_reverse] w-full h-full flex flex-col items-center justify-center pointer-events-none">
-                                        {/* Căn bằng nội dung nằm im trong khi viền xoay */}
-                                        <span className="text-xl sm:text-2xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/50 uppercase ml-1">
-                                            ZDream
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Cinematic Typography */}
-                            <h2 className="text-2xl sm:text-4xl font-medium tracking-tight text-center mb-4">
-                                Khung vẽ trống rỗng.
-                                <br className="sm:hidden" />
-                                <span className="text-muted-foreground font-light"> Tâm trí vô hạn.</span>
-                            </h2>
-
-                            <p className="text-muted-foreground/80 text-center max-w-sm sm:max-w-md text-sm sm:text-base leading-relaxed font-light">
-                                Đánh thức trí tưởng tượng. Viết ra bất kỳ điều gì, chúng tôi sẽ vẽ nó thành hiện thực.
-                            </p>
-
-                            {/* Elegant decorative line */}
-                            <div className="mt-12 w-12 h-[1px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
-                        </div>
-                    )}
-
-                    {/* Loading Skeleton — giống batch card nhưng đang shimmer */}
-                    {isGenerating && (() => {
-                        const count = parseInt(imageCount)
-                        const skeletonGrid = count === 1
-                            ? "grid-cols-1 max-w-sm sm:max-w-md"
-                            : count === 2
-                                ? "grid-cols-2 max-w-2xl"
-                                : count === 3
-                                    ? "grid-cols-3"
-                                    : "grid-cols-2 md:grid-cols-4"
-
-                        return (
-                            <div className="mb-6">
-                                <Card className="overflow-hidden p-0 bg-card/50 backdrop-blur-sm ring-2 ring-primary/40 shadow-[0_0_20px_rgba(168,85,247,0.25)] animate-in fade-in-0 duration-500">
-                                    {/* Header giống batch card */}
-                                    <div className="flex items-center gap-3 px-3 py-2">
-                                        <Spinner className="size-3.5 text-primary shrink-0" />
-
-                                        <p className="text-sm font-medium truncate flex-1 min-w-0 text-muted-foreground">
-                                            {prompt.slice(0, 80)}
-                                        </p>
-
-                                        <span className="text-[10px] text-primary/60 shrink-0 animate-pulse">
-                                            Đang tạo...
-                                        </span>
-                                    </div>
-
-                                    {/* Grid skeleton ảnh */}
-                                    <div className="px-1 pb-1">
-                                        <div className={`grid gap-1 ${skeletonGrid}`}>
-                                            {Array.from({ length: count }).map((_, i) => (
-                                                <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
-                                                    <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
-                                                        <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
-                                                        {/* Shimmer gradient overlay */}
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
-                                                    </AspectRatio>
-
-                                                    {/* Centered icon placeholder */}
-                                                    <div className="absolute inset-0 flex items-center justify-center">
-                                                        <Sparkles className="size-5 text-primary/20 animate-pulse" />
-                                                    </div>
-                                                </div>
-                                            ))}
+                                    {/* Glass core */}
+                                    <div className="absolute inset-3 z-10 rounded-[40%_50%_60%_50%] backdrop-blur-xl border border-white/20 dark:border-white/10 bg-white/10 dark:bg-black/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] flex items-center justify-center animate-[spin_15s_linear_infinite]">
+                                        <div className="animate-[spin_15s_linear_infinite_reverse] w-full h-full flex flex-col items-center justify-center pointer-events-none">
+                                            {/* Căn bằng nội dung nằm im trong khi viền xoay */}
+                                            <span className="text-xl sm:text-2xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/50 uppercase ml-1">
+                                                ZDream
+                                            </span>
                                         </div>
                                     </div>
-                                </Card>
+                                </div>
+
+                                {/* Cinematic Typography */}
+                                <h2 className="text-2xl sm:text-4xl font-medium tracking-tight text-center mb-4">
+                                    Khung vẽ trống rỗng.
+                                    <br className="sm:hidden" />
+                                    <span className="text-muted-foreground font-light"> Tâm trí vô hạn.</span>
+                                </h2>
+
+                                <p className="text-muted-foreground/80 text-center max-w-sm sm:max-w-md text-sm sm:text-base leading-relaxed font-light">
+                                    Đánh thức trí tưởng tượng. Viết ra bất kỳ điều gì, chúng tôi sẽ vẽ nó thành hiện thực.
+                                </p>
+
+                                {/* Elegant decorative line */}
+                                <div className="mt-12 w-12 h-[1px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
                             </div>
-                        )
-                    })()}
+                        )}
 
-                    {/* Batch Gallery — nhóm theo lần tạo */}
-                    {batches.length > 0 && (
-                        <div className="space-y-4">
-                            {/* Danh sách batch — full width */}
-                            <div className="space-y-4">
-                                {batches.map((batch) => {
-                                    // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
-                                    const count = batch.images.length
-                                    const gridClass = count === 1
-                                        ? "grid-cols-1 max-w-sm sm:max-w-md"
-                                        : count === 2
-                                            ? "grid-cols-2 max-w-2xl"
-                                            : count === 3
-                                                ? "grid-cols-3"
-                                                : "grid-cols-2 md:grid-cols-4"
+                        {/* Loading Skeleton — giống batch card nhưng đang shimmer */}
+                        {isGenerating && (() => {
+                            const count = parseInt(imageCount)
+                            const skeletonGrid = count === 1
+                                ? "grid-cols-1 max-w-xs mx-auto"
+                                : count === 2
+                                    ? "grid-cols-2 max-w-2xl"
+                                    : count === 3
+                                        ? "grid-cols-3"
+                                        : "grid-cols-2 md:grid-cols-4"
 
-                                    return (
-                                        <Card
-                                            key={batch.batchId}
-                                            className={`overflow-hidden p-0 bg-card/50 backdrop-blur-sm transition-all ${batch.isNew
-                                                ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-[0.98] duration-500"
-                                                : ""
-                                                }`}
-                                        >
-                                            {/* Compact header — 1 dòng prompt + metadata + actions */}
-                                            <div className="flex items-start sm:items-center w-full min-w-0 gap-3 px-3 py-3">
-                                                <div className="bg-muted/50 p-1.5 rounded-full shrink-0">
-                                                    <Wand2 className="size-3.5 text-muted-foreground" />
-                                                </div>
+                            return (
+                                <div className="mb-6">
+                                    <Card className="overflow-hidden p-0 bg-card/50 backdrop-blur-sm ring-2 ring-primary/40 shadow-[0_0_20px_rgba(168,85,247,0.25)] animate-in fade-in-0 duration-500">
+                                        {/* Header giống batch card */}
+                                        <div className="flex items-center gap-3 px-3 py-2">
+                                            <Spinner className="size-3.5 text-primary shrink-0" />
 
-                                                {/* Wrap in flex-1 min-w-0 to absolutely trap overflow bounds */}
-                                                <div className="flex-1 min-w-0">
-                                                    <p
-                                                        className="text-sm font-medium line-clamp-2 break-all text-ellipsis leading-snug"
-                                                        title={batch.prompt}
-                                                    >
-                                                        {batch.prompt}
-                                                    </p>
-                                                </div>
+                                            <p className="text-sm font-medium truncate flex-1 min-w-0 text-muted-foreground">
+                                                {prompt.slice(0, 80)}
+                                            </p>
 
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                                                        {batch.model.toUpperCase()} · {batch.aspectLabel}
-                                                    </span>
-                                                    <span className="text-[10px] text-muted-foreground/60">
-                                                        {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                                    </span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="size-6 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
-                                                        onClick={() => handleRegenerate(batch.images[0])}
-                                                    >
-                                                        <RefreshCw className="size-3" />
-                                                    </Button>
-                                                </div>
+                                            <span className="text-[10px] text-primary/60 shrink-0 animate-pulse">
+                                                Đang tạo...
+                                            </span>
+                                        </div>
+
+                                        {/* Grid skeleton ảnh */}
+                                        <div className="px-1 pb-1">
+                                            <div className={`grid gap-1 ${skeletonGrid}`}>
+                                                {Array.from({ length: count }).map((_, i) => (
+                                                    <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
+                                                        <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
+                                                            <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
+                                                            {/* Shimmer gradient overlay */}
+                                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
+                                                        </AspectRatio>
+
+                                                        {/* Centered icon placeholder */}
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <Sparkles className="size-5 text-primary/20 animate-pulse" />
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
+                                        </div>
+                                    </Card>
+                                </div>
+                            )
+                        })()}
 
-                                            {/* Media container */}
-                                            <div className="px-1 pb-1">
-                                                {/* Hiển thị ảnh tham chiếu (Input) độc lập phía trên lưới Output */}
-                                                {batch.referenceImages && batch.referenceImages.length > 0 && (
-                                                    <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
-                                                        {batch.referenceImages.map((src, i) => (
+                        {/* Batch Gallery — nhóm theo lần tạo, chiếm 60% bề ngang desktop */}
+                        {batches.length > 0 && (
+                            <div className="space-y-4">
+                                {/* Danh sách batch — full width */}
+                                <div className="space-y-4">
+                                    {batches.map((batch) => {
+                                        // Grid cột thông minh: 1 ảnh → 1 cột (giới hạn width), 2 → 2, 3 → 3, 4+ → 4
+                                        const count = batch.images.length
+                                        const gridClass = count === 1
+                                            ? "grid-cols-1 max-w-xs mx-auto"
+                                            : count === 2
+                                                ? "grid-cols-2 max-w-2xl"
+                                                : count === 3
+                                                    ? "grid-cols-3"
+                                                    : "grid-cols-2 md:grid-cols-4"
+
+                                        return (
+                                            <Card
+                                                key={batch.batchId}
+                                                className={`overflow-hidden p-0 bg-card/50 backdrop-blur-sm transition-all ${batch.isNew
+                                                    ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-[0.98] duration-500"
+                                                    : ""
+                                                    }`}
+                                            >
+                                                {/* Compact header — 1 dòng prompt + metadata + actions */}
+                                                <div className="flex items-start sm:items-center w-full min-w-0 gap-3 px-3 py-3">
+                                                    <div className="bg-muted/50 p-1.5 rounded-full shrink-0">
+                                                        <Wand2 className="size-3.5 text-muted-foreground" />
+                                                    </div>
+
+                                                    {/* Wrap in flex-1 min-w-0 to absolutely trap overflow bounds */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p
+                                                            className="text-sm font-medium line-clamp-2 break-all text-ellipsis leading-snug"
+                                                            title={batch.prompt}
+                                                        >
+                                                            {batch.prompt}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-1.5 shrink-0">
+                                                        <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                                                            {batch.model.toUpperCase()} · {batch.aspectLabel}
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground/60">
+                                                            {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                        </span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-6 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                                                            onClick={() => handleRegenerate(batch.images[0])}
+                                                        >
+                                                            <RefreshCw className="size-3" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                {/* Media container */}
+                                                <div className="px-1 pb-1">
+                                                    {/* Hiển thị ảnh tham chiếu (Input) độc lập phía trên lưới Output */}
+                                                    {batch.referenceImages && batch.referenceImages.length > 0 && (
+                                                        <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
+                                                            {batch.referenceImages.map((src, i) => (
+                                                                <div
+                                                                    key={`ref-${i}`}
+                                                                    className={`group/ref relative shrink-0 overflow-hidden bg-muted/20 w-20 sm:w-24 aspect-square ring-1 ring-border/10 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
+                                                                >
+                                                                    <img
+                                                                        src={src}
+                                                                        className="absolute inset-0 h-full w-full object-cover opacity-95 transition-transform duration-500 group-hover/ref:scale-[1.02]"
+                                                                        alt="ref"
+                                                                    />
+                                                                    <div className="absolute top-1.5 left-1.5 bg-black/60 text-white backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] font-medium flex items-center gap-1 shadow-sm">
+                                                                        <ImageIcon className="size-2.5" />
+                                                                        Input
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Image grid (Output) */}
+                                                    <div className={`grid gap-1 ${gridClass}`}>
+                                                        {batch.images.map((img) => (
                                                             <div
-                                                                key={`ref-${i}`}
-                                                                className={`group/ref relative shrink-0 overflow-hidden bg-muted/20 w-20 sm:w-24 aspect-square ring-1 ring-border/10 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
+                                                                key={img.id}
+                                                                className="group/img relative cursor-pointer overflow-hidden rounded-lg"
+                                                                onClick={() => setSelectedImage(img)}
                                                             >
-                                                                <img
-                                                                    src={src}
-                                                                    className="absolute inset-0 h-full w-full object-cover opacity-95 transition-transform duration-500 group-hover/ref:scale-[1.02]"
-                                                                    alt="ref"
-                                                                />
-                                                                <div className="absolute top-1.5 left-1.5 bg-black/60 text-white backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] font-medium flex items-center gap-1 shadow-sm">
-                                                                    <ImageIcon className="size-2.5" />
-                                                                    Input
+                                                                <AspectRatio ratio={img.aspectRatio}>
+                                                                    <img
+                                                                        src={img.url}
+                                                                        alt={img.prompt}
+                                                                        className="absolute inset-0 h-full w-full object-cover"
+                                                                    />
+                                                                </AspectRatio>
+
+                                                                {/* Hover overlay */}
+                                                                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
+
+                                                                {/* Hover actions */}
+                                                                <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
+                                                                    <Button
+                                                                        size="icon"
+                                                                        variant="secondary"
+                                                                        className="size-6 rounded-full"
+                                                                        onClick={(e) => { e.stopPropagation() }}
+                                                                    >
+                                                                        <Download className="size-3" />
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="icon"
+                                                                        variant="secondary"
+                                                                        className="size-6 rounded-full"
+                                                                        onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
+                                                                    >
+                                                                        <Trash2 className="size-3" />
+                                                                    </Button>
+                                                                </div>
+
+                                                                {/* Hover zoom */}
+                                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                                    <ZoomIn className="size-5 text-white drop-shadow-md" />
                                                                 </div>
                                                             </div>
                                                         ))}
                                                     </div>
-                                                )}
-
-                                                {/* Image grid (Output) */}
-                                                <div className={`grid gap-1 ${gridClass}`}>
-                                                    {batch.images.map((img) => (
-                                                        <div
-                                                            key={img.id}
-                                                            className="group/img relative cursor-pointer overflow-hidden rounded-lg"
-                                                            onClick={() => setSelectedImage(img)}
-                                                        >
-                                                            <AspectRatio ratio={img.aspectRatio}>
-                                                                <img
-                                                                    src={img.url}
-                                                                    alt={img.prompt}
-                                                                    className="absolute inset-0 h-full w-full object-cover"
-                                                                />
-                                                            </AspectRatio>
-
-                                                            {/* Hover overlay */}
-                                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
-
-                                                            {/* Hover actions */}
-                                                            <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
-                                                                <Button
-                                                                    size="icon"
-                                                                    variant="secondary"
-                                                                    className="size-6 rounded-full"
-                                                                    onClick={(e) => { e.stopPropagation() }}
-                                                                >
-                                                                    <Download className="size-3" />
-                                                                </Button>
-                                                                <Button
-                                                                    size="icon"
-                                                                    variant="secondary"
-                                                                    className="size-6 rounded-full"
-                                                                    onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                                >
-                                                                    <Trash2 className="size-3" />
-                                                                </Button>
-                                                            </div>
-
-                                                            {/* Hover zoom */}
-                                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                                <ZoomIn className="size-5 text-white drop-shadow-md" />
-                                                            </div>
-                                                        </div>
-                                                    ))}
                                                 </div>
-                                            </div>
-                                        </Card>
-                                    )
-                                })}
+                                            </Card>
+                                        )
+                                    })}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
                 {/* === IMAGE VIEWER DIALOG === */}
