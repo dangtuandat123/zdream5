@@ -623,17 +623,14 @@ export function GeneratePage() {
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
                                     <div className="relative flex max-w-full max-h-full rounded-xl md:rounded-2xl shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
 
-                                        {/* Invisible SVG forcing the perfectly bounded aspect ratio shrink-wrap via native object-contain */}
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="w-auto h-auto max-w-full max-h-full object-contain invisible"
+                                        {/* Invisible dynamic SVG Image forcing the perfectly bounded aspect ratio shrink-wrap via native replaced-element bounds */}
+                                        <img
+                                            src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${selectedImage.aspectRatio * 10000}" height="10000"></svg>`)}`}
+                                            alt="spacer"
+                                            className="w-auto h-auto max-w-full max-h-full object-contain invisible pointer-events-none"
                                             style={{
-                                                maxHeight: isMobile ? 'calc(100vh - 4rem)' : 'calc(85vh - 4rem)',
-                                                maxWidth: '100%'
+                                                maxHeight: isMobile ? 'calc(100vh - 12rem)' : 'calc(85vh - 4rem)',
                                             }}
-                                            viewBox={`0 0 ${selectedImage.aspectRatio * 10000} 10000`}
-                                            width={selectedImage.aspectRatio * 10000}
-                                            height={10000}
                                         />
 
                                         {/* Absolute container that exactly matches the SVG dimensions */}
