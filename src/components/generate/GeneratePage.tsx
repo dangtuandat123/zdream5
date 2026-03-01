@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react"
+import { useState, useCallback, useMemo, useRef, useEffect } from "react"
 import {
     Wand2,
     Download,
@@ -124,6 +124,71 @@ export function GeneratePage() {
     const [referenceImages, setReferenceImages] = useState<string[]>([])
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
+
+    // --- Prompt Bar: thu gọn khi lăn chuột, mở rộng khi focus ---
+    // Chỉ compact khi dùng MOUSE WHEEL (wheel event), KHÔNG compact khi kéo thanh cuộn (scroll event)
+    const [isCompact, setIsCompact] = useState(false)
+    const isCompactRef = useRef(false)
+    const topObserverRef = useRef<HTMLDivElement>(null)
+    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const sentinelVisibleRef = useRef(true)
+
+    // 1. IntersectionObserver: chỉ theo dõi vị trí sentinel, KHÔNG thay đổi state
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                sentinelVisibleRef.current = entry.isIntersecting
+                // Nếu cuộn về đầu trang → luôn mở rộng (dù bằng cách nào)
+                if (entry.isIntersecting && isCompactRef.current) {
+                    isCompactRef.current = false
+                    setIsCompact(false)
+                }
+            },
+            { threshold: 0 }
+        )
+        if (topObserverRef.current) observer.observe(topObserverRef.current)
+        return () => observer.disconnect()
+    }, [])
+
+    // 2. Wheel event: chỉ compact khi lăn chuột xuống VÀ sentinel đã ra khỏi viewport
+    useEffect(() => {
+        const handleWheel = () => {
+            if (!sentinelVisibleRef.current && !isCompactRef.current) {
+                isCompactRef.current = true
+                setIsCompact(true)
+            }
+        }
+        window.addEventListener('wheel', handleWheel, { passive: true })
+        return () => window.removeEventListener('wheel', handleWheel)
+    }, [])
+
+    // 3. Khi isCompact thay đổi → thu/phóng chiều cao textarea
+    useEffect(() => {
+        const ta = textareaRef.current
+        if (!ta) return
+        if (isCompact) {
+            ta.style.height = 'auto'
+        } else {
+            ta.style.height = 'auto'
+            ta.style.height = ta.scrollHeight + 'px'
+        }
+    }, [isCompact])
+
+    // 4. Handler: khi user bấm vào prompt → mở rộng, gắn one-shot wheel listener để thu lại khi lăn chuột tiếp
+    const handlePromptFocus = useCallback(() => {
+        isCompactRef.current = false
+        setIsCompact(false)
+        // Sau 300ms, gắn wheel listener 1 lần duy nhất để re-compact khi lăn tiếp
+        setTimeout(() => {
+            const recompact = () => {
+                if (!sentinelVisibleRef.current) {
+                    isCompactRef.current = true
+                    setIsCompact(true)
+                }
+            }
+            window.addEventListener('wheel', recompact, { once: true, passive: true })
+        }, 300)
+    }, [])
 
     // Settings
     const [model, setModel] = useState("sdxl")
@@ -375,6 +440,8 @@ export function GeneratePage() {
     return (
         <TooltipProvider>
             <div className="relative flex flex-1 flex-col">
+                {/* Sentinel: khi element này trượt ra khỏi viewport → isCompact = true */}
+                <div ref={topObserverRef} className="absolute top-0 left-0 w-full h-1 pointer-events-none" />
                 {/* Nền gradient giống hero section landing page */}
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
                     <div className="absolute top-[5%] left-[0%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-[#FF0055]/50 md:bg-[#FF0055]/30 rounded-full blur-[100px] md:blur-[120px]" />
@@ -729,17 +796,17 @@ export function GeneratePage() {
                 </Dialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                {/* === PROMPT BAR — Giao diện chuẩn LLM có Hào quang (Aura Glow) === */}
-                <div className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-6 pt-10">
+                {/* Thu lại khi cuộn màn hình để tránh che khuất Gallery */}
+                <div className={`sticky bottom-0 z-50 mx-auto w-full transition-[padding,max-width] duration-300 ease-out ${isCompact ? 'max-w-2xl px-2 sm:px-4 pb-2 pt-4' : 'max-w-3xl px-4 pb-6 pt-10'}`}>
                     <div className="relative w-full">
-                        {/* Hào quang (Aura) rực rỡ nghệ thuật phía sau */}
-                        <div className="absolute -inset-1 -z-10 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-pink-500/20 blur-2xl rounded-[32px] opacity-80" />
+                        {/* Hào quang (Aura) — Ẩn/hiện mượt không cần transition-all */}
+                        <div className={`absolute -inset-1 -z-10 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-pink-500/20 blur-2xl rounded-[32px] transition-opacity duration-300 ${isCompact ? 'opacity-0' : 'opacity-80'}`} />
 
-                        {/* Pill Container (Khung chính) */}
-                        <div className="relative flex flex-col w-full bg-muted/70 hover:bg-muted/90 focus-within:bg-muted/90 transition-colors border border-border/50 shadow-lg rounded-[28px] backdrop-blur-xl">
+                        {/* Pill Container — chỉ transition nhẹ (background, border-radius, border-color) */}
+                        <div className={`relative flex flex-col w-full transition-[background-color,border-radius,border-color] duration-300 border shadow-lg backdrop-blur-xl ${isCompact ? 'bg-background/95 border-border/70 rounded-[20px]' : 'bg-muted/70 hover:bg-muted/90 focus-within:bg-muted/90 border-border/50 rounded-[28px]'}`}>
 
-                            {/* 1. Preview Ảnh Tham Chiếu (Top) */}
-                            {referenceImages.length > 0 && (
+                            {/* 1. Preview Ảnh Tham Chiếu (Top) — Ẩn khi compact để tiết kiệm diện tích */}
+                            {!isCompact && referenceImages.length > 0 && (
                                 <div className="px-4 pt-4 pb-1 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50">
                                     {referenceImages.map((src, idx) => (
                                         <div key={idx} className="relative shrink-0 group/ref">
@@ -763,12 +830,27 @@ export function GeneratePage() {
                             )}
 
                             {/* 2. Text Input (Middle) */}
-                            <div className="flex items-end px-2 pt-2 pb-1">
+                            <div className={`flex items-center px-2 ${isCompact ? 'pt-1 pb-0.5' : 'pt-2 pb-1'}`}>
+                                {/* Compact + có nội dung: hiển thị 1 dòng truncate có ... */}
+                                {isCompact && prompt ? (
+                                    <div
+                                        className="w-full px-3 py-1.5 text-[15px] leading-[36px] truncate cursor-text text-foreground/80"
+                                        onClick={() => {
+                                            handlePromptFocus()
+                                            setTimeout(() => textareaRef.current?.focus(), 50)
+                                        }}
+                                    >
+                                        {prompt}
+                                    </div>
+                                ) : null}
+                                {/* Textarea thật — ẩn khi compact có nội dung, hiện khi expanded hoặc trống */}
                                 <textarea
+                                    ref={textareaRef}
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full min-h-[44px] max-h-[35vh] resize-none border-0 bg-transparent py-2.5 px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar"
+                                    className={`w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar transition-all duration-500 ease-out ${isCompact && prompt ? 'hidden' : ''} ${isCompact ? 'min-h-[36px] max-h-[44px] py-1.5 overflow-hidden' : 'min-h-[44px] max-h-[35vh] py-2.5'}`}
                                     rows={1}
                                     value={prompt}
+                                    onFocus={handlePromptFocus}
                                     onChange={(e) => {
                                         setPrompt(e.target.value)
                                         e.target.style.height = 'auto'
@@ -784,7 +866,7 @@ export function GeneratePage() {
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
-                            <div className="flex items-center justify-between px-3 pb-3">
+                            <div className={`flex items-center justify-between px-3 ${isCompact ? 'pb-2' : 'pb-3'}`}>
                                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pr-2">
                                     {/* Image Upload */}
                                     {isMobile ? (
@@ -918,14 +1000,14 @@ export function GeneratePage() {
                                     <TooltipTrigger asChild>
                                         <Button
                                             size="icon"
-                                            className={`size-10 rounded-full transition-all duration-300 ${prompt.trim() ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                                            className={`rounded-full transition-[width,height] duration-300 shrink-0 ${isCompact ? 'size-8' : 'size-10'} ${prompt.trim() ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                                             disabled={isGenerating || !prompt.trim()}
                                             onClick={handleGenerate}
                                         >
                                             {isGenerating ? (
                                                 <Spinner className="size-4" />
                                             ) : (
-                                                <ArrowUp className="size-[18px]" />
+                                                <ArrowUp className={isCompact ? "size-3.5" : "size-[18px]"} />
                                             )}
                                         </Button>
                                     </TooltipTrigger>
