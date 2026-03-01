@@ -631,7 +631,9 @@ export function GeneratePage() {
                                                 maxHeight: isMobile ? 'calc(100vh - 4rem)' : 'calc(85vh - 4rem)',
                                                 maxWidth: '100%'
                                             }}
-                                            viewBox={`0 0 ${selectedImage.aspectRatio * 1000} 1000`}
+                                            viewBox={`0 0 ${selectedImage.aspectRatio * 10000} 10000`}
+                                            width={selectedImage.aspectRatio * 10000}
+                                            height={10000}
                                         />
 
                                         {/* Absolute container that exactly matches the SVG dimensions */}
