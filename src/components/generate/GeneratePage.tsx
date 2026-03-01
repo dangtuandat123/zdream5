@@ -620,24 +620,38 @@ export function GeneratePage() {
                             <div className="flex flex-col lg:flex-row h-full overflow-hidden">
                                 {/* Ảnh */}
                                 <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
-                                    {/* Khối Ảnh Chính có Native Zoom (react-medium-image-zoom) */}
-                                    {/* Sử dụng inline-flex để div ôm khít kích thước ảnh, giúp Overlay không bị lệch/lớn hơn ảnh */}
-                                    <div className="relative group inline-flex max-w-full max-h-full rounded-xl md:rounded-2xl">
-                                        <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
-                                            <img
-                                                src={selectedImage.url}
-                                                alt={selectedImage.prompt}
-                                                style={{ aspectRatio: selectedImage.aspectRatio }}
-                                                className="w-auto h-auto max-w-full max-h-full object-cover rounded-xl md:rounded-2xl drop-shadow-2xl shadow-foreground/5 shadow-2xl ring-1 ring-border/10"
-                                            />
-                                        </Zoom>
+                                    {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
+                                    <div className="relative flex max-w-full max-h-full rounded-xl md:rounded-2xl shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
 
-                                        {/* Hover Overlay mờ ảo được bo góc và căn vừa khít với ảnh */}
-                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl md:rounded-2xl overflow-hidden">
-                                            <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
-                                            <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
-                                                <Maximize2 className="size-4" />
-                                                Xem chuẩn gốc
+                                        {/* Invisible SVG forcing the perfectly bounded aspect ratio shrink-wrap via native object-contain */}
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="w-auto h-auto max-w-full max-h-full object-contain invisible"
+                                            style={{
+                                                maxHeight: isMobile ? 'calc(100vh - 4rem)' : 'calc(85vh - 4rem)',
+                                                maxWidth: '100%'
+                                            }}
+                                            viewBox={`0 0 ${selectedImage.aspectRatio * 1000} 1000`}
+                                        />
+
+                                        {/* Absolute container that exactly matches the SVG dimensions */}
+                                        <div className="absolute inset-0 w-full h-full group">
+                                            <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
+                                                <img
+                                                    src={selectedImage.url}
+                                                    alt={selectedImage.prompt}
+                                                    className="w-full h-full object-cover rounded-xl md:rounded-2xl"
+                                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+                                                />
+                                            </Zoom>
+
+                                            {/* Hover Overlay mờ ảo được bo góc và căn vừa khít với ảnh */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl md:rounded-2xl overflow-hidden shadow-inner">
+                                                <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
+                                                <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
+                                                    <Maximize2 className="size-4" />
+                                                    Xem chuẩn gốc
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
