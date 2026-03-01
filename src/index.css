@@ -116,3 +116,10 @@
   background-color: rgba(0, 0, 0, 0.85) !important;
   backdrop-filter: blur(12px);
 }
+
+/* Make zoom wrappers fill their bounded layout containers accurately */
+[data-rmiz-wrap] {
+  width: 100%;
+  height: 100%;
+  display: block !important;
+}
