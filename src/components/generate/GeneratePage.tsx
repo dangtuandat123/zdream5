@@ -33,7 +33,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
+
 
 import {
     Select,
@@ -495,12 +495,15 @@ export function GeneratePage() {
                         {/* Loading Skeleton — giống batch card nhưng đang shimmer */}
                         {isGenerating && (() => {
                             const count = parseInt(imageCount)
+                            const ratio = getAspectRatio(aspectRatioValue).ratio
+                            const isPortrait = ratio < 1
+                            // Grid thông minh: ưu tiên chiếm tối đa chiều DỌC viewport
                             const skeletonGrid = count === 1
-                                ? "grid-cols-1 max-w-md mx-auto"
+                                ? "grid-cols-1"
                                 : count === 2
                                     ? "grid-cols-2"
                                     : count === 3
-                                        ? "grid-cols-3"
+                                        ? (isPortrait ? "grid-cols-3" : "grid-cols-3")
                                         : "grid-cols-2"
 
                             return (
@@ -521,16 +524,21 @@ export function GeneratePage() {
 
                                         {/* Grid skeleton ảnh */}
                                         <div className="px-1 pb-1">
-                                            <div className={`grid gap-1.5 ${skeletonGrid}`}>
+                                            {/* Container chiều cao tối đa viewport */}
+                                            <div className={`grid gap-1.5 ${skeletonGrid}`}
+                                                style={{ maxHeight: 'calc(100vh - 12rem)' }}
+                                            >
                                                 {Array.from({ length: count }).map((_, i) => (
-                                                    <div key={`skeleton-${i}`} className="relative overflow-hidden rounded-lg">
-                                                        <AspectRatio ratio={getAspectRatio(aspectRatioValue).ratio}>
-                                                            <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
-                                                            {/* Shimmer gradient overlay */}
-                                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
-                                                        </AspectRatio>
-
-                                                        {/* Centered icon placeholder */}
+                                                    <div
+                                                        key={`skeleton-${i}`}
+                                                        className="relative overflow-hidden rounded-lg w-full"
+                                                        style={{
+                                                            aspectRatio: ratio,
+                                                            maxHeight: count === 1 ? 'calc(100vh - 14rem)' : count === 2 ? 'calc(100vh - 14rem)' : 'calc(50vh - 7rem)'
+                                                        }}
+                                                    >
+                                                        <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
                                                         <div className="absolute inset-0 flex items-center justify-center">
                                                             <Sparkles className="size-5 text-primary/20 animate-pulse" />
                                                         </div>
@@ -550,13 +558,15 @@ export function GeneratePage() {
                                 <div className="space-y-4">
                                     {batches.map((batch) => {
                                         const count = batch.images.length
-                                        // Grid thông minh: 1 ảnh → full-width showcase, 2 → 2 cột, 3 → 3 cột, 4 → 2x2
+                                        const firstRatio = batch.images[0]?.aspectRatio ?? 1
+                                        const isPortrait = firstRatio < 1
+                                        // Grid thông minh: ưu tiên chiếm tối đa chiều DỌC viewport
                                         const gridClass = count === 1
-                                            ? "grid-cols-1 max-w-md mx-auto"
+                                            ? "grid-cols-1"
                                             : count === 2
                                                 ? "grid-cols-2"
                                                 : count === 3
-                                                    ? "grid-cols-3"
+                                                    ? (isPortrait ? "grid-cols-3" : "grid-cols-3")
                                                     : "grid-cols-2"
 
                                         return (
@@ -602,7 +612,7 @@ export function GeneratePage() {
                                                 </div>
 
                                                 {/* Media container */}
-                                                <div className="px-1.5 pb-1.5">
+                                                <div className="px-1 pb-1">
                                                     {/* Hiển thị ảnh tham chiếu (Input) độc lập phía trên lưới Output */}
                                                     {batch.referenceImages && batch.referenceImages.length > 0 && (
                                                         <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
@@ -625,51 +635,63 @@ export function GeneratePage() {
                                                         </div>
                                                     )}
 
-                                                    {/* Image grid (Output) */}
-                                                    <div className={`grid gap-1.5 ${gridClass}`}>
-                                                        {batch.images.map((img) => (
-                                                            <div
-                                                                key={img.id}
-                                                                className={`group/img relative cursor-pointer overflow-hidden ${count === 1 ? 'rounded-xl' : 'rounded-lg'}`}
-                                                                onClick={() => setSelectedImage(img)}
-                                                            >
-                                                                <AspectRatio ratio={img.aspectRatio}>
+                                                    {/* Image grid — chiều cao tối đa viewport */}
+                                                    <div
+                                                        className={`grid gap-1.5 ${gridClass}`}
+                                                        style={{ maxHeight: 'calc(100vh - 12rem)' }}
+                                                    >
+                                                        {batch.images.map((img) => {
+                                                            const imgMaxH = count === 1
+                                                                ? 'calc(100vh - 14rem)'
+                                                                : count === 2
+                                                                    ? 'calc(100vh - 14rem)'
+                                                                    : 'calc(50vh - 7rem)'
+                                                            return (
+                                                                <div
+                                                                    key={img.id}
+                                                                    className="group/img relative cursor-pointer overflow-hidden rounded-lg"
+                                                                    style={{
+                                                                        aspectRatio: img.aspectRatio,
+                                                                        maxHeight: imgMaxH
+                                                                    }}
+                                                                    onClick={() => setSelectedImage(img)}
+                                                                >
                                                                     <img
                                                                         src={img.url}
                                                                         alt={img.prompt}
                                                                         className="absolute inset-0 h-full w-full object-cover"
                                                                     />
-                                                                </AspectRatio>
 
-                                                                {/* Hover overlay */}
-                                                                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
+                                                                    {/* Hover overlay */}
+                                                                    <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
 
-                                                                {/* Hover actions */}
-                                                                <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
-                                                                    <Button
-                                                                        size="icon"
-                                                                        variant="secondary"
-                                                                        className="size-6 rounded-full"
-                                                                        onClick={(e) => { e.stopPropagation() }}
-                                                                    >
-                                                                        <Download className="size-3" />
-                                                                    </Button>
-                                                                    <Button
-                                                                        size="icon"
-                                                                        variant="secondary"
-                                                                        className="size-6 rounded-full"
-                                                                        onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                                    >
-                                                                        <Trash2 className="size-3" />
-                                                                    </Button>
+                                                                    {/* Hover actions */}
+                                                                    <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
+                                                                        <Button
+                                                                            size="icon"
+                                                                            variant="secondary"
+                                                                            className="size-6 rounded-full"
+                                                                            onClick={(e) => { e.stopPropagation() }}
+                                                                        >
+                                                                            <Download className="size-3" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="icon"
+                                                                            variant="secondary"
+                                                                            className="size-6 rounded-full"
+                                                                            onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
+                                                                        >
+                                                                            <Trash2 className="size-3" />
+                                                                        </Button>
+                                                                    </div>
+
+                                                                    {/* Hover zoom */}
+                                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                                                        <ZoomIn className="size-5 text-white drop-shadow-md" />
+                                                                    </div>
                                                                 </div>
-
-                                                                {/* Hover zoom */}
-                                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                                    <ZoomIn className="size-5 text-white drop-shadow-md" />
-                                                                </div>
-                                                            </div>
-                                                        ))}
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
                                             </Card>
