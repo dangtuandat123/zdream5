@@ -488,11 +488,15 @@ export function GeneratePage() {
                                         <span className="text-[10px] text-muted-foreground/50 shrink-0 animate-pulse">Đang tạo...</span>
                                     </div>
 
-                                    {/* Skeleton tiles — chiều cao cố định giống grid thật */}
-                                    <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 1 ? 'max-w-md' : count === 2 ? 'grid-cols-2' : count === 3 ? 'grid-cols-3' : 'grid-cols-4'
+                                    {/* Skeleton tiles — đúng tỉ lệ */}
+                                    <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 1 ? 'grid-cols-1 max-w-lg' : count === 2 ? 'grid-cols-2' : count === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'
                                         }`}>
                                         {Array.from({ length: count }).map((_, i) => (
-                                            <div key={`skeleton-${i}`} className={`relative overflow-hidden ${count === 1 ? 'h-[320px] rounded-lg' : 'h-[240px]'}`}>
+                                            <div
+                                                key={`skeleton-${i}`}
+                                                className={`relative overflow-hidden ${count === 1 ? 'rounded-lg' : ''}`}
+                                                style={{ aspectRatio: getAspectRatio(aspectRatioValue).ratio, maxHeight: getAspectRatio(aspectRatioValue).ratio < 1 && count === 1 ? '420px' : undefined }}
+                                            >
                                                 <Skeleton className="absolute inset-0 h-full w-full" />
                                             </div>
                                         ))}
@@ -565,53 +569,35 @@ export function GeneratePage() {
                                                 </div>
                                             </div>
 
-                                            {/* Image Grid — Dreamina style: fixed height, object-cover, no stretching */}
-                                            {count === 1 ? (
-                                                // 1 ảnh: kích thước vừa phải, không full-width
-                                                <div className="max-w-md">
-                                                    {batch.images.map(img => (
-                                                        <div
-                                                            key={img.id}
-                                                            className="group/img relative cursor-pointer overflow-hidden rounded-lg h-[320px]"
-                                                            onClick={() => setSelectedImage(img)}
-                                                        >
-                                                            <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
-                                                            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
-                                                                    <Download className="size-3 text-white" />
-                                                                </Button>
-                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
-                                                                    <Trash2 className="size-3 text-white" />
-                                                                </Button>
-                                                            </div>
+                                            {/* Image Grid — thống nhất, đúng tỉ lệ, responsive */}
+                                            <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 1
+                                                ? 'grid-cols-1 max-w-lg'
+                                                : count === 2
+                                                    ? 'grid-cols-2'
+                                                    : count === 3
+                                                        ? 'grid-cols-2 sm:grid-cols-3'
+                                                        : 'grid-cols-2 sm:grid-cols-4'
+                                                }`}>
+                                                {batch.images.map(img => (
+                                                    <div
+                                                        key={img.id}
+                                                        className="group/img relative cursor-pointer overflow-hidden"
+                                                        style={{ aspectRatio: img.aspectRatio }}
+                                                        onClick={() => setSelectedImage(img)}
+                                                    >
+                                                        <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+                                                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                                            <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
+                                                                <Download className="size-3 text-white" />
+                                                            </Button>
+                                                            <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
+                                                                <Trash2 className="size-3 text-white" />
+                                                            </Button>
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                // 2/3/4+ ảnh: 1 hàng ngang, chiều cao cố định, gap tối thiểu (giống Dreamina)
-                                                <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 2 ? 'grid-cols-2' : count === 3 ? 'grid-cols-3' : 'grid-cols-4'
-                                                    }`}>
-                                                    {batch.images.map(img => (
-                                                        <div
-                                                            key={img.id}
-                                                            className="group/img relative cursor-pointer overflow-hidden h-[240px]"
-                                                            onClick={() => setSelectedImage(img)}
-                                                        >
-                                                            <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
-                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
-                                                            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
-                                                                    <Download className="size-3 text-white" />
-                                                                </Button>
-                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
-                                                                    <Trash2 className="size-3 text-white" />
-                                                                </Button>
-                                                            </div>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     )
                                 })}
