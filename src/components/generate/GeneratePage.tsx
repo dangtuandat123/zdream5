@@ -8,7 +8,6 @@ import {
     Sparkles,
     Trash2,
     RotateCcw,
-    ZoomIn,
     Maximize2,
     RectangleHorizontal,
     RectangleVertical,
@@ -23,7 +22,6 @@ import {
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
@@ -98,13 +96,18 @@ interface Batch {
     isNew?: boolean
 }
 
-// Ảnh demo
-const DEMO_URLS = [
-    "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1633177317976-3f9bc45e1d1d?q=80&w=1200&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=1200&auto=format&fit=crop",
-]
+// Ảnh demo — tạo URL đúng tỉ lệ theo aspect ratio đang chọn
+const getDemoUrl = (aspectRatio: string, seed: number) => {
+    // Kích thước gốc tương ứng từng tỉ lệ
+    const sizes: Record<string, [number, number]> = {
+        "1": [800, 800],       // 1:1
+        "16/9": [1200, 675],   // 16:9
+        "9/16": [675, 1200],   // 9:16
+        "4/3": [1000, 750],    // 4:3
+    }
+    const [w, h] = sizes[aspectRatio] || [800, 800]
+    return `https://picsum.photos/seed/${seed}/${w}/${h}`
+}
 
 // Aspect ratio configs — value dùng cho AspectRatio component
 const ASPECT_RATIOS = [
@@ -239,7 +242,7 @@ export function GeneratePage() {
             const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
                 id: `img-${Date.now()}-${i}`,
                 batchId,
-                url: DEMO_URLS[(images.length + i) % DEMO_URLS.length],
+                url: getDemoUrl(aspectRatioValue, Date.now() + i),
                 prompt: prompt.trim(),
                 model,
                 style,
@@ -442,262 +445,176 @@ export function GeneratePage() {
             <div className="relative flex flex-1 flex-col">
                 {/* Sentinel: khi element này trượt ra khỏi viewport → isCompact = true */}
                 <div ref={topObserverRef} className="absolute top-0 left-0 w-full h-1 pointer-events-none" />
-                {/* Nền gradient giống hero section landing page */}
-                <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                    <div className="absolute top-[5%] left-[0%] w-[120vw] h-[120vw] md:w-[40vw] md:h-[40vw] bg-[#FF0055]/50 md:bg-[#FF0055]/30 rounded-full blur-[100px] md:blur-[120px]" />
-                    <div className="absolute bottom-[10%] right-[-10%] w-[130vw] h-[130vw] md:w-[45vw] md:h-[45vw] bg-[#7700FF]/50 md:bg-[#7700FF]/30 rounded-full blur-[100px] md:blur-[130px]" />
-                    <div className="absolute top-[30%] left-[30%] w-[100vw] h-[100vw] md:w-[35vw] md:h-[35vw] bg-[#00D4FF]/30 md:bg-[#00D4FF]/20 rounded-full blur-[80px] md:blur-[140px]" />
-                </div>
+                {/* Nền sạch, không gradient blob */}
 
                 {/* === CANVAS AREA — Gallery chiếm 60% bề ngang desktop, full-width mobile === */}
                 <div className="relative z-10 flex-1 flex flex-col items-center p-4 lg:p-6">
                     <div className="w-full lg:w-[70%] flex flex-col flex-1">
                         {/* Empty State — Nghệ thuật & Tương lai (Liquid Glass Portal) */}
                         {images.length === 0 && !isGenerating && (
-                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in zoom-in-[0.98] duration-1000 -mt-10">
+                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-10">
 
-                                {/* Animated Liquid Portal */}
-                                <div className="relative size-48 sm:size-56 mb-8 group">
-                                    {/* Glow layers */}
-                                    <div className="absolute inset-0 bg-blue-500/30 dark:bg-blue-500/20 rounded-full blur-3xl group-hover:bg-blue-500/40 transition-colors duration-1000" />
-
-                                    {/* Liquid spinning blobs */}
-                                    <div className="absolute inset-2 z-0 rounded-[40%_60%_70%_30%] bg-gradient-to-br from-blue-500/40 via-purple-500/40 to-pink-500/40 dark:from-blue-600/40 dark:via-purple-600/40 dark:to-pink-600/40 blur-md animate-[spin_8s_linear_infinite]" />
-                                    <div className="absolute inset-0 z-0 rounded-[60%_40%_30%_70%] bg-gradient-to-bl from-pink-500/40 via-purple-500/40 to-cyan-500/40 dark:from-pink-600/40 dark:via-purple-600/40 dark:to-cyan-600/40 blur-md animate-[spin_12s_linear_infinite_reverse]" />
-
-                                    {/* Glass core */}
-                                    <div className="absolute inset-3 z-10 rounded-[40%_50%_60%_50%] backdrop-blur-xl border border-white/20 dark:border-white/10 bg-white/10 dark:bg-black/10 shadow-[inset_0_0_20px_rgba(255,255,255,0.2)] dark:shadow-[inset_0_0_20px_rgba(255,255,255,0.05)] flex items-center justify-center animate-[spin_15s_linear_infinite]">
-                                        <div className="animate-[spin_15s_linear_infinite_reverse] w-full h-full flex flex-col items-center justify-center pointer-events-none">
-                                            {/* Căn bằng nội dung nằm im trong khi viền xoay */}
-                                            <span className="text-xl sm:text-2xl font-black tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/50 uppercase ml-1">
-                                                ZDream
-                                            </span>
-                                        </div>
-                                    </div>
+                                {/* Clean minimal icon */}
+                                <div className="relative size-28 sm:size-32 mb-8 flex items-center justify-center">
+                                    <div className="absolute inset-0 rounded-full border border-border/30" />
+                                    <div className="absolute inset-3 rounded-full border border-border/20" />
+                                    <Sparkles className="size-8 sm:size-10 text-muted-foreground/30" />
                                 </div>
 
-                                {/* Cinematic Typography */}
-                                <h2 className="text-2xl sm:text-4xl font-medium tracking-tight text-center mb-4">
-                                    Khung vẽ trống rỗng.
-                                    <br className="sm:hidden" />
-                                    <span className="text-muted-foreground font-light"> Tâm trí vô hạn.</span>
+                                {/* Clean Typography */}
+                                <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-center mb-3">
+                                    Bắt đầu tạo ảnh
                                 </h2>
 
-                                <p className="text-muted-foreground/80 text-center max-w-sm sm:max-w-md text-sm sm:text-base leading-relaxed font-light">
-                                    Đánh thức trí tưởng tượng. Viết ra bất kỳ điều gì, chúng tôi sẽ vẽ nó thành hiện thực.
+                                <p className="text-muted-foreground text-center max-w-sm text-sm leading-relaxed">
+                                    Mô tả ý tưởng của bạn và bịng pháp sẽ biến nó thành hiện thực.
                                 </p>
 
-                                {/* Elegant decorative line */}
-                                <div className="mt-12 w-12 h-[1px] bg-gradient-to-r from-transparent via-foreground/20 to-transparent" />
+                                <div className="mt-8 w-8 h-[1px] bg-border" />
                             </div>
                         )}
 
-                        {/* Loading Skeleton — giống batch card nhưng đang shimmer */}
+                        {/* === Loading Skeleton — Clean pulse === */}
                         {isGenerating && (() => {
                             const count = parseInt(imageCount)
-                            const ratio = getAspectRatio(aspectRatioValue).ratio
-                            const isPortrait = ratio < 1
-                            // Grid thông minh: ưu tiên chiếm tối đa chiều DỌC viewport
-                            const skeletonGrid = count === 1
-                                ? "grid-cols-1"
-                                : count === 2
-                                    ? "grid-cols-2"
-                                    : count === 3
-                                        ? (isPortrait ? "grid-cols-3" : "grid-cols-3")
-                                        : "grid-cols-2"
+
 
                             return (
-                                <div className="mb-6">
-                                    <Card className="overflow-hidden p-0 bg-card/50 backdrop-blur-sm ring-2 ring-primary/40 shadow-[0_0_20px_rgba(168,85,247,0.25)] animate-in fade-in-0 duration-500">
-                                        {/* Header giống batch card */}
-                                        <div className="flex items-center gap-3 px-3 py-2">
-                                            <Spinner className="size-3.5 text-primary shrink-0" />
+                                <div className="mb-8 animate-in fade-in-0 duration-500">
+                                    {/* Mini header */}
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Spinner className="size-3 text-muted-foreground shrink-0" />
+                                        <p className="text-xs text-muted-foreground truncate flex-1">{prompt.slice(0, 60)}</p>
+                                        <span className="text-[10px] text-muted-foreground/50 shrink-0 animate-pulse">Đang tạo...</span>
+                                    </div>
 
-                                            <p className="text-sm font-medium truncate flex-1 min-w-0 text-muted-foreground">
-                                                {prompt.slice(0, 80)}
-                                            </p>
-
-                                            <span className="text-[10px] text-primary/60 shrink-0 animate-pulse">
-                                                Đang tạo...
-                                            </span>
-                                        </div>
-
-                                        {/* Grid skeleton ảnh */}
-                                        <div className="px-1 pb-1">
-                                            {/* Container chiều cao tối đa viewport */}
-                                            <div className={`grid gap-1.5 ${skeletonGrid}`}
-                                                style={{ maxHeight: 'calc(100vh - 12rem)' }}
-                                            >
-                                                {Array.from({ length: count }).map((_, i) => (
-                                                    <div
-                                                        key={`skeleton-${i}`}
-                                                        className="relative overflow-hidden rounded-lg w-full"
-                                                        style={{
-                                                            aspectRatio: ratio,
-                                                            maxHeight: count === 1 ? 'calc(100vh - 14rem)' : count === 2 ? 'calc(100vh - 14rem)' : 'calc(50vh - 7rem)'
-                                                        }}
-                                                    >
-                                                        <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
-                                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_2s_ease-in-out_infinite] rounded-lg" />
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <Sparkles className="size-5 text-primary/20 animate-pulse" />
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                    {/* Skeleton tiles — chiều cao cố định giống grid thật */}
+                                    <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 1 ? 'max-w-md' : count === 2 ? 'grid-cols-2' : count === 3 ? 'grid-cols-3' : 'grid-cols-4'
+                                        }`}>
+                                        {Array.from({ length: count }).map((_, i) => (
+                                            <div key={`skeleton-${i}`} className={`relative overflow-hidden ${count === 1 ? 'h-[320px] rounded-lg' : 'h-[240px]'}`}>
+                                                <Skeleton className="absolute inset-0 h-full w-full" />
                                             </div>
-                                        </div>
-                                    </Card>
+                                        ))}
+                                    </div>
                                 </div>
                             )
                         })()}
 
-                        {/* Batch Gallery — nhóm theo lần tạo, chiếm 60% bề ngang desktop */}
+                        {/* === Batch Gallery — Modern, clean, creative === */}
                         {batches.length > 0 && (
-                            <div className="space-y-4">
-                                {/* Danh sách batch — full width */}
-                                <div className="space-y-4">
-                                    {batches.map((batch) => {
-                                        const count = batch.images.length
-                                        const firstRatio = batch.images[0]?.aspectRatio ?? 1
-                                        const isPortrait = firstRatio < 1
-                                        // Grid thông minh: ưu tiên chiếm tối đa chiều DỌC viewport
-                                        const gridClass = count === 1
-                                            ? "grid-cols-1"
-                                            : count === 2
-                                                ? "grid-cols-2"
-                                                : count === 3
-                                                    ? (isPortrait ? "grid-cols-3" : "grid-cols-3")
-                                                    : "grid-cols-2"
+                            <div className="space-y-6">
+                                {batches.map((batch, batchIdx) => {
+                                    const count = batch.images.length
 
-                                        return (
-                                            <Card
-                                                key={batch.batchId}
-                                                className={`overflow-hidden p-0 bg-card/50 backdrop-blur-sm transition-all ${batch.isNew
-                                                    ? "ring-2 ring-primary/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] animate-in fade-in-0 zoom-in-[0.98] duration-500"
-                                                    : ""
-                                                    }`}
-                                            >
-                                                {/* Compact header — 1 dòng prompt + metadata + actions */}
-                                                <div className="flex items-start sm:items-center w-full min-w-0 gap-3 px-3 py-3">
-                                                    <div className="bg-muted/50 p-1.5 rounded-full shrink-0">
-                                                        <Wand2 className="size-3.5 text-muted-foreground" />
+                                    return (
+                                        <div
+                                            key={batch.batchId}
+                                            className={batch.isNew
+                                                ? "animate-in fade-in-0 slide-in-from-bottom-3 duration-500"
+                                                : ""
+                                            }
+                                        >
+                                            {/* Separator giữa các batch */}
+                                            {batchIdx > 0 && (
+                                                <Separator className="mb-6 opacity-30" />
+                                            )}
+
+                                            {/* Header batch — rõ ràng, dễ đọc */}
+                                            <div className="flex items-center gap-2.5 mb-3">
+                                                <Wand2 className="size-3.5 text-muted-foreground shrink-0" />
+
+                                                {/* Ref images inline thumbnails */}
+                                                {batch.referenceImages && batch.referenceImages.length > 0 && (
+                                                    <div className="flex -space-x-1.5 shrink-0">
+                                                        {batch.referenceImages.slice(0, 3).map((src, i) => (
+                                                            <img
+                                                                key={`ref-${i}`}
+                                                                src={src}
+                                                                alt="ref"
+                                                                className="size-5 rounded-full object-cover ring-1 ring-background"
+                                                            />
+                                                        ))}
+                                                        {batch.referenceImages.length > 3 && (
+                                                            <div className="size-5 rounded-full bg-muted flex items-center justify-center text-[8px] text-muted-foreground ring-1 ring-background">
+                                                                +{batch.referenceImages.length - 3}
+                                                            </div>
+                                                        )}
                                                     </div>
+                                                )}
 
-                                                    {/* Wrap in flex-1 min-w-0 to absolutely trap overflow bounds */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <p
-                                                            className="text-sm font-medium line-clamp-2 break-all text-ellipsis leading-snug"
-                                                            title={batch.prompt}
-                                                        >
-                                                            {batch.prompt}
-                                                        </p>
-                                                    </div>
+                                                <p className="text-sm text-foreground/80 truncate flex-1 min-w-0 font-medium" title={batch.prompt}>
+                                                    {batch.prompt}
+                                                </p>
 
-                                                    <div className="flex items-center gap-1.5 shrink-0">
-                                                        <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                                                            {batch.model.toUpperCase()} · {batch.aspectLabel}
-                                                        </span>
-                                                        <span className="text-[10px] text-muted-foreground/60">
-                                                            {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                                        </span>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="size-6 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
-                                                            onClick={() => handleRegenerate(batch.images[0])}
-                                                        >
-                                                            <RefreshCw className="size-3" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-
-                                                {/* Media container */}
-                                                <div className="px-1 pb-1">
-                                                    {/* Hiển thị ảnh tham chiếu (Input) độc lập phía trên lưới Output */}
-                                                    {batch.referenceImages && batch.referenceImages.length > 0 && (
-                                                        <div className="flex gap-1 overflow-x-auto scrollbar-none mb-1">
-                                                            {batch.referenceImages.map((src, i) => (
-                                                                <div
-                                                                    key={`ref-${i}`}
-                                                                    className={`group/ref relative shrink-0 overflow-hidden bg-muted/20 w-20 sm:w-24 aspect-square ring-1 ring-border/10 ${batch.images.length === 1 ? 'rounded-lg' : 'rounded-md'}`}
-                                                                >
-                                                                    <img
-                                                                        src={src}
-                                                                        className="absolute inset-0 h-full w-full object-cover opacity-95 transition-transform duration-500 group-hover/ref:scale-[1.02]"
-                                                                        alt="ref"
-                                                                    />
-                                                                    <div className="absolute top-1.5 left-1.5 bg-black/60 text-white backdrop-blur-md px-1.5 py-0.5 rounded-[4px] text-[8px] sm:text-[9px] font-medium flex items-center gap-1 shadow-sm">
-                                                                        <ImageIcon className="size-2.5" />
-                                                                        Input
-                                                                    </div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-
-                                                    {/* Image grid — chiều cao tối đa viewport */}
-                                                    <div
-                                                        className={`grid gap-1.5 ${gridClass}`}
-                                                        style={{ maxHeight: 'calc(100vh - 12rem)' }}
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    <span className="text-xs text-muted-foreground hidden sm:inline">
+                                                        {batch.model.toUpperCase()} · {batch.aspectLabel}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground/60">
+                                                        {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                    </span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-6 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                                                        onClick={() => handleRegenerate(batch.images[0])}
                                                     >
-                                                        {batch.images.map((img) => {
-                                                            const imgMaxH = count === 1
-                                                                ? 'calc(100vh - 14rem)'
-                                                                : count === 2
-                                                                    ? 'calc(100vh - 14rem)'
-                                                                    : 'calc(50vh - 7rem)'
-                                                            return (
-                                                                <div
-                                                                    key={img.id}
-                                                                    className="group/img relative cursor-pointer overflow-hidden rounded-lg"
-                                                                    style={{
-                                                                        aspectRatio: img.aspectRatio,
-                                                                        maxHeight: imgMaxH
-                                                                    }}
-                                                                    onClick={() => setSelectedImage(img)}
-                                                                >
-                                                                    <img
-                                                                        src={img.url}
-                                                                        alt={img.prompt}
-                                                                        className="absolute inset-0 h-full w-full object-cover"
-                                                                    />
-
-                                                                    {/* Hover overlay */}
-                                                                    <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/30 transition-colors duration-200 rounded-lg" />
-
-                                                                    {/* Hover actions */}
-                                                                    <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-200">
-                                                                        <Button
-                                                                            size="icon"
-                                                                            variant="secondary"
-                                                                            className="size-6 rounded-full"
-                                                                            onClick={(e) => { e.stopPropagation() }}
-                                                                        >
-                                                                            <Download className="size-3" />
-                                                                        </Button>
-                                                                        <Button
-                                                                            size="icon"
-                                                                            variant="secondary"
-                                                                            className="size-6 rounded-full"
-                                                                            onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}
-                                                                        >
-                                                                            <Trash2 className="size-3" />
-                                                                        </Button>
-                                                                    </div>
-
-                                                                    {/* Hover zoom */}
-                                                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-200 pointer-events-none">
-                                                                        <ZoomIn className="size-5 text-white drop-shadow-md" />
-                                                                    </div>
-                                                                </div>
-                                                            )
-                                                        })}
-                                                    </div>
+                                                        <RefreshCw className="size-3" />
+                                                    </Button>
                                                 </div>
-                                            </Card>
-                                        )
-                                    })}
-                                </div>
+                                            </div>
+
+                                            {/* Image Grid — Dreamina style: fixed height, object-cover, no stretching */}
+                                            {count === 1 ? (
+                                                // 1 ảnh: kích thước vừa phải, không full-width
+                                                <div className="max-w-md">
+                                                    {batch.images.map(img => (
+                                                        <div
+                                                            key={img.id}
+                                                            className="group/img relative cursor-pointer overflow-hidden rounded-lg h-[320px]"
+                                                            onClick={() => setSelectedImage(img)}
+                                                        >
+                                                            <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+                                                            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
+                                                                    <Download className="size-3 text-white" />
+                                                                </Button>
+                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
+                                                                    <Trash2 className="size-3 text-white" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                // 2/3/4+ ảnh: 1 hàng ngang, chiều cao cố định, gap tối thiểu (giống Dreamina)
+                                                <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 2 ? 'grid-cols-2' : count === 3 ? 'grid-cols-3' : 'grid-cols-4'
+                                                    }`}>
+                                                    {batch.images.map(img => (
+                                                        <div
+                                                            key={img.id}
+                                                            className="group/img relative cursor-pointer overflow-hidden h-[240px]"
+                                                            onClick={() => setSelectedImage(img)}
+                                                        >
+                                                            <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+                                                            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
+                                                                    <Download className="size-3 text-white" />
+                                                                </Button>
+                                                                <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
+                                                                    <Trash2 className="size-3 text-white" />
+                                                                </Button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
                             </div>
                         )}
                     </div>
@@ -823,11 +740,9 @@ export function GeneratePage() {
                 {/* Thu lại khi cuộn màn hình để tránh che khuất Gallery */}
                 <div className={`sticky bottom-0 z-50 mx-auto w-full transition-[padding,max-width] duration-300 ease-out ${isCompact ? 'max-w-2xl px-2 sm:px-4 pb-2 pt-4' : 'max-w-3xl px-4 pb-6 pt-10'}`}>
                     <div className="relative w-full">
-                        {/* Hào quang (Aura) — Ẩn/hiện mượt không cần transition-all */}
-                        <div className={`absolute -inset-1 -z-10 bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 dark:from-blue-500/20 dark:via-purple-500/20 dark:to-pink-500/20 blur-2xl rounded-[32px] transition-opacity duration-300 ${isCompact ? 'opacity-0' : 'opacity-80'}`} />
 
-                        {/* Pill Container — chỉ transition nhẹ (background, border-radius, border-color) */}
-                        <div className={`relative flex flex-col w-full transition-[background-color,border-radius,border-color] duration-300 border shadow-lg backdrop-blur-xl ${isCompact ? 'bg-background/95 border-border/70 rounded-[20px]' : 'bg-muted/70 hover:bg-muted/90 focus-within:bg-muted/90 border-border/50 rounded-[28px]'}`}>
+                        {/* Pill Container — nền xám đậm kiểu Dreamina */}
+                        <div className={`relative flex flex-col w-full transition-[background-color,border-radius,border-color] duration-300 border backdrop-blur-2xl ${isCompact ? 'bg-muted/80 border-border/40 rounded-[20px]' : 'bg-muted/60 hover:bg-muted/70 focus-within:bg-muted/70 border-border/30 rounded-[24px]'}`}>
 
                             {/* 1. Preview Ảnh Tham Chiếu (Top) — Ẩn khi compact để tiết kiệm diện tích */}
                             {!isCompact && referenceImages.length > 0 && (
