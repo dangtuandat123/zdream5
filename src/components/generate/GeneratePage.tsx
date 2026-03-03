@@ -488,19 +488,31 @@ export function GeneratePage() {
                                         <span className="text-[10px] text-muted-foreground/50 shrink-0 animate-pulse">Đang tạo...</span>
                                     </div>
 
-                                    {/* Skeleton tiles — đúng tỉ lệ */}
-                                    <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 1 ? 'grid-cols-1 max-w-lg' : count === 2 ? 'grid-cols-2' : count === 3 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-4'
-                                        }`}>
-                                        {Array.from({ length: count }).map((_, i) => (
-                                            <div
-                                                key={`skeleton-${i}`}
-                                                className={`relative overflow-hidden ${count === 1 ? 'rounded-lg' : ''}`}
-                                                style={{ aspectRatio: getAspectRatio(aspectRatioValue).ratio, maxHeight: getAspectRatio(aspectRatioValue).ratio < 1 && count === 1 ? '420px' : undefined }}
-                                            >
-                                                <Skeleton className="absolute inset-0 h-full w-full" />
+                                    {/* Skeleton tiles — khớp grid thật */}
+                                    {(() => {
+                                        const ratio = getAspectRatio(aspectRatioValue).ratio
+                                        const isPortrait = ratio < 1
+                                        const gridCls = count === 1
+                                            ? `grid-cols-1 ${isPortrait ? 'max-w-sm' : 'max-w-lg'}`
+                                            : count === 2
+                                                ? 'grid-cols-2'
+                                                : count === 3
+                                                    ? 'grid-cols-3'
+                                                    : 'grid-cols-4'
+                                        return (
+                                            <div className={`grid gap-0.5 rounded-lg overflow-hidden ${gridCls}`}>
+                                                {Array.from({ length: count }).map((_, i) => (
+                                                    <div
+                                                        key={`skeleton-${i}`}
+                                                        className="relative overflow-hidden"
+                                                        style={{ aspectRatio: ratio }}
+                                                    >
+                                                        <Skeleton className="absolute inset-0 h-full w-full" />
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                    </div>
+                                        )
+                                    })()}
                                 </div>
                             )
                         })()}
@@ -569,35 +581,41 @@ export function GeneratePage() {
                                                 </div>
                                             </div>
 
-                                            {/* Image Grid — thống nhất, đúng tỉ lệ, responsive */}
-                                            <div className={`grid gap-0.5 rounded-lg overflow-hidden ${count === 1
-                                                ? 'grid-cols-1 max-w-lg'
-                                                : count === 2
-                                                    ? 'grid-cols-2'
-                                                    : count === 3
-                                                        ? 'grid-cols-2 sm:grid-cols-3'
-                                                        : 'grid-cols-2 sm:grid-cols-4'
-                                                }`}>
-                                                {batch.images.map(img => (
-                                                    <div
-                                                        key={img.id}
-                                                        className="group/img relative cursor-pointer overflow-hidden"
-                                                        style={{ aspectRatio: img.aspectRatio }}
-                                                        onClick={() => setSelectedImage(img)}
-                                                    >
-                                                        <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
-                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
-                                                        <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                                            <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
-                                                                <Download className="size-3 text-white" />
-                                                            </Button>
-                                                            <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
-                                                                <Trash2 className="size-3 text-white" />
-                                                            </Button>
-                                                        </div>
+                                            {/* Image Grid — thống nhất, portrait-aware */}
+                                            {(() => {
+                                                const isPortrait = batch.images[0]?.aspectRatio < 1
+                                                // Grid classes: portrait single → constrain width; multi → full width
+                                                const gridCls = count === 1
+                                                    ? `grid-cols-1 ${isPortrait ? 'max-w-sm' : 'max-w-lg'}`
+                                                    : count === 2
+                                                        ? 'grid-cols-2'
+                                                        : count === 3
+                                                            ? 'grid-cols-3'
+                                                            : 'grid-cols-4'
+                                                return (
+                                                    <div className={`grid gap-0.5 rounded-lg overflow-hidden ${gridCls}`}>
+                                                        {batch.images.map(img => (
+                                                            <div
+                                                                key={img.id}
+                                                                className="group/img relative cursor-pointer overflow-hidden"
+                                                                style={{ aspectRatio: img.aspectRatio }}
+                                                                onClick={() => setSelectedImage(img)}
+                                                            >
+                                                                <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
+                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+                                                                <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                                                    <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
+                                                                        <Download className="size-3 text-white" />
+                                                                    </Button>
+                                                                    <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
+                                                                        <Trash2 className="size-3 text-white" />
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                ))}
-                                            </div>
+                                                )
+                                            })()}
                                         </div>
                                     )
                                 })}
