@@ -127,45 +127,42 @@ export function GeneratePage() {
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
 
-    // --- Prompt Bar: thu gọn khi lăn chuột, mở rộng khi focus ---
-    // Chỉ compact khi dùng MOUSE WHEEL (wheel event), KHÔNG compact khi kéo thanh cuộn (scroll event)
+    // --- Prompt Bar: compact khi scroll xuống, expand khi scroll lên ---
     const [isCompact, setIsCompact] = useState(false)
     const isCompactRef = useRef(false)
     const topObserverRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const sentinelVisibleRef = useRef(true)
-
-    // 1. IntersectionObserver: theo dõi sentinel, dùng rootMargin để tạo hysteresis chống jitter
     const compactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    // IntersectionObserver: sentinel + rootMargin hysteresis
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 sentinelVisibleRef.current = entry.isIntersecting
-                // Khi sentinel quay lại viewport → expand ngay
                 if (entry.isIntersecting && isCompactRef.current) {
                     if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
                     isCompactRef.current = false
                     setIsCompact(false)
                 }
             },
-            { threshold: 0, rootMargin: '0px 0px 100px 0px' } // buffer 100px chống jitter
+            { threshold: 0, rootMargin: '0px 0px 150px 0px' }
         )
         if (topObserverRef.current) observer.observe(topObserverRef.current)
         return () => observer.disconnect()
     }, [])
 
-    // 2. Wheel event: compact với debounce 200ms để chống toggle nhanh
+    // Wheel event: debounce 300ms + double-check sentinel
     useEffect(() => {
         const handleWheel = () => {
             if (!sentinelVisibleRef.current && !isCompactRef.current) {
                 if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
                 compactTimerRef.current = setTimeout(() => {
-                    // Kiểm tra lại sau debounce — sentinel có thể đã quay lại
                     if (!sentinelVisibleRef.current) {
                         isCompactRef.current = true
                         setIsCompact(true)
                     }
-                }, 200)
+                }, 300)
             }
         }
         window.addEventListener('wheel', handleWheel, { passive: true })
@@ -175,27 +172,11 @@ export function GeneratePage() {
         }
     }, [])
 
-    // 3. Khi isCompact thay đổi → reset textarea height (không auto-grow)
-    useEffect(() => {
-        const ta = textareaRef.current
-        if (!ta) return
-        ta.style.height = 'auto'
-    }, [isCompact])
-
-    // 4. Handler: khi user bấm vào prompt → mở rộng, gắn one-shot wheel listener để thu lại khi lăn chuột tiếp
+    // Focus prompt → expand
     const handlePromptFocus = useCallback(() => {
+        if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
         isCompactRef.current = false
         setIsCompact(false)
-        // Sau 300ms, gắn wheel listener 1 lần duy nhất để re-compact khi lăn tiếp
-        setTimeout(() => {
-            const recompact = () => {
-                if (!sentinelVisibleRef.current) {
-                    isCompactRef.current = true
-                    setIsCompact(true)
-                }
-            }
-            window.addEventListener('wheel', recompact, { once: true, passive: true })
-        }, 300)
     }, [])
 
     // Settings
@@ -454,7 +435,7 @@ export function GeneratePage() {
 
                 {/* === CANVAS AREA — Gallery chiếm 60% bề ngang desktop, full-width mobile === */}
                 <div className="relative z-10 flex-1 flex flex-col items-center p-4 lg:p-6">
-                    <div className="w-full lg:w-[70%] flex flex-col flex-1">
+                    <div className="w-full max-w-5xl mx-auto flex flex-col flex-1">
                         {/* Empty State — Premium AI Studio */}
                         {images.length === 0 && !isGenerating && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-6">
@@ -524,21 +505,20 @@ export function GeneratePage() {
                                     {/* Skeleton tiles — khớp grid thật */}
                                     {(() => {
                                         const ratio = getAspectRatio(aspectRatioValue).ratio
-                                        const isPortrait = ratio < 1
                                         const gridCls = count === 1
-                                            ? `grid-cols-1 ${isPortrait ? 'max-w-sm' : 'max-w-lg'}`
+                                            ? 'grid-cols-1 max-w-md'
                                             : count === 2
                                                 ? 'grid-cols-2'
                                                 : count === 3
-                                                    ? 'grid-cols-3'
-                                                    : 'grid-cols-4'
+                                                    ? 'grid-cols-2 md:grid-cols-3'
+                                                    : 'grid-cols-2 md:grid-cols-4'
                                         return (
                                             <div className={`grid gap-0.5 rounded-lg overflow-hidden ${gridCls}`}>
                                                 {Array.from({ length: count }).map((_, i) => (
                                                     <div
                                                         key={`skeleton-${i}`}
                                                         className="relative overflow-hidden"
-                                                        style={{ aspectRatio: ratio }}
+                                                        style={{ aspectRatio: ratio, maxHeight: ratio < 1 && count === 1 ? '500px' : undefined }}
                                                     >
                                                         <Skeleton className="absolute inset-0 h-full w-full" />
                                                     </div>
@@ -614,24 +594,22 @@ export function GeneratePage() {
                                                 </div>
                                             </div>
 
-                                            {/* Image Grid — thống nhất, portrait-aware */}
+                                            {/* Image Grid — responsive, đúng tỉ lệ */}
                                             {(() => {
-                                                const isPortrait = batch.images[0]?.aspectRatio < 1
-                                                // Grid classes: portrait single → constrain width; multi → full width
                                                 const gridCls = count === 1
-                                                    ? `grid-cols-1 ${isPortrait ? 'max-w-sm' : 'max-w-lg'}`
+                                                    ? 'grid-cols-1 max-w-md'
                                                     : count === 2
                                                         ? 'grid-cols-2'
                                                         : count === 3
-                                                            ? 'grid-cols-3'
-                                                            : 'grid-cols-4'
+                                                            ? 'grid-cols-2 md:grid-cols-3'
+                                                            : 'grid-cols-2 md:grid-cols-4'
                                                 return (
                                                     <div className={`grid gap-0.5 rounded-lg overflow-hidden ${gridCls}`}>
                                                         {batch.images.map(img => (
                                                             <div
                                                                 key={img.id}
                                                                 className="group/img relative cursor-pointer overflow-hidden"
-                                                                style={{ aspectRatio: img.aspectRatio }}
+                                                                style={{ aspectRatio: img.aspectRatio, maxHeight: img.aspectRatio < 1 && count === 1 ? '500px' : undefined }}
                                                                 onClick={() => setSelectedImage(img)}
                                                             >
                                                                 <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
@@ -775,15 +753,15 @@ export function GeneratePage() {
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
                 {/* Thu lại khi cuộn màn hình để tránh che khuất Gallery */}
-                <div className={`sticky bottom-0 z-50 mx-auto w-full transition-[padding,max-width] duration-300 ease-out ${isCompact ? 'max-w-2xl px-2 sm:px-4 pb-2 pt-4' : 'max-w-3xl px-4 pb-6 pt-10'}`}>
+                <div className={`sticky bottom-0 z-50 mx-auto w-full max-w-3xl transition-[padding] duration-300 ease-out ${isCompact ? 'px-2 sm:px-4 pb-2 pt-3' : 'px-4 pb-4 pt-6'}`}>
                     <div className="relative w-full">
 
-                        {/* Pill Container — nền xám đậm kiểu Dreamina */}
-                        <div className={`relative flex flex-col w-full transition-[background-color,border-radius,border-color] duration-300 border backdrop-blur-2xl ${isCompact ? 'bg-muted/80 border-border/40 rounded-[20px]' : 'bg-muted/60 hover:bg-muted/70 focus-within:bg-muted/70 border-border/30 rounded-[24px]'}`}>
+                        {/* Pill Container */}
+                        <div className={`relative flex flex-col w-full transition-all duration-300 border backdrop-blur-2xl bg-muted/70 hover:bg-muted/80 focus-within:bg-muted/80 border-border/30 rounded-[22px]`}>
 
-                            {/* 1. Preview Ảnh Tham Chiếu (Top) — Ẩn khi compact để tiết kiệm diện tích */}
-                            {!isCompact && referenceImages.length > 0 && (
-                                <div className="px-4 pt-4 pb-1 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50">
+                            {/* 1. Preview Ảnh Tham Chiếu (Top) — thu nhỏ khi compact */}
+                            {referenceImages.length > 0 && (
+                                <div className={`px-4 pb-1 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 transition-all duration-300 ${isCompact ? 'pt-2 max-h-0 opacity-0 overflow-hidden' : 'pt-4'}`}>
                                     {referenceImages.map((src, idx) => (
                                         <div key={idx} className="relative shrink-0 group/ref">
                                             <img
@@ -805,25 +783,12 @@ export function GeneratePage() {
                                 </div>
                             )}
 
-                            {/* 2. Text Input (Middle) */}
-                            <div className={`flex items-center px-2 ${isCompact ? 'pt-1 pb-0.5' : 'pt-2 pb-1'}`}>
-                                {/* Compact + có nội dung: hiển thị 1 dòng truncate có ... */}
-                                {isCompact && prompt ? (
-                                    <div
-                                        className="w-full px-3 py-1.5 text-[15px] leading-snug truncate cursor-text text-foreground/80"
-                                        onClick={() => {
-                                            handlePromptFocus()
-                                            setTimeout(() => textareaRef.current?.focus(), 50)
-                                        }}
-                                    >
-                                        {prompt}
-                                    </div>
-                                ) : null}
-                                {/* Textarea thật — ẩn khi compact có nội dung, hiện khi expanded hoặc trống */}
+                            {/* 2. Text Input — chiều cao ổn định, auto-grow tới 120px */}
+                            <div className="flex items-center px-2 pt-2 pb-1">
                                 <textarea
                                     ref={textareaRef}
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className={`w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar transition-all duration-300 ease-out ${isCompact && prompt ? 'hidden' : ''} ${isCompact ? 'min-h-[36px] max-h-[44px] py-1.5 overflow-hidden' : 'min-h-[44px] max-h-[120px] py-2 overflow-y-auto'}`}
+                                    className="w-full resize-none border-0 bg-transparent px-3 py-2 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] overflow-y-auto"
                                     rows={1}
                                     value={prompt}
                                     onFocus={handlePromptFocus}
