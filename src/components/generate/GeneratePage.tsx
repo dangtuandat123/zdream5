@@ -484,7 +484,7 @@ export function GeneratePage() {
                                     {/* Mini header */}
                                     <div className="flex items-center gap-2 mb-3">
                                         <Spinner className="size-3 text-muted-foreground shrink-0" />
-                                        <p className="text-xs text-muted-foreground truncate flex-1">{prompt.slice(0, 60)}</p>
+                                        <p className="text-sm text-muted-foreground truncate flex-1 min-w-0">{prompt.slice(0, 80)}...</p>
                                         <span className="text-[10px] text-muted-foreground/50 shrink-0 animate-pulse">Đang tạo...</span>
                                     </div>
 
@@ -777,7 +777,7 @@ export function GeneratePage() {
                                 {/* Compact + có nội dung: hiển thị 1 dòng truncate có ... */}
                                 {isCompact && prompt ? (
                                     <div
-                                        className="w-full px-3 py-1.5 text-[15px] leading-[36px] truncate cursor-text text-foreground/80"
+                                        className="w-full px-3 py-1.5 text-[15px] leading-snug truncate cursor-text text-foreground/80"
                                         onClick={() => {
                                             handlePromptFocus()
                                             setTimeout(() => textareaRef.current?.focus(), 50)
