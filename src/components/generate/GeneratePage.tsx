@@ -136,45 +136,51 @@ export function GeneratePage() {
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const sentinelVisibleRef = useRef(true)
 
-    // 1. IntersectionObserver: chỉ theo dõi vị trí sentinel, KHÔNG thay đổi state
+    // 1. IntersectionObserver: theo dõi sentinel, dùng rootMargin để tạo hysteresis chống jitter
+    const compactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     useEffect(() => {
         const observer = new IntersectionObserver(
             ([entry]) => {
                 sentinelVisibleRef.current = entry.isIntersecting
-                // Nếu cuộn về đầu trang → luôn mở rộng (dù bằng cách nào)
+                // Khi sentinel quay lại viewport → expand ngay
                 if (entry.isIntersecting && isCompactRef.current) {
+                    if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
                     isCompactRef.current = false
                     setIsCompact(false)
                 }
             },
-            { threshold: 0 }
+            { threshold: 0, rootMargin: '0px 0px 100px 0px' } // buffer 100px chống jitter
         )
         if (topObserverRef.current) observer.observe(topObserverRef.current)
         return () => observer.disconnect()
     }, [])
 
-    // 2. Wheel event: chỉ compact khi lăn chuột xuống VÀ sentinel đã ra khỏi viewport
+    // 2. Wheel event: compact với debounce 200ms để chống toggle nhanh
     useEffect(() => {
         const handleWheel = () => {
             if (!sentinelVisibleRef.current && !isCompactRef.current) {
-                isCompactRef.current = true
-                setIsCompact(true)
+                if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
+                compactTimerRef.current = setTimeout(() => {
+                    // Kiểm tra lại sau debounce — sentinel có thể đã quay lại
+                    if (!sentinelVisibleRef.current) {
+                        isCompactRef.current = true
+                        setIsCompact(true)
+                    }
+                }, 200)
             }
         }
         window.addEventListener('wheel', handleWheel, { passive: true })
-        return () => window.removeEventListener('wheel', handleWheel)
+        return () => {
+            window.removeEventListener('wheel', handleWheel)
+            if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
+        }
     }, [])
 
-    // 3. Khi isCompact thay đổi → thu/phóng chiều cao textarea
+    // 3. Khi isCompact thay đổi → reset textarea height (không auto-grow)
     useEffect(() => {
         const ta = textareaRef.current
         if (!ta) return
-        if (isCompact) {
-            ta.style.height = 'auto'
-        } else {
-            ta.style.height = 'auto'
-            ta.style.height = ta.scrollHeight + 'px'
-        }
+        ta.style.height = 'auto'
     }, [isCompact])
 
     // 4. Handler: khi user bấm vào prompt → mở rộng, gắn one-shot wheel listener để thu lại khi lăn chuột tiếp
@@ -790,14 +796,15 @@ export function GeneratePage() {
                                 <textarea
                                     ref={textareaRef}
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className={`w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar transition-all duration-500 ease-out ${isCompact && prompt ? 'hidden' : ''} ${isCompact ? 'min-h-[36px] max-h-[44px] py-1.5 overflow-hidden' : 'min-h-[44px] max-h-[35vh] py-2.5'}`}
+                                    className={`w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar transition-all duration-300 ease-out ${isCompact && prompt ? 'hidden' : ''} ${isCompact ? 'min-h-[36px] max-h-[44px] py-1.5 overflow-hidden' : 'min-h-[44px] max-h-[120px] py-2 overflow-y-auto'}`}
                                     rows={1}
                                     value={prompt}
                                     onFocus={handlePromptFocus}
                                     onChange={(e) => {
                                         setPrompt(e.target.value)
+                                        // Auto-grow tới max-h-[120px], sau đó scroll nội bộ
                                         e.target.style.height = 'auto'
-                                        e.target.style.height = e.target.scrollHeight + 'px'
+                                        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter" && !e.shiftKey) {
