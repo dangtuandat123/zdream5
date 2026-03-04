@@ -132,6 +132,7 @@ export function GeneratePage() {
     const isCompactRef = useRef(false)
     const topObserverRef = useRef<HTMLDivElement>(null)
     const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const promptContainerRef = useRef<HTMLDivElement>(null)
     const sentinelVisibleRef = useRef(true)
     const compactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -170,6 +171,24 @@ export function GeneratePage() {
             window.removeEventListener('wheel', handleWheel)
             if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
         }
+    }, [])
+
+    // Click outside prompt bar → compact (if scrolled down)
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (
+                !sentinelVisibleRef.current &&
+                !isCompactRef.current &&
+                promptContainerRef.current &&
+                !promptContainerRef.current.contains(e.target as Node)
+            ) {
+                if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
+                isCompactRef.current = true
+                setIsCompact(true)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
     // Focus prompt → expand
@@ -753,7 +772,7 @@ export function GeneratePage() {
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
                 {/* Thu lại khi cuộn màn hình để tránh che khuất Gallery */}
-                <div className={`sticky bottom-0 z-50 mx-auto w-full max-w-3xl transition-[padding] duration-300 ease-out ${isCompact ? 'px-2 sm:px-4 pb-2 pt-3' : 'px-4 pb-4 pt-6'}`}>
+                <div ref={promptContainerRef} className={`sticky bottom-0 z-50 mx-auto w-full max-w-3xl transition-[padding] duration-300 ease-out ${isCompact ? 'px-2 sm:px-4 pb-2 pt-3' : 'px-4 pb-4 pt-6'}`}>
                     <div className="relative w-full">
 
                         {/* Pill Container */}
@@ -783,12 +802,25 @@ export function GeneratePage() {
                                 </div>
                             )}
 
-                            {/* 2. Text Input — chiều cao ổn định, auto-grow tới 120px */}
-                            <div className="flex items-center px-2 pt-2 pb-1">
+                            {/* 2. Text Input (Middle) */}
+                            <div className={`flex items-center px-2 relative transition-all duration-300 ease-in-out ${isCompact ? 'pt-1 pb-0.5' : 'pt-2 pb-1'}`}>
+                                {/* Compact + có nội dung: hiển thị 1 dòng truncate có ... Mờ đi khi expand */}
+                                {prompt && (
+                                    <div
+                                        className={`absolute top-0 left-2 right-2 px-3 text-[15px] leading-snug truncate cursor-text text-foreground/80 transition-all duration-300 ease-in-out ${isCompact ? 'opacity-100 z-10 pointer-events-auto mt-2.5' : 'opacity-0 -z-10 pointer-events-none mt-4'}`}
+                                        onClick={() => {
+                                            handlePromptFocus()
+                                            setTimeout(() => textareaRef.current?.focus(), 50)
+                                        }}
+                                    >
+                                        {prompt}
+                                    </div>
+                                )}
+                                {/* Textarea thật — mờ đi khi compact có nội dung, thu hẹp max-height mượt. Không dùng hidden */}
                                 <textarea
                                     ref={textareaRef}
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full resize-none border-0 bg-transparent px-3 py-2 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] overflow-y-auto"
+                                    className={`w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar transition-all duration-300 ease-in-out ${isCompact && prompt ? 'opacity-0 pointer-events-none' : 'opacity-100'} ${isCompact ? 'min-h-[36px] max-h-[36px] py-1.5 overflow-hidden' : 'min-h-[44px] max-h-[120px] py-2 overflow-y-auto'}`}
                                     rows={1}
                                     value={prompt}
                                     onFocus={handlePromptFocus}
