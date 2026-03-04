@@ -5,7 +5,6 @@ import {
     Share2,
     Settings2,
     ArrowUp,
-    Sparkles,
     Trash2,
     RotateCcw,
     Maximize2,
@@ -456,27 +455,55 @@ export function GeneratePage() {
                 {/* === CANVAS AREA — Gallery chiếm 60% bề ngang desktop, full-width mobile === */}
                 <div className="relative z-10 flex-1 flex flex-col items-center p-4 lg:p-6">
                     <div className="w-full lg:w-[70%] flex flex-col flex-1">
-                        {/* Empty State — Nghệ thuật & Tương lai (Liquid Glass Portal) */}
+                        {/* Empty State — Premium AI Studio */}
                         {images.length === 0 && !isGenerating && (
-                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-10">
+                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-6">
 
-                                {/* Clean minimal icon */}
-                                <div className="relative size-28 sm:size-32 mb-8 flex items-center justify-center">
-                                    <div className="absolute inset-0 rounded-full border border-border/30" />
-                                    <div className="absolute inset-3 rounded-full border border-border/20" />
-                                    <Sparkles className="size-8 sm:size-10 text-muted-foreground/30" />
+                                {/* Animated gradient mesh blob */}
+                                <div className="relative mb-10">
+                                    <div className="absolute -inset-16 opacity-30 blur-3xl bg-gradient-to-r from-violet-500/20 via-cyan-500/10 to-fuchsia-500/20 rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
+                                    <div className="relative flex flex-col items-center">
+                                        {/* Grid decorativo */}
+                                        <div className="grid grid-cols-3 gap-1.5 mb-8 opacity-40">
+                                            {[...Array(9)].map((_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className="size-8 sm:size-10 rounded-lg border border-border/40 bg-gradient-to-br from-muted/30 to-transparent"
+                                                    style={{
+                                                        animationDelay: `${i * 0.15}s`,
+                                                        opacity: [0, 1, 2, 4, 6, 8].includes(i) ? 0.3 : 0.6,
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* Clean Typography */}
-                                <h2 className="text-2xl sm:text-3xl font-medium tracking-tight text-center mb-3">
-                                    Bắt đầu tạo ảnh
+                                {/* Typography */}
+                                <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-center mb-2 text-foreground/90">
+                                    Tưởng tượng. Mô tả. Kiến tạo.
                                 </h2>
-
-                                <p className="text-muted-foreground text-center max-w-sm text-sm leading-relaxed">
-                                    Mô tả ý tưởng của bạn và bịng pháp sẽ biến nó thành hiện thực.
+                                <p className="text-muted-foreground/60 text-center max-w-md text-sm leading-relaxed mb-8">
+                                    Nhập prompt bên dưới để AI biến ý tưởng của bạn thành tác phẩm nghệ thuật.
                                 </p>
 
-                                <div className="mt-8 w-8 h-[1px] bg-border" />
+                                {/* Gợi ý prompt — click để tự điền */}
+                                <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                                    {[
+                                        "Phong cảnh núi lúc bình minh",
+                                        "Chân dung cyberpunk",
+                                        "Thành phố tương lai",
+                                        "Hoa anh đào mùa xuân",
+                                    ].map((suggestion) => (
+                                        <button
+                                            key={suggestion}
+                                            className="px-3 py-1.5 text-xs text-muted-foreground/70 border border-border/30 rounded-full hover:border-border/60 hover:text-foreground/80 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
+                                            onClick={() => setPrompt(suggestion)}
+                                        >
+                                            {suggestion}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
