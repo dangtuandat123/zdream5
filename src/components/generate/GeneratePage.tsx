@@ -18,6 +18,7 @@ import {
     Upload,
     Check,
     Plus,
+    Copy,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -278,6 +279,12 @@ export function GeneratePage() {
     const [referenceImages, setReferenceImages] = useState<string[]>([])
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
+    const [isCopied, setIsCopied] = useState(false)
+
+    // Reset copied state when image changes
+    useEffect(() => {
+        setIsCopied(false)
+    }, [selectedImage])
 
     // --- Prompt Bar refs ---
     const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -655,8 +662,27 @@ export function GeneratePage() {
                                 <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar min-h-0">
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2">
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
-                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-all whitespace-pre-wrap shadow-inner border border-foreground/5">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="size-6 rounded-md hover:bg-muted"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(selectedImage.prompt)
+                                                        setIsCopied(true)
+                                                        setTimeout(() => setIsCopied(false), 2000)
+                                                    }}
+                                                    title="Sao chép prompt"
+                                                >
+                                                    {isCopied ? (
+                                                        <Check className="size-3.5 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="size-3.5 text-muted-foreground" />
+                                                    )}
+                                                </Button>
+                                            </div>
+                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
                                                 {selectedImage.prompt}
                                             </div>
                                         </div>
