@@ -198,10 +198,21 @@ function JustifiedGallery({
                             return (
                                 <div
                                     key={item.key}
-                                    className="rounded-md overflow-hidden animate-pulse bg-muted/40"
+                                    className="relative rounded-md overflow-hidden bg-muted/20 border border-border/10 flex flex-col items-center justify-center isolate"
                                     style={itemStyle}
                                 >
-                                    <Skeleton className="h-full w-full" />
+                                    {/* Shimmer overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                                    <Skeleton className="absolute inset-0 h-full w-full rounded-none opacity-20" />
+
+                                    <div className="flex flex-col items-center gap-3 z-10">
+                                        <Wand2 className="size-6 text-muted-foreground/40 animate-pulse" />
+                                        <div className="flex gap-1.5">
+                                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                        </div>
+                                    </div>
                                 </div>
                             )
                         }
@@ -210,7 +221,7 @@ function JustifiedGallery({
                         return (
                             <div
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-md ${img.isNew ? 'animate-in fade-in-0 duration-500' : ''}`}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-md ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
                                 style={itemStyle}
                                 onClick={() => onSelectImage(img)}
                             >
