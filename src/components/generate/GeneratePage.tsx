@@ -728,7 +728,7 @@ export function GeneratePage() {
                     <div className="relative w-full">
 
                         {/* Pill Container */}
-                        <div className="relative flex flex-col w-full transition-all duration-300 border border-border/30 rounded-[22px]" style={{ backgroundColor: '#1e1f20' }}>
+                        <div className="relative flex flex-col w-full transition-all duration-300 border border-border/30 rounded-[22px]" style={{ backgroundColor: '#37393b' }}>
 
                             {/* 1. Preview Ảnh Tham Chiếu (Top) — thu nhỏ khi compact */}
                             {referenceImages.length > 0 && (
