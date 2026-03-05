@@ -611,10 +611,10 @@ export function GeneratePage() {
                     {selectedImage && (
                         <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl">
                             <DialogTitle className="sr-only">Chi tiết hình ảnh</DialogTitle>
-                            <div className="flex flex-col lg:flex-row h-full">
+                            <div className="flex flex-col lg:flex-row h-full overflow-hidden w-full">
 
                                 {/* Ảnh */}
-                                <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
+                                <div className="h-[45vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
                                     <div className="relative flex max-w-full max-h-full rounded-md shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
 
@@ -652,7 +652,7 @@ export function GeneratePage() {
                                 </div>
 
                                 {/* Info Panel */}
-                                <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar">
+                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar min-h-0">
                                     <div className="space-y-3">
                                         <div className="flex flex-col gap-2">
                                             <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
