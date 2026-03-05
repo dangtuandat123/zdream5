@@ -199,7 +199,7 @@ function JustifiedGallery({
                             return (
                                 <div
                                     key={item.key}
-                                    className="relative rounded-md overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate"
+                                    className="relative rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate"
                                     style={itemStyle}
                                 >
                                     {/* Shimmer overlay */}
@@ -222,7 +222,7 @@ function JustifiedGallery({
                         return (
                             <div
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-md border border-border/40 ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
                                 style={itemStyle}
                                 onClick={() => onSelectImage(img)}
                             >
@@ -623,7 +623,7 @@ export function GeneratePage() {
                                 {/* Ảnh */}
                                 <div className="h-[45vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
-                                    <div className="relative flex max-w-full max-h-full rounded-md shadow-2xl border border-border/40 overflow-hidden bg-black/5">
+                                    <div className="relative flex max-w-full max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5">
 
                                         {/* Invisible SVG spacer for aspect ratio */}
                                         <img
@@ -697,7 +697,7 @@ export function GeneratePage() {
                                                     <div className="grid grid-cols-5 gap-2 mt-2">
                                                         {selectedImage.referenceImages.map((src, i) => (
                                                             <div key={i} className="aspect-square relative group">
-                                                                <img src={src} className="absolute inset-0 w-full h-full rounded-md object-cover border border-border/40" alt="ref" />
+                                                                <img src={src} className="absolute inset-0 w-full h-full rounded-xl object-cover border border-border/40" alt="ref" />
                                                             </div>
                                                         ))}
                                                     </div>
@@ -764,7 +764,7 @@ export function GeneratePage() {
                                             <img
                                                 src={src}
                                                 alt={`Reference ${idx + 1}`}
-                                                className="h-16 w-16 rounded-md object-cover border border-border/40 bg-muted/30"
+                                                className="h-16 w-16 rounded-xl object-cover border border-border/40 bg-muted/30"
                                             />
                                             <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
                                                 {idx + 1}
