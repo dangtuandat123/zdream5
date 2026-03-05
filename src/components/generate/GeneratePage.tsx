@@ -59,6 +59,11 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+} from "@/components/ui/dialog"
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import Zoom from 'react-medium-image-zoom'
@@ -590,122 +595,122 @@ export function GeneratePage() {
                     </div>
                 </div>
 
-                {/* === IMAGE VIEWER — fullscreen within content area, không che sidebar === */}
-                {selectedImage && (
-                    <div className="absolute inset-0 z-[60] bg-background flex flex-col lg:flex-row overflow-hidden animate-in fade-in-0 duration-200"
-                        onKeyDown={(e) => { if (e.key === 'Escape') setSelectedImage(null) }}
-                        tabIndex={-1}
-                        ref={(el) => el?.focus()}
-                    >
-                        {/* Close button */}
-                        <button
-                            onClick={() => setSelectedImage(null)}
-                            className="absolute top-3 right-3 z-10 size-8 rounded-full bg-background/80 hover:bg-muted border border-border/50 backdrop-blur-sm flex items-center justify-center transition-colors"
-                        >
-                            <X className="size-4" />
-                        </button>
+                {/* === IMAGE VIEWER — Dialog modal === */}
+                <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
+                    {selectedImage && (
+                        <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl">
+                            <DialogTitle className="sr-only">Chi tiết hình ảnh</DialogTitle>
+                            <div className="flex flex-col lg:flex-row h-full">
 
-                        {/* Ảnh */}
-                        <div className="flex-1 flex items-center justify-center min-h-0 relative p-4 lg:p-8 bg-black/95 lg:bg-muted/20">
-                            {/* The container providing hover effects and zoom bounds */}
-                            <div className="relative group flex items-center justify-center w-full h-full max-h-[70vh] lg:max-h-[calc(100vh-8rem)] rounded-none md:rounded-2xl shadow-2xl overflow-hidden ring-0 md:ring-1 ring-border/10">
-                                <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
-                                    <img
-                                        src={selectedImage.url}
-                                        alt={selectedImage.prompt}
-                                        className="rounded-none md:rounded-2xl block"
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            maxHeight: isMobile ? '70vh' : 'calc(100vh - 8rem)',
-                                            objectFit: 'contain',
-                                            aspectRatio: selectedImage.aspectRatio
-                                        }}
-                                    />
-                                </Zoom>
+                                {/* Ảnh */}
+                                <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
+                                    {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
+                                    <div className="relative flex max-w-full max-h-full rounded-xl md:rounded-2xl shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
 
-                                {/* Hover overlay (Desktop only) */}
-                                {!isMobile && (
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-none md:rounded-2xl overflow-hidden shadow-inner">
-                                        <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
-                                        <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
-                                            <Maximize2 className="size-4" />
-                                            Xem chuẩn gốc
+                                        {/* Invisible SVG spacer for aspect ratio */}
+                                        <img
+                                            src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${selectedImage.aspectRatio * 10000}" height="10000"></svg>`)}`}
+                                            alt="spacer"
+                                            className="w-auto h-auto max-w-full max-h-full object-contain invisible pointer-events-none"
+                                            style={{
+                                                maxHeight: isMobile ? 'calc(100vh - 12rem)' : 'calc(85vh - 4rem)',
+                                            }}
+                                        />
+
+                                        {/* Actual image */}
+                                        <div className="absolute inset-0 w-full h-full group">
+                                            <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
+                                                <img
+                                                    src={selectedImage.url}
+                                                    alt={selectedImage.prompt}
+                                                    className="w-full h-full object-cover rounded-xl md:rounded-2xl"
+                                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+                                                />
+                                            </Zoom>
+
+                                            {/* Hover overlay */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl md:rounded-2xl overflow-hidden shadow-inner">
+                                                <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
+                                                <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
+                                                    <Maximize2 className="size-4" />
+                                                    Xem chuẩn gốc
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Info Panel */}
-                        <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar">
-                            <div className="space-y-3">
-                                <div className="flex flex-col gap-2">
-                                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
-                                    <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-all whitespace-pre-wrap shadow-inner border border-foreground/5">
-                                        {selectedImage.prompt}
-                                    </div>
                                 </div>
-                                <Separator />
-                                {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
-                                    <>
-                                        <div>
-                                            <div className="flex items-center gap-1.5">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
-                                                <Badge variant="secondary" className="h-4 px-1.5 text-[9px] rounded-sm font-medium">{selectedImage.referenceImages.length}</Badge>
-                                            </div>
-                                            <div className="grid grid-cols-5 gap-2 mt-2">
-                                                {selectedImage.referenceImages.map((src, i) => (
-                                                    <div key={i} className="aspect-square relative group">
-                                                        <img src={src} className="absolute inset-0 w-full h-full rounded-md object-cover ring-1 ring-border/50" alt="ref" />
-                                                    </div>
-                                                ))}
+
+                                {/* Info Panel */}
+                                <div className="w-full lg:w-[320px] shrink-0 border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar">
+                                    <div className="space-y-3">
+                                        <div className="flex flex-col gap-2">
+                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
+                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-all whitespace-pre-wrap shadow-inner border border-foreground/5">
+                                                {selectedImage.prompt}
                                             </div>
                                         </div>
                                         <Separator />
-                                    </>
-                                )}
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Model</Label>
-                                        <p className="text-xs font-medium mt-0.5">{selectedImage.model.toUpperCase()}</p>
+                                        {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
+                                            <>
+                                                <div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
+                                                        <Badge variant="secondary" className="h-4 px-1.5 text-[9px] rounded-sm font-medium">{selectedImage.referenceImages.length}</Badge>
+                                                    </div>
+                                                    <div className="grid grid-cols-5 gap-2 mt-2">
+                                                        {selectedImage.referenceImages.map((src, i) => (
+                                                            <div key={i} className="aspect-square relative group">
+                                                                <img src={src} className="absolute inset-0 w-full h-full rounded-md object-cover ring-1 ring-border/50" alt="ref" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <Separator />
+                                            </>
+                                        )}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Model</Label>
+                                                <p className="text-xs font-medium mt-0.5">{selectedImage.model.toUpperCase()}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Phong cách</Label>
+                                                <p className="text-xs font-medium mt-0.5 capitalize">{selectedImage.style}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tỷ lệ</Label>
+                                                <p className="text-xs font-medium mt-0.5">{selectedImage.aspectLabel}</p>
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thời gian</Label>
+                                                <p className="text-xs font-medium mt-0.5">
+                                                    {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Phong cách</Label>
-                                        <p className="text-xs font-medium mt-0.5 capitalize">{selectedImage.style}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tỷ lệ</Label>
-                                        <p className="text-xs font-medium mt-0.5">{selectedImage.aspectLabel}</p>
-                                    </div>
-                                    <div>
-                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thời gian</Label>
-                                        <p className="text-xs font-medium mt-0.5">
-                                            {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div className="flex flex-col gap-2 mt-auto">
-                                <Button size="sm" className="w-full">
-                                    <Download className="mr-2 size-4" /> Tải xuống
-                                </Button>
-                                <Button size="sm" variant="outline" className="w-full">
-                                    <Share2 className="mr-2 size-4" /> Chia sẻ
-                                </Button>
-                                <div className="flex gap-2">
-                                    <Button size="sm" variant="ghost" className="flex-1" onClick={() => handleRegenerate(selectedImage)}>
-                                        <RotateCcw className="mr-2 size-3.5" /> Tạo lại
-                                    </Button>
-                                    <Button size="sm" variant="ghost" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDelete(selectedImage.id)}>
-                                        <Trash2 className="mr-2 size-3.5" /> Xoá
-                                    </Button>
+                                    <div className="flex flex-col gap-2 mt-auto">
+                                        <Button size="sm" className="w-full">
+                                            <Download className="mr-2 size-4" /> Tải xuống
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="w-full">
+                                            <Share2 className="mr-2 size-4" /> Chia sẻ
+                                        </Button>
+                                        <div className="flex gap-2">
+                                            <Button size="sm" variant="ghost" className="flex-1" onClick={() => handleRegenerate(selectedImage)}>
+                                                <RotateCcw className="mr-2 size-3.5" /> Tạo lại
+                                            </Button>
+                                            <Button size="sm" variant="ghost" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDelete(selectedImage.id)}>
+                                                <Trash2 className="mr-2 size-3.5" /> Xoá
+                                            </Button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                )}
+                        </DialogContent>
+                    )}
+                </Dialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
                 <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-4 pt-6">
