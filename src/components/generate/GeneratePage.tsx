@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import {
     Wand2,
     Download,
@@ -11,7 +11,7 @@ import {
     RectangleHorizontal,
     RectangleVertical,
     Square,
-    RefreshCw,
+
     ImageIcon,
     X,
     Link,
@@ -83,16 +83,157 @@ interface GeneratedImage {
     isNew?: boolean
 }
 
-interface Batch {
-    batchId: string
-    prompt: string
-    model: string
-    style: string
-    aspectLabel: string
-    createdAt: Date
-    images: GeneratedImage[]
-    referenceImages?: string[]
-    isNew?: boolean
+
+
+// === Justified Gallery Component ===
+type GalleryItem =
+    | { type: 'skeleton'; ratio: number; key: string }
+    | { type: 'image'; img: GeneratedImage; ratio: number; key: string }
+
+interface JustifiedRow {
+    items: GalleryItem[]
+    height: number
+}
+
+function computeRows(items: GalleryItem[], containerWidth: number, targetHeight: number, gap: number): JustifiedRow[] {
+    if (containerWidth <= 0 || items.length === 0) return []
+
+    const rows: JustifiedRow[] = []
+    let currentItems: GalleryItem[] = []
+    let currentSumRatios = 0
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        const itemWidth = targetHeight * item.ratio
+        const currentRowWidth = targetHeight * currentSumRatios + (currentItems.length > 0 ? currentItems.length * gap : 0)
+        const widthAfterAdd = currentRowWidth + itemWidth + (currentItems.length > 0 ? gap : 0)
+
+        if (widthAfterAdd <= containerWidth || currentItems.length === 0) {
+            // Vẫn vừa hàng hoặc hàng trống → thêm vào
+            currentItems.push(item)
+            currentSumRatios += item.ratio
+        } else {
+            // Tràn — quyết định include hay exclude
+            const remaining = containerWidth - currentRowWidth
+            const nextWidth = itemWidth
+
+            if (remaining > 0.5 * nextWidth) {
+                // Khoảng trống > 50% ảnh tiếp → thêm vào, giảm chiều cao
+                currentItems.push(item)
+                currentSumRatios += item.ratio
+                const rowH = (containerWidth - (currentItems.length - 1) * gap) / currentSumRatios
+                rows.push({ items: [...currentItems], height: rowH })
+                currentItems = []
+                currentSumRatios = 0
+            } else {
+                // Khoảng trống <= 50% → không thêm, tăng chiều cao lấp đầy
+                const rowH = (containerWidth - (currentItems.length - 1) * gap) / currentSumRatios
+                rows.push({ items: [...currentItems], height: rowH })
+                currentItems = [item]
+                currentSumRatios = item.ratio
+            }
+        }
+    }
+
+    // Hàng cuối — giữ target height, không kéo giãn
+    if (currentItems.length > 0) {
+        rows.push({ items: currentItems, height: targetHeight })
+    }
+
+    return rows
+}
+
+function JustifiedGallery({
+    items,
+    targetHeight,
+    gap,
+    onSelectImage,
+    onDeleteImage,
+}: {
+    items: GalleryItem[]
+    targetHeight: number
+    gap: number
+    onSelectImage: (img: GeneratedImage) => void
+    onDeleteImage: (id: string) => void
+}) {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const [containerWidth, setContainerWidth] = useState(0)
+
+    // Theo dõi container width bằng ResizeObserver
+    useEffect(() => {
+        const el = containerRef.current
+        if (!el) return
+        const ro = new ResizeObserver(([entry]) => {
+            setContainerWidth(entry.contentRect.width)
+        })
+        ro.observe(el)
+        // Đọc width ban đầu
+        setContainerWidth(el.clientWidth)
+        return () => ro.disconnect()
+    }, [])
+
+    const rows = computeRows(items, containerWidth, targetHeight, gap)
+
+    return (
+        <div ref={containerRef} className="w-full overflow-hidden">
+            {rows.map((row, rowIdx) => (
+                <div
+                    key={rowIdx}
+                    className="flex"
+                    style={{ gap: `${gap}px`, marginBottom: `${gap}px` }}
+                >
+                    {row.items.map(item => {
+                        // Pixel width chính xác = height × ratio → đúng tỉ lệ
+                        // flex-shrink: 1 → co lại mượt khi sidebar mở (tạm thời, cho đến khi ResizeObserver recompute)
+                        const w = row.height * item.ratio
+                        const itemStyle = {
+                            width: `${w}px`,
+                            height: `${row.height}px`,
+                            flexShrink: 1,
+                            minWidth: 0,
+                        }
+
+                        if (item.type === 'skeleton') {
+                            return (
+                                <div
+                                    key={item.key}
+                                    className="rounded-2xl overflow-hidden animate-pulse bg-muted/40"
+                                    style={itemStyle}
+                                >
+                                    <Skeleton className="h-full w-full" />
+                                </div>
+                            )
+                        }
+
+                        const img = item.img
+                        return (
+                            <div
+                                key={item.key}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-2xl ${img.isNew ? 'animate-in fade-in-0 duration-500' : ''}`}
+                                style={itemStyle}
+                                onClick={() => onSelectImage(img)}
+                            >
+                                <img
+                                    src={img.url}
+                                    alt={img.prompt}
+                                    className="h-full w-full object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                                    <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
+                                        <Download className="size-3 text-white" />
+                                    </Button>
+                                    <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDeleteImage(img.id) }}>
+                                        <Trash2 className="size-3 text-white" />
+                                    </Button>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            ))}
+        </div>
+    )
 }
 
 // Ảnh demo — tạo URL đúng tỉ lệ theo aspect ratio đang chọn
@@ -115,7 +256,6 @@ const ASPECT_RATIOS = [
     { value: "9/16", label: "9:16", ratio: 9 / 16, icon: RectangleVertical },
     { value: "4/3", label: "4:3", ratio: 4 / 3, icon: RectangleHorizontal },
 ]
-
 export function GeneratePage() {
     // === State ===
     const isMobile = useIsMobile()
@@ -210,27 +350,7 @@ export function GeneratePage() {
     const getAspectRatio = (value: string) =>
         ASPECT_RATIOS.find((r) => r.value === value) || ASPECT_RATIOS[0]
 
-    // Nhóm ảnh theo batch
-    const batches = useMemo(() => {
-        const map = new Map<string, Batch>()
-        for (const img of images) {
-            if (!map.has(img.batchId)) {
-                map.set(img.batchId, {
-                    batchId: img.batchId,
-                    prompt: img.prompt,
-                    model: img.model,
-                    style: img.style,
-                    aspectLabel: img.aspectLabel,
-                    createdAt: img.createdAt,
-                    images: [],
-                    referenceImages: img.referenceImages,
-                    isNew: img.isNew,
-                })
-            }
-            map.get(img.batchId)!.images.push(img)
-        }
-        return Array.from(map.values())
-    }, [images])
+
 
 
     // === Handlers ===
@@ -447,14 +567,14 @@ export function GeneratePage() {
 
     return (
         <TooltipProvider>
-            <div className="relative flex flex-1 flex-col">
+            <div className="relative flex flex-1 flex-col min-w-0 overflow-hidden">
                 {/* Sentinel: khi element này trượt ra khỏi viewport → isCompact = true */}
                 <div ref={topObserverRef} className="absolute top-0 left-0 w-full h-1 pointer-events-none" />
                 {/* Nền sạch, không gradient blob */}
 
-                {/* === CANVAS AREA — Gallery chiếm 60% bề ngang desktop, full-width mobile === */}
-                <div className="relative z-10 flex-1 flex flex-col items-center p-4 lg:p-6">
-                    <div className="w-full max-w-5xl mx-auto flex flex-col flex-1">
+                {/* === CANVAS AREA — Gallery full-width, justified layout === */}
+                <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0 overflow-hidden">
+                    <div className="w-full flex flex-col flex-1 min-w-0 overflow-hidden">
                         {/* Empty State — Premium AI Studio */}
                         {images.length === 0 && !isGenerating && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-6">
@@ -507,150 +627,36 @@ export function GeneratePage() {
                             </div>
                         )}
 
-                        {/* === Loading Skeleton — Clean pulse === */}
-                        {isGenerating && (() => {
-                            const count = parseInt(imageCount)
+                        {/* === Gallery — Justified rows (Google Photos style) === */}
+                        {(images.length > 0 || isGenerating) && (() => {
+                            // Xây dựng danh sách item: skeleton trước, ảnh thật sau
+                            const GAP = 6 // gap giữa ảnh (px)
+                            const TARGET_H = Math.max(160, Math.min(window.innerWidth * 0.22, 280))
 
+                            // Tạo items list: skeleton + ảnh
+                            const items: GalleryItem[] = []
+
+                            if (isGenerating) {
+                                const count = parseInt(imageCount)
+                                const ratio = getAspectRatio(aspectRatioValue).ratio
+                                for (let i = 0; i < count; i++) {
+                                    items.push({ type: 'skeleton', ratio, key: `skeleton-${i}` })
+                                }
+                            }
+                            for (const img of images) {
+                                items.push({ type: 'image', img, ratio: img.aspectRatio, key: img.id })
+                            }
 
                             return (
-                                <div className="mb-8 animate-in fade-in-0 duration-500">
-                                    {/* Mini header */}
-                                    <div className="flex items-center gap-2 mb-3">
-                                        <Spinner className="size-3 text-muted-foreground shrink-0" />
-                                        <p className="text-sm text-muted-foreground truncate flex-1 min-w-0">{prompt.slice(0, 80)}...</p>
-                                        <span className="text-[10px] text-muted-foreground/50 shrink-0 animate-pulse">Đang tạo...</span>
-                                    </div>
-
-                                    {/* Skeleton tiles — khớp grid thật */}
-                                    {(() => {
-                                        const ratio = getAspectRatio(aspectRatioValue).ratio
-                                        const gridCls = count === 1
-                                            ? 'grid-cols-1 max-w-md'
-                                            : count === 2
-                                                ? 'grid-cols-2'
-                                                : count === 3
-                                                    ? 'grid-cols-2 md:grid-cols-3'
-                                                    : 'grid-cols-2 md:grid-cols-4'
-                                        return (
-                                            <div className={`grid gap-0.5 rounded-lg overflow-hidden ${gridCls}`}>
-                                                {Array.from({ length: count }).map((_, i) => (
-                                                    <div
-                                                        key={`skeleton-${i}`}
-                                                        className="relative overflow-hidden"
-                                                        style={{ aspectRatio: ratio, maxHeight: ratio < 1 && count === 1 ? '500px' : undefined }}
-                                                    >
-                                                        <Skeleton className="absolute inset-0 h-full w-full" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )
-                                    })()}
-                                </div>
+                                <JustifiedGallery
+                                    items={items}
+                                    targetHeight={TARGET_H}
+                                    gap={GAP}
+                                    onSelectImage={setSelectedImage}
+                                    onDeleteImage={handleDelete}
+                                />
                             )
                         })()}
-
-                        {/* === Batch Gallery — Modern, clean, creative === */}
-                        {batches.length > 0 && (
-                            <div className="space-y-6">
-                                {batches.map((batch, batchIdx) => {
-                                    const count = batch.images.length
-
-                                    return (
-                                        <div
-                                            key={batch.batchId}
-                                            className={batch.isNew
-                                                ? "animate-in fade-in-0 slide-in-from-bottom-3 duration-500"
-                                                : ""
-                                            }
-                                        >
-                                            {/* Separator giữa các batch */}
-                                            {batchIdx > 0 && (
-                                                <Separator className="mb-6 opacity-30" />
-                                            )}
-
-                                            {/* Header batch — rõ ràng, dễ đọc */}
-                                            <div className="flex items-center gap-2.5 mb-3">
-                                                <Wand2 className="size-3.5 text-muted-foreground shrink-0" />
-
-                                                {/* Ref images inline thumbnails */}
-                                                {batch.referenceImages && batch.referenceImages.length > 0 && (
-                                                    <div className="flex -space-x-1.5 shrink-0">
-                                                        {batch.referenceImages.slice(0, 3).map((src, i) => (
-                                                            <img
-                                                                key={`ref-${i}`}
-                                                                src={src}
-                                                                alt="ref"
-                                                                className="size-5 rounded-full object-cover ring-1 ring-background"
-                                                            />
-                                                        ))}
-                                                        {batch.referenceImages.length > 3 && (
-                                                            <div className="size-5 rounded-full bg-muted flex items-center justify-center text-[8px] text-muted-foreground ring-1 ring-background">
-                                                                +{batch.referenceImages.length - 3}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                <p className="text-sm text-foreground/80 truncate flex-1 min-w-0 font-medium" title={batch.prompt}>
-                                                    {batch.prompt}
-                                                </p>
-
-                                                <div className="flex items-center gap-1.5 shrink-0">
-                                                    <span className="text-xs text-muted-foreground hidden sm:inline">
-                                                        {batch.model.toUpperCase()} · {batch.aspectLabel}
-                                                    </span>
-                                                    <span className="text-xs text-muted-foreground/60">
-                                                        {batch.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                                    </span>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="size-6 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
-                                                        onClick={() => handleRegenerate(batch.images[0])}
-                                                    >
-                                                        <RefreshCw className="size-3" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-
-                                            {/* Image Grid — responsive, đúng tỉ lệ */}
-                                            {(() => {
-                                                const gridCls = count === 1
-                                                    ? 'grid-cols-1 max-w-md'
-                                                    : count === 2
-                                                        ? 'grid-cols-2'
-                                                        : count === 3
-                                                            ? 'grid-cols-2 md:grid-cols-3'
-                                                            : 'grid-cols-2 md:grid-cols-4'
-                                                return (
-                                                    <div className={`grid gap-0.5 rounded-lg overflow-hidden ${gridCls}`}>
-                                                        {batch.images.map(img => (
-                                                            <div
-                                                                key={img.id}
-                                                                className="group/img relative cursor-pointer overflow-hidden"
-                                                                style={{ aspectRatio: img.aspectRatio, maxHeight: img.aspectRatio < 1 && count === 1 ? '500px' : undefined }}
-                                                                onClick={() => setSelectedImage(img)}
-                                                            >
-                                                                <img src={img.url} alt={img.prompt} className="h-full w-full object-cover" />
-                                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
-                                                                <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                                                    <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
-                                                                        <Download className="size-3 text-white" />
-                                                                    </Button>
-                                                                    <Button size="icon" variant="secondary" className="size-7 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); handleDelete(img.id) }}>
-                                                                        <Trash2 className="size-3 text-white" />
-                                                                    </Button>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )
-                                            })()}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
                     </div>
                 </div>
 

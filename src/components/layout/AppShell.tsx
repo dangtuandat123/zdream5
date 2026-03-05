@@ -7,7 +7,7 @@ export function AppShell() {
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-                <div className="flex flex-1 flex-col">
+                <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
                     <Outlet />
                 </div>
             </SidebarInset>
