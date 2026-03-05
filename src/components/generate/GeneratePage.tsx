@@ -504,50 +504,53 @@ export function GeneratePage() {
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Premium AI Studio */}
                         {images.length === 0 && !isGenerating && (
-                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-6">
+                            <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 px-4 -mt-12">
 
-                                {/* Animated gradient mesh blob */}
-                                <div className="relative mb-10">
-                                    <div className="absolute -inset-16 opacity-30 blur-3xl bg-gradient-to-r from-violet-500/20 via-cyan-500/10 to-fuchsia-500/20 rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
-                                    <div className="relative flex flex-col items-center">
-                                        {/* Grid decorativo */}
-                                        <div className="grid grid-cols-3 gap-1.5 mb-8 opacity-40">
-                                            {[...Array(9)].map((_, i) => (
-                                                <div
-                                                    key={i}
-                                                    className="size-8 sm:size-10 rounded-lg border border-border/40 bg-gradient-to-br from-muted/30 to-transparent"
-                                                    style={{
-                                                        animationDelay: `${i * 0.15}s`,
-                                                        opacity: [0, 1, 2, 4, 6, 8].includes(i) ? 0.3 : 0.6,
-                                                    }}
-                                                />
-                                            ))}
-                                        </div>
+                                {/* Ethereal Aura - The "Core" */}
+                                <div className="relative mb-8 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 via-purple-500/10 to-pink-500/20 blur-3xl rounded-full size-48 animate-pulse" style={{ animationDuration: '6s' }} />
+                                    <div className="relative size-20 sm:size-24 rounded-full border border-white/5 bg-white/5 backdrop-blur-xl flex items-center justify-center shadow-2xl ring-1 ring-inset ring-white/10 overflow-hidden">
+                                        <Wand2 className="size-8 text-foreground/70 animate-pulse" style={{ animationDuration: '4s' }} />
+                                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
                                     </div>
                                 </div>
 
                                 {/* Typography */}
-                                <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-center mb-2 text-foreground/90">
-                                    Tưởng tượng. Mô tả. Kiến tạo.
-                                </h2>
-                                <p className="text-muted-foreground/60 text-center max-w-md text-sm leading-relaxed mb-8">
-                                    Nhập prompt bên dưới để AI biến ý tưởng của bạn thành tác phẩm nghệ thuật.
+                                <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-center mb-3 text-foreground/90">
+                                    Đánh thức trí tưởng tượng
+                                </h1>
+                                <p className="text-muted-foreground/60 text-center text-sm mb-10 max-w-sm leading-relaxed">
+                                    ZDream biến mọi giới hạn của ngôn từ thành những không gian thị giác vô tận.
                                 </p>
 
-                                {/* Gợi ý prompt — click để tự điền */}
-                                <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                                {/* Creative Suggestion Cards */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-4xl w-full">
                                     {[
-                                        "Phong cảnh núi lúc bình minh",
-                                        "Chân dung cyberpunk",
-                                        "Thành phố tương lai",
-                                        "Hoa anh đào mùa xuân",
-                                    ].map((suggestion) => (
+                                        { tag: "Nghệ thuật", title: "Sơn dầu trừu tượng", desc: "Sắc màu rực rỡ, nét cọ mạnh mẽ", icon: "M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.866 8.21 8.21 0 003 2.48z" },
+                                        { tag: "Tương lai", title: "Thành phố Cyberpunk", desc: "Neon, mưa kỹ thuật số, công nghệ cao", icon: "M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" },
+                                        { tag: "Nhiếp ảnh", title: "Chân dung Cinematic", desc: "Ánh sáng dramatic, bokeh sâu", icon: "M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z M18.75 10.5h.008v.008h-.008V10.5z" },
+                                        { tag: "Kỳ ảo", title: "Thế giới cổ mộc", desc: "Rừng già phát sáng, sinh vật huyền bí", icon: "M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" },
+                                    ].map((item) => (
                                         <button
-                                            key={suggestion}
-                                            className="px-3 py-1.5 text-xs text-muted-foreground/70 border border-border/30 rounded-full hover:border-border/60 hover:text-foreground/80 hover:bg-muted/30 transition-all duration-200 cursor-pointer"
-                                            onClick={() => setPrompt(suggestion)}
+                                            key={item.title}
+                                            className="group relative flex flex-col text-left p-4 rounded-2xl border border-border/40 bg-muted/10 hover:bg-muted/30 transition-all duration-300 hover:border-border/80 hover:shadow-lg overflow-hidden cursor-pointer"
+                                            onClick={() => setPrompt(`${item.title}, ${item.desc}`)}
                                         >
-                                            {suggestion}
+                                            {/* Watermark Icon */}
+                                            <div className="absolute -top-2 -right-2 p-4 opacity-[0.03] group-hover:opacity-[0.08] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-20">
+                                                    <path fillRule="evenodd" d={item.icon} clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60 mb-2 z-10">
+                                                {item.tag}
+                                            </span>
+                                            <span className="text-sm font-semibold text-foreground/90 mb-1.5 z-10 transition-colors group-hover:text-primary">
+                                                {item.title}
+                                            </span>
+                                            <span className="text-xs text-muted-foreground/70 pr-4 leading-relaxed z-10">
+                                                {item.desc}
+                                            </span>
                                         </button>
                                     ))}
                                 </div>
