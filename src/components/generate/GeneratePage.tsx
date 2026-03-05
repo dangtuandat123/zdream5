@@ -267,76 +267,9 @@ export function GeneratePage() {
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
 
-    // --- Prompt Bar: compact khi scroll xuống, expand khi scroll lên ---
-    const [isCompact, setIsCompact] = useState(false)
-    const isCompactRef = useRef(false)
-    const topObserverRef = useRef<HTMLDivElement>(null)
+    // --- Prompt Bar refs ---
     const textareaRef = useRef<HTMLTextAreaElement>(null)
     const promptContainerRef = useRef<HTMLDivElement>(null)
-    const sentinelVisibleRef = useRef(true)
-    const compactTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-    // IntersectionObserver: sentinel + rootMargin hysteresis
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                sentinelVisibleRef.current = entry.isIntersecting
-                if (entry.isIntersecting && isCompactRef.current) {
-                    if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
-                    isCompactRef.current = false
-                    setIsCompact(false)
-                }
-            },
-            { threshold: 0, rootMargin: '0px 0px 150px 0px' }
-        )
-        if (topObserverRef.current) observer.observe(topObserverRef.current)
-        return () => observer.disconnect()
-    }, [])
-
-    // Wheel event: debounce 300ms + double-check sentinel
-    useEffect(() => {
-        const handleWheel = () => {
-            if (!sentinelVisibleRef.current && !isCompactRef.current) {
-                if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
-                compactTimerRef.current = setTimeout(() => {
-                    if (!sentinelVisibleRef.current) {
-                        isCompactRef.current = true
-                        setIsCompact(true)
-                    }
-                }, 300)
-            }
-        }
-        window.addEventListener('wheel', handleWheel, { passive: true })
-        return () => {
-            window.removeEventListener('wheel', handleWheel)
-            if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
-        }
-    }, [])
-
-    // Click outside prompt bar → compact (if scrolled down)
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (
-                !sentinelVisibleRef.current &&
-                !isCompactRef.current &&
-                promptContainerRef.current &&
-                !promptContainerRef.current.contains(e.target as Node)
-            ) {
-                if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
-                isCompactRef.current = true
-                setIsCompact(true)
-            }
-        }
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
-
-    // Focus prompt → expand
-    const handlePromptFocus = useCallback(() => {
-        if (compactTimerRef.current) clearTimeout(compactTimerRef.current)
-        isCompactRef.current = false
-        setIsCompact(false)
-    }, [])
 
     // Settings
     const [model, setModel] = useState("sdxl")
@@ -567,14 +500,12 @@ export function GeneratePage() {
 
     return (
         <TooltipProvider>
-            <div className="relative flex flex-1 flex-col min-w-0 overflow-hidden">
-                {/* Sentinel: khi element này trượt ra khỏi viewport → isCompact = true */}
-                <div ref={topObserverRef} className="absolute top-0 left-0 w-full h-1 pointer-events-none" />
+            <div className="relative flex flex-1 flex-col min-w-0">
                 {/* Nền sạch, không gradient blob */}
 
                 {/* === CANVAS AREA — Gallery full-width, justified layout === */}
-                <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0 overflow-hidden">
-                    <div className="w-full flex flex-col flex-1 min-w-0 overflow-hidden">
+                <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
+                    <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Premium AI Studio */}
                         {images.length === 0 && !isGenerating && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 -mt-6">
@@ -777,8 +708,7 @@ export function GeneratePage() {
                 </Dialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                {/* Thu lại khi cuộn màn hình để tránh che khuất Gallery */}
-                <div ref={promptContainerRef} className={`sticky bottom-0 z-50 mx-auto w-full max-w-3xl transition-[padding] duration-300 ease-out ${isCompact ? 'px-2 sm:px-4 pb-2 pt-3' : 'px-4 pb-4 pt-6'}`}>
+                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-4 pt-6">
                     <div className="relative w-full">
 
                         {/* Pill Container */}
@@ -786,7 +716,7 @@ export function GeneratePage() {
 
                             {/* 1. Preview Ảnh Tham Chiếu (Top) — thu nhỏ khi compact */}
                             {referenceImages.length > 0 && (
-                                <div className={`px-4 pb-1 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 transition-all duration-300 ${isCompact ? 'pt-2 max-h-0 opacity-0 overflow-hidden' : 'pt-4'}`}>
+                                <div className="px-4 pb-1 pt-4 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30">
                                     {referenceImages.map((src, idx) => (
                                         <div key={idx} className="relative shrink-0 group/ref">
                                             <img
@@ -809,27 +739,13 @@ export function GeneratePage() {
                             )}
 
                             {/* 2. Text Input (Middle) */}
-                            <div className={`flex items-center px-2 relative transition-all duration-300 ease-in-out ${isCompact ? 'pt-1 pb-0.5' : 'pt-2 pb-1'}`}>
-                                {/* Compact + có nội dung: hiển thị 1 dòng truncate có ... Mờ đi khi expand */}
-                                {prompt && (
-                                    <div
-                                        className={`absolute top-0 left-2 right-2 px-3 text-[15px] leading-snug truncate cursor-text text-foreground/80 transition-all duration-300 ease-in-out ${isCompact ? 'opacity-100 z-10 pointer-events-auto mt-2.5' : 'opacity-0 -z-10 pointer-events-none mt-4'}`}
-                                        onClick={() => {
-                                            handlePromptFocus()
-                                            setTimeout(() => textareaRef.current?.focus(), 50)
-                                        }}
-                                    >
-                                        {prompt}
-                                    </div>
-                                )}
-                                {/* Textarea thật — mờ đi khi compact có nội dung, thu hẹp max-height mượt. Không dùng hidden */}
+                            <div className="flex items-center px-2 pt-2 pb-1">
                                 <textarea
                                     ref={textareaRef}
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className={`w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar transition-all duration-300 ease-in-out ${isCompact && prompt ? 'opacity-0 pointer-events-none' : 'opacity-100'} ${isCompact ? 'min-h-[36px] max-h-[36px] py-1.5 overflow-hidden' : 'min-h-[44px] max-h-[120px] py-2 overflow-y-auto'}`}
+                                    className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto"
                                     rows={1}
                                     value={prompt}
-                                    onFocus={handlePromptFocus}
                                     onChange={(e) => {
                                         setPrompt(e.target.value)
                                         // Auto-grow tới max-h-[120px], sau đó scroll nội bộ
@@ -846,7 +762,7 @@ export function GeneratePage() {
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
-                            <div className={`flex items-center justify-between px-3 ${isCompact ? 'pb-2' : 'pb-3'}`}>
+                            <div className="flex items-center justify-between px-3 pb-3">
                                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pr-2">
                                     {/* Image Upload */}
                                     {isMobile ? (
@@ -980,14 +896,14 @@ export function GeneratePage() {
                                     <TooltipTrigger asChild>
                                         <Button
                                             size="icon"
-                                            className={`rounded-full transition-[width,height] duration-300 shrink-0 ${isCompact ? 'size-8' : 'size-10'} ${prompt.trim() ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
+                                            className={`rounded-full shrink-0 size-10 ${prompt.trim() ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/90" : "bg-muted text-muted-foreground"}`}
                                             disabled={isGenerating || !prompt.trim()}
                                             onClick={handleGenerate}
                                         >
                                             {isGenerating ? (
                                                 <Spinner className="size-4" />
                                             ) : (
-                                                <ArrowUp className={isCompact ? "size-3.5" : "size-[18px]"} />
+                                                <ArrowUp className="size-[18px]" />
                                             )}
                                         </Button>
                                     </TooltipTrigger>
