@@ -198,7 +198,7 @@ function JustifiedGallery({
                             return (
                                 <div
                                     key={item.key}
-                                    className="rounded-2xl overflow-hidden animate-pulse bg-muted/40"
+                                    className="rounded-md overflow-hidden animate-pulse bg-muted/40"
                                     style={itemStyle}
                                 >
                                     <Skeleton className="h-full w-full" />
@@ -210,7 +210,7 @@ function JustifiedGallery({
                         return (
                             <div
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-2xl ${img.isNew ? 'animate-in fade-in-0 duration-500' : ''}`}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-md ${img.isNew ? 'animate-in fade-in-0 duration-500' : ''}`}
                                 style={itemStyle}
                                 onClick={() => onSelectImage(img)}
                             >
@@ -605,7 +605,7 @@ export function GeneratePage() {
                                 {/* Ảnh */}
                                 <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
-                                    <div className="relative flex max-w-full max-h-full rounded-xl md:rounded-2xl shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
+                                    <div className="relative flex max-w-full max-h-full rounded-md shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
 
                                         {/* Invisible SVG spacer for aspect ratio */}
                                         <img
@@ -623,13 +623,13 @@ export function GeneratePage() {
                                                 <img
                                                     src={selectedImage.url}
                                                     alt={selectedImage.prompt}
-                                                    className="w-full h-full object-cover rounded-xl md:rounded-2xl"
+                                                    className="w-full h-full object-cover rounded-md"
                                                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                                                 />
                                             </Zoom>
 
                                             {/* Hover overlay */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl md:rounded-2xl overflow-hidden shadow-inner">
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-md overflow-hidden shadow-inner">
                                                 <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
                                                 <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
                                                     <Maximize2 className="size-4" />
@@ -727,7 +727,7 @@ export function GeneratePage() {
                                             <img
                                                 src={src}
                                                 alt={`Reference ${idx + 1}`}
-                                                className="h-16 w-16 rounded-xl object-cover ring-1 ring-border/50 bg-muted/30"
+                                                className="h-16 w-16 rounded-md object-cover ring-1 ring-border/50 bg-muted/30"
                                             />
                                             <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
                                                 {idx + 1}
