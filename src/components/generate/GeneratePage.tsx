@@ -606,38 +606,34 @@ export function GeneratePage() {
                         </button>
 
                         {/* Ảnh */}
-                        <div className="flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
-                            {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
-                            <div className="relative flex max-w-full max-h-full rounded-xl md:rounded-2xl shadow-2xl ring-1 ring-border/10 overflow-hidden bg-black/5">
+                        <div className="flex-1 flex items-center justify-center min-h-0 relative p-4 lg:p-8 bg-black/95 lg:bg-muted/20">
+                            {/* The container providing hover effects and zoom bounds */}
+                            <div className="relative group flex items-center justify-center w-full h-full max-h-[70vh] lg:max-h-[calc(100vh-8rem)] rounded-none md:rounded-2xl shadow-2xl overflow-hidden ring-0 md:ring-1 ring-border/10">
+                                <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
+                                    <img
+                                        src={selectedImage.url}
+                                        alt={selectedImage.prompt}
+                                        className="rounded-none md:rounded-2xl block"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            maxHeight: isMobile ? '70vh' : 'calc(100vh - 8rem)',
+                                            objectFit: 'contain',
+                                            aspectRatio: selectedImage.aspectRatio
+                                        }}
+                                    />
+                                </Zoom>
 
-                                {/* Invisible SVG spacer for aspect ratio */}
-                                <img
-                                    src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${selectedImage.aspectRatio * 10000}" height="10000"></svg>`)}`}
-                                    alt="spacer"
-                                    className="w-auto h-auto max-w-full max-h-full object-contain invisible pointer-events-none"
-                                    style={{ maxHeight: 'calc(100% - 2rem)' }}
-                                />
-
-                                {/* Actual image */}
-                                <div className="absolute inset-0 w-full h-full group">
-                                    <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
-                                        <img
-                                            src={selectedImage.url}
-                                            alt={selectedImage.prompt}
-                                            className="w-full h-full object-cover rounded-xl md:rounded-2xl"
-                                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                                        />
-                                    </Zoom>
-
-                                    {/* Hover overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl md:rounded-2xl overflow-hidden shadow-inner">
+                                {/* Hover overlay (Desktop only) */}
+                                {!isMobile && (
+                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-none md:rounded-2xl overflow-hidden shadow-inner">
                                         <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
                                         <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
                                             <Maximize2 className="size-4" />
                                             Xem chuẩn gốc
                                         </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         </div>
 
