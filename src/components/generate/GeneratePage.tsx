@@ -1511,22 +1511,23 @@ export function GeneratePage() {
                                 )}
 
                                 {/* Highlight overlay — hiển thị text với @mention màu nổi bật */}
-                                <div
-                                    className="absolute inset-0 pointer-events-none px-3 text-[15px] leading-relaxed min-h-[44px] max-h-[120px] py-2 overflow-hidden whitespace-pre-wrap break-words"
-                                    style={{ paddingTop: '8px', paddingBottom: '8px', paddingLeft: '12px', paddingRight: '12px', marginLeft: '8px', marginRight: '8px' }}
-                                    aria-hidden="true"
-                                >
-                                    {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
-                                        /^@Ảnh \d+$/.test(part)
-                                            ? <span key={i} className="text-primary font-semibold bg-primary/10 rounded px-0.5">{part}</span>
-                                            : <span key={i} className="invisible">{part}</span>
-                                    ) : null}
-                                </div>
+                                {/* Overlay nằm CHÍNH XÁC trùng với textarea bên dưới */}
+                                <div className="relative">
+                                    <div
+                                        className="absolute inset-0 pointer-events-none px-3 text-[15px] leading-relaxed py-2 overflow-hidden whitespace-pre-wrap break-words z-20"
+                                        aria-hidden="true"
+                                    >
+                                        {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
+                                            /^@Ảnh \d+$/.test(part)
+                                                ? <span key={i} className="text-primary font-semibold bg-primary/10 rounded px-0.5">{part}</span>
+                                                : <span key={i} className="invisible">{part}</span>
+                                        ) : null}
+                                    </div>
 
-                                <textarea
-                                    ref={textareaRef}
-                                    placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto relative z-10"
+                                    <textarea
+                                        ref={textareaRef}
+                                        placeholder="Mô tả ý tưởng kiến tạo của bạn..."
+                                        className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto relative z-10"
                                     rows={1}
                                     value={prompt}
                                     onChange={(e) => {
@@ -1565,6 +1566,7 @@ export function GeneratePage() {
                                         }
                                     }}
                                 />
+                                </div>
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
