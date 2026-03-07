@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import {
     Wand2,
@@ -214,6 +215,7 @@ function JustifiedGallery({
     onDeleteImage,
     onDownloadImage,
     onSetReferenceImage,
+    onImageDragStart,
     selectionMode,
     selectedIds,
     onToggleSelection,
@@ -226,6 +228,7 @@ function JustifiedGallery({
     onDeleteImage: (id: string) => void
     onDownloadImage: (url: string, id: string) => void
     onSetReferenceImage: (url: string) => void
+    onImageDragStart: (e: React.DragEvent, url: string) => void
     selectionMode: boolean
     selectedIds: Set<string>
     onToggleSelection: (id: string) => void
@@ -304,34 +307,7 @@ function JustifiedGallery({
                                 style={itemStyle}
                                 onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
                                 draggable
-                                onDragStart={(e) => {
-                                    e.dataTransfer.setData('text/plain', img.url)
-                                    // Custom Drag Avatar
-                                    const dragContainer = document.createElement('div')
-                                    dragContainer.style.width = '120px'
-                                    dragContainer.style.height = '120px'
-                                    dragContainer.style.borderRadius = '12px'
-                                    dragContainer.style.overflow = 'hidden'
-                                    dragContainer.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
-                                    dragContainer.style.border = '2px solid rgba(255,255,255,0.2)'
-                                    dragContainer.style.position = 'absolute'
-                                    dragContainer.style.top = '-1000px' // giấu đi
-                                    
-                                    const dragImg = document.createElement('img')
-                                    dragImg.src = img.url
-                                    dragImg.style.width = '100%'
-                                    dragImg.style.height = '100%'
-                                    dragImg.style.objectFit = 'cover'
-                                    
-                                    dragContainer.appendChild(dragImg)
-                                    document.body.appendChild(dragContainer)
-                                    
-                                    // Đặt tâm của avatar ngay dưới con trỏ chuột
-                                    e.dataTransfer.setDragImage(dragContainer, 60, 60)
-                                    
-                                    // Dọn rác
-                                    setTimeout(() => document.body.removeChild(dragContainer), 0)
-                                }}
+                                onDragStart={(e) => onImageDragStart(e, img.url)}
                             >
                                 <img
                                     src={img.url}
@@ -431,6 +407,10 @@ export function GeneratePage() {
     // State cho xác nhận xoá: 'single' hoặc 'batch'
     const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'single'; id: string } | { type: 'batch' } | null>(null)
 
+    // — Custom drag avatar state —
+    const [dragState, setDragState] = useState<{ url: string; x: number; y: number } | null>(null)
+    const dragStateRef = useRef<typeof dragState>(null)
+
     // Reset copied + zoom hint khi image thay đổi
     useEffect(() => {
         setIsCopied(false)
@@ -443,6 +423,27 @@ export function GeneratePage() {
         const t = setTimeout(() => setShowZoomHint(false), 3000)
         return () => clearTimeout(t)
     }, [selectedImage, showZoomHint])
+
+    // Track cursor position for custom drag avatar
+    // NOTE: mousemove is suppressed during HTML5 drag — must use the `drag` event instead
+    useEffect(() => {
+        const onDrag = (e: DragEvent) => {
+            if (!dragStateRef.current) return
+            // `drag` emits clientX=0, clientY=0 on end — ignore those
+            if (e.clientX === 0 && e.clientY === 0) return
+            setDragState(prev => prev ? { ...prev, x: e.clientX, y: e.clientY } : null)
+        }
+        const onDragEnd = () => {
+            dragStateRef.current = null
+            setDragState(null)
+        }
+        window.addEventListener('drag', onDrag)
+        window.addEventListener('dragend', onDragEnd)
+        return () => {
+            window.removeEventListener('drag', onDrag)
+            window.removeEventListener('dragend', onDragEnd)
+        }
+    }, [])
 
     // Close history dropdown khi click ngoài
     useEffect(() => {
@@ -860,6 +861,7 @@ export function GeneratePage() {
     )
 
     return (
+        <>  
         <TooltipProvider>
             <div className="relative flex flex-1 flex-col min-w-0">
                 {/* Nền sạch, không gradient blob */}
@@ -975,6 +977,19 @@ export function GeneratePage() {
                                             setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
                                             toast.success('Đã thêm vào ảnh tham chiếu')
                                         }}
+                                        onImageDragStart={(e, url) => {
+                                            e.dataTransfer.setData('text/plain', url)
+                                            // Ẩn native ghost
+                                            const emptyCanvas = document.createElement('canvas')
+                                            emptyCanvas.width = 1; emptyCanvas.height = 1
+                                            document.body.appendChild(emptyCanvas)
+                                            e.dataTransfer.setDragImage(emptyCanvas, 0, 0)
+                                            setTimeout(() => document.body.removeChild(emptyCanvas), 0)
+                                            // Kích hoạt custom floating overlay
+                                            const initial = { url, x: e.clientX, y: e.clientY }
+                                            dragStateRef.current = initial
+                                            setDragState(initial)
+                                        }}
                                         selectionMode={selectionMode}
                                         selectedIds={selectedIds}
                                         onToggleSelection={toggleSelection}
@@ -1041,31 +1056,16 @@ export function GeneratePage() {
                                                     draggable
                                                     onDragStart={(e) => {
                                                         e.dataTransfer.setData('text/plain', selectedImage.url)
-                                                        // Custom Drag Avatar
-                                                        const dragContainer = document.createElement('div')
-                                                        dragContainer.style.width = '120px'
-                                                        dragContainer.style.height = '120px'
-                                                        dragContainer.style.borderRadius = '12px'
-                                                        dragContainer.style.overflow = 'hidden'
-                                                        dragContainer.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
-                                                        dragContainer.style.border = '2px solid rgba(255,255,255,0.2)'
-                                                        dragContainer.style.position = 'absolute'
-                                                        dragContainer.style.top = '-1000px' // giấu đi
-                                                        
-                                                        const dragImg = document.createElement('img')
-                                                        dragImg.src = selectedImage.url
-                                                        dragImg.style.width = '100%'
-                                                        dragImg.style.height = '100%'
-                                                        dragImg.style.objectFit = 'cover'
-                                                        
-                                                        dragContainer.appendChild(dragImg)
-                                                        document.body.appendChild(dragContainer)
-                                                        
-                                                        // Đặt tâm của avatar ngay dưới con trỏ chuột
-                                                        e.dataTransfer.setDragImage(dragContainer, 60, 60)
-                                                        
-                                                        // Dọn rác
-                                                        setTimeout(() => document.body.removeChild(dragContainer), 0)
+                                                        // Ẩn native ghost
+                                                        const emptyCanvas = document.createElement('canvas')
+                                                        emptyCanvas.width = 1; emptyCanvas.height = 1
+                                                        document.body.appendChild(emptyCanvas)
+                                                        e.dataTransfer.setDragImage(emptyCanvas, 0, 0)
+                                                        setTimeout(() => document.body.removeChild(emptyCanvas), 0)
+                                                        // Kích hoạt custom floating overlay
+                                                        const initial = { url: selectedImage.url, x: e.clientX, y: e.clientY }
+                                                        dragStateRef.current = initial
+                                                        setDragState(initial)
                                                     }}
                                                 />
                                             </Zoom>
@@ -1515,5 +1515,68 @@ export function GeneratePage() {
                 </div>
             </div>
         </TooltipProvider>
+
+        {/* === CUSTOM DRAG AVATAR PORTAL === */}
+        {dragState && typeof document !== 'undefined' && createPortal(
+            <div
+                className="fixed pointer-events-none z-[9999]"
+                style={{
+                    left: dragState.x,
+                    top: dragState.y,
+                    transform: 'translate(-50%, -50%)',
+                    animation: 'drag-wobble 0.8s ease-in-out infinite alternate',
+                }}
+            >
+                <div
+                    style={{
+                        width: 110,
+                        height: 110,
+                        borderRadius: 14,
+                        overflow: 'hidden',
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.6), 0 0 0 2px rgba(255,255,255,0.15)',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        transform: 'rotate(-4deg) scale(1.05)',
+                    }}
+                >
+                    <img
+                        src={dragState.url}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        alt=""
+                    />
+                </div>
+                {/* small badge khi nó đang khửng */}
+                <div style={{
+                    position: 'absolute',
+                    bottom: -6,
+                    right: -6,
+                    background: 'hsl(var(--primary))',
+                    color: 'hsl(var(--primary-foreground))',
+                    borderRadius: '50%',
+                    width: 24,
+                    height: 24,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                }}>
+                    +
+                </div>
+            </div>,
+            document.body
+        )}
+
+        {/* CSS for drag-wobble @keyframes */}
+        <style>{`
+            @keyframes drag-wobble {
+                0% { transform: translate(-50%, -50%) rotate(-4deg) scale(1.05); }
+                25% { transform: translate(-50%, -50%) rotate(2deg) scale(1.08) translateY(-4px); }
+                50% { transform: translate(-50%, -50%) rotate(-2deg) scale(1.06) translateY(2px); }
+                75% { transform: translate(-50%, -50%) rotate(4deg) scale(1.09) translateY(-3px); }
+                100% { transform: translate(-50%, -50%) rotate(-3deg) scale(1.07) translateY(1px); }
+            }
+        `}</style>
+        </>
     )
 }
