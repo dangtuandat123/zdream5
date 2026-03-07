@@ -1371,18 +1371,17 @@ export function GeneratePage() {
                         {/* Batch Action Bar — bám dính trên prompt bar, giống history dropdown */}
                         {selectionMode && selectedIds.size > 0 && (
                             <div className="absolute bottom-full mb-1 left-0 right-0 z-50 flex justify-center animate-in slide-in-from-bottom-2 fade-in duration-200">
-                                <div className="flex items-center gap-2 bg-popover text-popover-foreground border border-border rounded-2xl px-4 py-2 shadow-2xl">
-                                    <span className="text-sm font-medium whitespace-nowrap pl-1">Chọn {selectedIds.size}</span>
-                                    <div className="w-px h-4 bg-border mx-1" />
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 sm:w-auto px-0 sm:px-3 text-xs rounded-lg sm:gap-1.5" title="Tải xuống" onClick={handleBatchDownload}>
-                                        <Download className="size-3.5" /> <span className="hidden sm:inline">Tải xuống</span>
+                                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 bg-popover text-popover-foreground border border-border rounded-xl sm:rounded-2xl px-3 py-2 shadow-2xl max-w-[calc(100vw-2rem)]">
+                                    <span className="text-sm font-medium whitespace-nowrap pl-1 pr-1.5 flex-[1_0_100%] text-center sm:flex-auto sm:text-left border-b sm:border-b-0 pb-1.5 mb-0.5 sm:pb-0 sm:mb-0 border-border/50">Chọn {selectedIds.size} ảnh</span>
+                                    <div className="w-px h-4 bg-border mx-1 hidden sm:block" />
+                                    <Button size="sm" variant="ghost" className="h-8 text-[11px] sm:text-xs rounded-lg gap-1.5 px-2.5 sm:px-3 bg-muted/30 sm:bg-transparent" onClick={handleBatchDownload}>
+                                        <Download className="size-3.5" /> <span>Tải xuống</span>
                                     </Button>
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 sm:w-auto px-0 sm:px-3 text-xs rounded-lg sm:gap-1.5 text-primary hover:text-primary hover:bg-primary/10" title="Thêm tham chiếu" onClick={handleBatchAddReference}>
-                                        <ImageIcon className="size-3.5" /> <span className="hidden sm:inline">Thêm tham chiếu</span>
+                                    <Button size="sm" variant="ghost" className="h-8 text-[11px] sm:text-xs rounded-lg gap-1.5 px-2.5 sm:px-3 text-primary hover:text-primary hover:bg-primary/10 bg-primary/5 sm:bg-transparent" onClick={handleBatchAddReference}>
+                                        <ImageIcon className="size-3.5" /> <span>Thêm tham chiếu</span>
                                     </Button>
-                                    <div className="w-px h-4 bg-border mx-1" />
-                                    <Button size="sm" variant="ghost" className="h-8 w-8 sm:w-auto px-0 sm:px-3 text-xs rounded-lg sm:gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10" title="Xoá" onClick={handleBatchDelete}>
-                                        <Trash2 className="size-3.5" /> <span className="hidden sm:inline">Xoá</span>
+                                    <Button size="sm" variant="ghost" className="h-8 text-[11px] sm:text-xs rounded-lg gap-1.5 px-2.5 sm:px-3 text-destructive hover:text-destructive hover:bg-destructive/10 bg-destructive/5 sm:bg-transparent" onClick={handleBatchDelete}>
+                                        <Trash2 className="size-3.5" /> <span>Xoá</span>
                                     </Button>
                                 </div>
                             </div>
