@@ -593,9 +593,9 @@ export function GeneratePage() {
         setIsGenerating(true)
         setGenerateProgress(0)
 
-        // Parse @anh1, @anh2... in prompt → [Ảnh tham chiếu X]
+        // Parse @Ảnh 1, @Ảnh 2... in prompt → [Ảnh tham chiếu X]
         let finalPrompt = prompt.trim()
-        const anhRegex = /@anh(\d+)/g
+        const anhRegex = /@Ảnh (\d+)/g
         finalPrompt = finalPrompt.replace(anhRegex, (_match, p1) => {
             const index = parseInt(p1, 10)
             if (index > 0 && index <= referenceImages.length) {
@@ -1264,8 +1264,8 @@ export function GeneratePage() {
                                                 </Button>
                                             </div>
                                             <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
-                                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@anh\d+)/g).map((part, i) =>
-                                                    /^(\[Ảnh tham chiếu \d+\]|@anh\d+)$/.test(part)
+                                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)/g).map((part, i) =>
+                                                    /^(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)$/.test(part)
                                                         ? <span key={i} className="text-primary bg-primary/15 rounded px-1 py-0.5 text-xs font-medium">{part}</span>
                                                         : <span key={i}>{part}</span>
                                                 )}
@@ -1487,7 +1487,7 @@ export function GeneratePage() {
                                                         key={idx}
                                                         className="group flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-white/[0.08] transition-all duration-150 text-left"
                                                         onClick={() => {
-                                                            const mention = `@anh${idx + 1} `
+                                                            const mention = `@Ảnh ${idx + 1} `
                                                             const pos = mentionInsertPosRef.current
                                                             const before = prompt.slice(0, pos)
                                                             const after = prompt.slice(pos + 1)
@@ -1511,7 +1511,7 @@ export function GeneratePage() {
                                                         </div>
                                                         <div className="flex flex-col min-w-0">
                                                             <span className="text-[13px] font-medium text-foreground/90 group-hover:text-foreground transition-colors">Ảnh {idx + 1}</span>
-                                                            <span className="text-[10px] text-muted-foreground/50 font-mono">@anh{idx + 1}</span>
+                                                            <span className="text-[10px] text-muted-foreground/50 font-mono">@Ảnh {idx + 1}</span>
                                                         </div>
                                                         <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <div className="text-[10px] text-primary/70 bg-primary/10 rounded-md px-1.5 py-0.5 font-medium">Chèn</div>
@@ -1531,8 +1531,8 @@ export function GeneratePage() {
                                         style={{ fontFamily: 'inherit', wordBreak: 'break-word', overflowWrap: 'break-word' }}
                                         aria-hidden="true"
                                     >
-                                        {prompt ? prompt.split(/(@anh\d+)/g).map((part, i) =>
-                                            /^@anh\d+$/.test(part)
+                                        {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
+                                            /^@Ảnh \d+$/.test(part)
                                                 ? <span key={i} className="text-primary bg-primary/15 rounded">{part}</span>
                                                 : <span key={i} className="text-foreground">{part}</span>
                                         ) : null}
@@ -1584,7 +1584,7 @@ export function GeneratePage() {
                                             if (cursor === selEnd && cursor > 0) {
                                                 // Tìm mention pattern trước cursor
                                                 const textBefore = prompt.slice(0, cursor)
-                                                const mentionMatch = textBefore.match(/@anh\d+\s?$/)
+                                                const mentionMatch = textBefore.match(/@Ảnh \d+\s?$/)
                                                 if (mentionMatch) {
                                                     e.preventDefault()
                                                     const mentionStart = cursor - mentionMatch[0].length
