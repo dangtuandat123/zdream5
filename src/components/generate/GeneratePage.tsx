@@ -140,6 +140,7 @@ type GalleryItem =
 interface JustifiedRow {
     items: GalleryItem[]
     height: number
+    isLastRow?: boolean
 }
 
 function computeRows(items: GalleryItem[], containerWidth: number, targetHeight: number, gap: number): JustifiedRow[] {
@@ -182,9 +183,24 @@ function computeRows(items: GalleryItem[], containerWidth: number, targetHeight:
         }
     }
 
-    // Hàng cuối — giữ target height, không kéo giãn
+    // Hàng cuối
     if (currentItems.length > 0) {
-        rows.push({ items: currentItems, height: targetHeight })
+        const isMobile = containerWidth < 640
+
+        if (isMobile) {
+            // Tính rowH lý tưởng sao cho tổng chiều rộng của các ảnh chính xác bằng width container.
+            // (w1 + w2 + ... + wn) + (n-1)*gap = containerWidth
+            // => rowH * sumRatios + gaps = containerWidth
+            // => rowH = (containerWidth - gaps) / sumRatios
+            const gapsWidth = (currentItems.length - 1) * gap
+            const rowH = (containerWidth - gapsWidth) / currentSumRatios
+            
+            // Ép buộc dùng rowH này để giữ aspect ratio hoàn hảo
+            rows.push({ items: currentItems, height: rowH })
+        } else {
+            // Trên desktop: Giữ targetHeight cố định
+            rows.push({ items: currentItems, height: targetHeight })
+        }
     }
 
     return rows
@@ -237,7 +253,8 @@ function JustifiedGallery({
                 <div key={rowIdx} className="flex w-full" style={{ gap: `${gap}px` }}>
                     {row.items.map((item) => {
                         const w = row.height * item.ratio
-                        const itemStyle = {
+
+                        const itemStyle: React.CSSProperties = {
                             width: `${w}px`,
                             height: `${row.height}px`,
                             flexShrink: 1,
