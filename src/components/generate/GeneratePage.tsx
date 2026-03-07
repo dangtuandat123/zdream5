@@ -1510,24 +1510,27 @@ export function GeneratePage() {
                                     </div>
                                 )}
 
-                                {/* Highlight overlay — hiển thị text với @mention màu nổi bật */}
-                                {/* Overlay nằm CHÍNH XÁC trùng với textarea bên dưới */}
+                                {/* @Mention Highlight — textarea text ẩn, overlay render toàn bộ text */}
                                 <div className="relative">
+                                    {/* Overlay: render toàn bộ text, mention = màu primary, text thường = màu foreground */}
                                     <div
-                                        className="absolute inset-0 pointer-events-none px-3 text-[15px] leading-relaxed py-2 overflow-hidden whitespace-pre-wrap break-words z-20"
+                                        className="absolute inset-0 pointer-events-none px-3 text-[15px] leading-relaxed py-2 overflow-hidden whitespace-pre-wrap break-words"
+                                        style={{ fontFamily: 'inherit', wordBreak: 'break-word', overflowWrap: 'break-word' }}
                                         aria-hidden="true"
                                     >
                                         {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
                                             /^@Ảnh \d+$/.test(part)
                                                 ? <span key={i} className="text-primary font-semibold bg-primary/10 rounded px-0.5">{part}</span>
-                                                : <span key={i} className="invisible">{part}</span>
+                                                : <span key={i} className="text-foreground">{part}</span>
                                         ) : null}
                                     </div>
 
+                                    {/* Textarea: text trong suốt, chỉ hiện caret (con trỏ) */}
                                     <textarea
                                         ref={textareaRef}
                                         placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                        className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto relative z-10"
+                                        className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto relative"
+                                        style={{ color: 'transparent', caretColor: 'white' }}
                                     rows={1}
                                     value={prompt}
                                     onChange={(e) => {
