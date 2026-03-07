@@ -1264,7 +1264,11 @@ export function GeneratePage() {
                                                 </Button>
                                             </div>
                                             <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
-                                                {selectedImage.prompt}
+                                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)/g).map((part, i) =>
+                                                    /^(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)$/.test(part)
+                                                        ? <span key={i} className="text-primary bg-primary/15 rounded px-1 py-0.5 text-xs font-medium">{part}</span>
+                                                        : <span key={i}>{part}</span>
+                                                )}
                                             </div>
                                         </div>
 
@@ -1290,6 +1294,7 @@ export function GeneratePage() {
                                                         {selectedImage.referenceImages.map((src, i) => (
                                                             <div key={i} className="aspect-square relative group">
                                                                 <img src={src} className="absolute inset-0 w-full h-full rounded-xl object-cover border border-border/40" alt="ref" />
+                                                                <div className="absolute top-0.5 left-0.5 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold size-3.5 rounded-full flex items-center justify-center border border-white/20">{i + 1}</div>
                                                             </div>
                                                         ))}
                                                     </div>
