@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "sonner";
 import LandingPage from "@/pages/LandingPage";
 import { Login } from "@/components/auth/Login";
 import { Register } from "@/components/auth/Register";
@@ -13,6 +14,7 @@ import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute";
 function App() {
   return (
     <Router>
+      <Toaster theme="dark" position="top-right" richColors closeButton />
       <Routes>
 
         {/* Public Routes with standard Layout */}
@@ -46,3 +48,4 @@ function App() {
 }
 
 export default App;
+

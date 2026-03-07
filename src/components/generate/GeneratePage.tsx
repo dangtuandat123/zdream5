@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react"
+import { toast } from "sonner"
 import {
     Wand2,
     Download,
@@ -19,6 +20,11 @@ import {
     Check,
     Plus,
     Copy,
+    ChevronLeft,
+    ChevronRight,
+    History,
+    CheckSquare,
+    Dices,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -65,6 +71,17 @@ import {
     DialogContent,
     DialogTitle,
 } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import Zoom from 'react-medium-image-zoom'
@@ -76,6 +93,8 @@ interface GeneratedImage {
     batchId: string
     url: string
     prompt: string
+    negativePrompt?: string
+    seed: number
     model: string
     style: string
     aspectRatio: number
@@ -85,7 +104,33 @@ interface GeneratedImage {
     isNew?: boolean
 }
 
+// === Prompt History (localStorage) ===
+const HISTORY_KEY = 'zdream-prompt-history'
+const MAX_HISTORY = 10
+function getPromptHistory(): string[] {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') } catch { return [] }
+}
+function savePromptToHistory(p: string) {
+    const h = getPromptHistory().filter(x => x !== p)
+    h.unshift(p)
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h.slice(0, MAX_HISTORY)))
+}
 
+// === Download helper ===
+async function downloadImage(url: string, filename: string) {
+    try {
+        const res = await fetch(url)
+        const blob = await res.blob()
+        const a = document.createElement('a')
+        a.href = URL.createObjectURL(blob)
+        a.download = filename
+        a.click()
+        URL.revokeObjectURL(a.href)
+        // silent
+    } catch {
+        // silent
+    }
+}
 
 // === Justified Gallery Component ===
 type GalleryItem =
@@ -151,12 +196,22 @@ function JustifiedGallery({
     gap,
     onSelectImage,
     onDeleteImage,
+    onDownloadImage,
+    selectionMode,
+    selectedIds,
+    onToggleSelection,
+    progress,
 }: {
     items: GalleryItem[]
     targetHeight: number
     gap: number
     onSelectImage: (img: GeneratedImage) => void
     onDeleteImage: (id: string) => void
+    onDownloadImage: (url: string, id: string) => void
+    selectionMode: boolean
+    selectedIds: Set<string>
+    onToggleSelection: (id: string) => void
+    progress: number
 }) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [containerWidth, setContainerWidth] = useState(0)
@@ -177,16 +232,10 @@ function JustifiedGallery({
     const rows = computeRows(items, containerWidth, targetHeight, gap)
 
     return (
-        <div ref={containerRef} className="w-full overflow-hidden">
+        <div ref={containerRef} className="w-full flex flex-col" style={{ gap: `${gap}px` }}>
             {rows.map((row, rowIdx) => (
-                <div
-                    key={rowIdx}
-                    className="flex"
-                    style={{ gap: `${gap}px`, marginBottom: `${gap}px` }}
-                >
-                    {row.items.map(item => {
-                        // Pixel width chính xác = height × ratio → đúng tỉ lệ
-                        // flex-shrink: 1 → co lại mượt khi sidebar mở (tạm thời, cho đến khi ResizeObserver recompute)
+                <div key={rowIdx} className="flex w-full" style={{ gap: `${gap}px` }}>
+                    {row.items.map((item) => {
                         const w = row.height * item.ratio
                         const itemStyle = {
                             width: `${w}px`,
@@ -208,23 +257,33 @@ function JustifiedGallery({
 
                                     <div className="flex flex-col items-center gap-3 z-10">
                                         <Wand2 className="size-6 text-muted-foreground/40 animate-pulse" />
-                                        <div className="flex gap-1.5">
+                                        <div className="flex gap-1.5 items-center">
                                             <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
                                             <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
                                             <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            <span className="text-[10px] text-muted-foreground/50 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
                                         </div>
+                                    </div>
+
+                                    {/* Progress bar dưới cùng */}
+                                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/30">
+                                        <div
+                                            className="h-full bg-primary/60 transition-all duration-200 ease-out rounded-full"
+                                            style={{ width: `${Math.min(progress, 100)}%` }}
+                                        />
                                     </div>
                                 </div>
                             )
                         }
 
                         const img = item.img
+                        const isSelected = selectedIds.has(img.id)
                         return (
                             <div
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
                                 style={itemStyle}
-                                onClick={() => onSelectImage(img)}
+                                onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
                             >
                                 <img
                                     src={img.url}
@@ -232,8 +291,16 @@ function JustifiedGallery({
                                     className="h-full w-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+
+                                {/* Batch selection checkbox */}
+                                {selectionMode && (
+                                    <div className={`absolute top-2 left-2 size-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-white/70 bg-black/30'}`}>
+                                        {isSelected && <Check className="size-3 text-primary-foreground" />}
+                                    </div>
+                                )}
+
                                 <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                    <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation() }}>
+                                    <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDownloadImage(img.url, img.id) }}>
                                         <Download className="size-3 text-white" />
                                     </Button>
                                     <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDeleteImage(img.id) }}>
@@ -281,10 +348,52 @@ export function GeneratePage() {
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
     const [isCopied, setIsCopied] = useState(false)
 
-    // Reset copied state when image changes
+    // New states for 12 upgrades
+    const [negativePrompt, setNegativePrompt] = useState("")
+    const [seed, setSeed] = useState<number>(() => Math.floor(Math.random() * 999999999))
+    const [generateProgress, setGenerateProgress] = useState(0)
+    const [selectionMode, setSelectionMode] = useState(false)
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+    const [promptHistory, setPromptHistory] = useState<string[]>(getPromptHistory)
+    const [showHistory, setShowHistory] = useState(false)
+    const [isDragging, setIsDragging] = useState(false)
+    const [showZoomHint, setShowZoomHint] = useState(true)
+    const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const historyRef = useRef<HTMLDivElement>(null)
+    // State cho xác nhận xoá: 'single' hoặc 'batch'
+    const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'single'; id: string } | { type: 'batch' } | null>(null)
+
+    // Reset copied + zoom hint khi image thay đổi
     useEffect(() => {
         setIsCopied(false)
+        if (selectedImage) setShowZoomHint(true)
     }, [selectedImage])
+
+    // Auto-hide zoom hint sau 3s khi mở Dialog
+    useEffect(() => {
+        if (!selectedImage || !showZoomHint) return
+        const t = setTimeout(() => setShowZoomHint(false), 3000)
+        return () => clearTimeout(t)
+    }, [selectedImage, showZoomHint])
+
+    // Close history dropdown khi click ngoài
+    useEffect(() => {
+        if (!showHistory) return
+        const handler = (e: MouseEvent) => {
+            if (historyRef.current && !historyRef.current.contains(e.target as Node)) {
+                setShowHistory(false)
+            }
+        }
+        document.addEventListener('mousedown', handler)
+        return () => document.removeEventListener('mousedown', handler)
+    }, [showHistory])
+
+    // Cleanup progress interval on unmount
+    useEffect(() => {
+        return () => {
+            if (progressIntervalRef.current) clearInterval(progressIntervalRef.current)
+        }
+    }, [])
 
     // --- Prompt Bar refs ---
     const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -309,18 +418,40 @@ export function GeneratePage() {
     const handleGenerate = useCallback(() => {
         if (!prompt.trim() || isGenerating) return
         setIsGenerating(true)
+        setGenerateProgress(0)
+
+        // Lưu prompt vào history
+        savePromptToHistory(prompt.trim())
+        setPromptHistory(getPromptHistory())
 
         const count = parseInt(imageCount)
         const ar = getAspectRatio(aspectRatioValue)
         const batchId = `batch-${Date.now()}`
+        const currentSeed = seed
+        const currentNeg = negativePrompt.trim()
+        const currentRefs = [...referenceImages]
+
+        // Progress simulation (0 → 95% trong 2.3s)
+        const interval = setInterval(() => {
+            setGenerateProgress(prev => {
+                if (prev >= 95) { clearInterval(interval); return 95 }
+                return prev + Math.random() * 8 + 2
+            })
+        }, 100)
+        progressIntervalRef.current = interval
 
         setTimeout(() => {
-            const currentRefs = [...referenceImages]
+            clearInterval(interval)
+            progressIntervalRef.current = null
+            setGenerateProgress(100)
+
             const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
                 id: `img-${Date.now()}-${i}`,
                 batchId,
                 url: getDemoUrl(aspectRatioValue, Date.now() + i),
                 prompt: prompt.trim(),
+                negativePrompt: currentNeg || undefined,
+                seed: currentSeed + i,
                 model,
                 style,
                 aspectRatio: ar.ratio,
@@ -332,6 +463,10 @@ export function GeneratePage() {
 
             setImages((prev) => [...newImages, ...prev])
             setIsGenerating(false)
+            setGenerateProgress(0)
+            // Auto-randomize seed cho lần tạo tiếp theo
+            setSeed(Math.floor(Math.random() * 999999999))
+            // Ảnh đã hiển thị trong gallery, không cần toast
 
             // Tự tắt highlight sau 5 giây
             const newIds = newImages.map((img) => img.id)
@@ -343,19 +478,91 @@ export function GeneratePage() {
                 )
             }, 5000)
         }, 2500)
-    }, [prompt, isGenerating, imageCount, images.length, model, style, aspectRatioValue])
+    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages])
 
     const handleDelete = useCallback((id: string) => {
-        setImages((prev) => prev.filter((img) => img.id !== id))
-        if (selectedImage?.id === id) setSelectedImage(null)
-    }, [selectedImage])
+        setDeleteConfirm({ type: 'single', id })
+    }, [])
+
+    // Xác nhận xoá thực sự
+    const confirmDelete = useCallback(() => {
+        if (!deleteConfirm) return
+        if (deleteConfirm.type === 'single') {
+            setImages(prev => prev.filter(img => img.id !== deleteConfirm.id))
+            if (selectedImage?.id === deleteConfirm.id) setSelectedImage(null)
+            toast('Đã xoá ảnh', { icon: '🗑️' })
+        } else {
+            setImages(prev => prev.filter(img => !selectedIds.has(img.id)))
+            if (selectedImage && selectedIds.has(selectedImage.id)) setSelectedImage(null)
+            toast(`Đã xoá ${selectedIds.size} ảnh`, { icon: '🗑️' })
+            setSelectedIds(new Set())
+            setSelectionMode(false)
+        }
+        setDeleteConfirm(null)
+    }, [deleteConfirm, selectedImage, selectedIds])
 
     const handleRegenerate = useCallback((img: GeneratedImage) => {
         setPrompt(img.prompt)
+        if (img.negativePrompt) setNegativePrompt(img.negativePrompt)
         setModel(img.model)
         setStyle(img.style)
         setSelectedImage(null)
     }, [])
+
+    // Keyboard navigation trong Dialog (← →)
+    useEffect(() => {
+        if (!selectedImage) return
+        const handler = (e: KeyboardEvent) => {
+            const idx = images.findIndex(img => img.id === selectedImage.id)
+            if (idx === -1) return
+            if (e.key === 'ArrowLeft' && idx > 0) {
+                setSelectedImage(images[idx - 1])
+            } else if (e.key === 'ArrowRight' && idx < images.length - 1) {
+                setSelectedImage(images[idx + 1])
+            }
+        }
+        window.addEventListener('keydown', handler)
+        return () => window.removeEventListener('keydown', handler)
+    }, [selectedImage, images])
+
+    // Batch actions
+    const toggleSelection = useCallback((id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev)
+            if (next.has(id)) next.delete(id); else next.add(id)
+            return next
+        })
+    }, [])
+    const handleBatchDelete = useCallback(() => {
+        setDeleteConfirm({ type: 'batch' })
+    }, [])
+    const handleBatchDownload = useCallback(async () => {
+        const toDownload = images.filter(img => selectedIds.has(img.id))
+        for (const img of toDownload) {
+            await downloadImage(img.url, `zdream-${img.id}.jpg`) // silent, không toast từng ảnh
+        }
+        // silent
+        setSelectedIds(new Set())
+        setSelectionMode(false)
+    }, [images, selectedIds])
+
+    // Drag & drop reference images
+    const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true) }
+    const handleDragLeave = (e: React.DragEvent) => {
+        // Chỉ ẩn khi rời khỏi container thực sự, không phải child elements
+        if (e.currentTarget.contains(e.relatedTarget as Node)) return
+        setIsDragging(false)
+    }
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault()
+        setIsDragging(false)
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
+        if (files.length > 0) {
+            const urls = files.map(f => URL.createObjectURL(f))
+            setReferenceImages(prev => [...prev, ...urls])
+            // silent
+        }
+    }
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || [])
@@ -514,6 +721,42 @@ export function GeneratePage() {
                 <Label htmlFor="hr" className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">HD (2x)</Label>
                 <Switch id="hr" checked={highRes} onCheckedChange={setHighRes} />
             </div>
+
+            <Separator />
+
+            {/* Negative Prompt */}
+            <div className="space-y-2">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Negative Prompt</Label>
+                <textarea
+                    placeholder="mờ, nhòe, chữ, watermark, chất lượng thấp..."
+                    className="w-full resize-none border border-border/50 bg-muted/20 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/40 min-h-[60px] max-h-[100px] overflow-y-auto custom-scrollbar"
+                    value={negativePrompt}
+                    onChange={(e) => setNegativePrompt(e.target.value)}
+                />
+                <p className="text-[10px] text-muted-foreground/60">Những gì AI nên tránh khi tạo ảnh.</p>
+            </div>
+
+            {/* Seed */}
+            <div className="space-y-2">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Seed</Label>
+                <div className="flex gap-2">
+                    <Input
+                        type="number"
+                        className="h-8 text-sm text-foreground flex-1"
+                        value={seed}
+                        onChange={(e) => setSeed(parseInt(e.target.value) || 0)}
+                    />
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs shrink-0"
+                        onClick={() => setSeed(Math.floor(Math.random() * 999999999))}
+                    >
+                        <Dices className="size-3.5 mr-1" /> Random
+                    </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground/60">Cùng seed sẽ cho kết quả tương tự.</p>
+            </div>
         </div>
     )
 
@@ -546,8 +789,8 @@ export function GeneratePage() {
                                     ZDream biến mọi giới hạn của ngôn từ thành những không gian thị giác vô tận.
                                 </p>
 
-                                {/* Creative Suggestion Cards */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-4xl w-full">
+                                {/* Creative Suggestion Cards — Responsive: 2 on mobile */}
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-4xl w-full">
                                     {[
                                         { tag: "Nghệ thuật", title: "Sơn dầu trừu tượng", desc: "Sắc màu rực rỡ, nét cọ mạnh mẽ", icon: "M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.866 8.21 8.21 0 003 2.48z" },
                                         { tag: "Tương lai", title: "Thành phố Cyberpunk", desc: "Neon, mưa kỹ thuật số, công nghệ cao", icon: "M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" },
@@ -571,7 +814,7 @@ export function GeneratePage() {
                                             <span className="text-sm font-semibold text-foreground/90 mb-1.5 z-10 transition-colors group-hover:text-primary">
                                                 {item.title}
                                             </span>
-                                            <span className="text-xs text-muted-foreground/70 pr-4 leading-relaxed z-10">
+                                            <span className="text-xs text-muted-foreground/70 pr-4 leading-relaxed z-10 hidden sm:block">
                                                 {item.desc}
                                             </span>
                                         </button>
@@ -601,13 +844,41 @@ export function GeneratePage() {
                             }
 
                             return (
-                                <JustifiedGallery
-                                    items={items}
-                                    targetHeight={TARGET_H}
-                                    gap={GAP}
-                                    onSelectImage={setSelectedImage}
-                                    onDeleteImage={handleDelete}
-                                />
+                                <div className="flex flex-col gap-3">
+                                    {/* Stats bar */}
+                                    {images.length > 0 && (
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-xs text-muted-foreground">
+                                                {images.length} ảnh đã tạo
+                                            </span>
+                                            <div className="flex items-center gap-2">
+                                                <Button
+                                                    variant={selectionMode ? "secondary" : "ghost"}
+                                                    size="sm"
+                                                    className="h-7 text-xs rounded-full px-3"
+                                                    onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()) }}
+                                                >
+                                                    <CheckSquare className="size-3.5 mr-1.5" />
+                                                    {selectionMode ? "Bỏ chọn" : "Chọn"}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <JustifiedGallery
+                                        items={items}
+                                        targetHeight={TARGET_H}
+                                        gap={GAP}
+                                        onSelectImage={setSelectedImage}
+                                        onDeleteImage={handleDelete}
+                                        onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
+                                        selectionMode={selectionMode}
+                                        selectedIds={selectedIds}
+                                        onToggleSelection={toggleSelection}
+                                        progress={generateProgress}
+                                    />
+
+                                </div>
                             )
                         })()}
                     </div>
@@ -615,13 +886,34 @@ export function GeneratePage() {
 
                 {/* === IMAGE VIEWER — Dialog modal === */}
                 <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-                    {selectedImage && (
+                    {selectedImage && (() => {
+                        const currentIdx = images.findIndex(img => img.id === selectedImage.id)
+                        return (
                         <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl">
                             <DialogTitle className="sr-only">Chi tiết hình ảnh</DialogTitle>
                             <div className="flex flex-col lg:flex-row h-full overflow-hidden w-full">
 
-                                {/* Ảnh */}
-                                <div className="h-[45vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8">
+                                {/* Ảnh + Nav arrows */}
+                                <div className="h-[45vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8 group/viewer">
+                                    {/* Nav arrow Left (← ảnh mới hơn, index - 1) */}
+                                    {currentIdx > 0 && (
+                                        <button
+                                            className="absolute left-2 lg:left-4 top-1/2 -translate-y-1/2 z-20 size-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg sm:opacity-0 sm:group-hover/viewer:opacity-100 transition-opacity hover:bg-background"
+                                            onClick={() => setSelectedImage(images[currentIdx - 1])}
+                                        >
+                                            <ChevronLeft className="size-5" />
+                                        </button>
+                                    )}
+                                    {/* Nav arrow Right (→ ảnh cũ hơn, index + 1) */}
+                                    {currentIdx < images.length - 1 && (
+                                        <button
+                                            className="absolute right-2 lg:right-4 top-1/2 -translate-y-1/2 z-20 size-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg sm:opacity-0 sm:group-hover/viewer:opacity-100 transition-opacity hover:bg-background"
+                                            onClick={() => setSelectedImage(images[currentIdx + 1])}
+                                        >
+                                            <ChevronRight className="size-5" />
+                                        </button>
+                                    )}
+
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
                                     <div className="relative flex max-w-full max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5">
 
@@ -654,7 +946,19 @@ export function GeneratePage() {
                                                     Xem chuẩn gốc
                                                 </div>
                                             </div>
+
+                                            {/* Mobile zoom hint — auto-hide được xử lý bởi useEffect */}
+                                            {isMobile && showZoomHint && (
+                                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full animate-pulse pointer-events-none z-20">
+                                                    Chạm để phóng to
+                                                </div>
+                                            )}
                                         </div>
+                                    </div>
+
+                                    {/* Keyboard hint (desktop only) */}
+                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground/60 opacity-0 group-hover/viewer:opacity-100 transition-opacity hidden sm:block">
+                                        ← → để chuyển ảnh
                                     </div>
                                 </div>
 
@@ -671,6 +975,7 @@ export function GeneratePage() {
                                                     onClick={() => {
                                                         navigator.clipboard.writeText(selectedImage.prompt)
                                                         setIsCopied(true)
+                                                        toast.success('Đã sao chép prompt')
                                                         setTimeout(() => setIsCopied(false), 2000)
                                                     }}
                                                     title="Sao chép prompt"
@@ -686,6 +991,17 @@ export function GeneratePage() {
                                                 {selectedImage.prompt}
                                             </div>
                                         </div>
+
+                                        {/* Negative Prompt */}
+                                        {selectedImage.negativePrompt && (
+                                            <div className="flex flex-col gap-2">
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Negative Prompt</Label>
+                                                <div className="text-xs leading-relaxed bg-muted/30 p-3 rounded-lg max-h-[100px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap border border-border/30">
+                                                    {selectedImage.negativePrompt}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <Separator />
                                         {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
                                             <>
@@ -724,11 +1040,15 @@ export function GeneratePage() {
                                                     {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                                                 </p>
                                             </div>
+                                            <div>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Seed</Label>
+                                                <p className="text-xs font-medium mt-0.5 tabular-nums">{selectedImage.seed}</p>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-col gap-2 mt-auto">
-                                        <Button size="sm" className="w-full">
+                                        <Button size="sm" className="w-full" onClick={() => downloadImage(selectedImage.url, `zdream-${selectedImage.id}.jpg`)}>
                                             <Download className="mr-2 size-4" /> Tải xuống
                                         </Button>
                                         <Button size="sm" variant="outline" className="w-full">
@@ -746,15 +1066,91 @@ export function GeneratePage() {
                                 </div>
                             </div>
                         </DialogContent>
-                    )}
+                        )
+                    })()}
                 </Dialog>
+
+                {/* === XÁC NHẬN XOÁ === */}
+                <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+                    <AlertDialogContent size="sm">
+                        <AlertDialogHeader>
+                            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                <Trash2 />
+                            </AlertDialogMedia>
+                            <AlertDialogTitle>
+                                {deleteConfirm?.type === 'batch' ? `Xoá ${selectedIds.size} ảnh?` : 'Xoá ảnh này?'}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {deleteConfirm?.type === 'batch'
+                                    ? `Bạn có chắc muốn xoá ${selectedIds.size} ảnh đã chọn? Hành động này không thể hoàn tác.`
+                                    : 'Hành động này không thể hoàn tác. Ảnh sẽ bị xoá vĩnh viễn.'
+                                }
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel variant="outline">Huỷ</AlertDialogCancel>
+                            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
+                                Xoá
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
                 <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-4 pt-6">
                     <div className="relative w-full">
 
-                        {/* Pill Container */}
-                        <div className="relative flex flex-col w-full transition-all duration-300 border border-border/30 rounded-[22px]" style={{ backgroundColor: '#37393b' }}>
+                        {/* Batch Action Bar — bám dính trên prompt bar, giống history dropdown */}
+                        {selectionMode && selectedIds.size > 0 && (
+                            <div className="absolute bottom-full mb-1 left-0 right-0 z-50 flex justify-center animate-in slide-in-from-bottom-2 fade-in duration-200">
+                                <div className="flex items-center gap-2 bg-popover text-popover-foreground border border-border rounded-2xl px-4 py-2 shadow-2xl">
+                                    <span className="text-sm font-medium whitespace-nowrap pl-1">Đã chọn {selectedIds.size}</span>
+                                    <div className="w-px h-4 bg-border mx-1" />
+                                    <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5" onClick={handleBatchDownload}>
+                                        <Download className="size-3.5" /> Tải xuống
+                                    </Button>
+                                    <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleBatchDelete}>
+                                        <Trash2 className="size-3.5" /> Xoá
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Prompt History Dropdown */}
+                        {showHistory && promptHistory.length > 0 && (
+                            <div ref={historyRef} className="absolute bottom-full mb-1 left-0 right-0 bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
+                                <div className="p-1.5">
+                                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2.5 py-1.5">Lịch sử prompt</div>
+                                    {promptHistory.map((p, i) => (
+                                        <button
+                                            key={i}
+                                            className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors truncate"
+                                            onClick={() => { setPrompt(p); setShowHistory(false) }}
+                                        >
+                                            {p}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Pill Container — with Drag & Drop */}
+                        <div
+                            className={`relative flex flex-col w-full transition-all duration-300 border rounded-[22px] ${isDragging ? 'border-primary border-2 border-dashed' : 'border-border/30'}`}
+                            style={{ backgroundColor: '#37393b' }}
+                            onDragOver={handleDragOver}
+                            onDragLeave={handleDragLeave}
+                            onDrop={handleDrop}
+                        >
+                            {/* Drag overlay indicator */}
+                            {isDragging && (
+                                <div className="absolute inset-0 bg-primary/10 rounded-[22px] flex items-center justify-center z-30 pointer-events-none">
+                                    <div className="flex items-center gap-2 text-primary text-sm font-medium">
+                                        <Upload className="size-5" />
+                                        Thả ảnh tham chiếu vào đây
+                                    </div>
+                                </div>
+                            )}
 
                             {/* 1. Preview Ảnh Tham Chiếu (Top) — thu nhỏ khi compact */}
                             {referenceImages.length > 0 && (
@@ -806,6 +1202,23 @@ export function GeneratePage() {
                             {/* 3. Tools & Send Button (Bottom) */}
                             <div className="flex items-center justify-between px-3 pb-3">
                                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pr-2">
+                                    {/* Prompt History */}
+                                    {promptHistory.length > 0 && (
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className={`size-9 rounded-full text-muted-foreground hover:text-foreground ${showHistory ? 'bg-muted/40' : ''}`}
+                                                    onClick={() => setShowHistory(!showHistory)}
+                                                >
+                                                    <History className="size-[18px]" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top">Lịch sử prompt</TooltipContent>
+                                        </Tooltip>
+                                    )}
+
                                     {/* Image Upload */}
                                     {isMobile ? (
                                         <Drawer open={isImagePopoverOpen} onOpenChange={setIsImagePopoverOpen}>
