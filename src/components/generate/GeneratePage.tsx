@@ -306,16 +306,31 @@ function JustifiedGallery({
                                 draggable
                                 onDragStart={(e) => {
                                     e.dataTransfer.setData('text/plain', img.url)
-                                    // Optional: set drag image (ghost)
-                                    const dragIcon = document.createElement('img')
-                                    dragIcon.src = img.url
-                                    dragIcon.style.width = '100px'
-                                    dragIcon.style.height = '100px'
-                                    dragIcon.style.objectFit = 'cover'
-                                    dragIcon.style.borderRadius = '8px'
-                                    document.body.appendChild(dragIcon)
-                                    e.dataTransfer.setDragImage(dragIcon, 50, 50)
-                                    setTimeout(() => document.body.removeChild(dragIcon), 0)
+                                    // Custom Drag Avatar
+                                    const dragContainer = document.createElement('div')
+                                    dragContainer.style.width = '120px'
+                                    dragContainer.style.height = '120px'
+                                    dragContainer.style.borderRadius = '12px'
+                                    dragContainer.style.overflow = 'hidden'
+                                    dragContainer.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
+                                    dragContainer.style.border = '2px solid rgba(255,255,255,0.2)'
+                                    dragContainer.style.position = 'absolute'
+                                    dragContainer.style.top = '-1000px' // giấu đi
+                                    
+                                    const dragImg = document.createElement('img')
+                                    dragImg.src = img.url
+                                    dragImg.style.width = '100%'
+                                    dragImg.style.height = '100%'
+                                    dragImg.style.objectFit = 'cover'
+                                    
+                                    dragContainer.appendChild(dragImg)
+                                    document.body.appendChild(dragContainer)
+                                    
+                                    // Đặt tâm của avatar ngay dưới con trỏ chuột
+                                    e.dataTransfer.setDragImage(dragContainer, 60, 60)
+                                    
+                                    // Dọn rác
+                                    setTimeout(() => document.body.removeChild(dragContainer), 0)
                                 }}
                             >
                                 <img
@@ -1026,6 +1041,31 @@ export function GeneratePage() {
                                                     draggable
                                                     onDragStart={(e) => {
                                                         e.dataTransfer.setData('text/plain', selectedImage.url)
+                                                        // Custom Drag Avatar
+                                                        const dragContainer = document.createElement('div')
+                                                        dragContainer.style.width = '120px'
+                                                        dragContainer.style.height = '120px'
+                                                        dragContainer.style.borderRadius = '12px'
+                                                        dragContainer.style.overflow = 'hidden'
+                                                        dragContainer.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.3)'
+                                                        dragContainer.style.border = '2px solid rgba(255,255,255,0.2)'
+                                                        dragContainer.style.position = 'absolute'
+                                                        dragContainer.style.top = '-1000px' // giấu đi
+                                                        
+                                                        const dragImg = document.createElement('img')
+                                                        dragImg.src = selectedImage.url
+                                                        dragImg.style.width = '100%'
+                                                        dragImg.style.height = '100%'
+                                                        dragImg.style.objectFit = 'cover'
+                                                        
+                                                        dragContainer.appendChild(dragImg)
+                                                        document.body.appendChild(dragContainer)
+                                                        
+                                                        // Đặt tâm của avatar ngay dưới con trỏ chuột
+                                                        e.dataTransfer.setDragImage(dragContainer, 60, 60)
+                                                        
+                                                        // Dọn rác
+                                                        setTimeout(() => document.body.removeChild(dragContainer), 0)
                                                     }}
                                                 />
                                             </Zoom>
@@ -1234,18 +1274,23 @@ export function GeneratePage() {
 
                         {/* Pill Container — with Drag & Drop */}
                         <div
-                            className={`relative flex flex-col w-full transition-all duration-300 border rounded-[22px] ${isDragging ? 'border-primary border-2 border-dashed' : 'border-border/30'}`}
-                            style={{ backgroundColor: '#37393b' }}
+                            className={`relative flex flex-col w-full transition-all duration-300 border rounded-[22px] ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border-border/30'}`}
+                            style={{ backgroundColor: isDragging ? undefined : '#37393b' }}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
                         >
                             {/* Drag overlay indicator */}
                             {isDragging && (
-                                <div className="absolute inset-0 bg-primary/10 rounded-[22px] flex items-center justify-center z-30 pointer-events-none">
-                                    <div className="flex items-center gap-2 text-primary text-sm font-medium">
-                                        <Upload className="size-5" />
-                                        Thả ảnh tham chiếu vào đây
+                                <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] rounded-[22px] flex items-center justify-center z-30 pointer-events-none overflow-hidden hover:opacity-100">
+                                    {/* Shimmer background inside the dropzone */}
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                                    
+                                    <div className="flex flex-col items-center gap-3 text-primary relative z-10 animate-in zoom-in-95 duration-200">
+                                        <div className="size-14 rounded-full bg-primary/20 flex items-center justify-center animate-pulse ring-4 ring-primary/20">
+                                            <Upload className="size-6 text-primary" />
+                                        </div>
+                                        <span className="text-sm font-semibold tracking-wide shadow-sm">Thả ảnh tham chiếu vào đây</span>
                                     </div>
                                 </div>
                             )}
