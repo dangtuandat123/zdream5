@@ -19,6 +19,7 @@ import {
     Link,
     Upload,
     Check,
+    ImagePlus,
     Plus,
     Copy,
     ChevronLeft,
@@ -1473,16 +1474,26 @@ export function GeneratePage() {
 
                             {/* 2. Text Input (Middle) — with highlight overlay for @mentions */}
                             <div className="relative px-2 pt-2 pb-1">
-                                {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
-                                {showMentionPopover && referenceImages.length > 0 && (
+                                {/* @Mention popover — hiện khi gõ @ */}
+                                {showMentionPopover && (
                                     <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
                                         <div className="bg-popover/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)] p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
                                             <div className="flex items-center gap-1.5 px-2.5 py-1.5 mb-0.5">
                                                 <div className="size-1.5 rounded-full bg-primary animate-pulse" />
                                                 <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold">Ảnh tham chiếu</span>
                                             </div>
-                                            <div className="grid grid-cols-1 gap-0.5">
-                                                {referenceImages.map((src, idx) => (
+                                            
+                                            {referenceImages.length === 0 ? (
+                                                <div className="px-3 py-6 text-center flex flex-col items-center justify-center gap-2 border border-dashed border-white/10 rounded-xl bg-white/[0.02] mx-1 mb-1">
+                                                    <div className="size-8 rounded-full bg-muted/50 flex items-center justify-center">
+                                                        <ImagePlus className="size-4 text-muted-foreground/60" />
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground">Chưa có ảnh tham chiếu</p>
+                                                    <p className="text-[10px] text-muted-foreground/60">Tải ảnh lên để có thể gọi bằng @</p>
+                                                </div>
+                                            ) : (
+                                                <div className="grid grid-cols-1 gap-0.5">
+                                                    {referenceImages.map((src, idx) => (
                                                     <button
                                                         key={idx}
                                                         className="group flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-white/[0.08] transition-all duration-150 text-left"
@@ -1519,6 +1530,7 @@ export function GeneratePage() {
                                                     </button>
                                                 ))}
                                             </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -1551,9 +1563,9 @@ export function GeneratePage() {
                                         const cursorPos = e.target.selectionStart || 0
                                         setPrompt(newVal)
 
-                                        // Phát hiện nếu vừa gõ '@' và có ảnh tham chiếu
+                                        // Phát hiện nếu vừa gõ '@'
                                         const charBefore = newVal[cursorPos - 1]
-                                        if (charBefore === '@' && referenceImages.length > 0) {
+                                        if (charBefore === '@') {
                                             // Ghi lại vị trí '@' để thay thế khi chọn mention
                                             mentionInsertPosRef.current = cursorPos - 1
                                             setShowMentionPopover(true)
