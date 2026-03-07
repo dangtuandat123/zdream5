@@ -619,6 +619,21 @@ export function GeneratePage() {
         setSelectionMode(false)
     }, [images, selectedIds])
 
+    const handleBatchAddReference = useCallback(() => {
+        const toAdd = images.filter(img => selectedIds.has(img.id)).map(img => img.url)
+        setReferenceImages(prev => {
+            const newUrls = toAdd.filter(url => !prev.includes(url))
+            if (newUrls.length === 0) {
+                toast('Tất cả ảnh này đã có trong tham chiếu rồi', { icon: 'ℹ️' })
+                return prev
+            }
+            toast.success(`Đã thêm ${newUrls.length} ảnh vào tham chiếu`)
+            return [...prev, ...newUrls]
+        })
+        setSelectedIds(new Set())
+        setSelectionMode(false)
+    }, [images, selectedIds])
+
     // Drag & drop reference images
     const handleDragOver = (e: React.DragEvent) => {
         // Cần preventDefault để allow drop
@@ -1242,11 +1257,15 @@ export function GeneratePage() {
                         {selectionMode && selectedIds.size > 0 && (
                             <div className="absolute bottom-full mb-1 left-0 right-0 z-50 flex justify-center animate-in slide-in-from-bottom-2 fade-in duration-200">
                                 <div className="flex items-center gap-2 bg-popover text-popover-foreground border border-border rounded-2xl px-4 py-2 shadow-2xl">
-                                    <span className="text-sm font-medium whitespace-nowrap pl-1">Đã chọn {selectedIds.size}</span>
+                                    <span className="text-sm font-medium whitespace-nowrap pl-1">Chọn {selectedIds.size}</span>
                                     <div className="w-px h-4 bg-border mx-1" />
                                     <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5" onClick={handleBatchDownload}>
                                         <Download className="size-3.5" /> Tải xuống
                                     </Button>
+                                    <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5 text-primary hover:text-primary hover:bg-primary/10" onClick={handleBatchAddReference}>
+                                        <ImageIcon className="size-3.5" /> Thêm tham chiếu
+                                    </Button>
+                                    <div className="w-px h-4 bg-border mx-1" />
                                     <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleBatchDelete}>
                                         <Trash2 className="size-3.5" /> Xoá
                                     </Button>
