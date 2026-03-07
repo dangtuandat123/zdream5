@@ -475,7 +475,17 @@ export function GeneratePage() {
             const dy = touch.clientY - touchStartRef.current.startY
 
             if (!touchDragActiveRef.current) {
-                // Chưa active: kiểm tra ngưỡng di chuyển
+                // Chưa active: kiểm tra luồng di chuyển
+                const absDx = Math.abs(dx)
+                const absDy = Math.abs(dy)
+                
+                // Nếu người dùng cuộn dọc rõ ràng (lướt qua ảnh), huỷ ý định drag để cho phép native scroll
+                if (absDy > absDx && absDy > 5) {
+                    touchStartRef.current = null // Cancel drag intention
+                    return
+                }
+
+                // Nếu di chuyển đủ xa theo hướng ngang/chéo, kích hoạt drag
                 if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
                     touchDragActiveRef.current = true
                     const initial = { url: touchStartRef.current.url, x: touch.clientX, y: touch.clientY }
