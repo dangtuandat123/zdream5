@@ -519,11 +519,11 @@ export function GeneratePage() {
 
     return (
         <TooltipProvider>
-            <div className="relative flex flex-1 flex-col min-w-0 h-full overflow-hidden">
+            <div className="relative flex flex-1 flex-col min-w-0">
                 {/* Nền sạch, không gradient blob */}
 
                 {/* === CANVAS AREA — Gallery full-width, justified layout === */}
-                <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0 overflow-y-auto custom-scrollbar">
+                <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Premium AI Studio */}
                         {images.length === 0 && !isGenerating && (
@@ -749,8 +749,8 @@ export function GeneratePage() {
                     )}
                 </Dialog>
 
-                {/* === PROMPT BAR — fixed bottom, không scroll === */}
-                <div ref={promptContainerRef} className="shrink-0 z-50 mx-auto w-full max-w-3xl px-4 pb-4 pt-3">
+                {/* === PROMPT BAR — sticky dính đáy viewport === */}
+                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-4 pt-6">
                     <div className="relative w-full">
 
                         {/* Pill Container */}
