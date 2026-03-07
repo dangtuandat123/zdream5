@@ -306,7 +306,10 @@ function JustifiedGallery({
                             <div
                                 key={item.key}
                                 className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none touch-none [webkit-touch-callout:none] [-webkit-user-drag:none] ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
-                                style={itemStyle}
+                                style={{
+                                    ...itemStyle,
+                                    touchAction: 'none', // Bắt buộc browser không xử lý bất kỳ default gesture nào (scroll, pinch, long-press)
+                                }}
                                 onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
                                 onContextMenu={(e) => {
                                     // Chặn menu chuột phải / long press native trên mobile
@@ -324,6 +327,7 @@ function JustifiedGallery({
                                     src={img.url}
                                     alt={img.prompt}
                                     className="h-full w-full object-cover"
+                                    style={{ pointerEvents: 'none' }} // Chặn thẻ img bắt event, nhường hết cho thẻ div cha
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
 
