@@ -606,7 +606,7 @@ export function GeneratePage() {
     }
 
     const renderReferenceImageContent = () => (
-        <div className="flex-1 overflow-y-auto no-scrollbar pb-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar pb-4">
             <Tabs defaultValue="upload" className="w-full">
                 <div className="px-4 pt-3 pb-2">
                     <TabsList className="grid w-full grid-cols-2">
@@ -650,7 +650,7 @@ export function GeneratePage() {
     )
 
     const renderSettingsContent = () => (
-        <div className="space-y-4 px-4 pb-6 pt-4 overflow-y-auto no-scrollbar max-h-[70vh]">
+        <div className="space-y-4 px-4 pb-6 pt-4 overflow-y-auto custom-scrollbar max-h-[70vh]">
             {/* Model Select (Mobile Only) */}
             <div className="space-y-2 sm:hidden">
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Model</Label>
