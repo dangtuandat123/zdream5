@@ -590,8 +590,21 @@ export function GeneratePage() {
         setIsGenerating(true)
         setGenerateProgress(0)
 
+        // Parse @anh1, @anh2... in prompt to replace with clear reference tags
+        // e.g. "Mix @anh1 and @anh2" -> "Mix [Ảnh tham chiếu 1] and [Ảnh tham chiếu 2]"
+        let finalPrompt = prompt.trim()
+        const anhRegex = /@anh(\d+)/gi
+        finalPrompt = finalPrompt.replace(anhRegex, (match, p1) => {
+            const index = parseInt(p1, 10)
+            // Validating if the referenced image index exists (1-indexed)
+            if (index > 0 && index <= referenceImages.length) {
+                return `[Ảnh tham chiếu ${index}]`
+            }
+            return match // Return original if index is out of bounds
+        })
+
         // Lưu prompt vào history
-        savePromptToHistory(prompt.trim())
+        savePromptToHistory(finalPrompt)
         setPromptHistory(getPromptHistory())
 
         const count = parseInt(imageCount)
@@ -622,7 +635,7 @@ export function GeneratePage() {
                     id: `img-${Date.now()}-${i}`,
                     batchId,
                     url: getDemoUrl(aspectRatioValue, Date.now() + i),
-                    prompt: prompt.trim(),
+                    prompt: finalPrompt,
                     negativePrompt: currentNeg || undefined,
                     seed: currentSeed + i,
                     model,
