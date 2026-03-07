@@ -1470,39 +1470,47 @@ export function GeneratePage() {
                             <div className="relative px-2 pt-2 pb-1">
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && referenceImages.length > 0 && (
-                                    <div className="absolute bottom-full mb-1 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                                        <div className="bg-popover border border-border rounded-xl shadow-2xl p-2 max-h-[200px] overflow-y-auto custom-scrollbar">
-                                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2 py-1">Chọn ảnh tham chiếu</div>
+                                    <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
+                                        <div className="bg-popover/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)] p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
+                                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 mb-0.5">
+                                                <div className="size-1.5 rounded-full bg-primary animate-pulse" />
+                                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold">Ảnh tham chiếu</span>
+                                            </div>
                                             <div className="grid grid-cols-1 gap-0.5">
                                                 {referenceImages.map((src, idx) => (
                                                     <button
                                                         key={idx}
-                                                        className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left"
+                                                        className="group flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-white/[0.08] transition-all duration-150 text-left"
                                                         onClick={() => {
-                                                            // Chèn @Ảnh X tại vị trí cursor
                                                             const mention = `@Ảnh ${idx + 1} `
                                                             const pos = mentionInsertPosRef.current
                                                             const before = prompt.slice(0, pos)
-                                                            const after = prompt.slice(pos + 1) // +1 để bỏ ký tự '@' mà người dùng đã gõ
+                                                            const after = prompt.slice(pos + 1)
                                                             const newPrompt = before + mention + after
                                                             setPrompt(newPrompt)
                                                             setShowMentionPopover(false)
-                                                            // Đặt lại cursor sau mention
                                                             requestAnimationFrame(() => {
                                                                 if (textareaRef.current) {
                                                                     const newPos = pos + mention.length
                                                                     textareaRef.current.focus()
                                                                     textareaRef.current.setSelectionRange(newPos, newPos)
-                                                                    // Auto-grow
                                                                     textareaRef.current.style.height = 'auto'
                                                                     textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
                                                                 }
                                                             })
                                                         }}
                                                     >
-                                                        <img src={src} alt={`Ảnh ${idx + 1}`} className="size-8 rounded-lg object-cover border border-border/40 shrink-0" />
-                                                        <span className="text-sm font-medium">Ảnh {idx + 1}</span>
-                                                        <span className="text-[10px] text-muted-foreground ml-auto">@Ảnh {idx + 1}</span>
+                                                        <div className="relative shrink-0">
+                                                            <img src={src} alt={`Ảnh ${idx + 1}`} className="size-10 rounded-lg object-cover border border-white/10 group-hover:border-primary/40 transition-colors shadow-sm" />
+                                                            <div className="absolute -top-1 -left-1 bg-primary text-primary-foreground text-[9px] font-bold size-4 rounded-full flex items-center justify-center shadow-sm ring-1 ring-background">{idx + 1}</div>
+                                                        </div>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-[13px] font-medium text-foreground/90 group-hover:text-foreground transition-colors">Ảnh {idx + 1}</span>
+                                                            <span className="text-[10px] text-muted-foreground/50 font-mono">@Ảnh {idx + 1}</span>
+                                                        </div>
+                                                        <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <div className="text-[10px] text-primary/70 bg-primary/10 rounded-md px-1.5 py-0.5 font-medium">Chèn</div>
+                                                        </div>
                                                     </button>
                                                 ))}
                                             </div>
