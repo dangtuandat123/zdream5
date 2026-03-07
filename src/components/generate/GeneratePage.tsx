@@ -408,19 +408,12 @@ export function GeneratePage() {
     const [generateProgress, setGenerateProgress] = useState(0)
     const [selectionMode, setSelectionMode] = useState(false)
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-    const [promptHistory, setPromptHistory] = useState<string[]>([])
+    const [promptHistory, setPromptHistory] = useState<string[]>(getPromptHistory)
     const [showHistory, setShowHistory] = useState(false)
-    const historyRef = useRef<HTMLDivElement>(null)
-
-    // Mention Dropdown state
-    const [showMentionDropdown, setShowMentionDropdown] = useState(false)
-    const [mentionFilter, setMentionFilter] = useState("")
-    const [mentionIndex, setMentionIndex] = useState(0) // For keyboard nav in mention dropdown
-    const mentionDropdownRef = useRef<HTMLDivElement>(null)
-    const cursorPositionRef = useRef(0)
     const [isDragging, setIsDragging] = useState(false)
     const [showZoomHint, setShowZoomHint] = useState(true)
     const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const historyRef = useRef<HTMLDivElement>(null)
     // State cho xác nhận xoá: 'single' hoặc 'batch'
     const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'single'; id: string } | { type: 'batch' } | null>(null)
 
@@ -565,18 +558,6 @@ export function GeneratePage() {
         return () => document.removeEventListener('mousedown', handler)
     }, [showHistory])
 
-    // Close mention dropdown khi click ngoài
-    useEffect(() => {
-        if (!showMentionDropdown) return
-        const handler = (e: MouseEvent) => {
-            if (mentionDropdownRef.current && !mentionDropdownRef.current.contains(e.target as Node)) {
-                setShowMentionDropdown(false)
-            }
-        }
-        document.addEventListener('mousedown', handler)
-        return () => document.removeEventListener('mousedown', handler)
-    }, [showMentionDropdown])
-
     // Cleanup progress interval on unmount
     useEffect(() => {
         return () => {
@@ -600,29 +581,6 @@ export function GeneratePage() {
     const getAspectRatio = (value: string) =>
         ASPECT_RATIOS.find((r) => r.value === value) || ASPECT_RATIOS[0]
 
-    // render markup for highlighted prompt
-    const renderHighlightedPrompt = (text: string) => {
-        if (!text) return null
-        
-        // Split by @anh(\d+)
-        const parts = text.split(/(@anh\d+)/gi)
-        
-        return parts.map((part, i) => {
-            const match = part.match(/^@anh(\d+)$/i)
-            if (match) {
-                const index = parseInt(match[1], 10)
-                if (index > 0 && index <= referenceImages.length) {
-                    return (
-                        <span key={i} className="inline-flex items-center gap-1 bg-primary/20 text-primary px-1.5 py-0.5 rounded-md font-medium mx-px align-baseline -my-0.5 border border-primary/20">
-                            <ImageIcon className="size-3" />
-                            Ảnh {index}
-                        </span>
-                    )
-                }
-            }
-            return <span key={i}>{part}</span>
-        })
-    }
 
 
 
@@ -642,7 +600,7 @@ export function GeneratePage() {
             if (index > 0 && index <= referenceImages.length) {
                 return `[Ảnh tham chiếu ${index}]`
             }
-            return match
+            return match // Return original if index is out of bounds
         })
 
         // Lưu prompt vào history
@@ -1508,148 +1466,27 @@ export function GeneratePage() {
                             )}
 
                             {/* 2. Text Input (Middle) */}
-                            <div className="flex flex-col relative px-2 pt-2 pb-1">
-                                {/* Mention Dropdown Overlay */}
-                                {showMentionDropdown && (
-                                    <div 
-                                        ref={mentionDropdownRef}
-                                        className="absolute bottom-full left-4 mb-2 w-56 bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl overflow-hidden z-[60] animate-in fade-in zoom-in-95 duration-100"
-                                    >
-                                        <div className="p-1">
-                                            <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1.5 flex items-center gap-1.5">
-                                                <ImageIcon className="size-3" /> Chọn ảnh tham chiếu
-                                            </div>
-                                            {(() => {
-                                                const filteredRefs = referenceImages.map((src, i) => ({ src, index: i + 1 })).filter(img => `anh${img.index}`.includes(mentionFilter.toLowerCase()))
-                                                if (filteredRefs.length === 0) {
-                                                    return <div className="text-xs text-muted-foreground p-3 text-center">Không tìm thấy ảnh</div>
-                                                }
-                                                return filteredRefs.map((img, i) => (
-                                                    <button
-                                                        key={img.index}
-                                                        className={`w-full flex items-center gap-3 px-2 py-1.5 rounded-lg text-sm transition-colors ${i === mentionIndex ? 'bg-primary/10 text-primary' : 'hover:bg-accent hover:text-accent-foreground'}`}
-                                                        onClick={() => {
-                                                            const textBeforeCursor = prompt.substring(0, cursorPositionRef.current)
-                                                            const textAfterCursor = prompt.substring(cursorPositionRef.current)
-                                                            const newTextBefore = textBeforeCursor.replace(/@\w*$/, `@anh${img.index} `)
-                                                            
-                                                            setPrompt(newTextBefore + textAfterCursor)
-                                                            setShowMentionDropdown(false)
-                                                            
-                                                            setTimeout(() => {
-                                                                if (textareaRef.current) {
-                                                                    const newPos = newTextBefore.length
-                                                                    textareaRef.current.setSelectionRange(newPos, newPos)
-                                                                    textareaRef.current.focus()
-                                                                }
-                                                            }, 0)
-                                                        }}
-                                                    >
-                                                        <img src={img.src} alt="ref" className="size-6 rounded-md object-cover border border-border/50" />
-                                                        <span className="font-medium">Ảnh {img.index}</span>
-                                                    </button>
-                                                ))
-                                            })()}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* Fake Textarea Container */}
-                                <div className="relative w-full min-h-[44px] max-h-[120px]">
-                                    {/* Visual Overlay Layer */}
-                                    <div 
-                                        className="absolute inset-0 w-full h-full px-3 py-2 text-[15px] leading-relaxed whitespace-pre-wrap break-words pointer-events-none custom-scrollbar overflow-hidden text-transparent"
-                                        aria-hidden="true"
-                                    >
-                                        {/* Fake placeholder matching textarea exact styling */}
-                                        {!prompt && <span className="text-muted-foreground/0">Mô tả ý tưởng kiến tạo của bạn...</span>}
-                                        {renderHighlightedPrompt(prompt)}
-                                    </div>
-
-                                    {/* Real Textarea Input Layer */}
-                                    <textarea
-                                        ref={textareaRef}
-                                        placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                        className="relative w-full h-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none leading-relaxed custom-scrollbar py-2 text-foreground/0 placeholder:text-muted-foreground/60 caret-foreground"
-                                        style={{ color: 'transparent', minHeight: '44px' }}
-                                        rows={1}
+                            <div className="flex items-center px-2 pt-2 pb-1">
+                                <textarea
+                                    ref={textareaRef}
+                                    placeholder="Mô tả ý tưởng kiến tạo của bạn..."
+                                    className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto"
+                                    rows={1}
                                     value={prompt}
                                     onChange={(e) => {
-                                        const val = e.target.value
-                                        setPrompt(val)
+                                        setPrompt(e.target.value)
                                         // Auto-grow tới max-h-[120px], sau đó scroll nội bộ
                                         e.target.style.height = 'auto'
                                         e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
-
-                                        // Mention dropdown detection
-                                        const cursorStart = e.target.selectionStart
-                                        cursorPositionRef.current = cursorStart
-                                        
-                                        // Tìm từ đang gõ tại con trỏ
-                                        const textBeforeCursor = val.substring(0, cursorStart)
-                                        const match = textBeforeCursor.match(/@(\w*)$/)
-                                        
-                                        if (match) {
-                                            setShowMentionDropdown(true)
-                                            setMentionFilter(match[1].toLowerCase())
-                                            setMentionIndex(0)
-                                        } else {
-                                            setShowMentionDropdown(false)
-                                        }
                                     }}
                                     onKeyDown={(e) => {
-                                        if (showMentionDropdown) {
-                                            const filteredRefs = referenceImages.map((src, i) => ({ src, index: i + 1 })).filter(img => `anh${img.index}`.includes(mentionFilter))
-                                            
-                                            if (e.key === 'ArrowDown') {
-                                                e.preventDefault()
-                                                setMentionIndex(prev => (prev + 1) % (filteredRefs.length || 1))
-                                                return
-                                            }
-                                            if (e.key === 'ArrowUp') {
-                                                e.preventDefault()
-                                                setMentionIndex(prev => (prev - 1 + (filteredRefs.length || 1)) % (filteredRefs.length || 1))
-                                                return
-                                            }
-                                            if (e.key === 'Enter') {
-                                                e.preventDefault()
-                                                if (filteredRefs.length > 0) {
-                                                    const selected = filteredRefs[mentionIndex]
-                                                    // Thay thế @filter bằng @anhX
-                                                    const textBeforeCursor = prompt.substring(0, cursorPositionRef.current)
-                                                    const textAfterCursor = prompt.substring(cursorPositionRef.current)
-                                                    const newTextBefore = textBeforeCursor.replace(/@\w*$/, `@anh${selected.index} `)
-                                                    
-                                                    setPrompt(newTextBefore + textAfterCursor)
-                                                    setShowMentionDropdown(false)
-                                                    
-                                                    // Cố gắng đặt lại cursor sau chữ vừa chèn (dùng setTimeout)
-                                                    setTimeout(() => {
-                                                        if (textareaRef.current) {
-                                                            const newPos = newTextBefore.length
-                                                            textareaRef.current.setSelectionRange(newPos, newPos)
-                                                            textareaRef.current.focus()
-                                                        }
-                                                    }, 0)
-                                                } else {
-                                                    setShowMentionDropdown(false)
-                                                }
-                                                return
-                                            }
-                                            if (e.key === 'Escape') {
-                                                setShowMentionDropdown(false)
-                                                return
-                                            }
-                                        }
-
-                                        if (e.key === "Enter" && !e.shiftKey && !showMentionDropdown) {
+                                        if (e.key === "Enter" && !e.shiftKey) {
                                             e.preventDefault()
                                             handleGenerate()
                                         }
                                     }}
                                 />
                             </div>
-                        </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
                             <div className="flex items-center justify-between px-3 pb-3">
