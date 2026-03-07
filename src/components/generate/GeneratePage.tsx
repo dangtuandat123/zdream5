@@ -305,19 +305,15 @@ function JustifiedGallery({
                         return (
                             <div
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none touch-none [webkit-touch-callout:none] [-webkit-user-drag:none] ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
-                                style={{
-                                    ...itemStyle,
-                                    touchAction: 'none', // Bắt buộc browser không xử lý bất kỳ default gesture nào (scroll, pinch, long-press)
-                                }}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
+                                style={{ ...itemStyle, WebkitTouchCallout: 'none' }}
                                 onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
-                                onContextMenu={(e) => {
-                                    // Chặn menu chuột phải / long press native trên mobile
-                                    // (để tránh browser emit touchcancel khi drag)
-                                    e.preventDefault()
-                                }}
                                 draggable
                                 onDragStart={(e) => onImageDragStart(e, img.url)}
+                                onContextMenu={(e) => {
+                                    // Chặn menu ngữ cảnh gốc trên mobile (để không cản trở Long Press 1.5s)
+                                    e.preventDefault()
+                                }}
                                 onTouchStart={(e) => {
                                     const touch = e.touches[0]
                                     onImageTouchStart(img.url, touch.clientX, touch.clientY)
@@ -327,7 +323,6 @@ function JustifiedGallery({
                                     src={img.url}
                                     alt={img.prompt}
                                     className="h-full w-full object-cover"
-                                    style={{ pointerEvents: 'none' }} // Chặn thẻ img bắt event, nhường hết cho thẻ div cha
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
 
@@ -429,6 +424,7 @@ export function GeneratePage() {
     // — Mobile touch drag refs —
     const touchStartRef = useRef<{ url: string; startX: number; startY: number } | null>(null)
     const touchDragActiveRef = useRef(false)
+    const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
 
     // Reset copied + zoom hint khi image thay đổi
     useEffect(() => {
@@ -475,22 +471,11 @@ export function GeneratePage() {
             const dy = touch.clientY - touchStartRef.current.startY
 
             if (!touchDragActiveRef.current) {
-                // Chưa active: kiểm tra luồng di chuyển
-                const absDx = Math.abs(dx)
-                const absDy = Math.abs(dy)
-                
-                // Nếu người dùng cuộn dọc rõ ràng (lướt qua ảnh), huỷ ý định drag để cho phép native scroll
-                if (absDy > absDx && absDy > 5) {
-                    touchStartRef.current = null // Cancel drag intention
-                    return
-                }
-
-                // Nếu di chuyển đủ xa theo hướng ngang/chéo, kích hoạt drag
+                // Chưa active drag (chưa đủ 1.5s): kiểm tra nếu bị trượt tay (scroll/pan)
                 if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
-                    touchDragActiveRef.current = true
-                    const initial = { url: touchStartRef.current.url, x: touch.clientX, y: touch.clientY }
-                    dragStateRef.current = initial
-                    setDragState(initial)
+                    // Trượt tay -> Huỷ chờ long press
+                    if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+                    touchStartRef.current = null
                 }
                 return
             }
@@ -529,6 +514,8 @@ export function GeneratePage() {
                 }
             }
 
+            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+
             // Cleanup
             touchStartRef.current = null
             touchDragActiveRef.current = false
@@ -538,6 +525,8 @@ export function GeneratePage() {
         }
 
         const onTouchCancel = () => {
+            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+
             touchStartRef.current = null
             touchDragActiveRef.current = false
             dragStateRef.current = null
@@ -1119,6 +1108,17 @@ export function GeneratePage() {
                                         }}
                                         onImageTouchStart={(url, x, y) => {
                                             touchStartRef.current = { url, startX: x, startY: y }
+                                            touchDragActiveRef.current = false
+                                            
+                                            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+                                            longPressTimerRef.current = setTimeout(() => {
+                                                touchDragActiveRef.current = true
+                                                const initial = { url, x, y }
+                                                dragStateRef.current = initial
+                                                setDragState(initial)
+                                                // Optional haptic feedback
+                                                if (navigator.vibrate) navigator.vibrate(50)
+                                            }, 1500)
                                         }}
                                         selectionMode={selectionMode}
                                         selectedIds={selectedIds}
@@ -1374,15 +1374,15 @@ export function GeneratePage() {
                                 <div className="flex items-center gap-2 bg-popover text-popover-foreground border border-border rounded-2xl px-4 py-2 shadow-2xl">
                                     <span className="text-sm font-medium whitespace-nowrap pl-1">Chọn {selectedIds.size}</span>
                                     <div className="w-px h-4 bg-border mx-1" />
-                                    <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5" onClick={handleBatchDownload}>
-                                        <Download className="size-3.5" /> Tải xuống
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 sm:w-auto px-0 sm:px-3 text-xs rounded-lg sm:gap-1.5" title="Tải xuống" onClick={handleBatchDownload}>
+                                        <Download className="size-3.5" /> <span className="hidden sm:inline">Tải xuống</span>
                                     </Button>
-                                    <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5 text-primary hover:text-primary hover:bg-primary/10" onClick={handleBatchAddReference}>
-                                        <ImageIcon className="size-3.5" /> Thêm tham chiếu
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 sm:w-auto px-0 sm:px-3 text-xs rounded-lg sm:gap-1.5 text-primary hover:text-primary hover:bg-primary/10" title="Thêm tham chiếu" onClick={handleBatchAddReference}>
+                                        <ImageIcon className="size-3.5" /> <span className="hidden sm:inline">Thêm tham chiếu</span>
                                     </Button>
                                     <div className="w-px h-4 bg-border mx-1" />
-                                    <Button size="sm" variant="ghost" className="h-8 text-xs rounded-lg gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleBatchDelete}>
-                                        <Trash2 className="size-3.5" /> Xoá
+                                    <Button size="sm" variant="ghost" className="h-8 w-8 sm:w-auto px-0 sm:px-3 text-xs rounded-lg sm:gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10" title="Xoá" onClick={handleBatchDelete}>
+                                        <Trash2 className="size-3.5" /> <span className="hidden sm:inline">Xoá</span>
                                     </Button>
                                 </div>
                             </div>
