@@ -1479,11 +1479,11 @@ export function GeneratePage() {
                                         <div className="bg-[#1c1c1e] border border-[#333] rounded-xl shadow-lg p-2">
                                             <p className="text-[10px] text-[#888] px-1 mb-1.5 select-none">Ảnh tham chiếu</p>
                                             {referenceImages.length > 0 ? (
-                                                <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+                                                <div className="flex flex-col gap-px">
                                                     {referenceImages.map((src, idx) => (
                                                         <button
                                                             key={idx}
-                                                            className="relative shrink-0 group"
+                                                            className="flex items-center gap-2.5 w-full px-1.5 py-1.5 rounded-lg hover:bg-white/[0.06] transition-colors text-left"
                                                             onClick={() => {
                                                                 const mention = `@Ảnh ${idx + 1} `
                                                                 const pos = mentionInsertPosRef.current
@@ -1503,8 +1503,8 @@ export function GeneratePage() {
                                                                 })
                                                             }}
                                                         >
-                                                            <img src={src} alt={`Ảnh ${idx + 1}`} className="size-14 rounded-lg object-cover border-2 border-transparent group-hover:border-primary transition-colors" />
-                                                            <span className="absolute bottom-0.5 left-0.5 bg-black/70 text-[9px] text-white font-medium px-1 py-px rounded">{idx + 1}</span>
+                                                            <img src={src} alt={`Ảnh ${idx + 1}`} className="size-8 rounded object-cover shrink-0" />
+                                                            <span className="text-[13px] text-[#ccc]">Ảnh tham chiếu {idx + 1}</span>
                                                         </button>
                                                     ))}
                                                 </div>
