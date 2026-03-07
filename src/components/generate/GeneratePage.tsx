@@ -285,7 +285,7 @@ function JustifiedGallery({
                                     {/* Progress bar dưới cùng */}
                                     <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/30">
                                         <div
-                                            className="h-full bg-primary/60 transition-all duration-200 ease-out rounded-full"
+                                            className="h-full bg-primary/60 transition-all duration-300 ease-out"
                                             style={{ width: `${Math.min(progress, 100)}%` }}
                                         />
                                     </div>
@@ -457,44 +457,48 @@ export function GeneratePage() {
         }, 100)
         progressIntervalRef.current = interval
 
+        // Chạy tới 100% khi hết timeout giả lập
         setTimeout(() => {
             clearInterval(interval)
             progressIntervalRef.current = null
             setGenerateProgress(100)
 
-            const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
-                id: `img-${Date.now()}-${i}`,
-                batchId,
-                url: getDemoUrl(aspectRatioValue, Date.now() + i),
-                prompt: prompt.trim(),
-                negativePrompt: currentNeg || undefined,
-                seed: currentSeed + i,
-                model,
-                style,
-                aspectRatio: ar.ratio,
-                aspectLabel: ar.label,
-                createdAt: new Date(),
-                referenceImages: currentRefs.length > 0 ? currentRefs : undefined,
-                isNew: true,
-            }))
-
-            setImages((prev) => [...newImages, ...prev])
-            setIsGenerating(false)
-            setGenerateProgress(0)
-            // Auto-randomize seed cho lần tạo tiếp theo
-            setSeed(Math.floor(Math.random() * 999999999))
-            // Ảnh đã hiển thị trong gallery, không cần toast
-
-            // Tự tắt highlight sau 5 giây
-            const newIds = newImages.map((img) => img.id)
+            // Đợi thêm 400ms để animation progress bar chạy tới đích (transition 300ms)
             setTimeout(() => {
-                setImages((prev) =>
-                    prev.map((img) =>
-                        newIds.includes(img.id) ? { ...img, isNew: false } : img
+                const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
+                    id: `img-${Date.now()}-${i}`,
+                    batchId,
+                    url: getDemoUrl(aspectRatioValue, Date.now() + i),
+                    prompt: prompt.trim(),
+                    negativePrompt: currentNeg || undefined,
+                    seed: currentSeed + i,
+                    model,
+                    style,
+                    aspectRatio: ar.ratio,
+                    aspectLabel: ar.label,
+                    createdAt: new Date(),
+                    referenceImages: currentRefs.length > 0 ? currentRefs : undefined,
+                    isNew: true,
+                }))
+
+                setImages((prev) => [...newImages, ...prev])
+                setIsGenerating(false)
+                setGenerateProgress(0)
+                
+                // Auto-randomize seed cho lần tạo tiếp theo
+                setSeed(Math.floor(Math.random() * 999999999))
+
+                // Tự tắt highlight sau 5 giây
+                const newIds = newImages.map((img) => img.id)
+                setTimeout(() => {
+                    setImages((prev) =>
+                        prev.map((img) =>
+                            newIds.includes(img.id) ? { ...img, isNew: false } : img
+                        )
                     )
-                )
-            }, 5000)
-        }, 2500)
+                }, 5000)
+            }, 400)
+        }, 2200)
     }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages])
 
     const handleDelete = useCallback((id: string) => {
