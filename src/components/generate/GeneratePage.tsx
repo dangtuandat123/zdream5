@@ -412,6 +412,9 @@ export function GeneratePage() {
     const [showHistory, setShowHistory] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
     const [showZoomHint, setShowZoomHint] = useState(true)
+    // @Mention popover state
+    const [showMentionPopover, setShowMentionPopover] = useState(false)
+    const mentionInsertPosRef = useRef<number>(0)
     const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const historyRef = useRef<HTMLDivElement>(null)
     // State cho xác nhận xoá: 'single' hoặc 'batch'
@@ -590,17 +593,15 @@ export function GeneratePage() {
         setIsGenerating(true)
         setGenerateProgress(0)
 
-        // Parse @anh1, @anh2... in prompt to replace with clear reference tags
-        // e.g. "Mix @anh1 and @anh2" -> "Mix [Ảnh tham chiếu 1] and [Ảnh tham chiếu 2]"
+        // Parse @Ảnh 1, @Ảnh 2... in prompt → [Ảnh tham chiếu X]
         let finalPrompt = prompt.trim()
-        const anhRegex = /@anh(\d+)/gi
-        finalPrompt = finalPrompt.replace(anhRegex, (match, p1) => {
+        const anhRegex = /@Ảnh (\d+)/g
+        finalPrompt = finalPrompt.replace(anhRegex, (_match, p1) => {
             const index = parseInt(p1, 10)
-            // Validating if the referenced image index exists (1-indexed)
             if (index > 0 && index <= referenceImages.length) {
                 return `[Ảnh tham chiếu ${index}]`
             }
-            return match // Return original if index is out of bounds
+            return _match
         })
 
         // Lưu prompt vào history
@@ -1465,23 +1466,101 @@ export function GeneratePage() {
                                 </div>
                             )}
 
-                            {/* 2. Text Input (Middle) */}
-                            <div className="flex items-center px-2 pt-2 pb-1">
+                            {/* 2. Text Input (Middle) — with highlight overlay for @mentions */}
+                            <div className="relative px-2 pt-2 pb-1">
+                                {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
+                                {showMentionPopover && referenceImages.length > 0 && (
+                                    <div className="absolute bottom-full mb-1 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                                        <div className="bg-popover border border-border rounded-xl shadow-2xl p-2 max-h-[200px] overflow-y-auto custom-scrollbar">
+                                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2 py-1">Chọn ảnh tham chiếu</div>
+                                            <div className="grid grid-cols-1 gap-0.5">
+                                                {referenceImages.map((src, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        className="flex items-center gap-2.5 w-full px-2 py-1.5 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left"
+                                                        onClick={() => {
+                                                            // Chèn @Ảnh X tại vị trí cursor
+                                                            const mention = `@Ảnh ${idx + 1} `
+                                                            const pos = mentionInsertPosRef.current
+                                                            const before = prompt.slice(0, pos)
+                                                            const after = prompt.slice(pos)
+                                                            const newPrompt = before + mention + after
+                                                            setPrompt(newPrompt)
+                                                            setShowMentionPopover(false)
+                                                            // Đặt lại cursor sau mention
+                                                            requestAnimationFrame(() => {
+                                                                if (textareaRef.current) {
+                                                                    const newPos = pos + mention.length
+                                                                    textareaRef.current.focus()
+                                                                    textareaRef.current.setSelectionRange(newPos, newPos)
+                                                                    // Auto-grow
+                                                                    textareaRef.current.style.height = 'auto'
+                                                                    textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
+                                                                }
+                                                            })
+                                                        }}
+                                                    >
+                                                        <img src={src} alt={`Ảnh ${idx + 1}`} className="size-8 rounded-lg object-cover border border-border/40 shrink-0" />
+                                                        <span className="text-sm font-medium">Ảnh {idx + 1}</span>
+                                                        <span className="text-[10px] text-muted-foreground ml-auto">@Ảnh {idx + 1}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Highlight overlay — hiển thị text với @mention màu nổi bật */}
+                                <div
+                                    className="absolute inset-0 pointer-events-none px-3 text-[15px] leading-relaxed min-h-[44px] max-h-[120px] py-2 overflow-hidden whitespace-pre-wrap break-words"
+                                    style={{ paddingTop: '8px', paddingBottom: '8px', paddingLeft: '12px', paddingRight: '12px', marginLeft: '8px', marginRight: '8px' }}
+                                    aria-hidden="true"
+                                >
+                                    {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
+                                        /^@Ảnh \d+$/.test(part)
+                                            ? <span key={i} className="text-primary font-semibold bg-primary/10 rounded px-0.5">{part}</span>
+                                            : <span key={i} className="invisible">{part}</span>
+                                    ) : null}
+                                </div>
+
                                 <textarea
                                     ref={textareaRef}
                                     placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto"
+                                    className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto relative z-10"
                                     rows={1}
                                     value={prompt}
                                     onChange={(e) => {
-                                        setPrompt(e.target.value)
+                                        const newVal = e.target.value
+                                        const cursorPos = e.target.selectionStart || 0
+                                        setPrompt(newVal)
+
+                                        // Phát hiện nếu vừa gõ '@' và có ảnh tham chiếu
+                                        const charBefore = newVal[cursorPos - 1]
+                                        if (charBefore === '@' && referenceImages.length > 0) {
+                                            // Ghi lại vị trí '@' để thay thế khi chọn mention
+                                            mentionInsertPosRef.current = cursorPos - 1
+                                            setShowMentionPopover(true)
+                                        } else if (showMentionPopover) {
+                                            // Đóng popover nếu xoá '@' hoặc gõ thêm ký tự khác
+                                            const textSinceAt = newVal.slice(mentionInsertPosRef.current, cursorPos)
+                                            if (!textSinceAt.startsWith('@')) {
+                                                setShowMentionPopover(false)
+                                            }
+                                        }
+
                                         // Auto-grow tới max-h-[120px], sau đó scroll nội bộ
                                         e.target.style.height = 'auto'
                                         e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
                                     }}
                                     onKeyDown={(e) => {
+                                        if (showMentionPopover && e.key === 'Escape') {
+                                            e.preventDefault()
+                                            setShowMentionPopover(false)
+                                            return
+                                        }
                                         if (e.key === "Enter" && !e.shiftKey) {
                                             e.preventDefault()
+                                            setShowMentionPopover(false)
                                             handleGenerate()
                                         }
                                     }}
