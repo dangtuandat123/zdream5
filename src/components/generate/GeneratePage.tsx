@@ -1521,14 +1521,11 @@ export function GeneratePage() {
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col items-center gap-2 py-4 px-3">
-                                                    <div className="size-10 rounded-xl bg-muted/50 flex items-center justify-center">
-                                                        <ImageIcon className="size-5 text-muted-foreground/50" />
+                                                <div className="flex items-center gap-2.5 px-2.5 py-2.5">
+                                                    <div className="size-8 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
+                                                        <ImageIcon className="size-4 text-muted-foreground/40" />
                                                     </div>
-                                                    <div className="text-center">
-                                                        <p className="text-xs text-muted-foreground/70">Chưa có ảnh tham chiếu</p>
-                                                        <p className="text-[10px] text-muted-foreground/40 mt-0.5">Thêm ảnh tham chiếu để sử dụng @mention</p>
-                                                    </div>
+                                                    <p className="text-xs text-muted-foreground/50">Chưa có ảnh tham chiếu</p>
                                                 </div>
                                             )}
                                         </div>
