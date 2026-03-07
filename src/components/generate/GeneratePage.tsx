@@ -216,6 +216,7 @@ function JustifiedGallery({
     onDownloadImage,
     onSetReferenceImage,
     onImageDragStart,
+    onImageTouchStart,
     selectionMode,
     selectedIds,
     onToggleSelection,
@@ -229,6 +230,7 @@ function JustifiedGallery({
     onDownloadImage: (url: string, id: string) => void
     onSetReferenceImage: (url: string) => void
     onImageDragStart: (e: React.DragEvent, url: string) => void
+    onImageTouchStart: (url: string, x: number, y: number) => void
     selectionMode: boolean
     selectedIds: Set<string>
     onToggleSelection: (id: string) => void
@@ -308,6 +310,10 @@ function JustifiedGallery({
                                 onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
                                 draggable
                                 onDragStart={(e) => onImageDragStart(e, img.url)}
+                                onTouchStart={(e) => {
+                                    const touch = e.touches[0]
+                                    onImageTouchStart(img.url, touch.clientX, touch.clientY)
+                                }}
                             >
                                 <img
                                     src={img.url}
@@ -407,9 +413,13 @@ export function GeneratePage() {
     // State cho xác nhận xoá: 'single' hoặc 'batch'
     const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'single'; id: string } | { type: 'batch' } | null>(null)
 
-    // — Custom drag avatar state —
+    // — Custom drag avatar state — (reused for both desktop DnD and mobile touch drag)
     const [dragState, setDragState] = useState<{ url: string; x: number; y: number } | null>(null)
     const dragStateRef = useRef<typeof dragState>(null)
+
+    // — Mobile touch drag refs —
+    const touchStartRef = useRef<{ url: string; startX: number; startY: number } | null>(null)
+    const touchDragActiveRef = useRef(false)
 
     // Reset copied + zoom hint khi image thay đổi
     useEffect(() => {
@@ -424,7 +434,7 @@ export function GeneratePage() {
         return () => clearTimeout(t)
     }, [selectedImage, showZoomHint])
 
-    // Track cursor position for custom drag avatar
+    // Track cursor position for custom drag avatar (desktop DnD)
     // NOTE: mousemove is suppressed during HTML5 drag — must use the `drag` event instead
     useEffect(() => {
         const onDrag = (e: DragEvent) => {
@@ -443,6 +453,89 @@ export function GeneratePage() {
             window.removeEventListener('drag', onDrag)
             window.removeEventListener('dragend', onDragEnd)
         }
+    }, [])
+
+    // Mobile Touch Drag — reuses dragState and dragStateRef for the same floating avatar
+    useEffect(() => {
+        const DRAG_THRESHOLD = 10 // px cần di chuyển để kích hoạt drag (phân biệt tap vs drag)
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (!touchStartRef.current) return
+            const touch = e.touches[0]
+            const dx = touch.clientX - touchStartRef.current.startX
+            const dy = touch.clientY - touchStartRef.current.startY
+
+            if (!touchDragActiveRef.current) {
+                // Chưa active: kiểm tra ngưỡng di chuyển
+                if (Math.sqrt(dx * dx + dy * dy) > DRAG_THRESHOLD) {
+                    touchDragActiveRef.current = true
+                    const initial = { url: touchStartRef.current.url, x: touch.clientX, y: touch.clientY }
+                    dragStateRef.current = initial
+                    setDragState(initial)
+                }
+                return
+            }
+
+            // Đang drag: cập nhật vị trí và highlight drop zone
+            e.preventDefault() // Chặn scroll khi đang drag
+            setDragState(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null)
+
+            const rect = promptContainerRef.current?.getBoundingClientRect()
+            if (rect) {
+                const isOver = (
+                    touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                    touch.clientY >= rect.top && touch.clientY <= rect.bottom
+                )
+                setIsDragging(isOver)
+            }
+        }
+
+        const onTouchEnd = (e: TouchEvent) => {
+            if (!touchStartRef.current) return
+            const touch = e.changedTouches[0]
+
+            if (touchDragActiveRef.current) {
+                // Kiểm tra nếu thả vào drop zone
+                const rect = promptContainerRef.current?.getBoundingClientRect()
+                if (rect) {
+                    const isOver = (
+                        touch.clientX >= rect.left && touch.clientX <= rect.right &&
+                        touch.clientY >= rect.top && touch.clientY <= rect.bottom
+                    )
+                    if (isOver) {
+                        const url = touchStartRef.current.url
+                        setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
+                        toast.success('Đã thêm vào ảnh tham chiếu')
+                    }
+                }
+            }
+
+            // Cleanup
+            touchStartRef.current = null
+            touchDragActiveRef.current = false
+            dragStateRef.current = null
+            setDragState(null)
+            setIsDragging(false)
+        }
+
+        const onTouchCancel = () => {
+            touchStartRef.current = null
+            touchDragActiveRef.current = false
+            dragStateRef.current = null
+            setDragState(null)
+            setIsDragging(false)
+        }
+
+        // passive: false cần thiết để gọi e.preventDefault() trong touchmove
+        window.addEventListener('touchmove', onTouchMove, { passive: false })
+        window.addEventListener('touchend', onTouchEnd)
+        window.addEventListener('touchcancel', onTouchCancel)
+        return () => {
+            window.removeEventListener('touchmove', onTouchMove)
+            window.removeEventListener('touchend', onTouchEnd)
+            window.removeEventListener('touchcancel', onTouchCancel)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     // Close history dropdown khi click ngoài
@@ -1004,6 +1097,9 @@ export function GeneratePage() {
                                             const initial = { url, x: e.clientX, y: e.clientY }
                                             dragStateRef.current = initial
                                             setDragState(initial)
+                                        }}
+                                        onImageTouchStart={(url, x, y) => {
+                                            touchStartRef.current = { url, startX: x, startY: y }
                                         }}
                                         selectionMode={selectionMode}
                                         selectedIds={selectedIds}
