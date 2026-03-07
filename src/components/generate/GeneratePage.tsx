@@ -1483,7 +1483,7 @@ export function GeneratePage() {
                                                             const mention = `@Ảnh ${idx + 1} `
                                                             const pos = mentionInsertPosRef.current
                                                             const before = prompt.slice(0, pos)
-                                                            const after = prompt.slice(pos)
+                                                            const after = prompt.slice(pos + 1) // +1 để bỏ ký tự '@' mà người dùng đã gõ
                                                             const newPrompt = before + mention + after
                                                             setPrompt(newPrompt)
                                                             setShowMentionPopover(false)
@@ -1561,6 +1561,32 @@ export function GeneratePage() {
                                             e.preventDefault()
                                             setShowMentionPopover(false)
                                             return
+                                        }
+                                        // Backspace: xoá toàn bộ mention (@Ảnh X) cùng lúc
+                                        if (e.key === 'Backspace') {
+                                            const ta = e.target as HTMLTextAreaElement
+                                            const cursor = ta.selectionStart
+                                            const selEnd = ta.selectionEnd
+                                            // Chỉ xử lý khi không có text được select (cursor đơn)
+                                            if (cursor === selEnd && cursor > 0) {
+                                                // Tìm mention pattern trước cursor
+                                                const textBefore = prompt.slice(0, cursor)
+                                                const mentionMatch = textBefore.match(/@Ảnh \d+\s?$/)
+                                                if (mentionMatch) {
+                                                    e.preventDefault()
+                                                    const mentionStart = cursor - mentionMatch[0].length
+                                                    const newPrompt = prompt.slice(0, mentionStart) + prompt.slice(cursor)
+                                                    setPrompt(newPrompt)
+                                                    requestAnimationFrame(() => {
+                                                        if (textareaRef.current) {
+                                                            textareaRef.current.setSelectionRange(mentionStart, mentionStart)
+                                                            textareaRef.current.style.height = 'auto'
+                                                            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
+                                                        }
+                                                    })
+                                                    return
+                                                }
+                                            }
                                         }
                                         if (e.key === "Enter" && !e.shiftKey) {
                                             e.preventDefault()
