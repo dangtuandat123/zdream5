@@ -1476,7 +1476,7 @@ export function GeneratePage() {
                             <div className="relative px-2 pt-2 pb-1">
                                 {/* @Mention popover — hiện khi gõ @ */}
                                 {showMentionPopover && (
-                                    <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
+                                    <div className="absolute bottom-full pb-2 left-0 right-0 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
                                         <div className="bg-popover/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)] p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
                                             <div className="flex items-center gap-1.5 px-2.5 py-1.5 mb-0.5">
                                                 <div className="size-1.5 rounded-full bg-primary animate-pulse" />
