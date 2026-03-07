@@ -1520,7 +1520,7 @@ export function GeneratePage() {
                                     >
                                         {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
                                             /^@Ảnh \d+$/.test(part)
-                                                ? <span key={i} className="text-primary font-semibold bg-primary/10 rounded px-0.5">{part}</span>
+                                                ? <span key={i} className="text-primary bg-primary/15 rounded">{part}</span>
                                                 : <span key={i} className="text-foreground">{part}</span>
                                         ) : null}
                                     </div>
