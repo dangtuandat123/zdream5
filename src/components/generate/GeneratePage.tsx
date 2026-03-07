@@ -1475,18 +1475,15 @@ export function GeneratePage() {
                             <div className="relative px-2 pt-2 pb-1">
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
-                                    <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200">
-                                        <div className="bg-popover/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.6)] p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
-                                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 mb-0.5">
-                                                <div className="size-1.5 rounded-full bg-primary animate-pulse" />
-                                                <span className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-semibold">Ảnh tham chiếu</span>
-                                            </div>
+                                    <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                                        <div className="bg-[#1c1c1e] border border-[#333] rounded-xl shadow-lg p-2">
+                                            <p className="text-[10px] text-[#888] px-1 mb-1.5 select-none">Ảnh tham chiếu</p>
                                             {referenceImages.length > 0 ? (
-                                                <div className="grid grid-cols-1 gap-0.5">
+                                                <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
                                                     {referenceImages.map((src, idx) => (
                                                         <button
                                                             key={idx}
-                                                            className="group flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-white/[0.08] transition-all duration-150 text-left"
+                                                            className="relative shrink-0 group"
                                                             onClick={() => {
                                                                 const mention = `@Ảnh ${idx + 1} `
                                                                 const pos = mentionInsertPosRef.current
@@ -1506,26 +1503,17 @@ export function GeneratePage() {
                                                                 })
                                                             }}
                                                         >
-                                                            <div className="relative shrink-0">
-                                                                <img src={src} alt={`Ảnh ${idx + 1}`} className="size-10 rounded-lg object-cover border border-white/10 group-hover:border-primary/40 transition-colors shadow-sm" />
-                                                                <div className="absolute -top-1 -left-1 bg-primary text-primary-foreground text-[9px] font-bold size-4 rounded-full flex items-center justify-center shadow-sm ring-1 ring-background">{idx + 1}</div>
-                                                            </div>
-                                                            <div className="flex flex-col min-w-0">
-                                                                <span className="text-[13px] font-medium text-foreground/90 group-hover:text-foreground transition-colors">Ảnh {idx + 1}</span>
-                                                                <span className="text-[10px] text-muted-foreground/50 font-mono">@Ảnh {idx + 1}</span>
-                                                            </div>
-                                                            <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <div className="text-[10px] text-primary/70 bg-primary/10 rounded-md px-1.5 py-0.5 font-medium">Chèn</div>
-                                                            </div>
+                                                            <img src={src} alt={`Ảnh ${idx + 1}`} className="size-14 rounded-lg object-cover border-2 border-transparent group-hover:border-primary transition-colors" />
+                                                            <span className="absolute bottom-0.5 left-0.5 bg-black/70 text-[9px] text-white font-medium px-1 py-px rounded">{idx + 1}</span>
                                                         </button>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center gap-2.5 px-2.5 py-2.5">
-                                                    <div className="size-8 rounded-lg bg-muted/40 flex items-center justify-center shrink-0">
-                                                        <ImageIcon className="size-4 text-muted-foreground/40" />
+                                                <div className="flex items-center gap-2 px-1 py-1.5">
+                                                    <div className="size-7 rounded-md border border-dashed border-[#444] flex items-center justify-center">
+                                                        <ImageIcon className="size-3.5 text-[#555]" />
                                                     </div>
-                                                    <p className="text-xs text-muted-foreground/50">Chưa có ảnh tham chiếu</p>
+                                                    <span className="text-[11px] text-[#666]">Chưa có ảnh tham chiếu</span>
                                                 </div>
                                             )}
                                         </div>
