@@ -305,9 +305,14 @@ function JustifiedGallery({
                         return (
                             <div
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
+                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none touch-none [webkit-touch-callout:none] [-webkit-user-drag:none] ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
                                 style={itemStyle}
                                 onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
+                                onContextMenu={(e) => {
+                                    // Chặn menu chuột phải / long press native trên mobile
+                                    // (để tránh browser emit touchcancel khi drag)
+                                    e.preventDefault()
+                                }}
                                 draggable
                                 onDragStart={(e) => onImageDragStart(e, img.url)}
                                 onTouchStart={(e) => {
