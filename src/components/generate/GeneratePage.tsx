@@ -213,6 +213,7 @@ function JustifiedGallery({
     onSelectImage,
     onDeleteImage,
     onDownloadImage,
+    onSetReferenceImage,
     selectionMode,
     selectedIds,
     onToggleSelection,
@@ -224,6 +225,7 @@ function JustifiedGallery({
     onSelectImage: (img: GeneratedImage) => void
     onDeleteImage: (id: string) => void
     onDownloadImage: (url: string, id: string) => void
+    onSetReferenceImage: (url: string) => void
     selectionMode: boolean
     selectedIds: Set<string>
     onToggleSelection: (id: string) => void
@@ -301,6 +303,20 @@ function JustifiedGallery({
                                 className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
                                 style={itemStyle}
                                 onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
+                                draggable
+                                onDragStart={(e) => {
+                                    e.dataTransfer.setData('text/plain', img.url)
+                                    // Optional: set drag image (ghost)
+                                    const dragIcon = document.createElement('img')
+                                    dragIcon.src = img.url
+                                    dragIcon.style.width = '100px'
+                                    dragIcon.style.height = '100px'
+                                    dragIcon.style.objectFit = 'cover'
+                                    dragIcon.style.borderRadius = '8px'
+                                    document.body.appendChild(dragIcon)
+                                    e.dataTransfer.setDragImage(dragIcon, 50, 50)
+                                    setTimeout(() => document.body.removeChild(dragIcon), 0)
+                                }}
                             >
                                 <img
                                     src={img.url}
@@ -317,12 +333,32 @@ function JustifiedGallery({
                                 )}
 
                                 <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                    <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDownloadImage(img.url, img.id) }}>
-                                        <Download className="size-3 text-white" />
-                                    </Button>
-                                    <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDeleteImage(img.id) }}>
-                                        <Trash2 className="size-3 text-white" />
-                                    </Button>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onSetReferenceImage(img.url) }}>
+                                                <ImageIcon className="size-3 text-white" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-xs">Dùng làm ảnh tham chiếu</TooltipContent>
+                                    </Tooltip>
+                                    
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDownloadImage(img.url, img.id) }}>
+                                                <Download className="size-3 text-white" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-xs">Tải xuống</TooltipContent>
+                                    </Tooltip>
+                                    
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDeleteImage(img.id) }}>
+                                                <Trash2 className="size-3 text-white" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-xs">Xoá</TooltipContent>
+                                    </Tooltip>
                                 </div>
                             </div>
                         )
@@ -568,7 +604,15 @@ export function GeneratePage() {
     }, [images, selectedIds])
 
     // Drag & drop reference images
-    const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true) }
+    const handleDragOver = (e: React.DragEvent) => {
+        // Cần preventDefault để allow drop
+        e.preventDefault()
+        // Nếu đang kéo một thẻ HTML có chứa text (chính là URL ảnh được gài vào e.dataTransfer.setData('text/plain'))
+        // Hoặc đang kéo Files từ máy tính vào
+        if (e.dataTransfer.types.includes('Files') || e.dataTransfer.types.includes('text/plain')) {
+            setIsDragging(true)
+        }
+    }
     const handleDragLeave = (e: React.DragEvent) => {
         // Chỉ ẩn khi rời khỏi container thực sự, không phải child elements
         if (e.currentTarget.contains(e.relatedTarget as Node)) return
@@ -577,11 +621,30 @@ export function GeneratePage() {
     const handleDrop = (e: React.DragEvent) => {
         e.preventDefault()
         setIsDragging(false)
+        
+        // 1. Xử lý Drop Image từ thiết bị local (Tệp tin thật)
         const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
         if (files.length > 0) {
             const urls = files.map(f => URL.createObjectURL(f))
-            setReferenceImages(prev => [...prev, ...urls])
-            // silent
+            setReferenceImages(prev => {
+                const newUrls = urls.filter(u => !prev.includes(u))
+                return [...prev, ...newUrls]
+            })
+            toast.success(`Đã thêm ${files.length} ảnh tham chiếu`)
+            return
+        }
+
+        // 2. Xử lý Drop Text (Dữ liệu URL kéo từ gallery xuống)
+        const textData = e.dataTransfer.getData('text/plain')
+        if (textData && (textData.startsWith('http') || textData.startsWith('blob:') || textData.startsWith('data:'))) {
+            setReferenceImages(prev => {
+                if (prev.includes(textData)) {
+                    toast('Ảnh này đã có trong phần tham chiếu rồi', { icon: 'ℹ️' })
+                    return prev
+                }
+                toast.success('Đã thêm ảnh tham chiếu')
+                return [...prev, textData]
+            })
         }
     }
 
@@ -893,6 +956,10 @@ export function GeneratePage() {
                                         onSelectImage={setSelectedImage}
                                         onDeleteImage={handleDelete}
                                         onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
+                                        onSetReferenceImage={(url) => {
+                                            setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
+                                            toast.success('Đã thêm vào ảnh tham chiếu')
+                                        }}
                                         selectionMode={selectionMode}
                                         selectedIds={selectedIds}
                                         onToggleSelection={toggleSelection}
@@ -954,8 +1021,12 @@ export function GeneratePage() {
                                                 <img
                                                     src={selectedImage.url}
                                                     alt={selectedImage.prompt}
-                                                    className="w-full h-full object-cover rounded-md"
+                                                    className="w-full h-full object-cover rounded-md cursor-grab active:cursor-grabbing"
                                                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+                                                    draggable
+                                                    onDragStart={(e) => {
+                                                        e.dataTransfer.setData('text/plain', selectedImage.url)
+                                                    }}
                                                 />
                                             </Zoom>
 
@@ -1072,7 +1143,13 @@ export function GeneratePage() {
                                         <Button size="sm" className="w-full" onClick={() => downloadImage(selectedImage.url, `zdream-${selectedImage.id}.jpg`)}>
                                             <Download className="mr-2 size-4" /> Tải xuống
                                         </Button>
-                                        <Button size="sm" variant="outline" className="w-full">
+                                        <Button size="sm" variant="secondary" className="w-full border shadow-sm font-medium" onClick={() => {
+                                            setReferenceImages(prev => prev.includes(selectedImage.url) ? prev : [...prev, selectedImage.url]);
+                                            toast.success('Đã thêm vào ảnh tham chiếu');
+                                        }}>
+                                            <ImageIcon className="mr-2 size-4" /> Dùng làm ảnh tham chiếu
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="w-full hidden">
                                             <Share2 className="mr-2 size-4" /> Chia sẻ
                                         </Button>
                                         <div className="flex gap-2">
