@@ -809,24 +809,14 @@ function ViewerDialog({
 
                         {/* Spacer box config */}
                         <div className="relative flex max-w-[100%] max-h-[100%] gap-4 mx-auto w-full justify-center">
-                            
-                            {/* Input Image (only show if viewing generated results and input exists) */}
-                            {source === "generated" && uploadedImage && (
-                                <div className="relative hidden md:flex min-w-0 max-w-1/2 max-h-full rounded-xl shadow-xl overflow-hidden bg-black flex-1 items-center justify-center">
-                                    <img 
-                                        src={uploadedImage} 
-                                        alt="Input Image" 
-                                        className="w-full h-full object-contain pointer-events-none" 
-                                    />
-                                    <Badge variant="secondary" className="absolute top-3 left-3 shadow-md z-10">Ảnh đầu vào</Badge>
-                                </div>
-                            )}
 
                             {/* Result Image */}
-                            <div className="relative flex min-w-0 max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 max-w-full md:flex-1 items-center justify-center">
+                            <div className="relative flex min-w-0 max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 max-w-full flex-1 items-center justify-center">
                                 {source === "generated" && uploadedImage && (
-                                    <Badge variant="default" className="absolute top-3 left-3 shadow-md z-10 hidden md:flex">Kết quả Generation</Badge>
+                                    <Badge variant="default" className="absolute top-4 left-4 shadow-md z-10 hidden sm:flex">Kết quả Generation</Badge>
                                 )}
+                                
+
                                 
                                 <img
                                     src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${defaultAspectRatio * 10000}" height="10000"></svg>`)}`}
@@ -863,60 +853,74 @@ function ViewerDialog({
                                 ← → để chuyển ảnh
                             </div>
                         )}
-                        <Badge className="absolute top-4 right-4 bg-background/60 backdrop-blur-md text-foreground shadow-sm pointer-events-none flex items-center gap-1.5 px-3 py-1 lg:hidden">
-                             {safeIndex + 1} / {images.length}
-                        </Badge>
                     </div>
 
                     {/* Right Panel: Data & Actions (GeneratePage strict style) */}
                     <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar min-h-0">
                         
-                        <div className="space-y-3">
-                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Chi tiết ảnh</Label>
+                        <div className="space-y-4">
+                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-semibold mb-2 block">Chi tiết ảnh</Label>
                             
                             {currentGenData ? (
                                 <>
-                                    <div className="grid grid-cols-2 gap-3">
+                                    <div className="grid grid-cols-2 gap-y-5 gap-x-4">
                                         <div>
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tỷ lệ</Label>
-                                            <p className="text-xs font-medium mt-0.5">{currentGenData.aspectRatio}</p>
+                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block mb-1">Tỷ lệ</Label>
+                                            <p className="text-sm font-medium text-foreground">{currentGenData.aspectRatio}</p>
                                         </div>
                                         <div>
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thời gian</Label>
-                                            <p className="text-xs font-medium mt-0.5">
+                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block mb-1">Thời gian</Label>
+                                            <p className="text-sm font-medium text-foreground">
                                                 {new Date(currentGenData.timestamp).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                                             </p>
                                         </div>
-                                        <div className="col-span-2 mt-1">
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 block">Hiệu ứng áp dụng</Label>
+                                        <div className="col-span-2 pt-1">
+                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block mb-2">Hiệu ứng áp dụng</Label>
                                             <div className="flex flex-wrap gap-2">
                                                 {currentGenData.context !== "Mặc định" && (
-                                                    <Badge variant="secondary" className="bg-muted/50 hover:bg-muted text-foreground/80 font-medium px-2.5 py-1 border-border/40">
-                                                        <Layers className="size-3 mr-1.5 opacity-70" />
+                                                    <Badge variant="secondary" className="bg-muted/40 hover:bg-muted text-foreground/90 font-medium px-3 py-1 border-border/40 transition-colors">
+                                                        <Layers className="size-[14px] mr-1.5 opacity-60" />
                                                         Bối cảnh: {currentGenData.context}
                                                     </Badge>
                                                 )}
                                                 {currentGenData.material !== "Mặc định" && (
-                                                    <Badge variant="secondary" className="bg-muted/50 hover:bg-muted text-foreground/80 font-medium px-2.5 py-1 border-border/40">
-                                                        <Layers className="size-3 mr-1.5 opacity-70" />
+                                                    <Badge variant="secondary" className="bg-muted/40 hover:bg-muted text-foreground/90 font-medium px-3 py-1 border-border/40 transition-colors">
+                                                        <Layers className="size-[14px] mr-1.5 opacity-60" />
                                                         Chất liệu: {currentGenData.material}
                                                     </Badge>
                                                 )}
                                                 {currentGenData.context === "Mặc định" && currentGenData.material === "Mặc định" && (
-                                                    <div className="text-xs text-muted-foreground/80 italic w-full">Không sử dụng hiệu ứng thêm</div>
+                                                    <div className="text-sm text-muted-foreground/60 italic w-full pl-1">Không sử dụng</div>
                                                 )}
                                             </div>
                                         </div>
                                     </div>
 
                                     {currentGenData.prompt && (
-                                        <div className="flex flex-col gap-2 mt-2">
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Mô tả thêm</Label>
-                                            <div className="text-xs leading-relaxed bg-muted/30 p-3 rounded-lg max-h-[100px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap border border-border/30">
+                                        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/40">
+                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block">Mô tả thêm</Label>
+                                            <div className="text-[13px] leading-relaxed bg-muted/20 p-3.5 rounded-xl max-h-[120px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap border border-border/30 text-foreground/90 shadow-sm">
                                                 {currentGenData.prompt}
                                             </div>
                                         </div>
                                     )}
+
+                    {source === "generated" && uploadedImage && (
+                        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/40">
+                            <div className="flex items-center gap-2">
+                                <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium">Ảnh tham chiếu</Label>
+                            </div>
+                            <div className="flex flex-wrap gap-2 mt-1">
+                                <div className="relative group/ref shrink-0">
+                                    <img
+                                        src={uploadedImage}
+                                        alt="Reference Input"
+                                        className="h-14 w-14 rounded-xl object-cover border border-border/60 shadow-sm bg-muted/30 transition-transform duration-300 origin-top-left group-hover/ref:scale-[2.5] hover:z-50 relative z-10"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                                 </>
                             ) : (
                                 <div className="text-sm text-muted-foreground leading-relaxed">
