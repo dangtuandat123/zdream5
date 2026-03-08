@@ -630,7 +630,11 @@ export function GeneratePage() {
         // Chỉ update innerHTML nếu text thực sự khác
         const currentText = (el.innerText || '').replace(/\n$/, '')
         if (currentText !== prompt) {
+            // Lưu scroll position trước khi re-render
+            const savedScrollTop = el.scrollTop
             el.innerHTML = renderPromptHTML(prompt)
+            // Phục hồi scroll position
+            el.scrollTop = savedScrollTop
             // Phục hồi cursor
             if (document.activeElement === el) {
                 setCursorPosition(el, cursorOffset)
@@ -1560,8 +1564,23 @@ export function GeneratePage() {
                                                                 setShowMentionPopover(false)
                                                                 requestAnimationFrame(() => {
                                                                     if (textareaRef.current) {
-                                                                        textareaRef.current.focus()
-                                                                        setCursorPosition(textareaRef.current, pos + mention.length)
+                                                                        const el = textareaRef.current
+                                                                        const savedScroll = el.scrollTop
+                                                                        el.focus({ preventScroll: true })
+                                                                        setCursorPosition(el, pos + mention.length)
+                                                                        // Phục hồi scroll rồi cuộn nhẹ để cursor vừa vặn hiện ra
+                                                                        el.scrollTop = savedScroll
+                                                                        // Đảm bảo cursor nằm trong vùng nhìn thấy
+                                                                        const sel = window.getSelection()
+                                                                        if (sel && sel.rangeCount > 0) {
+                                                                            const rect = sel.getRangeAt(0).getBoundingClientRect()
+                                                                            const elRect = el.getBoundingClientRect()
+                                                                            if (rect.bottom > elRect.bottom) {
+                                                                                el.scrollTop += rect.bottom - elRect.bottom + 8
+                                                                            } else if (rect.top < elRect.top) {
+                                                                                el.scrollTop -= elRect.top - rect.top + 8
+                                                                            }
+                                                                        }
                                                                     }
                                                                 })
                                                             }}
