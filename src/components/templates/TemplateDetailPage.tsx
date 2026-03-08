@@ -330,17 +330,15 @@ export function TemplateDetailPage() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <Card className="overflow-hidden">
-                        <div className="relative aspect-[4/3]">
-                            <img src={uploadedImage} alt="Ảnh đầu vào" className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute top-2 right-2 flex gap-1">
-                                <Button size="icon" variant="secondary" className="size-7" onClick={() => fileInputRef.current?.click()}>
-                                    <Upload className="size-3" />
-                                </Button>
-                                <Button size="icon" variant="destructive" className="size-7" onClick={() => setUploadedImage(null)}>
-                                    <X className="size-3" />
-                                </Button>
-                            </div>
+                    <Card className="overflow-hidden relative flex flex-col items-center justify-center py-6 h-[106px]">
+                        <img src={uploadedImage} alt="Ảnh đầu vào" className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute top-2 right-2 flex gap-1 z-10">
+                            <Button size="icon" variant="secondary" className="size-7 shadow-md" onClick={() => fileInputRef.current?.click()}>
+                                <Upload className="size-3" />
+                            </Button>
+                            <Button size="icon" variant="destructive" className="size-7 shadow-md" onClick={() => setUploadedImage(null)}>
+                                <X className="size-3" />
+                            </Button>
                         </div>
                     </Card>
                 )}
