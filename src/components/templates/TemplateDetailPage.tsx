@@ -22,7 +22,8 @@ import {
     Ban,
     Pencil,
     ZoomIn,
-    Maximize2
+    Maximize2,
+    Layers
 } from "lucide-react"
 import Zoom from "react-medium-image-zoom"
 import "react-medium-image-zoom/dist/styles.css"
@@ -886,12 +887,24 @@ function ViewerDialog({
                                                 {new Date(currentGenData.timestamp).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                                             </p>
                                         </div>
-                                        <div className="col-span-2">
-                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Hiệu ứng áp dụng</Label>
-                                            <div className="text-xs font-medium mt-0.5 space-y-0.5 text-foreground/90">
-                                                {currentGenData.context !== "Mặc định" && <p>• Bối cảnh: {currentGenData.context}</p>}
-                                                {currentGenData.material !== "Mặc định" && <p>• Chất liệu: {currentGenData.material}</p>}
-                                                {currentGenData.context === "Mặc định" && currentGenData.material === "Mặc định" && <p className="text-muted-foreground">Không sử dụng hiệu ứng</p>}
+                                        <div className="col-span-2 mt-1">
+                                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 block">Hiệu ứng áp dụng</Label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {currentGenData.context !== "Mặc định" && (
+                                                    <Badge variant="secondary" className="bg-muted/50 hover:bg-muted text-foreground/80 font-medium px-2.5 py-1 border-border/40">
+                                                        <Layers className="size-3 mr-1.5 opacity-70" />
+                                                        Bối cảnh: {currentGenData.context}
+                                                    </Badge>
+                                                )}
+                                                {currentGenData.material !== "Mặc định" && (
+                                                    <Badge variant="secondary" className="bg-muted/50 hover:bg-muted text-foreground/80 font-medium px-2.5 py-1 border-border/40">
+                                                        <Layers className="size-3 mr-1.5 opacity-70" />
+                                                        Chất liệu: {currentGenData.material}
+                                                    </Badge>
+                                                )}
+                                                {currentGenData.context === "Mặc định" && currentGenData.material === "Mặc định" && (
+                                                    <div className="text-xs text-muted-foreground/80 italic w-full">Không sử dụng hiệu ứng thêm</div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
