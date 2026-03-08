@@ -123,8 +123,9 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
             <img
                 src={src}
                 alt={alt}
-                className={`${className ?? ""} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+                className={`${className ?? ""} ${loaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300 pointer-events-none`}
                 onLoad={() => setLoaded(true)}
+                draggable={false}
             />
         </>
     )
@@ -407,7 +408,7 @@ export function TemplateDetailPage() {
                             {CONTEXT_OPTIONS.map(opt => {
                                 const isActive = context === opt.value
                                 return (
-                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20" onClick={() => setContext(opt.value)}>
+                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setContext(opt.value)}>
                                         <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
                                             isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
                                         }`}>
@@ -438,7 +439,7 @@ export function TemplateDetailPage() {
                             {MATERIAL_OPTIONS.map(opt => {
                                 const isActive = material === opt.value
                                 return (
-                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20" onClick={() => setMaterial(opt.value)}>
+                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setMaterial(opt.value)}>
                                         <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
                                             isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
                                         }`}>
