@@ -425,7 +425,9 @@ export function TemplateDetailPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <span className={`text-[10px] text-center leading-tight ${isActive ? "text-primary font-medium" : "text-muted-foreground"}`}>{opt.label}</span>
+                                        <div className="min-h-[28px] flex items-start justify-center mt-0.5">
+                                            <span className={`text-[10px] text-center leading-tight font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>{opt.label}</span>
+                                        </div>
                                     </div>
                                 )
                             })}
@@ -456,7 +458,9 @@ export function TemplateDetailPage() {
                                                 </div>
                                             )}
                                         </div>
-                                        <span className={`text-[10px] text-center leading-tight ${isActive ? "text-primary font-medium" : "text-muted-foreground"}`}>{opt.label}</span>
+                                        <div className="min-h-[28px] flex items-start justify-center mt-0.5">
+                                            <span className={`text-[10px] text-center leading-tight font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>{opt.label}</span>
+                                        </div>
                                     </div>
                                 )
                             })}
