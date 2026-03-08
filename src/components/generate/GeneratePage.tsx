@@ -569,8 +569,74 @@ export function GeneratePage() {
     }, [])
 
     // --- Prompt Bar refs ---
-    const textareaRef = useRef<HTMLTextAreaElement>(null)
+    const textareaRef = useRef<HTMLDivElement>(null)
     const promptContainerRef = useRef<HTMLDivElement>(null)
+
+    // Hàm tiện ích: render prompt thành HTML với mention highlight
+    const renderPromptHTML = (text: string): string => {
+        if (!text) return ''
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/(@Ảnh \d+)/g, '<span class="text-primary" style="color: hsl(var(--primary))">$1</span>')
+    }
+
+    // Hàm tiện ích: đặt cursor vào vị trí offset trong contenteditable
+    const setCursorPosition = (el: HTMLElement, offset: number) => {
+        const sel = window.getSelection()
+        if (!sel) return
+        const range = document.createRange()
+        
+        // Duyệt qua các childNodes để tìm vị trí offset tương ứng
+        let currentOffset = 0
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+        let node: Node | null = walker.nextNode()
+        while (node) {
+            const nodeLen = (node.textContent || '').length
+            if (currentOffset + nodeLen >= offset) {
+                range.setStart(node, offset - currentOffset)
+                range.collapse(true)
+                sel.removeAllRanges()
+                sel.addRange(range)
+                return
+            }
+            currentOffset += nodeLen
+            node = walker.nextNode()
+        }
+        // Fallback: đặt cursor ở cuối
+        range.selectNodeContents(el)
+        range.collapse(false)
+        sel.removeAllRanges()
+        sel.addRange(range)
+    }
+
+    // useEffect: re-render innerHTML với mention highlight khi prompt thay đổi
+    useEffect(() => {
+        const el = textareaRef.current
+        if (!el) return
+
+        // Lưu vị trí cursor hiện tại 
+        const sel = window.getSelection()
+        let cursorOffset = 0
+        if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+            const range = sel.getRangeAt(0)
+            const preRange = document.createRange()
+            preRange.selectNodeContents(el)
+            preRange.setEnd(range.startContainer, range.startOffset)
+            cursorOffset = preRange.toString().length
+        }
+
+        // Chỉ update innerHTML nếu text thực sự khác
+        const currentText = (el.innerText || '').replace(/\n$/, '')
+        if (currentText !== prompt) {
+            el.innerHTML = renderPromptHTML(prompt)
+            // Phục hồi cursor
+            if (document.activeElement === el) {
+                setCursorPosition(el, cursorOffset)
+            }
+        }
+    }, [prompt])
 
     // Settings
     const [model, setModel] = useState("sdxl")
@@ -1494,11 +1560,8 @@ export function GeneratePage() {
                                                                 setShowMentionPopover(false)
                                                                 requestAnimationFrame(() => {
                                                                     if (textareaRef.current) {
-                                                                        const newPos = pos + mention.length
                                                                         textareaRef.current.focus()
-                                                                        textareaRef.current.setSelectionRange(newPos, newPos)
-                                                                        textareaRef.current.style.height = 'auto'
-                                                                        textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
+                                                                        setCursorPosition(textareaRef.current, pos + mention.length)
                                                                     }
                                                                 })
                                                             }}
@@ -1520,83 +1583,60 @@ export function GeneratePage() {
                                     </div>
                                 )}
 
-                                {/* @Mention Highlight — textarea text ẩn, overlay render toàn bộ text */}
-                                <div className="relative">
-                                    {/* Overlay: render toàn bộ text, mention = màu primary, text thường = màu foreground */}
-                                    <div
-                                        className="absolute inset-0 pointer-events-none px-3 text-[15px] leading-relaxed py-2 overflow-hidden whitespace-pre-wrap break-words"
-                                        style={{ fontFamily: 'inherit', wordBreak: 'break-word', overflowWrap: 'break-word' }}
-                                        aria-hidden="true"
-                                    >
-                                        {prompt ? prompt.split(/(@Ảnh \d+)/g).map((part, i) =>
-                                            /^@Ảnh \d+$/.test(part)
-                                                ? <span key={i} className="text-primary bg-primary/15 rounded">{part}</span>
-                                                : <span key={i} className="text-foreground">{part}</span>
-                                        ) : null}
-                                    </div>
+                                {/* ContentEditable Prompt Input — single element, no overlay sync needed */}
+                                <div
+                                    ref={textareaRef}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    spellCheck={false}
+                                    role="textbox"
+                                    aria-multiline="true"
+                                    data-placeholder="Mô tả ý tưởng kiến tạo của bạn..."
+                                    className="w-full border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none leading-relaxed custom-scrollbar pt-[10px] pb-[10px] overflow-y-auto break-words relative m-0 text-foreground"
+                                    style={{
+                                        minHeight: '44px',
+                                        maxHeight: '120px',
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'break-word',
+                                        caretColor: 'white',
+                                        boxSizing: 'border-box',
+                                    }}
+                                    onInput={(e) => {
+                                        const el = e.currentTarget
+                                        // Lấy plain text từ contenteditable
+                                        const text = el.innerText || ''
+                                        // Loại bỏ trailing newline mà contenteditable tự thêm
+                                        const cleanText = text.replace(/\n$/, '')
+                                        setPrompt(cleanText)
 
-                                    {/* Textarea: text trong suốt, chỉ hiện caret (con trỏ) */}
-                                    <textarea
-                                        ref={textareaRef}
-                                        placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                        className="w-full resize-none border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none placeholder:text-muted-foreground/60 leading-relaxed custom-scrollbar min-h-[44px] max-h-[120px] py-2 overflow-y-auto relative"
-                                        style={{ color: 'transparent', caretColor: 'white' }}
-                                    rows={1}
-                                    value={prompt}
-                                    onChange={(e) => {
-                                        const newVal = e.target.value
-                                        const cursorPos = e.target.selectionStart || 0
-                                        setPrompt(newVal)
-
-                                        // Phát hiện nếu vừa gõ '@'
-                                        const charBefore = newVal[cursorPos - 1]
-                                        if (charBefore === '@') {
-                                            // Ghi lại vị trí '@' để thay thế khi chọn mention
-                                            mentionInsertPosRef.current = cursorPos - 1
-                                            setShowMentionPopover(true)
-                                        } else if (showMentionPopover) {
-                                            // Đóng popover nếu xoá '@' hoặc gõ thêm ký tự khác
-                                            const textSinceAt = newVal.slice(mentionInsertPosRef.current, cursorPos)
-                                            if (!textSinceAt.startsWith('@')) {
-                                                setShowMentionPopover(false)
+                                        // Phát hiện '@' để trigger mention popover
+                                        const sel = window.getSelection()
+                                        if (sel && sel.rangeCount > 0) {
+                                            const range = sel.getRangeAt(0)
+                                            // Lấy text trước cursor
+                                            const preRange = document.createRange()
+                                            preRange.selectNodeContents(el)
+                                            preRange.setEnd(range.startContainer, range.startOffset)
+                                            const textBeforeCursor = preRange.toString()
+                                            const lastChar = textBeforeCursor[textBeforeCursor.length - 1]
+                                            
+                                            if (lastChar === '@') {
+                                                mentionInsertPosRef.current = textBeforeCursor.length - 1
+                                                setShowMentionPopover(true)
+                                            } else if (showMentionPopover) {
+                                                const textSinceAt = textBeforeCursor.slice(mentionInsertPosRef.current)
+                                                if (!textSinceAt.startsWith('@')) {
+                                                    setShowMentionPopover(false)
+                                                }
                                             }
                                         }
-
-                                        // Auto-grow tới max-h-[120px], sau đó scroll nội bộ
-                                        e.target.style.height = 'auto'
-                                        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
                                     }}
                                     onKeyDown={(e) => {
                                         if (showMentionPopover && e.key === 'Escape') {
                                             e.preventDefault()
                                             setShowMentionPopover(false)
                                             return
-                                        }
-                                        // Backspace: xoá toàn bộ mention (@Ảnh X) cùng lúc
-                                        if (e.key === 'Backspace') {
-                                            const ta = e.target as HTMLTextAreaElement
-                                            const cursor = ta.selectionStart
-                                            const selEnd = ta.selectionEnd
-                                            // Chỉ xử lý khi không có text được select (cursor đơn)
-                                            if (cursor === selEnd && cursor > 0) {
-                                                // Tìm mention pattern trước cursor
-                                                const textBefore = prompt.slice(0, cursor)
-                                                const mentionMatch = textBefore.match(/@Ảnh \d+\s?$/)
-                                                if (mentionMatch) {
-                                                    e.preventDefault()
-                                                    const mentionStart = cursor - mentionMatch[0].length
-                                                    const newPrompt = prompt.slice(0, mentionStart) + prompt.slice(cursor)
-                                                    setPrompt(newPrompt)
-                                                    requestAnimationFrame(() => {
-                                                        if (textareaRef.current) {
-                                                            textareaRef.current.setSelectionRange(mentionStart, mentionStart)
-                                                            textareaRef.current.style.height = 'auto'
-                                                            textareaRef.current.style.height = Math.min(textareaRef.current.scrollHeight, 120) + 'px'
-                                                        }
-                                                    })
-                                                    return
-                                                }
-                                            }
                                         }
                                         if (e.key === "Enter" && !e.shiftKey) {
                                             e.preventDefault()
@@ -1605,7 +1645,6 @@ export function GeneratePage() {
                                         }
                                     }}
                                 />
-                                </div>
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}

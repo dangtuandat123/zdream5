@@ -141,3 +141,19 @@
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--foreground) / 0.15) transparent;
 }
+
+/* ContentEditable placeholder */
+[data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground) / 0.6);
+  pointer-events: none;
+  display: block;
+}
+
+/* ContentEditable placeholder — khi chỉ có <br> (trình duyệt tự thêm) */
+[data-placeholder]:has(br:only-child):before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground) / 0.6);
+  pointer-events: none;
+  display: block;
+}
