@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { toast } from "sonner"
 import {
@@ -13,9 +13,14 @@ import {
     Wand2,
     RectangleHorizontal,
     RectangleVertical,
+    Check,
     Square,
     Copy,
     AlertCircle,
+    Settings2,
+    ChevronDown,
+    Ban,
+    Pencil,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -26,7 +31,9 @@ import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
     Dialog,
     DialogContent,
@@ -69,11 +76,35 @@ const TEMPLATES: Record<string, {
     "6": { name: "Anime Waifu", category: "Anime", description: "Tạo nhân vật anime từ ảnh chân dung", prompt: "anime character, waifu, cute style", sampleImages: [] },
 }
 
-// Kích thước đầu ra — đơn giản cho người dùng phổ thông
+// Tỷ lệ khung hình
 const SIZE_OPTIONS = [
-    { value: "1:1", label: "Vuông", icon: Square },
-    { value: "9:16", label: "Dọc", icon: RectangleVertical },
-    { value: "16:9", label: "Ngang", icon: RectangleHorizontal },
+    { value: "1:1", label: "1:1", icon: Square },
+    { value: "16:9", label: "16:9", icon: RectangleHorizontal },
+    { value: "9:16", label: "9:16", icon: RectangleVertical },
+    { value: "4:3", label: "4:3", icon: RectangleHorizontal },
+]
+
+// Số lượng ảnh
+const COUNT_OPTIONS = [1, 2, 3, 4]
+
+// Bối cảnh — mỗi option có ảnh preview + prompt snippet
+const CONTEXT_OPTIONS = [
+    { value: "default", label: "Mặc định", prompt: "", image: "" },
+    { value: "showcase", label: "Hộp Trưng Bày", prompt: "in a showcase display box", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=300&auto=format&fit=crop" },
+    { value: "studio", label: "Studio", prompt: "professional studio lighting", image: "https://images.unsplash.com/photo-1604754742629-3e5728249d73?q=80&w=300&auto=format&fit=crop" },
+    { value: "outdoor", label: "Ngoài trời", prompt: "natural outdoor setting", image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?q=80&w=300&auto=format&fit=crop" },
+    { value: "abstract", label: "Trừu tượng", prompt: "abstract colorful background", image: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=300&auto=format&fit=crop" },
+    { value: "gradient", label: "Gradient", prompt: "smooth gradient background", image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=300&auto=format&fit=crop" },
+]
+
+// Chất liệu — mỗi option có ảnh preview + prompt snippet
+const MATERIAL_OPTIONS = [
+    { value: "default", label: "Mặc định", prompt: "", image: "" },
+    { value: "flocked", label: "Chất liệu Nhung", prompt: "flocked velvet texture", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=300&auto=format&fit=crop" },
+    { value: "translucent", label: "Nhựa Trong Suốt", prompt: "translucent plastic material", image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?q=80&w=300&auto=format&fit=crop" },
+    { value: "metallic", label: "Kim loại", prompt: "metallic chrome finish", image: "https://images.unsplash.com/photo-1589254065878-42c6bf5e6878?q=80&w=300&auto=format&fit=crop" },
+    { value: "wood", label: "Gỗ tự nhiên", prompt: "natural wood texture", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=300&auto=format&fit=crop" },
+    { value: "glass", label: "Thuỷ tinh", prompt: "transparent glass material", image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?q=80&w=300&auto=format&fit=crop" },
 ]
 
 interface GeneratedImage {
@@ -99,6 +130,41 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
     )
 }
 
+// === Hook kéo chuột để scroll ngang (drag-to-scroll desktop) ===
+function useDragScroll() {
+    const ref = useRef<HTMLDivElement>(null)
+    const dragging = useRef(false)
+    const startX = useRef(0)
+    const scrollStart = useRef(0)
+
+    const handlers = {
+        onMouseDown: (e: React.MouseEvent) => {
+            if (!ref.current) return
+            dragging.current = true
+            startX.current = e.pageX
+            scrollStart.current = ref.current.scrollLeft
+            ref.current.style.cursor = "grabbing"
+        },
+        onMouseUp: () => {
+            if (!ref.current) return
+            dragging.current = false
+            ref.current.style.cursor = "grab"
+        },
+        onMouseLeave: () => {
+            if (!ref.current) return
+            dragging.current = false
+            ref.current.style.cursor = "grab"
+        },
+        onMouseMove: (e: React.MouseEvent) => {
+            if (!dragging.current || !ref.current) return
+            e.preventDefault()
+            ref.current.scrollLeft = scrollStart.current - (e.pageX - startX.current)
+        },
+    }
+
+    return { ref, ...handlers }
+}
+
 export function TemplateDetailPage() {
     const { id } = useParams<{ id: string }>()
     const template = TEMPLATES[id || "1"] || TEMPLATES["1"]
@@ -110,8 +176,13 @@ export function TemplateDetailPage() {
     const [generateProgress, setGenerateProgress] = useState(0)
     const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
     const [outputSize, setOutputSize] = useState("1:1")
+    const [imageCount, setImageCount] = useState(1)
     const [isDragging, setIsDragging] = useState(false)
     const [hasError, setHasError] = useState(false)
+    const [optionsOpen, setOptionsOpen] = useState(false)
+    const [context, setContext] = useState("default")
+    const [material, setMaterial] = useState("default")
+    const [extraPrompt, setExtraPrompt] = useState("")
 
     // Viewer state — tách biệt source (sample vs generated)
     const [viewerOpen, setViewerOpen] = useState(false)
@@ -119,6 +190,8 @@ export function TemplateDetailPage() {
     const [viewerIndex, setViewerIndex] = useState(0)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
+    const contextScroll = useDragScroll()
+    const materialScroll = useDragScroll()
 
     // === Handlers ===
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -224,19 +297,15 @@ export function TemplateDetailPage() {
     // === Shared Controls Block (dùng cho cả desktop sidebar và mobile) ===
     const ControlsBlock = (
         <div className="space-y-4">
-            {/* Ảnh mẫu — full width, tỉ lệ 4:3 giống thumbnail trang danh sách */}
+            {/* Ảnh mẫu — chỉ hiện 1 ảnh đại diện */}
             {template.sampleImages.length > 0 && (
                 <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">Ảnh mẫu</Label>
-                    <div className="space-y-2">
-                        {template.sampleImages.map((src, i) => (
-                            <Card key={i} className="overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => openSampleViewer(i)}>
-                                <div className="relative aspect-[4/3]">
-                                    <ImageWithSkeleton src={src} alt={`Mẫu ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
+                    <Card className="overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all" onClick={() => openSampleViewer(0)}>
+                        <div className="relative aspect-[4/3]">
+                            <ImageWithSkeleton src={template.sampleImages[0]} alt="Ảnh mẫu" className="absolute inset-0 w-full h-full object-cover" />
+                        </div>
+                    </Card>
                     <Separator />
                 </div>
             )}
@@ -247,7 +316,7 @@ export function TemplateDetailPage() {
                 {!uploadedImage ? (
                     <Card
                         id="upload-dropzone"
-                        className={`cursor-pointer transition-colors ${isDragging ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
+                        className={`cursor-pointer border-dashed transition-colors ${isDragging ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
                         onClick={() => fileInputRef.current?.click()}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
@@ -261,8 +330,8 @@ export function TemplateDetailPage() {
                     </Card>
                 ) : (
                     <Card className="overflow-hidden">
-                        <div className="relative">
-                            <img src={uploadedImage} alt="Ảnh đầu vào" className="w-full h-36 object-cover" />
+                        <div className="relative aspect-[4/3]">
+                            <img src={uploadedImage} alt="Ảnh đầu vào" className="absolute inset-0 w-full h-full object-cover" />
                             <div className="absolute top-2 right-2 flex gap-1">
                                 <Button size="icon" variant="secondary" className="size-7" onClick={() => fileInputRef.current?.click()}>
                                     <Upload className="size-3" />
@@ -278,10 +347,10 @@ export function TemplateDetailPage() {
 
             <Separator />
 
-            {/* Kích thước */}
+            {/* Tỷ lệ khung hình */}
             <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Kích thước</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <Label className="text-xs font-medium text-muted-foreground">TỶ LỆ KHUNG HÌNH</Label>
+                <div className="grid grid-cols-4 gap-2">
                     {SIZE_OPTIONS.map(opt => {
                         const Icon = opt.icon
                         const isActive = outputSize === opt.value
@@ -301,6 +370,113 @@ export function TemplateDetailPage() {
                     })}
                 </div>
             </div>
+
+            {/* Số lượng ảnh */}
+            <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">SỐ LƯỢNG ẢNH</Label>
+                <div className="grid grid-cols-4 gap-2">
+                    {COUNT_OPTIONS.map(n => (
+                        <Button
+                            key={n}
+                            variant={imageCount === n ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setImageCount(n)}
+                        >
+                            {n}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Option thêm — collapsible */}
+            <Collapsible open={optionsOpen} onOpenChange={setOptionsOpen}>
+                <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between gap-2 h-9 px-2">
+                        <div className="flex items-center gap-2">
+                            <Settings2 className="size-4 text-primary" />
+                            <span className="text-sm font-medium">Hiệu ứng thêm</span>
+                        </div>
+                        <ChevronDown className={`size-4 text-muted-foreground transition-transform ${optionsOpen ? "rotate-180" : ""}`} />
+                    </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-4 pt-2">
+                    {/* Bối cảnh — image cards */}
+                    <div className="space-y-2 overflow-hidden">
+                        <Label className="text-xs font-medium text-muted-foreground">Bối cảnh</Label>
+                        <div ref={contextScroll.ref} onMouseDown={contextScroll.onMouseDown} onMouseUp={contextScroll.onMouseUp} onMouseLeave={contextScroll.onMouseLeave} onMouseMove={contextScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full custom-scrollbar" style={{ cursor: 'grab' }}>
+                            {CONTEXT_OPTIONS.map(opt => {
+                                const isActive = context === opt.value
+                                return (
+                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20" onClick={() => setContext(opt.value)}>
+                                        <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
+                                            isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
+                                        }`}>
+                                            {opt.image ? (
+                                                <ImageWithSkeleton src={opt.image} alt={opt.label} className="absolute inset-0 w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                                                    <Ban className="size-6 text-muted-foreground" />
+                                                </div>
+                                            )}
+                                            {isActive && (
+                                                <div className="absolute top-1 right-1 size-5 rounded-full bg-primary flex items-center justify-center">
+                                                    <Check className="size-3 text-primary-foreground" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span className={`text-[10px] text-center leading-tight ${isActive ? "text-primary font-medium" : "text-muted-foreground"}`}>{opt.label}</span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Chất liệu — image cards */}
+                    <div className="space-y-2 overflow-hidden">
+                        <Label className="text-xs font-medium text-muted-foreground">Chất liệu</Label>
+                        <div ref={materialScroll.ref} onMouseDown={materialScroll.onMouseDown} onMouseUp={materialScroll.onMouseUp} onMouseLeave={materialScroll.onMouseLeave} onMouseMove={materialScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full custom-scrollbar" style={{ cursor: 'grab' }}>
+                            {MATERIAL_OPTIONS.map(opt => {
+                                const isActive = material === opt.value
+                                return (
+                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20" onClick={() => setMaterial(opt.value)}>
+                                        <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
+                                            isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
+                                        }`}>
+                                            {opt.image ? (
+                                                <ImageWithSkeleton src={opt.image} alt={opt.label} className="absolute inset-0 w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                                                    <Ban className="size-6 text-muted-foreground" />
+                                                </div>
+                                            )}
+                                            {isActive && (
+                                                <div className="absolute top-1 right-1 size-5 rounded-full bg-primary flex items-center justify-center">
+                                                    <Check className="size-3 text-primary-foreground" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span className={`text-[10px] text-center leading-tight ${isActive ? "text-primary font-medium" : "text-muted-foreground"}`}>{opt.label}</span>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Mô tả thêm */}
+                    <div className="space-y-2">
+                        <Label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                            <Pencil className="size-3" />
+                            Mô tả thêm <span className="text-muted-foreground/60">(Tùy chọn)</span>
+                        </Label>
+                        <Textarea
+                            placeholder="VD: tóc dài, đeo kính, áo trắng..."
+                            className="resize-none text-sm min-h-[60px]"
+                            value={extraPrompt}
+                            onChange={(e) => setExtraPrompt(e.target.value)}
+                        />
+                    </div>
+                </CollapsibleContent>
+            </Collapsible>
         </div>
     )
 
@@ -356,7 +532,7 @@ export function TemplateDetailPage() {
                             {generatedImages.map((img, idx) => (
                                 <Card
                                     key={img.id}
-                                    className="group overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all"
+                                    className="group overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                                     onClick={() => openGeneratedViewer(idx)}
                                 >
                                     <div className="relative aspect-square">
@@ -441,7 +617,7 @@ export function TemplateDetailPage() {
                                         {generatedImages.map((img, idx) => (
                                             <Card
                                                 key={img.id}
-                                                className="overflow-hidden cursor-pointer hover:ring-2 ring-primary transition-all"
+                                                className="overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
                                                 onClick={() => openGeneratedViewer(idx)}
                                             >
                                                 <div className="relative aspect-square">
@@ -488,7 +664,7 @@ export function TemplateDetailPage() {
     // DESKTOP LAYOUT — 2 panel cố định, không scroll toàn trang
     // ============================
     return (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-[100dvh] overflow-hidden">
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 border-b shrink-0">
                 <Button variant="ghost" size="icon" className="shrink-0" asChild>
@@ -504,7 +680,7 @@ export function TemplateDetailPage() {
             {/* 2-column layout */}
             <div className="flex flex-1 min-h-0">
                 {/* LEFT: Controls */}
-                <div className="w-80 shrink-0 border-r flex flex-col">
+                <div className="w-80 shrink-0 border-r flex flex-col overflow-hidden">
                     <ScrollArea className="flex-1">
                         <div className="p-4">
                             {ControlsBlock}
@@ -552,9 +728,20 @@ function ViewerDialog({
     generatedImages: GeneratedImage[]
     onDownload: (url: string) => void
 }) {
-    if (images.length === 0) return null
-
     const safeIndex = Math.min(index, images.length - 1)
+
+    // Keyboard navigation: ArrowLeft/Right để chuyển ảnh
+    useEffect(() => {
+        if (!open || images.length <= 1) return
+        const handler = (e: KeyboardEvent) => {
+            if (e.key === "ArrowLeft") setIndex((safeIndex - 1 + images.length) % images.length)
+            if (e.key === "ArrowRight") setIndex((safeIndex + 1) % images.length)
+        }
+        window.addEventListener("keydown", handler)
+        return () => window.removeEventListener("keydown", handler)
+    }, [open, safeIndex, images.length, setIndex])
+
+    if (images.length === 0) return null
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
