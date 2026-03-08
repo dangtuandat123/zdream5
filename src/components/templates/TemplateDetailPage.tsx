@@ -818,14 +818,14 @@ function ViewerDialog({
                                         alt="Input Image" 
                                         className="w-full h-full object-contain pointer-events-none" 
                                     />
-                                    <Badge className="absolute top-3 left-3 bg-black/50 text-white backdrop-blur border-none font-medium z-10">Ảnh đầu vào</Badge>
+                                    <Badge variant="secondary" className="absolute top-3 left-3 shadow-md z-10">Ảnh đầu vào</Badge>
                                 </div>
                             )}
 
                             {/* Result Image */}
                             <div className="relative flex min-w-0 max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 max-w-full md:flex-1 items-center justify-center">
                                 {source === "generated" && uploadedImage && (
-                                    <Badge className="absolute top-3 left-3 bg-primary/90 text-white backdrop-blur border-none font-medium z-10 hidden md:flex">Kết quả Generation</Badge>
+                                    <Badge variant="default" className="absolute top-3 left-3 shadow-md z-10 hidden md:flex">Kết quả Generation</Badge>
                                 )}
                                 
                                 <img
