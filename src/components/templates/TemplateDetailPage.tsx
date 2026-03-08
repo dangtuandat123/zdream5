@@ -21,6 +21,7 @@ import {
     ChevronDown,
     Ban,
     Pencil,
+    ZoomIn,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -301,13 +302,28 @@ export function TemplateDetailPage() {
             {/* Ảnh mẫu — chỉ hiện 1 ảnh đại diện */}
             {template.sampleImages.length > 0 && (
                 <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Ảnh mẫu</Label>
-                    <Card className="overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all" onClick={() => openSampleViewer(0)}>
-                        <div className="relative aspect-[4/3]">
-                            <ImageWithSkeleton src={template.sampleImages[0]} alt="Ảnh mẫu" className="absolute inset-0 w-full h-full object-cover" />
+                    <Card className="relative overflow-hidden cursor-pointer group rounded-xl border-accent/50 bg-muted/20 shadow-sm" onClick={() => openSampleViewer(0)}>
+                        <div className="relative aspect-[4/3] w-full">
+                            <ImageWithSkeleton src={template.sampleImages[0]} alt="Ảnh mẫu" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            
+                            {/* Gradient Overlay for contrast */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/20 opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
+
+                            {/* Top Badge */}
+                            <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10 pointer-events-none">
+                                <Sparkles className="size-3 text-primary" />
+                                <span className="text-[10px] font-medium text-white shadow-sm">Ảnh mẫu ({template.name})</span>
+                            </div>
+
+                            {/* Hover Zoom Icon */}
+                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100 pointer-events-none">
+                                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 text-white shadow-xl">
+                                    <ZoomIn className="size-4" />
+                                    <span className="text-xs font-medium">Bấm để phóng to</span>
+                                </div>
+                            </div>
                         </div>
                     </Card>
-                    <Separator />
                 </div>
             )}
 
