@@ -116,3 +116,28 @@
   background-color: rgba(0, 0, 0, 0.85) !important;
   backdrop-filter: blur(12px);
 }
+
+/* Elegant horizontal scrollbar without ugly arrows */
+.clean-horizontal-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.clean-horizontal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.clean-horizontal-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.15);
+  border-radius: 10px;
+}
+.clean-horizontal-scroll::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground) / 0.3);
+}
+/* Hide the buttons/arrows */
+.clean-horizontal-scroll::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+.clean-horizontal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--foreground) / 0.15) transparent;
+}

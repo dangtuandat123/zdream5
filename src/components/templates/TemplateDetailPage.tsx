@@ -404,7 +404,7 @@ export function TemplateDetailPage() {
                     {/* Bối cảnh — image cards */}
                     <div className="space-y-2 overflow-hidden">
                         <Label className="text-xs font-medium text-muted-foreground">Bối cảnh</Label>
-                        <div ref={contextScroll.ref} onMouseDown={contextScroll.onMouseDown} onMouseUp={contextScroll.onMouseUp} onMouseLeave={contextScroll.onMouseLeave} onMouseMove={contextScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full custom-scrollbar" style={{ cursor: 'grab' }}>
+                        <div ref={contextScroll.ref} onMouseDown={contextScroll.onMouseDown} onMouseUp={contextScroll.onMouseUp} onMouseLeave={contextScroll.onMouseLeave} onMouseMove={contextScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
                             {CONTEXT_OPTIONS.map(opt => {
                                 const isActive = context === opt.value
                                 return (
@@ -437,7 +437,7 @@ export function TemplateDetailPage() {
                     {/* Chất liệu — image cards */}
                     <div className="space-y-2 overflow-hidden">
                         <Label className="text-xs font-medium text-muted-foreground">Chất liệu</Label>
-                        <div ref={materialScroll.ref} onMouseDown={materialScroll.onMouseDown} onMouseUp={materialScroll.onMouseUp} onMouseLeave={materialScroll.onMouseLeave} onMouseMove={materialScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full custom-scrollbar" style={{ cursor: 'grab' }}>
+                        <div ref={materialScroll.ref} onMouseDown={materialScroll.onMouseDown} onMouseUp={materialScroll.onMouseUp} onMouseLeave={materialScroll.onMouseLeave} onMouseMove={materialScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
                             {MATERIAL_OPTIONS.map(opt => {
                                 const isActive = material === opt.value
                                 return (
@@ -685,7 +685,7 @@ export function TemplateDetailPage() {
             {/* 2-column layout */}
             <div className="flex flex-1 min-h-0">
                 {/* LEFT: Controls */}
-                <div className="w-80 shrink-0 border-r flex flex-col overflow-hidden">
+                <div className="w-[30%] shrink-0 border-r flex flex-col overflow-hidden">
                     <ScrollArea className="flex-1">
                         <div className="p-4">
                             {ControlsBlock}
@@ -697,7 +697,7 @@ export function TemplateDetailPage() {
                 </div>
 
                 {/* RIGHT: Canvas */}
-                <div className="flex-1 min-h-0 flex flex-col">
+                <div className="w-[70%] shrink-0 flex flex-col min-h-0">
                     {CanvasContent}
                 </div>
             </div>
