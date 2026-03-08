@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { SearchIcon, ImageIcon, SparklesIcon } from "lucide-react"
+import { SearchIcon, SparklesIcon } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -11,18 +11,18 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 const CATEGORIES = ["Tất cả", "Chân dung", "Phong cảnh", "Anime", "3D", "Logo", "Sản phẩm"]
 
 const TEMPLATES = [
-    { id: "1", name: "Chân dung Cyberpunk", category: "Chân dung", description: "Phong cách neon cyberpunk" },
-    { id: "2", name: "Phong cảnh Ghibli", category: "Anime", description: "Anime phong cách Studio Ghibli" },
-    { id: "3", name: "Render sản phẩm 3D", category: "3D", description: "Render sản phẩm siêu thực" },
-    { id: "4", name: "Logo Minimalist", category: "Logo", description: "Logo tối giản hiện đại" },
-    { id: "5", name: "Sơn dầu cổ điển", category: "Phong cảnh", description: "Phong cách sơn dầu Baroque" },
-    { id: "6", name: "Anime Waifu", category: "Anime", description: "Nhân vật anime phong cách Nhật Bản" },
-    { id: "7", name: "Ảnh thời trang", category: "Chân dung", description: "Ảnh chân dung thời trang cao cấp" },
-    { id: "8", name: "Concept Art", category: "Phong cảnh", description: "Concept art game/phim" },
-    { id: "9", name: "Mockup sản phẩm", category: "Sản phẩm", description: "Ảnh mockup sản phẩm chuyên nghiệp" },
-    { id: "10", name: "Chibi Avatar", category: "Anime", description: "Avatar chibi dễ thương" },
-    { id: "11", name: "Pixel Art", category: "3D", description: "Pixel art retro game" },
-    { id: "12", name: "Watercolor Portrait", category: "Chân dung", description: "Chân dung phong cách màu nước" },
+    { id: "1", name: "Chân dung Cyberpunk", category: "Chân dung", description: "Phong cách neon cyberpunk", thumbnail: "https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=400&auto=format&fit=crop" },
+    { id: "2", name: "Phong cảnh Ghibli", category: "Anime", description: "Anime phong cách Studio Ghibli", thumbnail: "https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=400&auto=format&fit=crop" },
+    { id: "3", name: "Render sản phẩm 3D", category: "3D", description: "Render sản phẩm siêu thực", thumbnail: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop" },
+    { id: "4", name: "Logo Minimalist", category: "Logo", description: "Logo tối giản hiện đại", thumbnail: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=400&auto=format&fit=crop" },
+    { id: "5", name: "Sơn dầu cổ điển", category: "Phong cảnh", description: "Phong cách sơn dầu Baroque", thumbnail: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400&auto=format&fit=crop" },
+    { id: "6", name: "Anime Waifu", category: "Anime", description: "Nhân vật anime phong cách Nhật Bản", thumbnail: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
+    { id: "7", name: "Ảnh thời trang", category: "Chân dung", description: "Ảnh chân dung thời trang cao cấp", thumbnail: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=400&auto=format&fit=crop" },
+    { id: "8", name: "Concept Art", category: "Phong cảnh", description: "Concept art game/phim", thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" },
+    { id: "9", name: "Mockup sản phẩm", category: "Sản phẩm", description: "Ảnh mockup sản phẩm chuyên nghiệp", thumbnail: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop" },
+    { id: "10", name: "Chibi Avatar", category: "Anime", description: "Avatar chibi dễ thương", thumbnail: "https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?q=80&w=400&auto=format&fit=crop" },
+    { id: "11", name: "Pixel Art", category: "3D", description: "Pixel art retro game", thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop" },
+    { id: "12", name: "Watercolor Portrait", category: "Chân dung", description: "Chân dung phong cách màu nước", thumbnail: "https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?q=80&w=400&auto=format&fit=crop" },
 ]
 
 export function TemplatesPage() {
@@ -57,7 +57,7 @@ export function TemplatesPage() {
                 </div>
             </div>
 
-            {/* Category Filter — nằm ngang, chọn nhanh bằng ToggleGroup */}
+            {/* Category Filter */}
             <ToggleGroup
                 type="single"
                 value={category}
@@ -80,7 +80,7 @@ export function TemplatesPage() {
                 {filteredTemplates.length} mẫu
             </p>
 
-            {/* Template Grid */}
+            {/* Template Grid — với ảnh thumbnail thật */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {filteredTemplates.map((template) => (
                     <Link
@@ -90,8 +90,12 @@ export function TemplatesPage() {
                     >
                         <Card className="overflow-hidden transition-all hover:shadow-md hover:border-primary/30">
                             <CardContent className="p-0">
-                                <div className="relative flex aspect-[4/3] items-center justify-center bg-muted transition-colors group-hover:bg-muted/70">
-                                    <ImageIcon className="size-10 text-muted-foreground/30" />
+                                <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                                    <img
+                                        src={template.thumbnail}
+                                        alt={template.name}
+                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
                                     {/* Hover overlay */}
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                                         <div className="flex items-center gap-2 text-white text-sm font-medium">
