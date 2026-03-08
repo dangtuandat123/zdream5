@@ -579,7 +579,7 @@ export function GeneratePage() {
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
-            .replace(/(@Ảnh \d+)/g, '<span contenteditable="false" data-mention="true" style="color: hsl(var(--primary)); background: hsl(var(--primary) / 0.15); border-radius: 4px; padding: 1px 4px; font-weight: 500; user-select: all;">$1</span>')
+            .replace(/(@Ảnh \d+)/g, '<span contenteditable="false" data-mention="true" style="color: hsl(var(--primary)); background: hsl(var(--primary) / 0.15); border-radius: 4px; padding: 1px 4px; font-weight: 500; user-select: all; white-space: nowrap; display: inline-block;">$1</span>')
     }
 
     // Hàm tiện ích: đặt cursor vào vị trí offset trong contenteditable
