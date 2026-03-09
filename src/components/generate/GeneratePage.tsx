@@ -4,7 +4,6 @@ import { toast } from "sonner"
 import {
     Wand2,
     Download,
-    Share2,
     Settings2,
     ArrowUp,
     Trash2,
@@ -26,6 +25,7 @@ import {
     History,
     CheckSquare,
     Dices,
+    Loader2
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -1129,28 +1129,26 @@ export function GeneratePage() {
                 {/* === CANVAS AREA — Gallery full-width, justified layout === */}
                 <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
                     <div className="w-full flex flex-col flex-1 min-w-0">
-                        {/* Empty State — Premium AI Studio */}
+                        {/* Empty State — Solid, Neo-brutalism flat design */}
                         {images.length === 0 && !isGenerating && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 px-4 -mt-12">
 
-                                {/* Ethereal Aura - The "Core" */}
-                                <div className="relative mb-8 flex items-center justify-center">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 via-purple-500/10 to-pink-500/20 blur-3xl rounded-full size-48 animate-pulse" style={{ animationDuration: '6s' }} />
-                                    <div className="relative size-20 sm:size-24 rounded-full border border-white/5 bg-white/5 backdrop-blur-xl flex items-center justify-center shadow-2xl ring-1 ring-inset ring-white/10 overflow-hidden">
-                                        <Wand2 className="size-8 text-foreground/70 animate-pulse" style={{ animationDuration: '4s' }} />
-                                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white/10 to-transparent pointer-events-none" />
+                                {/* Core Icon - Flat Design */}
+                                <div className="relative mb-6 sm:mb-8 flex items-center justify-center">
+                                    <div className="size-16 sm:size-24 rounded-full border-2 border-border bg-card flex items-center justify-center">
+                                        <Wand2 className="size-6 sm:size-8 text-primary" />
                                     </div>
                                 </div>
 
                                 {/* Typography */}
-                                <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-center mb-3 text-foreground/90">
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-center mb-2 sm:mb-3 text-foreground text-balance">
                                     Đánh thức trí tưởng tượng
                                 </h1>
-                                <p className="text-muted-foreground/60 text-center text-sm mb-10 max-w-sm leading-relaxed">
+                                <p className="text-muted-foreground text-center text-sm font-medium mb-8 sm:mb-10 max-w-sm leading-relaxed text-balance">
                                     ZDream biến mọi giới hạn của ngôn từ thành những không gian thị giác vô tận.
                                 </p>
 
-                                {/* Creative Suggestion Cards — Responsive: 2 on mobile */}
+                                {/* Creative Suggestion Cards — Responsive: 2 on mobile, 4 lg */}
                                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 max-w-4xl w-full">
                                     {[
                                         { tag: "Nghệ thuật", title: "Sơn dầu trừu tượng", desc: "Sắc màu rực rỡ, nét cọ mạnh mẽ", icon: "M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.866 8.21 8.21 0 003 2.48z" },
@@ -1160,22 +1158,22 @@ export function GeneratePage() {
                                     ].map((item) => (
                                         <button
                                             key={item.title}
-                                            className="group relative flex flex-col text-left p-4 rounded-2xl border border-border/40 bg-muted/10 hover:bg-muted/30 transition-all duration-300 hover:border-border/80 hover:shadow-lg overflow-hidden cursor-pointer"
+                                            className="group relative flex flex-col text-left p-3 sm:p-4 rounded-xl border-2 border-border bg-card hover:bg-accent transition-colors duration-200 overflow-hidden cursor-pointer w-full"
                                             onClick={() => setPrompt(`${item.title}, ${item.desc}`)}
                                         >
-                                            {/* Watermark Icon */}
-                                            <div className="absolute -top-2 -right-2 p-4 opacity-[0.03] group-hover:opacity-[0.08] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-500">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-20">
+                                            {/* Watermark Icon - Solid color (text-border) */}
+                                            <div className="absolute -top-3 -right-2 p-4 text-border group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-500">
+                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-16 sm:size-20">
                                                     <path fillRule="evenodd" d={item.icon} clipRule="evenodd" />
                                                 </svg>
                                             </div>
-                                            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/60 mb-2 z-10">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 z-10">
                                                 {item.tag}
                                             </span>
-                                            <span className="text-sm font-semibold text-foreground/90 mb-1.5 z-10 transition-colors group-hover:text-primary">
+                                            <span className="text-xs sm:text-sm font-bold text-foreground mb-1 z-10 group-hover:text-primary transition-colors">
                                                 {item.title}
                                             </span>
-                                            <span className="text-xs text-muted-foreground/70 pr-4 leading-relaxed z-10 hidden sm:block">
+                                            <span className="text-[11px] sm:text-xs font-medium text-muted-foreground pr-4 leading-relaxed z-10 hidden lg:block">
                                                 {item.desc}
                                             </span>
                                         </button>
@@ -1307,7 +1305,7 @@ export function GeneratePage() {
                                     )}
 
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
-                                    <div className="relative flex max-w-full max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5">
+                                    <div className="relative flex max-w-full max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 group/img-wrapper isolate">
 
                                         {/* Invisible SVG spacer for aspect ratio */}
                                         <img
@@ -1319,13 +1317,13 @@ export function GeneratePage() {
                                             }}
                                         />
 
-                                        {/* Actual image */}
-                                        <div className="absolute inset-0 w-full h-full group">
+                                        {/* Actual image wrapper */}
+                                        <div className="absolute inset-0 w-full h-full">
                                             <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
                                                 <img
                                                     src={selectedImage.url}
                                                     alt={selectedImage.prompt}
-                                                    className="w-full h-full object-cover rounded-md cursor-grab active:cursor-grabbing"
+                                                    className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
                                                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
                                                     draggable
                                                     onDragStart={(e) => {
@@ -1344,16 +1342,16 @@ export function GeneratePage() {
                                                 />
                                             </Zoom>
 
-                                            {/* Hover overlay */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-md overflow-hidden shadow-inner">
-                                                <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
-                                                <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
+                                            {/* Hover overlay that is strictly clipped by the parent's rounded-xl overflow-hidden */}
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img-wrapper:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                                                <div className="absolute inset-0 bg-black/20 backdrop-blur-[3px]" />
+                                                <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover/img-wrapper:translate-y-0 transition-all duration-300 relative z-10">
                                                     <Maximize2 className="size-4" />
                                                     Xem chuẩn gốc
                                                 </div>
                                             </div>
 
-                                            {/* Mobile zoom hint — auto-hide được xử lý bởi useEffect */}
+                                            {/* Mobile zoom hint */}
                                             {isMobile && showZoomHint && (
                                                 <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full animate-pulse pointer-events-none z-20">
                                                     Chạm để phóng to
@@ -1369,34 +1367,38 @@ export function GeneratePage() {
                                 </div>
 
                                 {/* Info Panel */}
-                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar min-h-0">
-                                    <div className="space-y-3">
+                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background min-h-0">
+                                    <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center justify-between gap-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Prompt</Label>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="size-6 rounded-md hover:bg-muted"
-                                                    onClick={() => {
-                                                        navigator.clipboard.writeText(selectedImage.prompt)
-                                                        setIsCopied(true)
-                                                        toast.success('Đã sao chép prompt')
-                                                        setTimeout(() => setIsCopied(false), 2000)
-                                                    }}
-                                                    title="Sao chép prompt"
-                                                >
-                                                    {isCopied ? (
-                                                        <Check className="size-3.5 text-green-500" />
-                                                    ) : (
-                                                        <Copy className="size-3.5 text-muted-foreground" />
-                                                    )}
-                                                </Button>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Prompt</Label>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="size-6 rounded-md hover:bg-muted"
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(selectedImage.prompt)
+                                                                setIsCopied(true)
+                                                                toast.success('Đã sao chép prompt')
+                                                                setTimeout(() => setIsCopied(false), 2000)
+                                                            }}
+                                                        >
+                                                            {isCopied ? (
+                                                                <Check className="size-3.5 text-green-500" />
+                                                            ) : (
+                                                                <Copy className="size-3.5 text-muted-foreground" />
+                                                            )}
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent side="top">Sao chép prompt</TooltipContent>
+                                                </Tooltip>
                                             </div>
-                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg max-h-[180px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
+                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
                                                 {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)/g).map((part, i) =>
                                                     /^(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)$/.test(part)
-                                                        ? <span key={i} className="text-primary bg-primary/15 rounded px-1 py-0.5 text-xs font-medium">{part}</span>
+                                                        ? <span key={i} className="text-primary bg-primary/15 rounded px-1 py-0.5 text-xs font-semibold">{part}</span>
                                                         : <span key={i}>{part}</span>
                                                 )}
                                             </div>
@@ -1405,8 +1407,8 @@ export function GeneratePage() {
                                         {/* Negative Prompt */}
                                         {selectedImage.negativePrompt && (
                                             <div className="flex flex-col gap-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Negative Prompt</Label>
-                                                <div className="text-xs leading-relaxed bg-muted/30 p-3 rounded-lg max-h-[100px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap border border-border/30">
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Negative Prompt</Label>
+                                                <div className="text-xs leading-relaxed bg-muted/30 p-3 rounded-lg break-words whitespace-pre-wrap border border-border/30">
                                                     {selectedImage.negativePrompt}
                                                 </div>
                                             </div>
@@ -1417,8 +1419,8 @@ export function GeneratePage() {
                                             <>
                                                 <div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Ảnh tham chiếu</Label>
-                                                        <Badge variant="secondary" className="h-4 px-1.5 text-[9px] rounded-sm font-medium">{selectedImage.referenceImages.length}</Badge>
+                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Ảnh tham chiếu</Label>
+                                                        <Badge variant="secondary" className="h-4 px-1.5 text-[9px] rounded-sm font-semibold">{selectedImage.referenceImages.length}</Badge>
                                                     </div>
                                                     <div className="grid grid-cols-5 gap-2 mt-2">
                                                         {selectedImage.referenceImages.map((src, i) => (
@@ -1434,31 +1436,31 @@ export function GeneratePage() {
                                         )}
                                         <div className="grid grid-cols-2 gap-3">
                                             <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Model</Label>
-                                                <p className="text-xs font-medium mt-0.5">{selectedImage.model.toUpperCase()}</p>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Model</Label>
+                                                <p className="text-xs font-semibold mt-0.5">{selectedImage.model.toUpperCase()}</p>
                                             </div>
                                             <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Phong cách</Label>
-                                                <p className="text-xs font-medium mt-0.5 capitalize">{selectedImage.style}</p>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Phong cách</Label>
+                                                <p className="text-xs font-semibold mt-0.5 capitalize">{selectedImage.style}</p>
                                             </div>
                                             <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tỷ lệ</Label>
-                                                <p className="text-xs font-medium mt-0.5">{selectedImage.aspectLabel}</p>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Tỷ lệ</Label>
+                                                <p className="text-xs font-semibold mt-0.5">{selectedImage.aspectLabel}</p>
                                             </div>
                                             <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Thời gian</Label>
-                                                <p className="text-xs font-medium mt-0.5">
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Thời gian</Label>
+                                                <p className="text-xs font-semibold mt-0.5">
                                                     {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
                                                 </p>
                                             </div>
                                             <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Seed</Label>
-                                                <p className="text-xs font-medium mt-0.5 tabular-nums">{selectedImage.seed}</p>
+                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Seed</Label>
+                                                <p className="text-xs font-semibold mt-0.5 tabular-nums">{selectedImage.seed}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-2 mt-auto">
+                                    <div className="flex flex-col gap-2 shrink-0">
                                         <Button size="sm" className="w-full" onClick={() => downloadImage(selectedImage.url, `zdream-${selectedImage.id}.jpg`)}>
                                             <Download className="mr-2 size-4" /> Tải xuống
                                         </Button>
@@ -1468,12 +1470,21 @@ export function GeneratePage() {
                                         }}>
                                             <ImageIcon className="mr-2 size-4" /> Dùng làm ảnh tham chiếu
                                         </Button>
-                                        <Button size="sm" variant="outline" className="w-full hidden">
-                                            <Share2 className="mr-2 size-4" /> Chia sẻ
-                                        </Button>
+
                                         <div className="flex gap-2">
-                                            <Button size="sm" variant="ghost" className="flex-1" onClick={() => handleRegenerate(selectedImage)}>
-                                                <RotateCcw className="mr-2 size-3.5" /> Tạo lại
+                                            <Button 
+                                                size="sm" 
+                                                variant="ghost" 
+                                                className="flex-1 transition-all" 
+                                                disabled={isGenerating}
+                                                onClick={() => handleRegenerate(selectedImage)}
+                                            >
+                                                {isGenerating ? (
+                                                    <Loader2 className="mr-2 size-3.5 animate-spin" />
+                                                ) : (
+                                                    <RotateCcw className="mr-2 size-3.5" />
+                                                )}
+                                                {isGenerating ? 'Đang tạo...' : 'Tạo lại'}
                                             </Button>
                                             <Button size="sm" variant="ghost" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDelete(selectedImage.id)}>
                                                 <Trash2 className="mr-2 size-3.5" /> Xoá
