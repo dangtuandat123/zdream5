@@ -1342,9 +1342,9 @@ export function GeneratePage() {
                                                 />
                                             </Zoom>
 
-                                            {/* Hover overlay that is strictly clipped by the parent's rounded-xl overflow-hidden */}
+                                            {/* Hover overlay — không dùng backdrop-blur vì nó bỏ qua overflow-hidden, gây lòe góc */}
                                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img-wrapper:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                                                <div className="absolute inset-0 bg-black/20 backdrop-blur-[3px]" />
+                                                <div className="absolute inset-0 bg-black/30" />
                                                 <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover/img-wrapper:translate-y-0 transition-all duration-300 relative z-10">
                                                     <Maximize2 className="size-4" />
                                                     Xem chuẩn gốc
