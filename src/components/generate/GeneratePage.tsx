@@ -579,36 +579,96 @@ export function GeneratePage() {
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>')
             .replace(/(@Ảnh \d+)/g, '<span contenteditable="false" data-mention="true" style="color: hsl(var(--primary)); background: hsl(var(--primary) / 0.15); border-radius: 4px; padding: 1px 4px; font-weight: 500; user-select: all; white-space: nowrap;">$1</span>')
     }
 
     // Hàm tiện ích: đặt cursor vào vị trí offset trong contenteditable
+    // Phải duyệt TẤT CẢ nodes (kể cả bên trong contenteditable=false) để khớp với innerText
     const setCursorPosition = (el: HTMLElement, offset: number) => {
         const sel = window.getSelection()
         if (!sel) return
-        const range = document.createRange()
-        
-        // Duyệt qua các childNodes để tìm vị trí offset tương ứng
+
         let currentOffset = 0
-        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
-        let node: Node | null = walker.nextNode()
-        while (node) {
-            const nodeLen = (node.textContent || '').length
-            if (currentOffset + nodeLen >= offset) {
-                range.setStart(node, offset - currentOffset)
-                range.collapse(true)
-                sel.removeAllRanges()
-                sel.addRange(range)
-                return
+        
+        // Hàm đệ quy duyệt tất cả nodes
+        const walkNodes = (parent: Node): boolean => {
+            for (let i = 0; i < parent.childNodes.length; i++) {
+                const child = parent.childNodes[i]
+                
+                if (child.nodeType === Node.TEXT_NODE) {
+                    const nodeLen = (child.textContent || '').length
+                    if (currentOffset + nodeLen >= offset) {
+                        const range = document.createRange()
+                        range.setStart(child, offset - currentOffset)
+                        range.collapse(true)
+                        sel.removeAllRanges()
+                        sel.addRange(range)
+                        return true
+                    }
+                    currentOffset += nodeLen
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    const childEl = child as HTMLElement
+                    // Mention node (contenteditable=false): tính toàn bộ text length, đặt cursor SAU nó
+                    if (childEl.getAttribute('contenteditable') === 'false') {
+                        const mentionLen = (childEl.textContent || '').length
+                        if (currentOffset + mentionLen >= offset) {
+                            // Đặt cursor ngay sau mention node
+                            const range = document.createRange()
+                            range.setStartAfter(child)
+                            range.collapse(true)
+                            sel.removeAllRanges()
+                            sel.addRange(range)
+                            return true
+                        }
+                        currentOffset += mentionLen
+                    } else if (childEl.tagName === 'BR') {
+                        // <br> tương ứng với 1 ký tự newline
+                        if (currentOffset >= offset) {
+                            const range = document.createRange()
+                            range.setStartBefore(child)
+                            range.collapse(true)
+                            sel.removeAllRanges()
+                            sel.addRange(range)
+                            return true
+                        }
+                        currentOffset += 1
+                    } else {
+                        if (walkNodes(child)) return true
+                    }
+                }
             }
-            currentOffset += nodeLen
-            node = walker.nextNode()
+            return false
         }
-        // Fallback: đặt cursor ở cuối
-        range.selectNodeContents(el)
-        range.collapse(false)
-        sel.removeAllRanges()
-        sel.addRange(range)
+
+        if (!walkNodes(el)) {
+            // Fallback: đặt cursor ở cuối
+            const range = document.createRange()
+            range.selectNodeContents(el)
+            range.collapse(false)
+            sel.removeAllRanges()
+            sel.addRange(range)
+        }
+    }
+
+    // Hàm tiện ích: đảm bảo chiều cao contenteditable luôn khớp với nội dung
+    const adjustHeight = (el: HTMLDivElement) => {
+        // Reset height để đo lại scrollHeight chính xác
+        el.style.height = 'auto'
+        const newHeight = Math.min(el.scrollHeight, 120)
+        el.style.height = newHeight + 'px'
+
+        // Cuộn xuống để cursor luôn nằm trong vùng nhìn thấy
+        const sel = window.getSelection()
+        if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+            const rect = sel.getRangeAt(0).getBoundingClientRect()
+            const elRect = el.getBoundingClientRect()
+            if (rect.bottom > elRect.bottom) {
+                el.scrollTop += rect.bottom - elRect.bottom + 4
+            } else if (rect.top < elRect.top) {
+                el.scrollTop -= elRect.top - rect.top + 4
+            }
+        }
     }
 
     // useEffect: re-render innerHTML với mention highlight khi prompt thay đổi
@@ -640,6 +700,9 @@ export function GeneratePage() {
                 setCursorPosition(el, cursorOffset)
             }
         }
+
+        // Luôn recalc chiều cao sau mỗi lần prompt thay đổi
+        adjustHeight(el)
     }, [prompt])
 
     // Settings
@@ -653,9 +716,6 @@ export function GeneratePage() {
     // Helper
     const getAspectRatio = (value: string) =>
         ASPECT_RATIOS.find((r) => r.value === value) || ASPECT_RATIOS[0]
-
-
-
 
     // === Handlers ===
     const handleGenerate = useCallback(() => {
@@ -1541,8 +1601,8 @@ export function GeneratePage() {
                                 </div>
                             )}
 
-                            {/* 2. Text Input (Middle) — with highlight overlay for @mentions */}
-                            <div className="relative px-2 pt-2 pb-1">
+                            {/* 2. Text Input (Middle) — contenteditable with inline @mention highlighting */}
+                            <div className="relative px-2 py-2">
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
                                     <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
@@ -1611,7 +1671,7 @@ export function GeneratePage() {
                                     role="textbox"
                                     aria-multiline="true"
                                     data-placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none leading-relaxed custom-scrollbar pt-[10px] pb-[10px] overflow-y-auto break-words relative m-0 text-foreground"
+                                    className="w-full border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none leading-[24px] custom-scrollbar pt-[10px] pb-[10px] overflow-y-auto break-words relative m-0 text-foreground"
                                     style={{
                                         minHeight: '44px',
                                         maxHeight: '120px',
@@ -1650,6 +1710,15 @@ export function GeneratePage() {
                                                 }
                                             }
                                         }
+
+                                        // Cập nhật chiều cao theo nội dung
+                                        adjustHeight(el as HTMLDivElement)
+                                    }}
+                                    onPaste={(e) => {
+                                        // Chỉ cho phép paste plain text, loại bỏ mọi HTML/rich formatting
+                                        e.preventDefault()
+                                        const text = e.clipboardData.getData('text/plain')
+                                        document.execCommand('insertText', false, text)
                                     }}
                                     onKeyDown={(e) => {
                                         if (showMentionPopover && e.key === 'Escape') {
@@ -1667,7 +1736,7 @@ export function GeneratePage() {
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
-                            <div className="flex items-center justify-between px-3 pb-3">
+                            <div className="flex items-center justify-between px-3 pb-2.5">
                                 <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pr-2">
                                     {/* Prompt History */}
                                     {promptHistory.length > 0 && (
