@@ -1,180 +1,106 @@
 "use client"
 
-import * as React from "react"
 import { Link, useLocation } from "react-router-dom"
 import {
+  Home,
+  Palette,
   Sparkles,
-  LayoutDashboardIcon,
-  WandIcon,
-  LayoutGridIcon,
-  ZapIcon,
-  SettingsIcon,
-  HelpCircleIcon,
-  ChevronDownIcon
+  Image as ImageIcon,
+  Settings,
+  Gem,
 } from "lucide-react"
+import { cn } from "@/lib/utils"
 
-import { NavUser } from "@/components/nav-user"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+// Menu items chính
+const navItems = [
+  { icon: Home, label: "Trang chủ", path: "/app/dashboard" },
+  { icon: Palette, label: "Styles", path: "/app/templates" },
+  { icon: Sparkles, label: "Tạo ảnh", path: "/app/generate" },
+  { icon: ImageIcon, label: "Thư viện", path: "/app/library" },
+]
 
-const data = {
-  user: {
-    name: "Nhà Sáng Tạo",
-    email: "creator@nexusart.io",
-    avatar: "",
-  },
-}
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar() {
   const location = useLocation()
 
+  const isActive = (path: string) => {
+    if (path === "/app/dashboard") return location.pathname.includes("dashboard")
+    return location.pathname.startsWith(path)
+  }
+
   return (
-    <Sidebar collapsible="icon" {...props}>
-      {/* Logo & Toggle */}
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem className="group/header relative flex items-center">
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5 transition-opacity duration-200 group-data-[collapsible=icon]:group-hover/header:opacity-0"
-            >
-              <Link to="/">
-                <div className="flex aspect-square size-5 items-center justify-center rounded bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white">
-                  <Sparkles className="size-3" />
-                </div>
-                <span className="text-base font-semibold">Nexus Art</span>
+    <>
+      {/* Desktop sidebar — cố định bên trái, chỉ hiện trên md+ */}
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-30 w-[72px] flex-col items-center bg-sidebar border-r border-sidebar-border py-4">
+
+        {/* Logo */}
+        <Link
+          to="/"
+          className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 text-white mb-6 shrink-0 hover:scale-105 active:scale-95 transition-transform"
+        >
+          <Sparkles className="size-5" />
+        </Link>
+
+        {/* Nav chính */}
+        <nav className="flex flex-col items-center gap-1 flex-1 w-full px-2">
+          {navItems.map((item) => {
+            const active = isActive(item.path)
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  // Base: mờ nhẹ, sạch sẽ
+                  "flex flex-col items-center justify-center gap-1 w-full py-2.5 rounded-xl transition-all duration-200",
+                  active
+                    // Active: nền accent nổi bật, text trắng sáng
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    // Inactive: text xám nhạt, hover sáng lên
+                    : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5"
+                )}
+              >
+                <item.icon className={cn("size-5", active && "text-white")} />
+                <span className={cn(
+                  "text-[10px] leading-tight",
+                  active ? "font-semibold text-white" : "font-medium"
+                )}>
+                  {item.label}
+                </span>
               </Link>
-            </SidebarMenuButton>
+            )
+          })}
+        </nav>
 
-            <SidebarTrigger className="ml-auto transition-all duration-200 group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:left-1 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:group-hover/header:opacity-100" />
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
+        {/* Footer */}
+        <div className="flex flex-col items-center gap-1.5 w-full px-2 shrink-0">
+          {/* Cài đặt */}
+          <Link
+            to="/app/settings"
+            className={cn(
+              "flex flex-col items-center justify-center gap-1 w-full py-2.5 rounded-xl transition-all duration-200",
+              location.pathname.includes("settings")
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5"
+            )}
+          >
+            <Settings className="size-5" />
+            <span className="text-[10px] font-medium leading-tight">Cài đặt</span>
+          </Link>
 
-      {/* Menu chính */}
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {/* Workspace Selector */}
-              <SidebarMenuItem className="mb-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton tooltip="Chọn không gian">
-                      <Avatar className="size-5 rounded-md">
-                        <AvatarFallback className="rounded-md text-[10px] bg-primary text-primary-foreground">
-                          N
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="truncate font-medium">Nhà Sáng Tạo</span>
-                      <ChevronDownIcon className="ml-auto size-4" />
-                    </SidebarMenuButton>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="start" side="right">
-                    <DropdownMenuItem>Không gian cá nhân</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>Tạo không gian mới</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
+          {/* Diamond balance */}
+          <div className="flex flex-col items-center gap-0.5 py-2">
+            <Gem className="size-[18px] text-cyan-400" />
+            <span className="text-[11px] font-bold text-sidebar-foreground tabular-nums">926</span>
+          </div>
 
-              {/* Main Links */}
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname.includes("dashboard")}
-                  tooltip="Trang chủ"
-                >
-                  <Link to="/app/dashboard">
-                    <LayoutDashboardIcon />
-                    <span>Trang chủ</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname === "/app/generate"}
-                  tooltip="Tạo ảnh AI"
-                >
-                  <Link to="/app/generate">
-                    <WandIcon />
-                    <span>Tạo ảnh AI</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location.pathname.includes("templates")}
-                  tooltip="Mẫu thiết kế"
-                >
-                  <Link to="/app/templates">
-                    <LayoutGridIcon />
-                    <span>Mẫu thiết kế</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <div className="mt-auto" />
-
-        {/* Bottom Actions */}
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Nâng cấp Pro">
-                  <ZapIcon />
-                  <div className="grid flex-1 text-left leading-tight">
-                    <span className="truncate text-sm font-medium">Nâng cấp Pro</span>
-                    <span className="truncate text-xs text-muted-foreground">Mở khoá toàn bộ</span>
-                  </div>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Cài đặt">
-                  <Link to="/app/settings">
-                    <SettingsIcon />
-                    <span>Cài đặt</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton tooltip="Trợ giúp">
-                  <HelpCircleIcon />
-                  <span>Trợ giúp</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      {/* Footer */}
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
-    </Sidebar>
+          {/* Nạp Xu CTA */}
+          <Link
+            to="/app/topup"
+            className="w-full text-center text-[10px] font-bold py-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 text-white hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-fuchsia-500/20"
+          >
+            Nạp Xu
+          </Link>
+        </div>
+      </aside>
+    </>
   )
 }
