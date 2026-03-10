@@ -134,7 +134,8 @@ class ImageController extends Controller
             ->findOrFail($id);
 
         // Xoá file vật lý khỏi storage
-        \Illuminate\Support\Facades\Storage::disk('public')->delete($image->file_path);
+        $disk = config('filesystems.default');
+        \Illuminate\Support\Facades\Storage::disk($disk)->delete($image->file_path);
 
         $image->delete();
 

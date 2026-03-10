@@ -136,12 +136,13 @@ class OpenRouterService
         // Tạo tên file unique
         $filename = 'images/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $extension;
 
-        // Lưu vào public disk
-        Storage::disk('public')->put($filename, $imageData);
+        // Lưu vào storage (S3/MinIO)
+        $disk = config('filesystems.default');
+        Storage::disk($disk)->put($filename, $imageData);
 
         return [
             'file_path' => $filename,
-            'file_url' => Storage::disk('public')->url($filename),
+            'file_url' => Storage::disk($disk)->url($filename),
         ];
     }
 }
