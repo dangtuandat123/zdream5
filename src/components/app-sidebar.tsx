@@ -2,21 +2,22 @@
 
 import { Link, useLocation } from "react-router-dom"
 import {
-  Home,
-  Palette,
-  Sparkles,
-  Image as ImageIcon,
-  Settings,
+  LayoutDashboard,
+  SwatchBook,
+  WandSparkles,
+  Images,
+  Settings2,
   Gem,
+  Hexagon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 // Menu items chính
 const navItems = [
-  { icon: Home, label: "Trang chủ", path: "/app/dashboard" },
-  { icon: Palette, label: "Styles", path: "/app/templates" },
-  { icon: Sparkles, label: "Tạo ảnh", path: "/app/generate" },
-  { icon: ImageIcon, label: "Thư viện", path: "/app/library" },
+  { icon: LayoutDashboard, label: "Trang chủ", path: "/app/dashboard" },
+  { icon: SwatchBook, label: "Kiểu mẫu", path: "/app/templates" },
+  { icon: WandSparkles, label: "Tạo ảnh", path: "/app/generate" },
+  { icon: Images, label: "Thư viện", path: "/app/library" },
 ]
 
 export function AppSidebar() {
@@ -35,9 +36,10 @@ export function AppSidebar() {
         {/* Logo */}
         <Link
           to="/"
-          className="flex items-center justify-center size-10 rounded-xl bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 text-white mb-6 shrink-0 hover:scale-105 active:scale-95 transition-transform"
+          className="relative flex items-center justify-center size-12 rounded-2xl bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 text-white mb-8 shrink-0 hover:scale-110 hover:shadow-[0_0_20px_rgba(244,63,94,0.4)] active:scale-95 transition-all duration-300 group"
         >
-          <Sparkles className="size-5" />
+          <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Hexagon className="size-6 fill-white/20 relative z-10 animate-[spin_10s_linear_infinite]" />
         </Link>
 
         {/* Nav chính */}
@@ -49,19 +51,22 @@ export function AppSidebar() {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  // Base: mờ nhẹ, sạch sẽ
-                  "flex flex-col items-center justify-center gap-1 w-full py-2.5 rounded-xl transition-all duration-200",
+                  // Base: Nút bo góc lớn, spacing thoáng
+                  "group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 border border-transparent",
                   active
-                    // Active: nền accent nổi bật, text trắng sáng
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                    // Inactive: text xám nhạt, hover sáng lên
-                    : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5"
+                    // Active: Glassmorphism nổi bật, đổ bóng trắng (hoặc accent)
+                    ? "bg-white/10 text-white border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                    // Inactive: Làm mờ text, hover sẽ sáng lên
+                    : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5 active:bg-white/10"
                 )}
               >
-                <item.icon className={cn("size-5", active && "text-white")} />
+                <item.icon className={cn(
+                  "size-[22px] transition-transform duration-300 ease-out", 
+                  active ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "group-hover:scale-110"
+                )} />
                 <span className={cn(
-                  "text-[10px] leading-tight",
-                  active ? "font-semibold text-white" : "font-medium"
+                  "text-[10px] tracking-wide",
+                  active ? "font-bold text-white shadow-black" : "font-medium"
                 )}>
                   {item.label}
                 </span>
@@ -76,14 +81,22 @@ export function AppSidebar() {
           <Link
             to="/app/settings"
             className={cn(
-              "flex flex-col items-center justify-center gap-1 w-full py-2.5 rounded-xl transition-all duration-200",
+              "group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 border border-transparent",
               location.pathname.includes("settings")
-                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5"
+                ? "bg-white/10 text-white border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5 active:bg-white/10"
             )}
           >
-            <Settings className="size-5" />
-            <span className="text-[10px] font-medium leading-tight">Cài đặt</span>
+            <Settings2 className={cn(
+                  "size-[22px] transition-transform duration-300 ease-out", 
+                  location.pathname.includes("settings") ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "group-hover:scale-110"
+                )} />
+            <span className={cn(
+                  "text-[10px] tracking-wide",
+                  location.pathname.includes("settings") ? "font-bold text-white shadow-black" : "font-medium"
+                )}>
+                Cài đặt
+            </span>
           </Link>
 
           {/* Diamond balance */}
