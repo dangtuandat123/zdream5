@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
+import { useAuth } from "@/contexts/AuthContext"
+import { imageApi, type GeneratedImageData } from "@/lib/api"
 import {
     Wand2,
     Download,
@@ -370,18 +372,6 @@ function JustifiedGallery({
     )
 }
 
-// Ảnh demo — tạo URL đúng tỉ lệ theo aspect ratio đang chọn
-const getDemoUrl = (aspectRatio: string, seed: number) => {
-    // Kích thước gốc tương ứng từng tỉ lệ
-    const sizes: Record<string, [number, number]> = {
-        "1": [800, 800],       // 1:1
-        "16/9": [1200, 675],   // 16:9
-        "9/16": [675, 1200],   // 9:16
-        "4/3": [1000, 750],    // 4:3
-    }
-    const [w, h] = sizes[aspectRatio] || [800, 800]
-    return `https://picsum.photos/seed/${seed}/${w}/${h}`
-}
 
 // Aspect ratio configs — value dùng cho AspectRatio component
 const ASPECT_RATIOS = [
@@ -392,6 +382,7 @@ const ASPECT_RATIOS = [
 ]
 export function GeneratePage() {
     // === State ===
+    const { updateGems, refreshUser } = useAuth()
     const isMobile = useIsMobile()
     const [isGenerating, setIsGenerating] = useState(false)
     const [prompt, setPrompt] = useState("")
@@ -706,7 +697,7 @@ export function GeneratePage() {
     }, [prompt])
 
     // Settings
-    const [model, setModel] = useState("sdxl")
+    const [model, setModel] = useState("google/gemini-2.5-flash-image")
     const [style, setStyle] = useState("photorealistic")
     const [aspectRatioValue, setAspectRatioValue] = useState("1")
     const [creativity, setCreativity] = useState([75])
@@ -718,7 +709,7 @@ export function GeneratePage() {
         ASPECT_RATIOS.find((r) => r.value === value) || ASPECT_RATIOS[0]
 
     // === Handlers ===
-    const handleGenerate = useCallback(() => {
+    const handleGenerate = useCallback(async () => {
         if (!prompt.trim() || isGenerating) return
         setIsGenerating(true)
         setGenerateProgress(0)
@@ -745,35 +736,48 @@ export function GeneratePage() {
         const currentNeg = negativePrompt.trim()
         const currentRefs = [...referenceImages]
 
-        // Progress simulation (0 → 95% trong 2.3s)
+        // Progress simulation
         const interval = setInterval(() => {
             setGenerateProgress(prev => {
-                if (prev >= 95) { clearInterval(interval); return 95 }
-                return prev + Math.random() * 8 + 2
+                if (prev >= 95) return 95
+                return prev + Math.random() * 5 + 1
             })
-        }, 100)
+        }, 400)
         progressIntervalRef.current = interval
 
-        // Chạy tới 100% khi hết timeout giả lập
-        setTimeout(() => {
+        try {
+            const response = await imageApi.generate({
+                prompt: finalPrompt,
+                negative_prompt: currentNeg || undefined,
+                model,
+                style,
+                aspect_ratio: ar.label,
+                seed: currentSeed,
+                count,
+            })
+
             clearInterval(interval)
             progressIntervalRef.current = null
             setGenerateProgress(100)
 
+            updateGems(response.gems_remaining)
+            refreshUser()
+            toast.success(response.message)
+
             // Đợi thêm 400ms để animation progress bar chạy tới đích (transition 300ms)
             setTimeout(() => {
-                const newImages: GeneratedImage[] = Array.from({ length: count }, (_, i) => ({
-                    id: `img-${Date.now()}-${i}`,
+                const newImages: GeneratedImage[] = response.images.map((img: GeneratedImageData, i: number) => ({
+                    id: String(img.id),
                     batchId,
-                    url: getDemoUrl(aspectRatioValue, Date.now() + i),
-                    prompt: finalPrompt,
-                    negativePrompt: currentNeg || undefined,
-                    seed: currentSeed + i,
-                    model,
-                    style,
+                    url: img.file_url,
+                    prompt: img.prompt,
+                    negativePrompt: img.negative_prompt || undefined,
+                    seed: img.seed ?? (currentSeed + i),
+                    model: img.model,
+                    style: img.style,
                     aspectRatio: ar.ratio,
-                    aspectLabel: ar.label,
-                    createdAt: new Date(),
+                    aspectLabel: img.aspect_ratio,
+                    createdAt: new Date(img.created_at),
                     referenceImages: currentRefs.length > 0 ? currentRefs : undefined,
                     isNew: true,
                 }))
@@ -795,8 +799,15 @@ export function GeneratePage() {
                     )
                 }, 5000)
             }, 400)
-        }, 2200)
-    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages])
+
+        } catch (error: any) {
+            clearInterval(interval)
+            progressIntervalRef.current = null
+            setIsGenerating(false)
+            setGenerateProgress(0)
+            toast.error(error.message || 'Lỗi khi tạo ảnh. Vui lòng thử lại.')
+        }
+    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages, updateGems, refreshUser])
 
     const handleDelete = useCallback((id: string) => {
         setDeleteConfirm({ type: 'single', id })
@@ -998,10 +1009,10 @@ export function GeneratePage() {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
-                        <SelectItem value="dalle3">DALL·E 3</SelectItem>
-                        <SelectItem value="midjourney">Midjourney V6</SelectItem>
-                        <SelectItem value="flux">Flux Pro</SelectItem>
+                        <SelectItem value="google/gemini-2.5-flash-image">Gemini 2.5 Flash</SelectItem>
+                        <SelectItem value="stabilityai/stable-diffusion-3">Stable Diffusion 3</SelectItem>
+                        <SelectItem value="openai/dall-e-3">DALL·E 3</SelectItem>
+                        <SelectItem value="black-forest-labs/flux-1.1-pro">Flux Pro</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -1876,10 +1887,10 @@ export function GeneratePage() {
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="sdxl">Stable Diffusion XL</SelectItem>
-                                                <SelectItem value="dalle3">DALL·E 3</SelectItem>
-                                                <SelectItem value="midjourney">Midjourney V6</SelectItem>
-                                                <SelectItem value="flux">Flux Pro</SelectItem>
+                                                <SelectItem value="google/gemini-2.5-flash-image">Gemini 2.5 Flash</SelectItem>
+                                                <SelectItem value="stabilityai/stable-diffusion-3">Stable Diffusion 3</SelectItem>
+                                                <SelectItem value="openai/dall-e-3">DALL·E 3</SelectItem>
+                                                <SelectItem value="black-forest-labs/flux-1.1-pro">Flux Pro</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>

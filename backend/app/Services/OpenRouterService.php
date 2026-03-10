@@ -51,6 +51,9 @@ class OpenRouterService
             $messageContent .= "\n\nAvoid: " . $negativePrompt;
         }
 
+        // Thêm hướng dẫn tỉ lệ ảnh vào prompt vì 1 số model không hỗ trợ image_config
+        $messageContent .= "\n\nPlease ensure the aspect ratio is {$aspectRatio}.";
+
         // Payload gửi đến OpenRouter
         $payload = [
             'model' => $model,
@@ -61,13 +64,11 @@ class OpenRouterService
                 ],
             ],
             'modalities' => ['image', 'text'],
-            'image_config' => [
-                'aspect_ratio' => $aspectRatio,
-            ],
         ];
 
         // Gọi API OpenRouter
         $response = Http::timeout(120)
+            ->withoutVerifying()
             ->withHeaders([
                 'Authorization' => "Bearer {$this->apiKey}",
                 'Content-Type' => 'application/json',
@@ -100,45 +101,63 @@ class OpenRouterService
             throw new \RuntimeException("Không tìm thấy URL ảnh trong response.");
         }
 
-        // Decode base64 và lưu thành file
-        return $this->saveBase64Image($imageDataUrl);
+        // Xử lý cả Base64 Data URL và HTTP URL
+        return $this->processImageResponse($imageDataUrl);
     }
 
     /**
-     * Lưu ảnh base64 vào storage và trả về đường dẫn.
+     * Tải hoặc decode ảnh và lưu vào storage (MinIO).
      *
-     * @param string $dataUrl Data URL dạng "data:image/png;base64,..."
+     * @param string $imageUrl Data URL hoặc HTTP URL
      * @return array{file_path: string, file_url: string}
      */
-    private function saveBase64Image(string $dataUrl): array
+    private function processImageResponse(string $imageUrl): array
     {
-        // Tách phần base64 khỏi data URL prefix
-        $parts = explode(',', $dataUrl, 2);
-        if (count($parts) !== 2) {
-            throw new \RuntimeException("Định dạng data URL không hợp lệ.");
-        }
-
-        $base64Data = $parts[1];
-        $imageData = base64_decode($base64Data, true);
-
-        if ($imageData === false) {
-            throw new \RuntimeException("Không thể decode base64 image.");
-        }
-
-        // Xác định extension từ MIME type
+        $imageData = null;
         $extension = 'png';
-        if (str_contains($parts[0], 'image/jpeg') || str_contains($parts[0], 'image/jpg')) {
-            $extension = 'jpg';
-        } elseif (str_contains($parts[0], 'image/webp')) {
-            $extension = 'webp';
+
+        if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
+            // Tải ảnh từ HTTP URL
+            $imageResponse = Http::timeout(30)->withoutVerifying()->get($imageUrl);
+            if ($imageResponse->failed()) {
+                throw new \RuntimeException("Không thể tải ảnh từ URL: " . $imageUrl);
+            }
+            $imageData = $imageResponse->body();
+            
+            // Thử xác định extension từ header hoặc URL
+            $contentType = $imageResponse->header('Content-Type');
+            if (str_contains($contentType, 'jpeg') || str_contains($contentType, 'jpg')) $extension = 'jpg';
+            elseif (str_contains($contentType, 'webp')) $extension = 'webp';
+            elseif (str_contains(strtolower($imageUrl), '.jpg')) $extension = 'jpg';
+            elseif (str_contains(strtolower($imageUrl), '.webp')) $extension = 'webp';
+        } else {
+            // Xử lý Base64 Data URL
+            $parts = explode(',', $imageUrl, 2);
+            if (count($parts) !== 2) {
+                throw new \RuntimeException("Định dạng data URL không hợp lệ.");
+            }
+
+            $base64Data = $parts[1];
+            $imageData = base64_decode($base64Data, true);
+
+            if ($imageData === false) {
+                throw new \RuntimeException("Không thể decode base64 image.");
+            }
+
+            // Xác định extension từ MIME type
+            if (str_contains($parts[0], 'image/jpeg') || str_contains($parts[0], 'image/jpg')) {
+                $extension = 'jpg';
+            } elseif (str_contains($parts[0], 'image/webp')) {
+                $extension = 'webp';
+            }
         }
 
         // Tạo tên file unique
         $filename = 'images/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $extension;
 
-        // Lưu vào storage (S3/MinIO)
+        // Lưu vào storage (S3/MinIO) với quyền public
         $disk = config('filesystems.default');
-        Storage::disk($disk)->put($filename, $imageData);
+        Storage::disk($disk)->put($filename, $imageData, 'public');
 
         return [
             'file_path' => $filename,
