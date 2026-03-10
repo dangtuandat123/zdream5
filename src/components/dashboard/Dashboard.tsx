@@ -1,154 +1,334 @@
 import { Link } from "react-router-dom"
 import {
-    WandIcon,
-    LayoutGridIcon,
-    ArrowRightIcon,
-    ImageIcon,
+    WandSparkles,
+    SwatchBook,
+    Images,
+    Settings2,
+    CrownIcon,
+    Search,
+    Heart,
     Sparkles,
-    DiamondIcon,
+    VideoIcon,
+    MoreHorizontal
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
-// Dữ liệu mẫu cho "Ảnh gần đây"
-const RECENT_ITEMS = [
-    { title: "Cyberpunk City", type: "txt2img" },
-    { title: "Anime Portrait", type: "template" },
-    { title: "Fantasy Dragon", type: "txt2img" },
-    { title: "Watercolor Dog", type: "template" },
-    { title: "Space Station", type: "txt2img" },
-    { title: "Oil Painting", type: "template" },
+// Dữ liệu mẫu phong phú cho Feed Masonry - Đậm chất AI Art
+const FEED_ITEMS = [
+    {
+        id: "1",
+        image: "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop",
+        creator: "AIArtist_Pro",
+        avatar: "https://i.pravatar.cc/150?u=1",
+        likes: 1205,
+        type: "image"
+    },
+    {
+        id: "2",
+        image: "https://images.unsplash.com/photo-1580477667995-2b92f353364e?q=80&w=600&auto=format&fit=crop",
+        creator: "AnimeLover",
+        avatar: "https://i.pravatar.cc/150?u=2",
+        likes: 842,
+        type: "video" 
+    },
+    {
+        id: "3",
+        image: "https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=800&auto=format&fit=crop",
+        creator: "CyberpunkNeo",
+        avatar: "https://i.pravatar.cc/150?u=3",
+        likes: 3410,
+        type: "image"
+    },
+    {
+        id: "4",
+        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=700&auto=format&fit=crop",
+        creator: "PortraitMaster",
+        avatar: "https://i.pravatar.cc/150?u=4",
+        likes: 672,
+        type: "image"
+    },
+    {
+        id: "5",
+        image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop",
+        creator: "RenderGenius",
+        avatar: "https://i.pravatar.cc/150?u=5",
+        likes: 2190,
+        type: "video"
+    },
+    {
+        id: "6",
+        image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=800&auto=format&fit=crop",
+        creator: "FantasyWorld",
+        avatar: "https://i.pravatar.cc/150?u=6",
+        likes: 954,
+        type: "image"
+    },
+    {
+        id: "7",
+        image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=700&auto=format&fit=crop",
+        creator: "ProductDesign",
+        avatar: "https://i.pravatar.cc/150?u=7",
+        likes: 432,
+        type: "image"
+    },
+    {
+        id: "8",
+        image: "https://images.unsplash.com/photo-1506744012022-28d54c1bb264?q=80&w=800&auto=format&fit=crop",
+        creator: "LandscapeAI",
+        avatar: "https://i.pravatar.cc/150?u=8",
+        likes: 5120,
+        type: "image"
+    },
+    {
+        id: "9",
+        image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop",
+        creator: "DreamCatcher",
+        avatar: "https://i.pravatar.cc/150?u=9",
+        likes: 890,
+        type: "image"
+    },
+    {
+        id: "10",
+        image: "https://images.unsplash.com/photo-1620121692029-d088224ddc74?q=80&w=800&auto=format&fit=crop",
+        creator: "AbstractArt",
+        avatar: "https://i.pravatar.cc/150?u=10",
+        likes: 350,
+        type: "video"
+    }
 ]
 
 export function Dashboard() {
     return (
-        <div className="flex flex-1 flex-col gap-8 p-4 lg:p-6">
-            {/* Greeting */}
-            {/* Removed greeting block as requested */}
-
-            {/* Quick Actions — Luồng chính: 2 cách tạo ảnh */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Card className="group relative overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background transition-all hover:border-primary/40 hover:shadow-md">
-                    <CardContent className="flex flex-col gap-4 p-6">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10">
-                            <WandIcon className="size-6 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-lg font-semibold">Tạo ảnh từ mô tả</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Nhập prompt, chọn model — AI sẽ tạo ảnh cho bạn.
+        <div className="relative flex flex-1 flex-col min-h-screen pb-24 font-sans selection:bg-primary/30">
+            
+            {/* ========= TOP SECTION: BANNERS & QUICK TOOLS ========= */}
+            <div className="flex flex-col gap-6 p-4 lg:p-6 lg:pb-0">
+                
+                {/* 🌟 1. HERO BANNERS */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+                    {/* Main Hero Banner: Tầm nhìn & Cảm hứng */}
+                    <div className="relative col-span-1 lg:col-span-2 overflow-hidden rounded-3xl h-[280px] sm:h-[320px] lg:h-[360px] group cursor-pointer shadow-2xl ring-1 ring-inset ring-white/10">
+                        <img 
+                            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560&auto=format&fit=crop" 
+                            alt="Hero Background"
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
+                        <div className="absolute inset-x-6 sm:inset-x-10 bottom-8 sm:bottom-10 flex flex-col items-start gap-3 sm:gap-4">
+                            <Badge className="bg-white/10 text-white backdrop-blur-md border border-white/20 hover:bg-white/20 py-1 px-3 shadow-lg">
+                                <Sparkles className="size-3.5 mr-1.5 text-blue-400" /> ZDream Studio
+                            </Badge>
+                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.1] drop-shadow-2xl">
+                                Biến Ý Tưởng Thành<br />
+                                Tác Phẩm Nghệ Thuật
+                            </h1>
+                            <p className="text-sm sm:text-base text-zinc-300 max-w-sm drop-shadow font-medium">
+                                Nâng tầm sáng tạo với các mô hình AI thế hệ mới. Khám phá kho tàng phong cách đa dạng chỉ trong vài giây.
                             </p>
                         </div>
-                        <Button asChild className="w-fit">
-                            <Link to="/app/generate">
-                                Bắt đầu <ArrowRightIcon className="ml-2 size-4" />
-                            </Link>
-                        </Button>
-                    </CardContent>
-                </Card>
+                    </div>
 
-                <Card className="group relative overflow-hidden transition-all hover:border-primary/40 hover:shadow-md">
-                    <CardContent className="flex flex-col gap-4 p-6">
-                        <div className="flex size-12 items-center justify-center rounded-2xl bg-purple-500/10">
-                            <LayoutGridIcon className="size-6 text-purple-500" />
-                        </div>
-                        <div className="space-y-1">
-                            <h3 className="text-lg font-semibold">Dùng mẫu thiết kế</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Chọn mẫu có sẵn, tải ảnh lên — AI biến đổi theo phong cách mẫu.
+                    {/* Promo Banner: Khuyến mãi sắc bén góc cạnh */}
+                    <div className="relative col-span-1 overflow-hidden rounded-3xl h-[200px] sm:h-auto lg:h-[360px] bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] group cursor-pointer shadow-[0_20px_40px_rgba(2,44,34,0.3)] ring-1 ring-inset ring-emerald-500/20">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-400/30 transition-colors duration-500"></div>
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+                        
+                        <div className="relative h-full flex flex-col p-6 sm:p-8 justify-center items-start z-10">
+                            <Badge className="mb-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase tracking-wider text-[10px]">
+                                <CrownIcon className="size-3 mr-1 fill-emerald-300" /> Gói Độc Quyền
+                            </Badge>
+                            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2 tracking-tight leading-snug">
+                                ZDream Pro Series<br/>
+                                Giảm Đến <span className="text-emerald-400">50%</span>
+                            </h2>
+                            <p className="text-emerald-100/70 text-sm mb-6 drop-shadow">
+                                Bypass giới hạn API. Mở khóa độ phân giải 4K cho toàn bộ tài nguyên.
                             </p>
+                            <Button className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold rounded-2xl px-6 py-5 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all group-hover:scale-[1.02]">
+                                Nâng Cấp Ngay <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                            </Button>
                         </div>
-                        <Button variant="outline" asChild className="w-fit">
-                            <Link to="/app/templates">
-                                Khám phá mẫu <ArrowRightIcon className="ml-2 size-4" />
-                            </Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Stats Row — gọn gàng, chỉ 2 con số quan trọng */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-                            <ImageIcon className="size-5 text-blue-500" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold tabular-nums">1,204</p>
-                            <p className="text-xs text-muted-foreground">Ảnh đã tạo</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/10">
-                            <LayoutGridIcon className="size-5 text-purple-500" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold tabular-nums">48</p>
-                            <p className="text-xs text-muted-foreground">Mẫu đã dùng</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-                            <DiamondIcon className="size-5 text-amber-500" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold tabular-nums">5,820</p>
-                            <p className="text-xs text-muted-foreground">Diamonds 💎</p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="flex items-center gap-3 p-4">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                            <Sparkles className="size-5 text-emerald-500" />
-                        </div>
-                        <div>
-                            <p className="text-2xl font-bold tabular-nums">42.5h</p>
-                            <p className="text-xs text-muted-foreground">API còn lại</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Recent Generations */}
-            <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Ảnh gần đây</h2>
-                    <Button variant="ghost" size="sm" className="text-xs">
-                        Xem tất cả
-                    </Button>
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                    {RECENT_ITEMS.map((item, i) => (
-                        <Card
-                            key={i}
-                            className="group cursor-pointer overflow-hidden transition-all hover:shadow-md"
-                        >
-                            <CardContent className="p-0">
-                                <div className="flex aspect-square items-center justify-center bg-muted transition-colors group-hover:bg-muted/70">
-                                    <ImageIcon className="size-8 text-muted-foreground/50" />
+
+                {/* 🎯 2. QUICK NAV BAR (Horizontal Scroll Menu - Glassmorphism) */}
+                <ScrollArea className="w-full whitespace-nowrap pb-2 clean-horizontal-scroll">
+                    <div className="flex w-max space-x-3 sm:space-x-4">
+                        
+                        <Link to="/app/generate" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-primary/50 hover:to-primary/10 transition-all duration-300">
+                            <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
+                                <div className="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(currentcolor,0.3)]">
+                                    <Sparkles className="size-5" />
                                 </div>
-                                <div className="flex items-center justify-between p-2.5">
-                                    <p className="text-xs font-medium truncate">{item.title}</p>
-                                    <Badge
-                                        variant="secondary"
-                                        className="text-[10px] shrink-0 ml-1"
-                                    >
-                                        {item.type === "txt2img" ? "AI" : "Mẫu"}
-                                    </Badge>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white tracking-wide">Tạo Ảnh AI</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium tracking-wide border-b border-primary/20 pb-0.5 w-fit">Đỉnh Cao</span>
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </Link>
+
+                        <Link to="/app/templates" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-purple-500/50 hover:to-purple-500/10 transition-all duration-300">
+                            <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
+                                <div className="flex items-center justify-center size-10 rounded-full bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+                                    <SwatchBook className="size-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white tracking-wide">Kiểu Mẫu</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium tracking-wide">Preset Thiết Kế</span>
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link to="/app/generate" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-sky-500/50 hover:to-sky-500/10 transition-all duration-300">
+                            <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
+                                <div className="flex items-center justify-center size-10 rounded-full bg-sky-500/20 text-sky-400 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(14,165,233,0.3)]">
+                                    <WandSparkles className="size-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white tracking-wide">Chỉnh Nét</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium tracking-wide">Inpainting</span>
+                                </div>
+                            </div>
+                        </Link>
+
+                        <Link to="/app/library" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-amber-500/50 hover:to-amber-500/10 transition-all duration-300">
+                            <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
+                                <div className="flex items-center justify-center size-10 rounded-full bg-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                                    <Images className="size-5" />
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white tracking-wide">Thư Viện</span>
+                                    <span className="text-[10px] text-zinc-400 font-medium tracking-wide">Lưu Trữ Riêng</span>
+                                </div>
+                            </div>
+                        </Link>
+                        
+                    </div>
+                    <ScrollBar orientation="horizontal" className="invisible" />
+                </ScrollArea>
+                
+            </div>
+
+            {/* ========= COMMUNITY / FEED SECTION ========= */}
+            <div className="flex flex-col gap-6 p-4 lg:p-6 mt-4">
+                
+                {/* Headers & Search Bar */}
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/5 pb-4">
+                    <div className="flex items-center gap-2">
+                        <Button variant="secondary" className="bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl px-5 shadow-lg drop-shadow">Đề xuất</Button>
+                        <Button variant="ghost" className="text-zinc-500 hover:text-white rounded-xl px-4 transition-colors">Theo dõi</Button>
+                        <div className="w-[1px] h-4 bg-white/10 mx-2 hidden sm:block"></div>
+                        <Button variant="ghost" className="text-zinc-500 hover:text-white rounded-xl px-4 transition-colors">Sự kiện</Button>
+                    </div>
+
+                    <div className="flex flex-1 md:flex-none w-full md:w-auto items-center gap-3">
+                        <div className="relative w-full md:w-[280px]">
+                            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
+                            <Input
+                                placeholder="Tìm kiếm nguồn cảm hứng..."
+                                className="pl-9 h-10 w-full rounded-xl bg-black/40 border-white/5 focus-visible:ring-1 focus-visible:ring-white/20 transition-all font-medium placeholder:text-zinc-600"
+                            />
+                        </div>
+                        <Button className="shrink-0 rounded-xl h-10 px-5 bg-gradient-to-r from-emerald-500 to-teal-400 text-black hover:brightness-110 border-none transition-all font-bold shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                            Chia Sẻ Artwork
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Sub-filters Categories */}
+                <div className="flex items-center gap-6 overflow-x-auto pb-4 clean-horizontal-scroll text-[13px] font-semibold text-zinc-500 tracking-wide">
+                    <span className="text-white cursor-pointer hover:text-white whitespace-nowrap drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">Dành cho bạn</span>
+                    <span className="cursor-pointer hover:text-white transition-colors whitespace-nowrap">Chân dung điện ảnh</span>
+                    <span className="cursor-pointer hover:text-white transition-colors whitespace-nowrap">Phong cách Anime</span>
+                    <span className="cursor-pointer hover:text-white transition-colors whitespace-nowrap">Nhiếp ảnh đường phố</span>
+                    <span className="cursor-pointer hover:text-white transition-colors whitespace-nowrap">Kiểu mẫu Kiến trúc</span>
+                    <span className="cursor-pointer hover:text-white transition-colors whitespace-nowrap">3D Engine</span>
+                </div>
+
+                {/* MASONRY GRID - The core display of aesthetics */}
+                <div className="columns-2 sm:columns-3 lg:columns-4 2xl:columns-5 gap-3 lg:gap-4">
+                    {FEED_ITEMS.map((item) => (
+                        <div key={item.id} className="break-inside-avoid mb-3 lg:mb-4 relative group rounded-[18px] overflow-hidden cursor-pointer bg-zinc-900 ring-1 ring-inset ring-white/10 shadow-lg">
+                            {/* Artwork Image */}
+                            <img 
+                                src={item.image} 
+                                alt="AI Generation" 
+                                className="w-full text-zinc-900 h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                                loading="lazy"
+                            />
+                            
+                            {/* Inner Glass Overlay on Hover */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3 sm:p-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex gap-1">
+                                        {/* Hiển thị Icon định dạng nếu cần */}
+                                        {item.type === "video" && (
+                                            <div className="size-6 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 shadow-sm">
+                                                <VideoIcon className="size-3 text-white" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="size-7 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300 hover:bg-white/20">
+                                        <MoreHorizontal className="size-4 text-white" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                    <div className="flex items-center gap-2">
+                                        <img src={item.avatar} alt="Avatar" className="size-6 rounded-full border border-white/20 shadow-sm" />
+                                        <span className="text-[11px] sm:text-xs font-semibold text-white truncate max-w-[80px] sm:max-w-[120px] drop-shadow-md">{item.creator}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-white/90">
+                                        <Heart className="size-4 hover:fill-rose-500 hover:text-rose-500 transition-colors drop-shadow" />
+                                        <span className="text-[11px] font-bold tabular-nums drop-shadow">{item.likes}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>
+
+            {/* ========= FLOATING ACTION BAR (Magic Controller Island) ========= */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden sm:block">
+                <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-zinc-950/80 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/5">
+                    
+                    <Link to="/app/generate">
+                        <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
+                            <WandSparkles className="size-[18px] group-hover:scale-110 transition-transform" />
+                        </Button>
+                    </Link>
+                    
+                    <Link to="/app/templates">
+                        <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
+                            <Images className="size-[18px] group-hover:scale-110 transition-transform" />
+                        </Button>
+                    </Link>
+                    
+                    <div className="w-[1px] h-5 bg-white/10 mx-1"></div>
+                    
+                    <Button variant="ghost" size="icon" className="size-12 rounded-full bg-gradient-to-tr from-primary to-rose-400 hover:brightness-110 text-black shadow-inner shadow-white/30 hover:scale-105 transition-all">
+                        <Sparkles className="size-6 fill-black/20" />
+                    </Button>
+                    
+                    <div className="w-[1px] h-5 bg-white/10 mx-1"></div>
+                    
+                    <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
+                        <VideoIcon className="size-[18px] group-hover:scale-110 transition-transform" />
+                    </Button>
+                    
+                    <Link to="/app/settings">
+                        <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
+                            <Settings2 className="size-[18px] group-hover:scale-110 transition-transform" />
+                        </Button>
+                    </Link>
+                    
+                </div>
+            </div>
+
         </div>
     )
 }
