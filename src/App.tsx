@@ -8,6 +8,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 import { GeneratePage } from "@/components/generate/GeneratePage";
 import { TemplatesPage } from "@/components/templates/TemplatesPage";
+import { LibraryPage } from "@/components/library/LibraryPage";
 import { TemplateDetailPage } from "@/components/templates/TemplateDetailPage";
 import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute";
 
@@ -36,6 +37,7 @@ function App() {
             <Route path="generate" element={<GeneratePage />} />
             <Route path="templates" element={<TemplatesPage />} />
             <Route path="templates/:id" element={<TemplateDetailPage />} />
+            <Route path="library" element={<LibraryPage />} />
           </Route>
         </Route>
 
