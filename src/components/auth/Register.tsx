@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff, Check } from "lucide-react"
+import { toast } from "sonner"
 import { AppLogo } from "@/components/app-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -18,7 +19,7 @@ const passwordReqs = [
 
 export function Register() {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { register } = useAuth();
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -29,12 +30,15 @@ export function Register() {
         e.preventDefault()
         setIsLoading(true)
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            await register(name, email, password)
+            toast.success('Đăng ký thành công! Bạn được tặng 50 💎.')
+            navigate('/app/home')
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Đăng ký thất bại')
+        } finally {
             setIsLoading(false)
-            login()
-            navigate('/app/dashboard')
-        }, 1500)
+        }
     }
 
     return (

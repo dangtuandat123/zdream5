@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Eye, EyeOff } from "lucide-react"
+import { toast } from "sonner"
 import { AppLogo } from "@/components/app-logo"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,12 +22,15 @@ export function Login() {
         e.preventDefault()
         setIsLoading(true)
 
-        // Simulate API call
-        setTimeout(() => {
+        try {
+            await login(email, password)
+            toast.success('Đăng nhập thành công!')
+            navigate('/app/home')
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Đăng nhập thất bại')
+        } finally {
             setIsLoading(false)
-            login()
-            navigate('/app/dashboard')
-        }, 1500)
+        }
     }
 
     return (

@@ -70,7 +70,7 @@ export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
                                 <History className="w-4 h-4" /> Bảng giá
                             </span>
                             {isLoggedIn ? (
-                                <Link to="/app/dashboard" className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer flex items-center gap-2 relative ml-4">
+                                <Link to="/app/home" className="text-white/70 hover:text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-white/10 transition-colors cursor-pointer flex items-center gap-2 relative ml-4">
                                     <span className="absolute -top-1 -right-1 flex h-3 w-3">
                                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
                                         <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
@@ -83,7 +83,7 @@ export function Navbar({ isLoggedIn }: { isLoggedIn?: boolean }) {
 
                     <div className="flex items-center gap-4">
                         {isLoggedIn ? (
-                            <Link to="/app/dashboard">
+                            <Link to="/app/home">
                                 <Button variant="ghost" size="icon" className="rounded-full bg-white/5 hover:bg-white/20 text-white border border-white/10 focus:ring-0">
                                     <User className="w-4 h-4" />
                                 </Button>

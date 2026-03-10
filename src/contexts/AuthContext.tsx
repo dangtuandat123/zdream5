@@ -1,30 +1,115 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { authApi, setToken, clearToken, type AuthUser } from '@/lib/api';
 
 interface AuthContextType {
     isLoggedIn: boolean;
-    login: () => void;
-    logout: () => void;
+    user: AuthUser | null;
+    gems: number;
+    login: (email: string, password: string) => Promise<void>;
+    register: (name: string, email: string, password: string) => Promise<void>;
+    logout: () => Promise<void>;
+    refreshUser: () => Promise<void>;
+    updateGems: (gems: number) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    // Initialize from localStorage if available, otherwise default to false
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-        const saved = localStorage.getItem('isLoggedIn');
-        return saved === 'true';
+    const [user, setUser] = useState<AuthUser | null>(() => {
+        try {
+            const saved = localStorage.getItem('auth_user');
+            return saved ? JSON.parse(saved) : null;
+        } catch {
+            return null;
+        }
     });
 
-    // Persist auth state to localStorage
-    useEffect(() => {
-        localStorage.setItem('isLoggedIn', String(isLoggedIn));
-    }, [isLoggedIn]);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+        return !!localStorage.getItem('auth_token');
+    });
 
-    const login = () => setIsLoggedIn(true);
-    const logout = () => setIsLoggedIn(false);
+    // Persist user data vào localStorage
+    useEffect(() => {
+        if (user) {
+            localStorage.setItem('auth_user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('auth_user');
+        }
+    }, [user]);
+
+    // Lấy thông tin user mới nhất từ server
+    const refreshUser = useCallback(async () => {
+        try {
+            const data = await authApi.getUser();
+            setUser(data.user);
+        } catch {
+            // Token hết hạn hoặc lỗi → đăng xuất
+            setUser(null);
+            setIsLoggedIn(false);
+            clearToken();
+        }
+    }, []);
+
+    // Đăng nhập
+    const login = useCallback(async (email: string, password: string) => {
+        const data = await authApi.login({ email, password });
+        setToken(data.token);
+        setUser(data.user);
+        setIsLoggedIn(true);
+    }, []);
+
+    // Đăng ký
+    const register = useCallback(async (name: string, email: string, password: string) => {
+        const data = await authApi.register({
+            name,
+            email,
+            password,
+            password_confirmation: password,
+        });
+        setToken(data.token);
+        setUser(data.user);
+        setIsLoggedIn(true);
+    }, []);
+
+    // Đăng xuất
+    const logout = useCallback(async () => {
+        try {
+            await authApi.logout();
+        } catch {
+            // Bỏ qua lỗi nếu token đã hết hạn
+        } finally {
+            clearToken();
+            setUser(null);
+            setIsLoggedIn(false);
+        }
+    }, []);
+
+    // Cập nhật gems (dùng sau khi tạo ảnh hoặc nạp tiền)
+    const updateGems = useCallback((gems: number) => {
+        setUser(prev => prev ? { ...prev, gems } : null);
+    }, []);
+
+    // Verify token khi khởi động app
+    useEffect(() => {
+        if (isLoggedIn) {
+            refreshUser();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    const gems = user?.gems ?? 0;
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+        <AuthContext.Provider value={{
+            isLoggedIn,
+            user,
+            gems,
+            login,
+            register,
+            logout,
+            refreshUser,
+            updateGems,
+        }}>
             {children}
         </AuthContext.Provider>
     );

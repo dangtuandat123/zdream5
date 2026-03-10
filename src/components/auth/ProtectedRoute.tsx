@@ -18,7 +18,7 @@ export function PublicRoute() {
 
     if (isLoggedIn) {
         // Redirect to app if already authenticated
-        return <Navigate to="/app/dashboard" replace />;
+        return <Navigate to="/app/home" replace />;
     }
 
     // Render child routes (like login/register) if not authenticated
