@@ -15,6 +15,9 @@ import {
     ChevronLeftIcon,
     ChevronRightIcon,
     XIcon,
+    ZoomInIcon,
+    ZoomOutIcon,
+    MaximizeIcon,
 } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
@@ -107,6 +110,12 @@ export function LibraryPage() {
     
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+    
+    // Pan & Zoom State
+    const [zoom, setZoom] = useState(1)
+    const [position, setPosition] = useState({ x: 0, y: 0 })
+    const [isDraggingZoom, setIsDraggingZoom] = useState(false)
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
     
     // Upload refs & state
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -248,6 +257,56 @@ export function LibraryPage() {
     }, [items, tab, generatedSubFilter, search, sort])
 
     const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
+
+    // Reset pan & zoom
+    const resetZoom = useCallback(() => {
+        setZoom(1)
+        setPosition({ x: 0, y: 0 })
+    }, [])
+
+    // Handle Zoom interactions
+    const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.5, 5))
+    const handleZoomOut = () => setZoom(prev => {
+        const newZoom = Math.max(prev - 0.5, 1)
+        if (newZoom === 1) setPosition({ x: 0, y: 0 }) // tự focus lại góc 0 khi thuề nhỏ nhất
+        return newZoom
+    })
+    
+    // Reset zoom khi chuyển ảnh hoặc đóng
+    useEffect(() => {
+        resetZoom()
+    }, [selectedIndex, resetZoom])
+
+    // Handlers cho việc Drag Pan Image
+    const handleMouseDownPan = (e: React.MouseEvent) => {
+        if (zoom <= 1) return // Không cho kéo nếu chưa zoom
+        e.preventDefault()
+        setIsDraggingZoom(true)
+        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+    }
+
+    const handleMouseMovePan = (e: React.MouseEvent) => {
+        if (!isDraggingZoom || zoom <= 1) return
+        e.preventDefault()
+        setPosition({
+            x: e.clientX - dragStart.x,
+            y: e.clientY - dragStart.y
+        })
+    }
+
+    const handleMouseUpPan = () => {
+        setIsDraggingZoom(false)
+    }
+
+    const handleWheelZoom = (e: React.WheelEvent) => {
+        e.preventDefault() // Ngăn scroll trang
+        // e.deltaY > 0 là cuộn xuống (Zoom out), < 0 là lên (Zoom in)
+        if (e.deltaY < 0) {
+            handleZoomIn()
+        } else {
+            handleZoomOut()
+        }
+    }
 
     // Handlers for Navigation
     const handleNext = useCallback(() => {
@@ -523,18 +582,18 @@ export function LibraryPage() {
             {/* Fullscreen Image Lightbox */}
             <Dialog open={selectedIndex !== null} onOpenChange={(open) => !open && setSelectedIndex(null)}>
                 <DialogContent 
-                    className="max-w-none w-screen h-screen p-0 m-0 border-none bg-black/95 rounded-none flex items-center justify-center overflow-hidden [&>button]:hidden text-slate-200"
+                    className="max-w-none w-screen h-screen p-0 m-0 border-none bg-black/95 rounded-none overflow-hidden [&>button]:hidden text-slate-200"
                     aria-describedby="Image viewer"
                 >
                     <DialogTitle className="sr-only">Trình xem ảnh toàn màn hình</DialogTitle>
                     
                     {selectedItem && (
-                        <>
+                        <div className="relative w-full h-full flex items-center justify-center">
                             {/* Nút đóng */}
                             <Button 
-                                variant="ghost" 
+                                variant="outline" 
                                 size="icon" 
-                                className="absolute top-4 right-4 z-50 rounded-full bg-black/20 text-white hover:bg-black/50 hover:text-white"
+                                className="absolute top-4 right-4 z-50 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg"
                                 onClick={() => setSelectedIndex(null)}
                             >
                                 <XIcon className="size-6" />
@@ -558,18 +617,57 @@ export function LibraryPage() {
                                 </h3>
                             </div>
 
-                            {/* Action Bar (Góc dưới) */}
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 p-2 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                            {/* Action Bar (Góc dưới) - Gộp chung Zoom Tool & Tools Khác */}
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                                {/* Group: Zoom Controls */}
+                                <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        title="Thu nhỏ"
+                                        className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
+                                        onClick={handleZoomOut}
+                                        disabled={zoom <= 1}
+                                    >
+                                        <ZoomOutIcon className="size-4" />
+                                    </Button>
+                                    <span className="text-xs font-medium w-10 text-center text-white/80 select-none">
+                                        {Math.round(zoom * 100)}%
+                                    </span>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        title="Phóng to"
+                                        className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
+                                        onClick={handleZoomIn}
+                                        disabled={zoom >= 5}
+                                    >
+                                        <ZoomInIcon className="size-4" />
+                                    </Button>
+                                    {zoom > 1 && (
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            title="Đặt lại"
+                                            className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
+                                            onClick={resetZoom}
+                                        >
+                                            <MaximizeIcon className="size-4" />
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Group: Actions */}
                                 {(selectedItem.type === "ai" || selectedItem.type === "template") && (
-                                    <Button variant="ghost" className="text-white hover:bg-white/20 gap-2 h-10 rounded-xl">
+                                    <Button variant="ghost" className="text-white hover:bg-white/20 gap-2 h-9 rounded-xl px-3">
                                         <WandIcon className="size-4" />
-                                        <span className="hidden sm:inline">Tạo tương tự</span>
+                                        <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
                                     </Button>
                                 )}
-                                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-10 w-10 py-0 rounded-xl">
+                                <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl">
                                     <DownloadIcon className="size-4" />
                                 </Button>
-                                <Button variant="ghost" size="icon" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-10 w-10 py-0 rounded-xl">
+                                <Button variant="ghost" size="icon" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-9 w-9 py-0 rounded-xl mr-0.5">
                                     <Trash2Icon className="size-4" />
                                 </Button>
                             </div>
@@ -577,9 +675,9 @@ export function LibraryPage() {
                             {/* Nút Previous */}
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-40">
                                 <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     size="icon"
-                                    className={`size-12 rounded-full bg-black/20 text-white hover:bg-black/50 hover:text-white backdrop-blur-sm transition-opacity ${selectedIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                                    className={`size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handlePrev()
@@ -592,9 +690,9 @@ export function LibraryPage() {
                             {/* Nút Next */}
                             <div className="absolute right-4 top-1/2 -translate-y-1/2 z-40">
                                 <Button
-                                    variant="ghost"
+                                    variant="outline"
                                     size="icon"
-                                    className={`size-12 rounded-full bg-black/20 text-white hover:bg-black/50 hover:text-white backdrop-blur-sm transition-opacity ${selectedIndex === filteredItems.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                                    className={`size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === filteredItems.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handleNext()
@@ -604,15 +702,28 @@ export function LibraryPage() {
                                 </Button>
                             </div>
 
-                            {/* Container Hình Ảnh */}
-                            <div className="w-full h-full p-4 md:p-12 flex items-center justify-center pointer-events-none relative select-none">
+                            {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
+                            <div 
+                                className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'select-none pointer-events-none'}`}
+                                onWheel={handleWheelZoom}
+                                onMouseDown={handleMouseDownPan}
+                                onMouseMove={handleMouseMovePan}
+                                onMouseUp={handleMouseUpPan}
+                                onMouseLeave={handleMouseUpPan}
+                                onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
+                            >
                                 <img 
                                     src={selectedItem.thumbnail} 
                                     alt="Preview" 
-                                    className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform select-none"
+                                    className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform ease-out will-change-transform pointer-events-auto"
+                                    style={{
+                                        transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                                        transitionDuration: isDraggingZoom ? '0ms' : '200ms' // Tắt chuyển động mượt khi đang kéo thả cho cảm giác 1:1 realtime
+                                    }}
+                                    draggable={false}
                                 />
                             </div>
-                        </>
+                        </div>
                     )}
                 </DialogContent>
             </Dialog>
