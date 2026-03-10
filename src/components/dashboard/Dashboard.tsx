@@ -26,14 +26,7 @@ export function Dashboard() {
     return (
         <div className="flex flex-1 flex-col gap-8 p-4 lg:p-6">
             {/* Greeting */}
-            <div className="space-y-1">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                    Xin chào, Nhà Sáng Tạo 👋
-                </h1>
-                <p className="text-muted-foreground">
-                    Hôm nay bạn muốn tạo gì?
-                </p>
-            </div>
+            {/* Removed greeting block as requested */}
 
             {/* Quick Actions — Luồng chính: 2 cách tạo ảnh */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

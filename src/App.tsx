@@ -32,8 +32,8 @@ function App() {
         {/* Protected App Routes with Sidebar Shell */}
         <Route element={<ProtectedRoute />}>
           <Route path="/app" element={<AppShell />}>
-            <Route index element={<Navigate to="/app/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
+            <Route index element={<Navigate to="/app/home" replace />} />
+            <Route path="home" element={<Dashboard />} />
             <Route path="generate" element={<GeneratePage />} />
             <Route path="templates" element={<TemplatesPage />} />
             <Route path="templates/:id" element={<TemplateDetailPage />} />
