@@ -433,6 +433,44 @@ export function GeneratePage() {
         return () => clearTimeout(t)
     }, [selectedImage, showZoomHint])
 
+    // Load lịch sử ảnh khi component mount
+    useEffect(() => {
+        const fetchHistory = async () => {
+            try {
+                const res = await imageApi.list(1, 100)
+                if (res.data) {
+                    const loadedImages: GeneratedImage[] = res.data.map((img) => {
+                        let arNumber = 1
+                        if (img.aspect_ratio) {
+                            const parts = img.aspect_ratio.split(':')
+                            if (parts.length === 2 && !isNaN(Number(parts[0])) && !isNaN(Number(parts[1]))) {
+                                arNumber = Number(parts[0]) / Number(parts[1])
+                            }
+                        }
+                        return {
+                            id: String(img.id),
+                            batchId: String(img.id),
+                            url: img.file_url,
+                            prompt: img.prompt,
+                            negativePrompt: img.negative_prompt || undefined,
+                            seed: img.seed ?? 0,
+                            model: img.model,
+                            style: img.style,
+                            aspectRatio: arNumber,
+                            aspectLabel: img.aspect_ratio,
+                            createdAt: new Date(img.created_at),
+                            isNew: false,
+                        }
+                    })
+                    setImages(loadedImages)
+                }
+            } catch (err) {
+                console.error("Failed to load history:", err)
+            }
+        }
+        fetchHistory()
+    }, [])
+
     // Track cursor position for custom drag avatar (desktop DnD)
     // NOTE: mousemove is suppressed during HTML5 drag — must use the `drag` event instead
     useEffect(() => {
@@ -835,20 +873,30 @@ export function GeneratePage() {
     }, [])
 
     // Xác nhận xoá thực sự
-    const confirmDelete = useCallback(() => {
+    const confirmDelete = useCallback(async () => {
         if (!deleteConfirm) return
-        if (deleteConfirm.type === 'single') {
-            setImages(prev => prev.filter(img => img.id !== deleteConfirm.id))
-            if (selectedImage?.id === deleteConfirm.id) setSelectedImage(null)
-            toast('Đã xoá ảnh', { icon: '🗑️' })
-        } else {
-            setImages(prev => prev.filter(img => !selectedIds.has(img.id)))
-            if (selectedImage && selectedIds.has(selectedImage.id)) setSelectedImage(null)
-            toast(`Đã xoá ${selectedIds.size} ảnh`, { icon: '🗑️' })
-            setSelectedIds(new Set())
-            setSelectionMode(false)
+        try {
+            if (deleteConfirm.type === 'single') {
+                await imageApi.delete(Number(deleteConfirm.id))
+                setImages(prev => prev.filter(img => img.id !== deleteConfirm.id))
+                if (selectedImage?.id === deleteConfirm.id) setSelectedImage(null)
+                toast('Đã xoá ảnh', { icon: '🗑️' })
+            } else {
+                for (const id of selectedIds) {
+                    await imageApi.delete(Number(id))
+                }
+                setImages(prev => prev.filter(img => !selectedIds.has(img.id)))
+                if (selectedImage && selectedIds.has(selectedImage.id)) setSelectedImage(null)
+                toast(`Đã xoá ${selectedIds.size} ảnh`, { icon: '🗑️' })
+                setSelectedIds(new Set())
+                setSelectionMode(false)
+            }
+        } catch (e: any) {
+            console.error('Lỗi khi xóa ảnh:', e)
+            toast.error("Không thể xoá ảnh trên máy chủ")
+        } finally {
+            setDeleteConfirm(null)
         }
-        setDeleteConfirm(null)
     }, [deleteConfirm, selectedImage, selectedIds])
 
     const handleRegenerate = useCallback((img: GeneratedImage) => {
