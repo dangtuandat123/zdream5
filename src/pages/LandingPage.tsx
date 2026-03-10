@@ -22,44 +22,7 @@ import {
 // Tuân thủ: zdream-rule.md, Shadcn UI Components
 // ============================================================
 
-// Dữ liệu tính năng - ánh xạ trực tiếp từ sidebar /app
-const FEATURES = [
-    {
-        icon: WandSparkles,
-        title: "Tạo Ảnh AI",
-        description: "Nhập mô tả bằng văn bản, chọn tỷ lệ khung hình, số lượng và mô hình AI. Nhận ảnh chất lượng cao chỉ trong vài giây.",
-        color: "from-violet-500/20 to-violet-600/10",
-        ringColor: "ring-violet-500/20",
-        iconColor: "text-violet-400",
-        glowColor: "bg-violet-500/10",
-        link: "/app/generate",
-        tags: ["Text-to-Image", "Batch Generation", "4K Output"],
-    },
-    {
-        icon: SwatchBook,
-        title: "Kho Kiểu Mẫu",
-        description: "Hơn 12 bộ preset phong cách: Chân dung, Anime, 3D, Logo, Phong cảnh, Sản phẩm. Chọn mẫu → Tải ảnh → Nhận kết quả.",
-        color: "from-sky-500/20 to-sky-600/10",
-        ringColor: "ring-sky-500/20",
-        iconColor: "text-sky-400",
-        glowColor: "bg-sky-500/10",
-        link: "/app/templates",
-        tags: ["Chân dung", "Anime", "3D", "Logo"],
-    },
-    {
-        icon: Images,
-        title: "Thư Viện Cá Nhân",
-        description: "Quản lý toàn bộ ảnh AI đã tạo, kết quả từ kiểu mẫu, và tài nguyên gốc tải lên. Tìm kiếm, lọc và tải xuống dễ dàng.",
-        color: "from-amber-500/20 to-amber-600/10",
-        ringColor: "ring-amber-500/20",
-        iconColor: "text-amber-400",
-        glowColor: "bg-amber-500/10",
-        link: "/app/library",
-        tags: ["Kết quả AI", "Template", "Upload"],
-    },
-]
-
-// Dữ liệu bảng giá
+// Dữ liệu bảng giá - ánh xạ từ hệ thống Kim Cương
 const PLANS = [
     {
         name: "Miễn Phí",
@@ -169,7 +132,7 @@ export default function LandingPage() {
                         <Zap className="size-3 mr-1.5 text-yellow-400 fill-yellow-400" /> AI-Powered Creative Platform
                     </Badge>
 
-                    {/* Headline */}
+                    {/* Headline - Dùng Barlow để hỗ trợ đầy đủ tiếng Việt */}
                     <h1 className="mb-6">
                         <span
                             className="block text-[clamp(32px,5.5vw,72px)] font-semibold text-white leading-[1.05]"
@@ -178,8 +141,8 @@ export default function LandingPage() {
                             Nền tảng giúp bạn tạo
                         </span>
                         <span
-                            className="block text-[clamp(40px,7vw,84px)] text-white leading-[1.0] mt-1"
-                            style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic", letterSpacing: "-2px" }}
+                            className="block text-[clamp(40px,7vw,84px)] text-white leading-[1.1] mt-2 font-bold"
+                            style={{ fontFamily: "'Dancing Script', cursive", letterSpacing: "-1px" }}
                         >
                             ảnh AI chất lượng cao
                         </span>
@@ -257,7 +220,7 @@ export default function LandingPage() {
             </section>
 
             {/* =============================================
-                🎨 SECTION 3: Tính Năng Chính - Ánh xạ từ /app
+                🎨 SECTION 3: Tính Năng Chính - Bento Grid Sáng Tạo
             ================================================ */}
             <section id="features" className="relative z-10 bg-black py-20 sm:py-28">
                 <div className="max-w-6xl mx-auto px-4">
@@ -269,48 +232,142 @@ export default function LandingPage() {
                             className="text-3xl sm:text-5xl font-bold text-white tracking-tight"
                             style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-2px" }}
                         >
-                            Tất cả công cụ bạn cần
+                            Sáng tạo không giới hạn
                         </h2>
-                        <p className="text-white/40 text-sm sm:text-base mt-4 max-w-md mx-auto" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                            Ba công cụ cốt lõi. Một nền tảng duy nhất.
+                        <p className="text-white/40 text-sm sm:text-base mt-4 max-w-lg mx-auto" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                            Từ ý tưởng đến tác phẩm chỉ trong vài cú nhấp chuột.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                        {FEATURES.map((feature) => (
-                            <Link key={feature.title} to={feature.link} className="block group">
-                                <Card className="relative overflow-hidden rounded-[20px] bg-white/[0.03] border-white/5 h-full hover:bg-white/[0.06] transition-all duration-500">
-                                    {/* Glow hover */}
-                                    <div className={`absolute top-0 right-0 w-40 h-40 ${feature.glowColor} rounded-full blur-[60px] opacity-0 group-hover:opacity-100 transition-opacity duration-700`}></div>
+                    {/* Bento Grid Layout - 2 hàng, tỷ lệ không đều tạo nhịp cải tiến */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-5">
 
-                                    <CardContent className="relative z-10 p-8">
-                                        {/* Icon */}
-                                        <div className={`size-12 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-6 ring-1 ${feature.ringColor}`}>
-                                            <feature.icon className={`size-5 ${feature.iconColor}`} />
-                                        </div>
+                        {/* Card 1: Tạo Ảnh AI - CHIẾM 7 CỘT (lớn nhất, quan trọng nhất) */}
+                        <Link to="/app/generate" className="md:col-span-7 block group">
+                            <Card className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-violet-950/80 via-[#1a0b2e] to-black border-violet-500/10 h-full min-h-[340px] sm:min-h-[380px] cursor-pointer transition-all duration-500 hover:border-violet-500/30 hover:shadow-[0_0_60px_rgba(139,92,246,0.15)]">
+                                {/* Orb glow động */}
+                                <div className="absolute top-[-20%] right-[-10%] w-[300px] h-[300px] bg-violet-500/20 rounded-full blur-[100px] group-hover:bg-violet-400/30 group-hover:scale-110 transition-all duration-1000"></div>
+                                <div className="absolute bottom-[-15%] left-[-5%] w-[200px] h-[200px] bg-fuchsia-500/10 rounded-full blur-[80px] group-hover:bg-fuchsia-400/15 transition-all duration-1000"></div>
 
-                                        {/* Title */}
-                                        <h3 className="text-lg font-bold text-white mb-3" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                            {feature.title}
-                                        </h3>
+                                {/* Floating mock UI elements - tạo cảm giác "sản phẩm thật" */}
+                                <div className="absolute top-6 right-6 flex gap-2 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
+                                    <div className="h-8 w-20 rounded-lg bg-white/10 backdrop-blur-sm"></div>
+                                    <div className="h-8 w-8 rounded-lg bg-violet-500/20"></div>
+                                </div>
+                                <div className="absolute bottom-20 right-8 w-[140px] h-[90px] rounded-xl bg-white/[0.04] border border-white/5 backdrop-blur-sm opacity-0 group-hover:opacity-40 translate-y-4 group-hover:translate-y-0 transition-all duration-700"></div>
 
-                                        {/* Description */}
-                                        <p className="text-white/50 text-sm leading-relaxed font-medium mb-5" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                            {feature.description}
-                                        </p>
+                                <CardContent className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-10">
+                                    <div className="size-14 rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mb-6 shadow-[0_8px_30px_rgba(139,92,246,0.4)] group-hover:scale-110 group-hover:shadow-[0_12px_40px_rgba(139,92,246,0.5)] transition-all duration-500">
+                                        <WandSparkles className="size-6 text-white" />
+                                    </div>
+                                    <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Tạo Ảnh AI
+                                    </h3>
+                                    <p className="text-white/50 text-sm sm:text-[15px] leading-relaxed font-medium max-w-sm" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Nhập mô tả bằng văn bản, chọn tỷ lệ khung hình (1:1, 9:16, 16:9), số lượng batch và mô hình AI. Ảnh 4K chỉ trong vài giây.
+                                    </p>
+                                    <div className="flex flex-wrap gap-2 mt-5">
+                                        <Badge className="bg-violet-500/20 text-violet-200 border-none text-[11px] px-3 py-1 rounded-full">Text-to-Image</Badge>
+                                        <Badge className="bg-violet-500/20 text-violet-200 border-none text-[11px] px-3 py-1 rounded-full">Batch</Badge>
+                                        <Badge className="bg-violet-500/20 text-violet-200 border-none text-[11px] px-3 py-1 rounded-full">4K Output</Badge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
 
-                                        {/* Tags */}
-                                        <div className="flex flex-wrap gap-1.5">
-                                            {feature.tags.map((tag) => (
-                                                <Badge key={tag} variant="outline" className="bg-white/[0.04] text-white/50 border-white/10 text-[10px] px-2 py-0.5 rounded-full font-medium">
-                                                    {tag}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        ))}
+                        {/* Card 2: Kho Kiểu Mẫu - CHIẾM 5 CỘT */}
+                        <Link to="/app/templates" className="md:col-span-5 block group">
+                            <Card className="relative overflow-hidden rounded-[24px] bg-gradient-to-b from-sky-950/60 to-black border-sky-500/10 h-full min-h-[340px] sm:min-h-[380px] cursor-pointer transition-all duration-500 hover:border-sky-500/25 hover:shadow-[0_0_60px_rgba(14,165,233,0.1)]">
+                                <div className="absolute top-[-10%] left-[-10%] w-[250px] h-[250px] bg-sky-500/15 rounded-full blur-[90px] group-hover:bg-sky-400/25 transition-all duration-1000"></div>
+
+                                {/* Mini preview grid giả lập template thumbnails */}
+                                <div className="absolute top-6 right-6 grid grid-cols-3 gap-1.5 opacity-20 group-hover:opacity-50 transition-opacity duration-700">
+                                    {[1,2,3,4,5,6].map(i => (
+                                        <div key={i} className="size-9 rounded-lg bg-white/10"></div>
+                                    ))}
+                                </div>
+
+                                <CardContent className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-10">
+                                    <div className="size-14 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-400 flex items-center justify-center mb-6 shadow-[0_8px_30px_rgba(14,165,233,0.4)] group-hover:scale-110 transition-all duration-500">
+                                        <SwatchBook className="size-6 text-white" />
+                                    </div>
+                                    <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Kho Kiểu Mẫu
+                                    </h3>
+                                    <p className="text-white/50 text-sm leading-relaxed font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        12+ preset: Cyberpunk, Anime, 3D, Logo, Sơn dầu&hellip; Chọn mẫu, tải ảnh lên, nhận kết quả ngay.
+                                    </p>
+                                    <div className="flex flex-wrap gap-2 mt-5">
+                                        {["Chân dung", "Anime", "3D", "Logo"].map(t => (
+                                            <Badge key={t} className="bg-sky-500/15 text-sky-200 border-none text-[11px] px-3 py-1 rounded-full">{t}</Badge>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
+
+                        {/* Card 3: Thư Viện - CHIẾM 5 CỘT */}
+                        <Link to="/app/library" className="md:col-span-5 block group">
+                            <Card className="relative overflow-hidden rounded-[24px] bg-gradient-to-b from-amber-950/50 to-black border-amber-500/10 h-full min-h-[300px] sm:min-h-[340px] cursor-pointer transition-all duration-500 hover:border-amber-500/25 hover:shadow-[0_0_60px_rgba(245,158,11,0.1)]">
+                                <div className="absolute bottom-[-15%] right-[-10%] w-[220px] h-[220px] bg-amber-500/10 rounded-full blur-[80px] group-hover:bg-amber-400/20 transition-all duration-1000"></div>
+
+                                {/* Giả lập gallery thumbnails */}
+                                <div className="absolute top-6 right-6 flex gap-1.5 opacity-15 group-hover:opacity-40 transition-opacity duration-700">
+                                    <div className="w-16 h-20 rounded-lg bg-white/10"></div>
+                                    <div className="w-16 h-16 rounded-lg bg-white/10 mt-4"></div>
+                                    <div className="w-16 h-24 rounded-lg bg-white/10 -mt-2"></div>
+                                </div>
+
+                                <CardContent className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-10">
+                                    <div className="size-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-400 flex items-center justify-center mb-6 shadow-[0_8px_30px_rgba(245,158,11,0.4)] group-hover:scale-110 transition-all duration-500">
+                                        <Images className="size-6 text-white" />
+                                    </div>
+                                    <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Thư Viện Của Bạn
+                                    </h3>
+                                    <p className="text-white/50 text-sm leading-relaxed font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Quản lý ảnh AI, kết quả kiểu mẫu và tài nguyên gốc. Tìm kiếm, lọc, tải xuống trong tích tắc.
+                                    </p>
+                                    <div className="flex flex-wrap gap-2 mt-5">
+                                        {["Kết quả AI", "Mẫu", "Upload"].map(t => (
+                                            <Badge key={t} className="bg-amber-500/15 text-amber-200 border-none text-[11px] px-3 py-1 rounded-full">{t}</Badge>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
+
+                        {/* Card 4: Hệ thống Kim Cương - CHIẾM 7 CỘT */}
+                        <Link to="/register" className="md:col-span-7 block group">
+                            <Card className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-cyan-950/50 via-black to-violet-950/30 border-cyan-500/10 h-full min-h-[300px] sm:min-h-[340px] cursor-pointer transition-all duration-500 hover:border-cyan-400/25 hover:shadow-[0_0_60px_rgba(6,182,212,0.1)]">
+                                <div className="absolute top-[-10%] right-[10%] w-[200px] h-[200px] bg-cyan-500/10 rounded-full blur-[90px] group-hover:bg-cyan-400/20 transition-all duration-1000"></div>
+                                <div className="absolute bottom-[-10%] left-[20%] w-[200px] h-[200px] bg-violet-500/10 rounded-full blur-[80px]"></div>
+
+                                {/* Floating gems animation hint */}
+                                <div className="absolute top-8 right-10 flex items-center gap-2 opacity-20 group-hover:opacity-50 transition-opacity duration-700">
+                                    <Gem className="size-5 text-cyan-400" />
+                                    <span className="text-cyan-400 text-lg font-bold">926</span>
+                                </div>
+
+                                <CardContent className="relative z-10 h-full flex flex-col justify-end p-8 sm:p-10">
+                                    <div className="size-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-violet-500 flex items-center justify-center mb-6 shadow-[0_8px_30px_rgba(6,182,212,0.4)] group-hover:scale-110 transition-all duration-500">
+                                        <Gem className="size-6 text-white" />
+                                    </div>
+                                    <h3 className="text-2xl sm:text-3xl font-black text-white mb-3 tracking-tight" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Hệ Thống Kim Cương
+                                    </h3>
+                                    <p className="text-white/50 text-sm sm:text-[15px] leading-relaxed font-medium max-w-sm" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        Mỗi lượt tạo ảnh tiêu hao Kim Cương. Đăng ký miễn phí nhận 50 💎 ngay. Nạp thêm bất cứ lúc nào để sáng tạo không gián đoạn.
+                                    </p>
+                                    <div className="flex flex-wrap gap-2 mt-5">
+                                        <Badge className="bg-cyan-500/15 text-cyan-200 border-none text-[11px] px-3 py-1 rounded-full">50 💎 Miễn phí</Badge>
+                                        <Badge className="bg-cyan-500/15 text-cyan-200 border-none text-[11px] px-3 py-1 rounded-full">Nạp Xu</Badge>
+                                        <Badge className="bg-cyan-500/15 text-cyan-200 border-none text-[11px] px-3 py-1 rounded-full">Pro Plan</Badge>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
+
                     </div>
                 </div>
             </section>
