@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 // Dữ liệu mẫu phong phú cho Feed Masonry - Đậm chất AI Art
@@ -24,7 +25,8 @@ const FEED_ITEMS = [
         creator: "AIArtist_Pro",
         avatar: "https://i.pravatar.cc/150?u=1",
         likes: 1205,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-[3/4]"
     },
     {
         id: "2",
@@ -32,7 +34,8 @@ const FEED_ITEMS = [
         creator: "AnimeLover",
         avatar: "https://i.pravatar.cc/150?u=2",
         likes: 842,
-        type: "video" 
+        type: "video",
+        aspectRatio: "aspect-square"
     },
     {
         id: "3",
@@ -40,7 +43,8 @@ const FEED_ITEMS = [
         creator: "CyberpunkNeo",
         avatar: "https://i.pravatar.cc/150?u=3",
         likes: 3410,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-[4/5]"
     },
     {
         id: "4",
@@ -48,7 +52,8 @@ const FEED_ITEMS = [
         creator: "PortraitMaster",
         avatar: "https://i.pravatar.cc/150?u=4",
         likes: 672,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-[3/4]"
     },
     {
         id: "5",
@@ -56,7 +61,8 @@ const FEED_ITEMS = [
         creator: "RenderGenius",
         avatar: "https://i.pravatar.cc/150?u=5",
         likes: 2190,
-        type: "video"
+        type: "video",
+        aspectRatio: "aspect-video"
     },
     {
         id: "6",
@@ -64,7 +70,8 @@ const FEED_ITEMS = [
         creator: "FantasyWorld",
         avatar: "https://i.pravatar.cc/150?u=6",
         likes: 954,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-square"
     },
     {
         id: "7",
@@ -72,7 +79,8 @@ const FEED_ITEMS = [
         creator: "ProductDesign",
         avatar: "https://i.pravatar.cc/150?u=7",
         likes: 432,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-[4/5]"
     },
     {
         id: "8",
@@ -80,7 +88,8 @@ const FEED_ITEMS = [
         creator: "LandscapeAI",
         avatar: "https://i.pravatar.cc/150?u=8",
         likes: 5120,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-[3/4]"
     },
     {
         id: "9",
@@ -88,7 +97,8 @@ const FEED_ITEMS = [
         creator: "DreamCatcher",
         avatar: "https://i.pravatar.cc/150?u=9",
         likes: 890,
-        type: "image"
+        type: "image",
+        aspectRatio: "aspect-square"
     },
     {
         id: "10",
@@ -96,7 +106,8 @@ const FEED_ITEMS = [
         creator: "AbstractArt",
         avatar: "https://i.pravatar.cc/150?u=10",
         likes: 350,
-        type: "video"
+        type: "video",
+        aspectRatio: "aspect-[16/9]"
     }
 ]
 
@@ -109,56 +120,61 @@ export function Dashboard() {
                 
                 {/* 🌟 1. HERO BANNERS */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-                    {/* Main Hero Banner: Tầm nhìn & Cảm hứng */}
-                    <div className="relative col-span-1 lg:col-span-2 overflow-hidden rounded-3xl h-[280px] sm:h-[320px] lg:h-[360px] group cursor-pointer shadow-2xl ring-1 ring-inset ring-white/10">
-                        <img 
-                            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2560&auto=format&fit=crop" 
-                            alt="Hero Background"
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent"></div>
-                        <div className="absolute inset-x-6 sm:inset-x-10 bottom-8 sm:bottom-10 flex flex-col items-start gap-3 sm:gap-4">
-                            <Badge className="bg-white/10 text-white backdrop-blur-md border border-white/20 hover:bg-white/20 py-1 px-3 shadow-lg">
+                    {/* Main Hero Banner: ZDream Studio (Trái) - Chuẩn Shadcn Card */}
+                    <Card className="relative col-span-1 lg:col-span-2 overflow-hidden rounded-[20px] min-h-[280px] sm:min-h-[320px] border-white/5 border-[0.5px] bg-[#1a0b2e] shadow-2xl group cursor-pointer">
+                        {/* Vector Wave Background Simulation */}
+                        <div className="absolute inset-0 z-0">
+                            <div className="absolute top-0 right-[-10%] w-[80%] h-[120%] rounded-[100%] bg-gradient-to-l from-violet-600/80 to-transparent blur-[80px] opacity-70 group-hover:opacity-90 transition-opacity duration-1000"></div>
+                            <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[80%] rounded-[100%] bg-[#0f0724] blur-[60px] opacity-90"></div>
+                        </div>
+
+                        <CardContent className="relative z-10 h-full flex flex-col justify-center items-start p-6 sm:p-10">
+                            <Badge variant="outline" className="mb-6 bg-white/5 text-white/[0.85] border-white/10 hover:bg-white/10 py-1.5 px-3 backdrop-blur-md rounded-md font-medium text-xs">
                                 <Sparkles className="size-3.5 mr-1.5 text-blue-400" /> ZDream Studio
                             </Badge>
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.1] drop-shadow-2xl">
+                            
+                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight leading-[1.05] mb-4">
                                 Biến Ý Tưởng Thành<br />
                                 Tác Phẩm Nghệ Thuật
                             </h1>
-                            <p className="text-sm sm:text-base text-zinc-300 max-w-sm drop-shadow font-medium">
+                            
+                            <p className="text-sm sm:text-[15px] text-white/70 max-w-[320px] font-medium leading-relaxed">
                                 Nâng tầm sáng tạo với các mô hình AI thế hệ mới. Khám phá kho tàng phong cách đa dạng chỉ trong vài giây.
                             </p>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
 
-                    {/* Promo Banner: Khuyến mãi sắc bén góc cạnh */}
-                    <div className="relative col-span-1 overflow-hidden rounded-3xl h-[200px] sm:h-[320px] lg:h-[360px] bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] group cursor-pointer shadow-[0_20px_40px_rgba(2,44,34,0.3)] ring-1 ring-inset ring-emerald-500/20">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-400/30 transition-colors duration-500"></div>
-                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-                        
-                        <div className="relative h-full flex flex-col p-6 sm:p-8 justify-center items-start z-10">
-                            <Badge className="mb-4 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold uppercase tracking-wider text-[10px]">
-                                <CrownIcon className="size-3 mr-1 fill-emerald-300" /> Gói Độc Quyền
+                    {/* Promo Banner: Gói Độc Quyền (Phải) - Chuẩn Shadcn Card */}
+                    <Card className="relative col-span-1 overflow-hidden rounded-[20px] min-h-[240px] sm:min-h-[320px] border-white/5 border-[0.5px] bg-gradient-to-br from-[#0c3e29] to-[#042817] group cursor-pointer shadow-lg p-0">
+                        {/* Green Glow Accent */}
+                        <div className="absolute top-0 right-0 w-[250px] h-[250px] bg-emerald-500/10 blur-[90px] rounded-full group-hover:bg-emerald-400/20 transition-colors duration-700"></div>
+
+                        <CardContent className="relative z-10 h-full flex flex-col justify-center items-start p-6 sm:p-8">
+                            <Badge className="mb-5 bg-emerald-700/40 hover:bg-emerald-600/40 text-emerald-100 border border-emerald-500/30 rounded-md font-semibold text-[10px] tracking-widest px-2.5 py-0.5 uppercase shadow-none">
+                                <CrownIcon className="size-3 mr-1 fill-emerald-100" /> GÓI ĐỘC QUYỀN
                             </Badge>
-                            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2 tracking-tight leading-snug">
+                            
+                            <h2 className="text-2xl lg:text-[28px] font-black text-white tracking-tight leading-[1.1] mb-4 drop-shadow-sm">
                                 ZDream Pro Series<br/>
                                 Giảm Đến <span className="text-emerald-400">50%</span>
                             </h2>
-                            <p className="text-emerald-100/70 text-sm mb-6 drop-shadow">
+                            
+                            <p className="text-emerald-50/60 text-xs leading-relaxed mb-6 font-medium max-w-[220px]">
                                 Bypass giới hạn API. Mở khóa độ phân giải 4K cho toàn bộ tài nguyên.
                             </p>
-                            <Button className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold rounded-2xl px-6 py-5 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all group-hover:scale-[1.02]">
-                                Nâng Cấp Ngay <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                            
+                            <Button className="bg-[#10b981] hover:bg-[#059669] text-emerald-950 font-bold rounded-full px-6 py-4 shadow-[0_4px_14px_rgba(16,185,129,0.3)] transition-all h-auto mt-auto sm:mt-0">
+                                Nâng Cấp Ngay <span className="ml-2 font-normal">→</span>
                             </Button>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 {/* 🎯 2. QUICK NAV BAR (Horizontal Scroll Menu - Glassmorphism) */}
                 <ScrollArea className="w-full whitespace-nowrap pb-2 clean-horizontal-scroll">
-                    <div className="flex w-max space-x-3 sm:space-x-4">
+                    <div className="flex w-max space-x-3 sm:space-x-4 px-1 snap-x snap-mandatory">
                         
-                        <Link to="/app/generate" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-primary/50 hover:to-primary/10 transition-all duration-300">
+                        <Link to="/app/generate" className="w-[180px] sm:w-[200px] shrink-0 snap-center group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-primary/50 hover:to-primary/10 transition-all duration-300">
                             <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
                                 <div className="flex items-center justify-center size-10 rounded-full bg-primary/20 text-primary group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(currentcolor,0.3)]">
                                     <Sparkles className="size-5" />
@@ -170,7 +186,7 @@ export function Dashboard() {
                             </div>
                         </Link>
 
-                        <Link to="/app/templates" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-purple-500/50 hover:to-purple-500/10 transition-all duration-300">
+                        <Link to="/app/templates" className="w-[180px] sm:w-[200px] shrink-0 snap-center group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-purple-500/50 hover:to-purple-500/10 transition-all duration-300">
                             <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
                                 <div className="flex items-center justify-center size-10 rounded-full bg-purple-500/20 text-purple-400 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                                     <SwatchBook className="size-5" />
@@ -182,7 +198,7 @@ export function Dashboard() {
                             </div>
                         </Link>
 
-                        <Link to="/app/generate" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-sky-500/50 hover:to-sky-500/10 transition-all duration-300">
+                        <Link to="/app/generate" className="w-[180px] sm:w-[200px] shrink-0 snap-center group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-sky-500/50 hover:to-sky-500/10 transition-all duration-300">
                             <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
                                 <div className="flex items-center justify-center size-10 rounded-full bg-sky-500/20 text-sky-400 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(14,165,233,0.3)]">
                                     <WandSparkles className="size-5" />
@@ -194,7 +210,7 @@ export function Dashboard() {
                             </div>
                         </Link>
 
-                        <Link to="/app/library" className="w-[180px] sm:w-[200px] shrink-0 group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-amber-500/50 hover:to-amber-500/10 transition-all duration-300">
+                        <Link to="/app/library" className="w-[180px] sm:w-[200px] shrink-0 snap-center group rounded-2xl p-[1px] bg-gradient-to-b from-white/10 to-transparent hover:from-amber-500/50 hover:to-amber-500/10 transition-all duration-300">
                             <div className="flex items-center gap-3.5 bg-black/40 backdrop-blur-md rounded-[15px] p-4 h-full group-hover:bg-black/60 transition-colors">
                                 <div className="flex items-center justify-center size-10 rounded-full bg-amber-500/20 text-amber-400 group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(245,158,11,0.3)]">
                                     <Images className="size-5" />
@@ -248,15 +264,15 @@ export function Dashboard() {
                     <span className="cursor-pointer hover:text-white transition-colors whitespace-nowrap">3D Engine</span>
                 </div>
 
-                {/* MASONRY GRID - The core display of aesthetics */}
-                <div className="columns-2 sm:columns-3 lg:columns-4 2xl:columns-5 gap-3 lg:gap-4">
+                {/* MASONRY GRID - Refactored to Standard CSS Grid with aspect ratio locking */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4">
                     {FEED_ITEMS.map((item) => (
-                        <div key={item.id} className="break-inside-avoid mb-3 lg:mb-4 relative group rounded-[18px] overflow-hidden cursor-pointer bg-zinc-900 ring-1 ring-inset ring-white/10 shadow-lg">
+                        <div key={item.id} className={`relative group rounded-[18px] overflow-hidden cursor-pointer bg-zinc-900 border border-white/5 ring-1 ring-inset ring-white/10 shadow-lg transition-transform hover:-translate-y-1 duration-300 ${item.aspectRatio}`}>
                             {/* Artwork Image */}
                             <img 
                                 src={item.image} 
                                 alt="AI Generation" 
-                                className="w-full text-zinc-900 h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
+                                className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-300"
                                 loading="lazy"
                             />
                             
