@@ -3,7 +3,6 @@ import {
     WandSparkles,
     SwatchBook,
     Images,
-    Settings2,
     CrownIcon,
     Search,
     Heart,
@@ -292,42 +291,7 @@ export function Dashboard() {
                 </div>
             </div>
 
-            {/* ========= FLOATING ACTION BAR (Magic Controller Island) ========= */}
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden sm:block">
-                <div className="flex items-center gap-1.5 p-1.5 rounded-full bg-zinc-950/80 backdrop-blur-3xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] ring-1 ring-white/5">
-                    
-                    <Link to="/app/generate">
-                        <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
-                            <WandSparkles className="size-[18px] group-hover:scale-110 transition-transform" />
-                        </Button>
-                    </Link>
-                    
-                    <Link to="/app/templates">
-                        <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
-                            <Images className="size-[18px] group-hover:scale-110 transition-transform" />
-                        </Button>
-                    </Link>
-                    
-                    <div className="w-[1px] h-5 bg-white/10 mx-1"></div>
-                    
-                    <Button variant="ghost" size="icon" className="size-12 rounded-full bg-gradient-to-tr from-primary to-rose-400 hover:brightness-110 text-black shadow-inner shadow-white/30 hover:scale-105 transition-all">
-                        <Sparkles className="size-6 fill-black/20" />
-                    </Button>
-                    
-                    <div className="w-[1px] h-5 bg-white/10 mx-1"></div>
-                    
-                    <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
-                        <VideoIcon className="size-[18px] group-hover:scale-110 transition-transform" />
-                    </Button>
-                    
-                    <Link to="/app/settings">
-                        <Button variant="ghost" size="icon" className="size-10 rounded-full hover:bg-white/10 text-zinc-400 hover:text-white transition-colors group">
-                            <Settings2 className="size-[18px] group-hover:scale-110 transition-transform" />
-                        </Button>
-                    </Link>
-                    
-                </div>
-            </div>
+
 
         </div>
     )
