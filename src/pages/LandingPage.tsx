@@ -98,7 +98,6 @@ export default function LandingPage() {
                                 { label: "Tính năng", href: "#features" },
                                 { label: "Kiểu mẫu", href: "#templates" },
                                 { label: "Bảng giá", href: "#pricing" },
-                                { label: "Đánh giá", href: "#reviews" },
                             ].map((item) => (
                                 <a
                                     key={item.label}
