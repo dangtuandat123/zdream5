@@ -131,19 +131,34 @@ export function TopUpPage() {
 
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 lg:p-6 lg:min-h-[calc(100vh-theme(spacing.16))] max-w-6xl mx-auto w-full">
-            {/* Header - Rút gọn spacing */}
-            <div className="flex flex-col gap-1 shrink-0">
-                <h1 className="text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
-                    <CreditCard className="size-5 lg:size-6 text-primary" />
-                    Nạp Kim Cương (Xu)
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                    Thanh toán siêu tốc qua VietQR. Trải nghiệm sáng tạo không gián đoạn.
-                </p>
+            {/* Header - Có hiện số dư hiện tại */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 shrink-0">
+                <div className="flex flex-col gap-1">
+                    <h1 className="text-xl lg:text-2xl font-bold tracking-tight flex items-center gap-2">
+                        <CreditCard className="size-5 lg:size-6 text-primary" />
+                        Nạp Kim Cương (Xu)
+                    </h1>
+                    <p className="text-sm text-muted-foreground">
+                        Thanh toán siêu tốc qua VietQR. Trải nghiệm sáng tạo không gián đoạn.
+                    </p>
+                </div>
+
+                {/* Số dư hiện tại */}
+                <div className="flex items-center gap-3 bg-muted/40 border px-4 py-2.5 rounded-2xl shadow-sm">
+                    <div className="flex flex-col">
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Số dư hiện tại</span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-lg font-black tracking-tight">926</span>
+                        </div>
+                    </div>
+                    <div className="size-10 rounded-xl bg-cyan-500/10 flex items-center justify-center shrink-0">
+                        <Gem className="size-5 text-cyan-400" />
+                    </div>
+                </div>
             </div>
 
-            {/* Layout chính: 2 cột trên Desktop, cho phép cuộn nội dung cột trái nếu cần */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 flex-1">
+            {/* Layout chính: 2 cột trên Desktop, cho phép cuộn tự nhiên, không gò ép */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 flex-1 mt-4">
                 
                 {/* ----------------------------------------------------
                     Cột trái: Chọn Gói (Chiếm 7 cột)
@@ -174,7 +189,7 @@ export function TopUpPage() {
                                         PHỔ BIẾN NHẤT
                                     </div>
                                 )}
-                                <CardContent className="p-4 flex flex-col relative z-0">
+                                <CardContent className="p-5 lg:p-6 flex flex-col relative z-0">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3">
                                             <div className={`size-10 lg:size-12 rounded-xl bg-background border shadow-sm flex items-center justify-center shrink-0 ${selectedPkgId === pkg.id ? 'ring-1 ring-violet-500/50' : ''}`}>
@@ -239,7 +254,7 @@ export function TopUpPage() {
                                             animate={{ opacity: 1, height: "auto", marginTop: 16 }}
                                             className="overflow-hidden"
                                         >
-                                            <div className="p-4 rounded-xl bg-background/50 border border-emerald-500/20 shadow-inner flex flex-col gap-2">
+                                            <div className="p-4 lg:p-5 rounded-xl bg-background/50 border border-emerald-500/20 shadow-inner flex flex-col gap-3">
                                                 <label className="text-xs font-semibold text-muted-foreground">Nhập số tiền Nạp (VNĐ)</label>
                                                 <div className="relative">
                                                     <Input 
@@ -278,7 +293,7 @@ export function TopUpPage() {
                 {/* ----------------------------------------------------
                     Cột phải: Thanh toán VietQR (Chiếm 5 cột)
                 ------------------------------------------------------*/}
-                <div className="lg:col-span-5 flex flex-col gap-4 h-full sticky top-6">
+                <div className="lg:col-span-5 flex flex-col gap-4 sticky top-6 mb-8">
                     <h2 className="text-base font-semibold flex items-center gap-2 shrink-0">
                         <span className="flex items-center justify-center size-5 rounded-full bg-primary/20 text-primary text-[10px] font-bold">2</span>
                         Quét mã thanh toán
@@ -293,25 +308,25 @@ export function TopUpPage() {
                             transition={{ duration: 0.2 }}
                             className="flex-1"
                         >
-                            {/* Card thanh toán */}
-                            <Card className="border-violet-500/20 shadow-[0_0_40px_rgba(139,92,246,0.1)] relative overflow-hidden flex flex-col h-full lg:min-h-[500px]">
+                                {/* Card thanh toán tự giãn nở, không ép minimum height */}
+                            <Card className="border-violet-500/20 shadow-[0_0_40px_rgba(139,92,246,0.1)] relative overflow-hidden flex flex-col">
                                 {/* Dải màu top */}
-                                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-violet-600 to-fuchsia-600"></div>
+                                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600"></div>
                                 
-                                <CardHeader className="text-center pb-2 pt-5 shrink-0">
-                                    <CardTitle className="text-lg">Tổng thanh toán</CardTitle>
-                                    <div className="text-2xl lg:text-3xl font-black text-white mt-1">
+                                <CardHeader className="text-center pb-4 pt-8 shrink-0">
+                                    <CardTitle className="text-xl">Tổng thanh toán</CardTitle>
+                                    <div className="text-3xl lg:text-4xl font-black text-white mt-2 tracking-tight">
                                         {formatCurrency(currentPrice)}
                                     </div>
-                                    <div className="text-xs text-muted-foreground mt-1 font-medium bg-muted/50 inline-block px-3 py-1 rounded-full mx-auto">
+                                    <div className="text-sm text-center text-muted-foreground mt-3 font-medium bg-muted/50 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full mx-auto">
                                         Nhận ngay: <span className="text-violet-400 font-bold">{currentGems} 💎</span>
                                     </div>
                                 </CardHeader>
 
-                                <CardContent className="flex flex-col items-center gap-4 pt-2 flex-1">
+                                <CardContent className="flex flex-col items-center gap-6 pt-2 flex-1 pb-6 px-4 lg:px-6">
                                     
-                                    {/* VietQR Code Box */}
-                                    <div className="bg-white p-2.5 rounded-[1.25rem] shadow-xl w-48 h-48 lg:w-56 lg:h-56 relative group shrink-0">
+                                    {/* VietQR Code Box - To và rõ ràng hơn */}
+                                    <div className="bg-white p-3 lg:p-4 rounded-2xl shadow-xl w-56 h-56 lg:w-64 lg:h-64 relative group shrink-0">
                                         {(isCustom && customAmountNum < MIN_CUSTOM_AMOUNT) ? (
                                             <div className="w-full h-full flex flex-col items-center justify-center text-center bg-muted/20 rounded-xl border-2 border-dashed border-muted p-4">
                                                 <AlertDescription className="text-xs text-muted-foreground font-medium">
@@ -330,8 +345,8 @@ export function TopUpPage() {
                                         )}
                                     </div>
 
-                                    {/* Bank Info Table - Compact */}
-                                    <div className="w-full bg-muted/30 rounded-xl border border-muted divide-y divide-border text-xs lg:text-sm">
+                                    {/* Bank Info Table - Khoảng cách thoáng hơn, font chữ dễ đọc */}
+                                    <div className="w-full bg-muted/20 rounded-xl border border-muted/50 divide-y divide-border/50 text-sm">
                                         <div className="flex justify-between items-center px-4 py-2.5">
                                             <span className="text-muted-foreground">Ngân hàng:</span>
                                             <span className="font-bold">{BANK_INFO.bankId}</span>
@@ -349,20 +364,20 @@ export function TopUpPage() {
                                                 </Button>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center px-4 py-2.5 group/item bg-violet-500/5 rounded-b-xl">
-                                            <span className="text-violet-300 shrink-0">Nội dung CK:</span>
-                                            <div className="flex items-center gap-2 font-mono font-bold text-violet-400 truncate">
+                                        <div className="flex justify-between items-center px-4 py-3 group/item bg-violet-500/5 rounded-b-xl">
+                                            <span className="text-violet-400/80 shrink-0">Nội dung CK:</span>
+                                            <div className="flex items-center gap-2 font-mono font-bold text-violet-400 text-base truncate">
                                                 {transferContent}
-                                                <Button variant="ghost" size="icon" className="size-5 opacity-50 group-hover/item:opacity-100 text-violet-400 hover:bg-violet-500/20 hover:text-violet-300" onClick={() => handleCopy(transferContent, "Nội dung chuyển khoản")}>
-                                                    <Copy className="size-3" />
+                                                <Button variant="ghost" size="icon" className="size-6 opacity-50 group-hover/item:opacity-100 text-violet-400 hover:bg-violet-500/20 hover:text-violet-300 transition-opacity" onClick={() => handleCopy(transferContent, "Nội dung chuyển khoản")}>
+                                                    <Copy className="size-3.5" />
                                                 </Button>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     {/* Mẹo nhỏ */}
-                                     <p className="text-[10px] text-muted-foreground/70 text-center px-2 mt-auto pb-2">
-                                        Sử dụng App Ngân hàng hoặc Momo để quét mã QR bên trên. Ghi đúng nội dung CK để được duyệt tự động.
+                                     <p className="text-xs text-muted-foreground text-center px-2 mt-2 leading-relaxed">
+                                        Sử dụng App Ngân hàng quét mã QR. Ghi đúng <strong>Nội dung CK</strong> để duyệt tự động.
                                     </p>
 
                                 </CardContent>
