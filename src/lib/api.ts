@@ -155,6 +155,7 @@ export const imageApi = {
         aspect_ratio?: string;
         seed?: number;
         count?: number;
+        reference_images?: string[];
     }) => request<GenerateResponse>('/images/generate', {
         method: 'POST',
         body: JSON.stringify(data),

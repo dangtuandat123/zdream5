@@ -26,6 +26,8 @@ class GenerateImageRequest extends FormRequest
             'aspect_ratio' => ['nullable', 'string', 'in:1:1,16:9,9:16,4:3,3:4,2:3,3:2'],
             'seed' => ['nullable', 'integer', 'min:0'],
             'count' => ['nullable', 'integer', 'min:1', 'max:4'],
+            'reference_images' => ['nullable', 'array', 'max:5'],
+            'reference_images.*' => ['string'],
         ];
     }
 

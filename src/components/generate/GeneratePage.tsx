@@ -571,7 +571,7 @@ export function GeneratePage() {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/\n/g, '<br>')
-            .replace(/(@Ảnh \d+)/g, '<span contenteditable="false" data-mention="true" style="color: hsl(var(--primary)); background: hsl(var(--primary) / 0.15); border-radius: 4px; padding: 1px 4px; font-weight: 500; user-select: all; white-space: nowrap;">$1</span>')
+            .replace(/(@(?:Ảnh|anh|ảnh)\s*\d+)/gi, '<span contenteditable="false" data-mention="true" style="color: hsl(var(--primary)); background: hsl(var(--primary) / 0.15); border-radius: 4px; padding: 1px 4px; font-weight: 500; user-select: all; white-space: nowrap;">$1</span>')
     }
 
     // Hàm tiện ích: đặt cursor vào vị trí offset trong contenteditable
@@ -716,7 +716,7 @@ export function GeneratePage() {
 
         // Parse @Ảnh 1, @Ảnh 2... in prompt → [Ảnh tham chiếu X]
         let finalPrompt = prompt.trim()
-        const anhRegex = /@Ảnh (\d+)/g
+        const anhRegex = /@(?:Ảnh|anh|ảnh)\s*(\d+)/gi
         finalPrompt = finalPrompt.replace(anhRegex, (_match, p1) => {
             const index = parseInt(p1, 10)
             if (index > 0 && index <= referenceImages.length) {
@@ -746,6 +746,26 @@ export function GeneratePage() {
         progressIntervalRef.current = interval
 
         try {
+            // Convert any blob URLs to Base64
+            const base64Refs = await Promise.all(
+                currentRefs.map(async (url) => {
+                    if (url.startsWith('data:')) return url
+                    try {
+                        const res = await fetch(url)
+                        const blob = await res.blob()
+                        return new Promise<string>((resolve, reject) => {
+                            const reader = new FileReader()
+                            reader.onloadend = () => resolve(reader.result as string)
+                            reader.onerror = reject
+                            reader.readAsDataURL(blob)
+                        })
+                    } catch (e) {
+                        console.error('Lỗi convert ảnh tham chiếu:', e)
+                        return url
+                    }
+                })
+            )
+
             const response = await imageApi.generate({
                 prompt: finalPrompt,
                 negative_prompt: currentNeg || undefined,
@@ -754,6 +774,7 @@ export function GeneratePage() {
                 aspect_ratio: ar.label,
                 seed: currentSeed,
                 count,
+                reference_images: base64Refs.length > 0 ? base64Refs : undefined,
             })
 
             clearInterval(interval)
@@ -1407,8 +1428,8 @@ export function GeneratePage() {
                                                 </Tooltip>
                                             </div>
                                             <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
-                                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)/g).map((part, i) =>
-                                                    /^(\[Ảnh tham chiếu \d+\]|@Ảnh \d+)$/.test(part)
+                                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)/gi).map((part, i) =>
+                                                    /^(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)$/i.test(part)
                                                         ? <span key={i} className="text-primary bg-primary/15 rounded px-1 py-0.5 text-xs font-semibold">{part}</span>
                                                         : <span key={i}>{part}</span>
                                                 )}

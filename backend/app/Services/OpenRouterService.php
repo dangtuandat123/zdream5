@@ -42,17 +42,43 @@ class OpenRouterService
         ?string $negativePrompt = null,
         string $aspectRatio = '1:1',
         ?string $model = null,
+        ?array $referenceImages = null,
     ): array {
         $model = $model ?? $this->defaultModel;
 
         // Xây dựng nội dung message
-        $messageContent = $prompt;
+        $messageText = $prompt;
         if ($negativePrompt) {
-            $messageContent .= "\n\nAvoid: " . $negativePrompt;
+            $messageText .= "\n\nAvoid: " . $negativePrompt;
         }
 
         // Thêm hướng dẫn tỉ lệ ảnh vào prompt vì 1 số model không hỗ trợ image_config
-        $messageContent .= "\n\nPlease ensure the aspect ratio is {$aspectRatio}.";
+        $messageText .= "\n\nPlease ensure the aspect ratio is {$aspectRatio}.";
+
+        // Mảng chứa cả Text và Image nếu có ảnh tham chiếu
+        if (!empty($referenceImages)) {
+            $finalContent = [
+                [
+                    'type' => 'text',
+                    'text' => $messageText,
+                ]
+            ];
+            
+            foreach ($referenceImages as $imgBase64) {
+                // Thêm tiền tố data:image nếu có lỗi thiếu từ Frontend
+                if (!str_starts_with($imgBase64, 'data:image/')) {
+                    $imgBase64 = "data:image/jpeg;base64," . $imgBase64;
+                }
+                $finalContent[] = [
+                    'type' => 'image_url',
+                    'image_url' => [
+                        'url' => $imgBase64,
+                    ],
+                ];
+            }
+        } else {
+            $finalContent = $messageText;
+        }
 
         // Payload gửi đến OpenRouter
         $payload = [
@@ -60,7 +86,7 @@ class OpenRouterService
             'messages' => [
                 [
                     'role' => 'user',
-                    'content' => $messageContent,
+                    'content' => $finalContent,
                 ],
             ],
             'modalities' => ['image', 'text'],

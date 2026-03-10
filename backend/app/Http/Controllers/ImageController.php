@@ -64,6 +64,7 @@ class ImageController extends Controller
                     negativePrompt: $validated['negative_prompt'] ?? null,
                     aspectRatio: $aspectRatio,
                     model: $model,
+                    referenceImages: $validated['reference_images'] ?? null,
                 );
 
                 // Lưu vào database
