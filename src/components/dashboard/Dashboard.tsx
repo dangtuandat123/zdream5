@@ -102,7 +102,7 @@ const FEED_ITEMS = [
 
 export function Dashboard() {
     return (
-        <div className="relative flex flex-1 flex-col min-h-screen pb-24 font-sans selection:bg-primary/30">
+        <div className="relative flex flex-1 flex-col min-h-screen pb-6 lg:pb-8 font-sans selection:bg-primary/30">
             
             {/* ========= TOP SECTION: BANNERS & QUICK TOOLS ========= */}
             <div className="flex flex-col gap-6 p-4 lg:p-6 lg:pb-0">
@@ -132,7 +132,7 @@ export function Dashboard() {
                     </div>
 
                     {/* Promo Banner: Khuyến mãi sắc bén góc cạnh */}
-                    <div className="relative col-span-1 overflow-hidden rounded-3xl h-[200px] sm:h-auto lg:h-[360px] bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] group cursor-pointer shadow-[0_20px_40px_rgba(2,44,34,0.3)] ring-1 ring-inset ring-emerald-500/20">
+                    <div className="relative col-span-1 overflow-hidden rounded-3xl h-[200px] sm:h-[320px] lg:h-[360px] bg-gradient-to-br from-[#022c22] via-[#064e3b] to-[#022c22] group cursor-pointer shadow-[0_20px_40px_rgba(2,44,34,0.3)] ring-1 ring-inset ring-emerald-500/20">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-emerald-400/30 transition-colors duration-500"></div>
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
                         
