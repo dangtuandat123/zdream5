@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 // Menu items chính
 const navItems = [
-  { icon: LayoutDashboard, label: "Trang chủ", path: "/app/dashboard" },
+  { icon: LayoutDashboard, label: "Home", path: "/app/dashboard" },
   { icon: SwatchBook, label: "Kiểu mẫu", path: "/app/templates" },
   { icon: WandSparkles, label: "Tạo ảnh", path: "/app/generate" },
   { icon: Images, label: "Thư viện", path: "/app/library" },
