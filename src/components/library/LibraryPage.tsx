@@ -69,9 +69,9 @@ type GeneratedFilter = "all" | "ai" | "template"
 
 // === Badge config theo loại ===
 const TYPE_CONFIG: Record<MediaType, { label: string; className: string }> = {
-    ai: { label: "AI", className: "bg-blue-500/15 text-blue-400 border-blue-500/20" },
-    template: { label: "Mẫu", className: "bg-purple-500/15 text-purple-400 border-purple-500/20" },
-    upload: { label: "Upload", className: "bg-emerald-500/15 text-emerald-400 border-emerald-500/20" },
+    ai: { label: "AI", className: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300" },
+    template: { label: "Mẫu", className: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300" },
+    upload: { label: "Upload", className: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" },
 }
 
 // === Mock data ===
@@ -249,8 +249,14 @@ export function LibraryPage() {
 
         // Sắp xếp
         currentItems.sort((a, b) => {
-            if (sort === "newest") return b.createdAt.localeCompare(a.createdAt)
-            return a.createdAt.localeCompare(b.createdAt)
+            const dateDiff = sort === "newest" 
+                ? b.createdAt.localeCompare(a.createdAt) 
+                : a.createdAt.localeCompare(b.createdAt)
+            
+            if (dateDiff === 0) {
+                return b.id.localeCompare(a.id)
+            }
+            return dateDiff
         })
 
         return currentItems
@@ -299,7 +305,6 @@ export function LibraryPage() {
     }
 
     const handleWheelZoom = (e: React.WheelEvent) => {
-        e.preventDefault() // Ngăn scroll trang
         // e.deltaY > 0 là cuộn xuống (Zoom out), < 0 là lên (Zoom in)
         if (e.deltaY < 0) {
             handleZoomIn()
@@ -338,7 +343,7 @@ export function LibraryPage() {
         <div className="relative flex flex-1 flex-col gap-5 p-4 lg:p-6 min-h-full">
             {/* Overlay Drag & Drop */}
             {isDragging && (
-                <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[72px] z-50 flex items-center justify-center p-4 lg:p-6 bg-background/80 backdrop-blur-sm pointer-events-none transition-all duration-200">
+                <div className="fixed top-0 bottom-0 right-0 left-0 md:left-[72px] z-[100] flex items-center justify-center p-4 lg:p-6 bg-background/80 backdrop-blur-sm pointer-events-none transition-all duration-200">
                     <div className="flex flex-col items-center justify-center w-full h-full rounded-2xl border-2 border-dashed border-primary bg-background/50">
                         <div className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary animate-pulse mb-4">
                             <UploadIcon className="size-10" />
@@ -361,7 +366,7 @@ export function LibraryPage() {
                         Tất cả kết quả hình ảnh và tài nguyên của bạn.
                     </p>
                 </div>
-                <div className="flex w-full sm:w-auto items-center gap-3">
+                <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
                     <div className="relative w-full sm:w-[240px]">
                         <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
@@ -373,7 +378,7 @@ export function LibraryPage() {
                     </div>
                     <Button 
                         onClick={handleUploadClick}
-                        className="h-9 whitespace-nowrap px-4"
+                        className="h-9 whitespace-nowrap px-4 w-full sm:w-auto"
                         disabled={isUploading}
                     >
                         {isUploading ? (
@@ -484,7 +489,7 @@ export function LibraryPage() {
                                     />
 
                                     {/* Hover overlay */}
-                                    <div className="absolute inset-0 flex items-end justify-between p-2 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                    <div className="absolute inset-0 flex items-end justify-between p-2 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100">
                                         <div className="flex gap-1">
                                             <Button
                                                 variant="secondary"
@@ -529,8 +534,7 @@ export function LibraryPage() {
 
                                     {/* Type badge — góc trên trái */}
                                     <Badge
-                                        variant="outline"
-                                        className={`absolute top-2 left-2 text-[9px] font-semibold border px-1.5 py-0 rounded-md backdrop-blur-md ${TYPE_CONFIG[item.type].className}`}
+                                        className={`absolute top-2 left-2 text-[10px] sm:text-[9px] font-semibold px-2 sm:px-1.5 py-0.5 sm:py-0 border-none rounded-md shadow-sm ${TYPE_CONFIG[item.type].className}`}
                                     >
                                         {TYPE_CONFIG[item.type].label}
                                     </Badge>
@@ -603,8 +607,7 @@ export function LibraryPage() {
                             <div className="absolute top-4 left-4 z-50 max-w-[60vw] space-y-2 pointer-events-none">
                                 <div className="flex items-center gap-3">
                                     <Badge
-                                        variant="outline"
-                                        className={`px-2.5 py-0.5 text-xs font-semibold backdrop-blur-md shadow-sm border ${TYPE_CONFIG[selectedItem.type].className}`}
+                                        className={`px-2.5 py-0.5 text-xs font-semibold shadow-sm border-none ${TYPE_CONFIG[selectedItem.type].className}`}
                                     >
                                         {TYPE_CONFIG[selectedItem.type].label}
                                     </Badge>
@@ -704,7 +707,7 @@ export function LibraryPage() {
 
                             {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
                             <div 
-                                className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'select-none pointer-events-none'}`}
+                                className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
                                 onWheel={handleWheelZoom}
                                 onMouseDown={handleMouseDownPan}
                                 onMouseMove={handleMouseMovePan}
