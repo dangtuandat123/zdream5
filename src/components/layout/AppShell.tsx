@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 
 export function AppShell() {
     return (
-        <div className="flex min-h-svh w-full bg-background">
-            {/* Sidebar cố định bên trái, chỉ hiện trên desktop (md+) */}
+        <div className="flex flex-col md:flex-row min-h-svh w-full bg-background">
+            {/* Mobile Header và Desktop Sidebar */}
             <AppSidebar />
 
             {/* Main content — offset bởi sidebar width trên desktop */}
