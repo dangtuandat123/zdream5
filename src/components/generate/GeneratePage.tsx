@@ -27,6 +27,7 @@ import {
     ChevronLeft,
     ChevronRight,
     ChevronDown,
+    ChevronUp,
     History,
     CheckSquare,
     Dices,
@@ -468,7 +469,9 @@ export function GeneratePage() {
     // Header Scroll State (Headroom)
     const { scrollY } = useScroll()
     const [isHeaderHidden, setIsHeaderHidden] = useState(false)
+    const [isScrolledDown, setIsScrolledDown] = useState(false)
     useMotionValueEvent(scrollY, "change", (latest) => {
+        setIsScrolledDown(latest > 200)
         const previous = scrollY.getPrevious() ?? 0
         if (latest > previous && latest > 150) {
             setIsHeaderHidden(true)
@@ -957,9 +960,6 @@ export function GeneratePage() {
     // === Handlers ===
     const handleGenerate = useCallback(async () => {
         if (!prompt.trim() || isGenerating) return
-        
-        // Cuộn lên đầu trang để người dùng thấy skeleton progress
-        window.scrollTo({ top: 0, behavior: 'smooth' })
 
         setIsGenerating(true)
         setGenerateProgress(0)
@@ -2028,8 +2028,63 @@ export function GeneratePage() {
                 </AlertDialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-4 pb-4 pt-6">
-                    <div className="relative w-full">
+                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-4 sm:pb-6 pt-6 pointer-events-none">
+                    {/* Floating Indicators Container */}
+                    <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
+                        <AnimatePresence>
+                            {/* Scroll to Top Handle (when scrolled down but NOT generating) */}
+                            {isScrolledDown && !isGenerating && (
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.9, y: 5 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.9, y: 5 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="pointer-events-auto"
+                                >
+                                    <button
+                                        className="h-8 md:h-9 px-3.5 md:px-4 rounded-full bg-[#1c1c1e] border border-[#303030] shadow-xl flex items-center justify-center gap-1.5 text-[#a1a1aa] hover:text-white hover:bg-[#2c2c2e] transition-all outline-none group"
+                                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                                        aria-label="Lên đầu trang"
+                                    >
+                                        <span className="text-[12px] md:text-[13px] font-semibold tracking-wide">Lên trên cùng</span>
+                                        <ChevronUp className="size-3.5 md:size-4 opacity-70 group-hover:opacity-100" />
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* Generating Indicator (Matches user reference exactly) */}
+                            {isGenerating && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 5 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="pointer-events-auto"
+                                >
+                                    <button
+                                        className="h-8 md:h-9 px-3.5 md:px-4 rounded-full bg-[#1c1c1e] border border-[#303030] shadow-xl flex items-center justify-center gap-2 text-[#a1a1aa] hover:text-white hover:bg-[#2c2c2e] transition-all outline-none group"
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            window.scrollTo({ top: 0, behavior: 'smooth' })
+                                        }}
+                                    >
+                                        <div className="size-3.5 border-[2px] border-[#a1a1aa]/30 border-t-[#a1a1aa] rounded-full animate-spin group-hover:border-t-white" />
+                                        <span className="text-[12px] md:text-[13px] font-semibold tracking-wide whitespace-nowrap">Đang tạo...</span>
+                                        {isScrolledDown && (
+                                            <>
+                                                <div className="w-px h-3.5 bg-[#303030] mx-0.5" />
+                                                <span className="text-[12px] md:text-[13px] font-semibold tracking-wide flex items-center gap-1.5">
+                                                    Lên trên cùng <ChevronUp className="size-3.5 md:size-4 opacity-70 group-hover:opacity-100" />
+                                                </span>
+                                            </>
+                                        )}
+                                    </button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+
+                    <div className="relative w-full pointer-events-auto">
 
                         {/* Batch Action Bar — bám dính trên prompt bar, giống history dropdown */}
                         {selectionMode && selectedIds.size > 0 && (
