@@ -70,6 +70,7 @@ class ImageController extends Controller
                 // Lưu vào database
                 $image = Image::create([
                     'user_id' => $user->id,
+                    'project_id' => $validated['project_id'] ?? null,
                     'prompt' => $validated['prompt'],
                     'negative_prompt' => $validated['negative_prompt'] ?? null,
                     'model' => $model ?? config('services.openrouter.default_model'),
@@ -79,6 +80,7 @@ class ImageController extends Controller
                     'file_url' => $result['file_url'],
                     'seed' => $seed + $i,
                     'gems_cost' => $gemsCostPerImage,
+                    'reference_images' => $validated['reference_images'] ?? null,
                 ]);
 
                 // Trừ gems
@@ -115,11 +117,15 @@ class ImageController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = min((int) $request->input('per_page', 20), 50);
+        $projectId = $request->input('project_id');
 
-        $images = $request->user()
-            ->images()
-            ->orderByDesc('created_at')
-            ->paginate($perPage);
+        $query = $request->user()->images()->orderByDesc('created_at');
+
+        if ($projectId) {
+            $query->where('project_id', $projectId);
+        }
+
+        $images = $query->paginate($perPage);
 
         return response()->json($images);
     }

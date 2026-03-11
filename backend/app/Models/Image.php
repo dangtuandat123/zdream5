@@ -6,11 +6,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Project; // Added this line
 
 class Image extends Model
 {
     protected $fillable = [
         'user_id',
+        'project_id', // Added this line
         'prompt',
         'negative_prompt',
         'model',
@@ -36,5 +38,13 @@ class Image extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Dự án chứa ảnh này
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 }

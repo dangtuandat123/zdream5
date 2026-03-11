@@ -19,6 +19,7 @@ class GenerateImageRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
             'prompt' => ['required', 'string', 'max:2000'],
             'negative_prompt' => ['nullable', 'string', 'max:1000'],
             'model' => ['nullable', 'string', 'max:100'],

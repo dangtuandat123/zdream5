@@ -36,6 +36,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/images', [ImageController::class, 'index']);
     Route::delete('/images/{id}', [ImageController::class, 'destroy']);
 
+    // Projects
+    Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index']);
+    Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store']);
+    Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'destroy']);
+
     // Wallet / Gems
     Route::get('/wallet', [WalletController::class, 'show']);
     Route::post('/wallet/topup', [WalletController::class, 'topup']);

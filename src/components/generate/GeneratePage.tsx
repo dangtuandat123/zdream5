@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
-import { imageApi, type GeneratedImageData } from "@/lib/api"
+import { imageApi, projectApi, type GeneratedImageData, type ProjectData } from "@/lib/api"
 import {
     Wand2,
     Download,
@@ -27,7 +27,9 @@ import {
     History,
     CheckSquare,
     Dices,
-    Loader2
+    Loader2,
+    FolderOpen,
+    FolderPlus
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -73,6 +75,7 @@ import {
     Dialog,
     DialogContent,
     DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog"
 import {
     AlertDialog,
@@ -84,6 +87,7 @@ import {
     AlertDialogHeader,
     AlertDialogMedia,
     AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -402,6 +406,12 @@ export function GeneratePage() {
     const [promptHistory, setPromptHistory] = useState<string[]>(getPromptHistory)
     const [showHistory, setShowHistory] = useState(false)
     const [isDragging, setIsDragging] = useState(false)
+
+    // Projects (Folders) state
+    const [projects, setProjects] = useState<ProjectData[]>([])
+    const [currentProjectId, setCurrentProjectId] = useState<string>("all")
+    const [isCreatingProject, setIsCreatingProject] = useState(false)
+    const [newProjectName, setNewProjectName] = useState("")
     const [showZoomHint, setShowZoomHint] = useState(true)
     // @Mention popover state
     const [showMentionPopover, setShowMentionPopover] = useState(false)
@@ -433,11 +443,54 @@ export function GeneratePage() {
         return () => clearTimeout(t)
     }, [selectedImage, showZoomHint])
 
-    // Load lịch sử ảnh khi component mount
+    // Load danh sách projects
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                const res = await projectApi.list()
+                if (res.data) setProjects(res.data)
+            } catch (err) {
+                console.error("Failed to load projects:", err)
+            }
+        }
+        fetchProjects()
+    }, [])
+
+    // Handler tạo dự án
+    const handleCreateProject = async () => {
+        if (!newProjectName.trim()) return
+        try {
+            const res = await projectApi.create({ name: newProjectName })
+            setProjects(prev => [res.data, ...prev])
+            setCurrentProjectId(String(res.data.id))
+            setNewProjectName("")
+            setIsCreatingProject(false)
+            toast.success("Đã tạo dự án mới")
+        } catch (e: any) {
+            toast.error("Không thể tạo dự án")
+        }
+    }
+
+    // Handler xóa dự án
+    const handleDeleteProject = async (id: number) => {
+        try {
+            await projectApi.delete(id)
+            setProjects(prev => prev.filter(p => p.id !== id))
+            if (currentProjectId === String(id)) {
+                setCurrentProjectId("all")
+            }
+            toast.success("Đã xóa dự án")
+        } catch (e: any) {
+            toast.error("Lỗi khi xóa dự án")
+        }
+    }
+
+    // Load lịch sử ảnh khi component mount hoặc chuyển dự án
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const res = await imageApi.list(1, 100)
+                const paramProjectId = currentProjectId === "all" ? undefined : currentProjectId
+                const res = await imageApi.list(1, 100, paramProjectId)
                 if (res.data) {
                     const loadedImages: GeneratedImage[] = res.data.map((img) => {
                         let arNumber = 1
@@ -469,7 +522,7 @@ export function GeneratePage() {
             }
         }
         fetchHistory()
-    }, [])
+    }, [currentProjectId])
 
     // Track cursor position for custom drag avatar (desktop DnD)
     // NOTE: mousemove is suppressed during HTML5 drag — must use the `drag` event instead
@@ -803,8 +856,10 @@ export function GeneratePage() {
                     }
                 })
             )
-
+            const paramProjectId = currentProjectId === "all" ? undefined : Number(currentProjectId)
+            
             const response = await imageApi.generate({
+                project_id: paramProjectId,
                 prompt: finalPrompt,
                 negative_prompt: currentNeg || undefined,
                 model,
@@ -1208,6 +1263,83 @@ export function GeneratePage() {
 
                 {/* === CANVAS AREA — Gallery full-width, justified layout === */}
                 <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
+                    {/* Top Canvas Header: Project Context */}
+                    <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between pb-4 border-b border-border/40 mb-4 sm:mb-6 gap-4">
+                        <div className="flex flex-col gap-1.5">
+                            <Label className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground ml-1">
+                                Không gian làm việc
+                            </Label>
+                            <div className="flex items-center gap-1">
+                                <Select value={currentProjectId} onValueChange={setCurrentProjectId}>
+                                    <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-muted/50 px-2 text-lg sm:text-xl font-bold shadow-none focus:ring-0 w-auto gap-2 data-[state=open]:bg-muted/50 transition-colors">
+                                        <FolderOpen className="size-5 text-primary" />
+                                        <SelectValue placeholder="Chọn dự án..." />
+                                    </SelectTrigger>
+                                    <SelectContent align="start" className="w-[240px]">
+                                        <SelectItem value="all" className="font-medium">Tất cả ảnh</SelectItem>
+                                        {projects.length > 0 && <div className="h-px bg-border/50 my-1 mx-2" />}
+                                        {projects.map(p => (
+                                            <SelectItem key={p.id} value={String(p.id)} className="pl-6">{p.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                
+                                <Dialog open={isCreatingProject} onOpenChange={setIsCreatingProject}>
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full">
+                                            <FolderPlus className="size-4.5" />
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="sm:max-w-md rounded-xl">
+                                        <DialogTitle>Tạo thư mục mới</DialogTitle>
+                                        <div className="flex flex-col gap-4 py-4">
+                                            <div className="space-y-2">
+                                                <Label>Tên thư mục</Label>
+                                                <Input 
+                                                    autoFocus
+                                                    placeholder="Ví dụ: Cảnh quan Cyberpunk..."
+                                                    value={newProjectName}
+                                                    onChange={e => setNewProjectName(e.target.value)}
+                                                    onKeyDown={e => e.key === 'Enter' && handleCreateProject()}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-end gap-2">
+                                            <Button variant="ghost" onClick={() => setIsCreatingProject(false)}>Hủy</Button>
+                                            <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>Tạo mới</Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            </div>
+                        </div>
+                        
+                        {/* Right side actions (Delete) */}
+                        <div className="flex items-center ml-1 sm:ml-0">
+                            {currentProjectId !== 'all' && (
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button variant="destructive" size="sm" className="h-8 text-xs bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors shadow-none">
+                                            <Trash2 className="size-3.5 mr-1.5" /> Xóa thư mục
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Xóa thư mục làm việc?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Hành động này sẽ xóa vĩnh viễn thư mục <b className="text-foreground">{projects.find(p => String(p.id) === currentProjectId)?.name}</b>.<br/>
+                                                Các ảnh bên trong sẽ KHÔNG bị xóa mà được chuyển về kho chung "Tất cả ảnh".
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Hủy</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteProject(Number(currentProjectId))} className="bg-destructive text-destructive-foreground">Đồng ý xóa</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Solid, Neo-brutalism flat design */}
                         {images.length === 0 && !isGenerating && (

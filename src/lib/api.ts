@@ -140,6 +140,14 @@ export interface GeneratedImageData {
     created_at: string;
 }
 
+export interface ProjectData {
+    id: number;
+    user_id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface GenerateResponse {
     message: string;
     images: GeneratedImageData[];
@@ -148,6 +156,7 @@ export interface GenerateResponse {
 
 export const imageApi = {
     generate: (data: {
+        project_id?: number | null;
         prompt: string;
         negative_prompt?: string;
         model?: string;
@@ -161,16 +170,36 @@ export const imageApi = {
         body: JSON.stringify(data),
     }),
 
-    list: (page = 1, perPage = 20) =>
-        request<{
+    list: (page = 1, perPage = 20, projectId?: string | null) => {
+        let url = `/images?page=${page}&per_page=${perPage}`;
+        if (projectId) url += `&project_id=${projectId}`;
+        return request<{
             data: GeneratedImageData[];
             current_page: number;
             last_page: number;
             total: number;
-        }>(`/images?page=${page}&per_page=${perPage}`),
+        }>(url);
+    },
 
     delete: (id: number) =>
         request<{ message: string }>(`/images/${id}`, { method: 'DELETE' }),
+};
+
+// ========================
+// Project API
+// ========================
+
+export const projectApi = {
+    list: () => request<{ data: ProjectData[] }>('/projects'),
+    
+    create: (data: { name: string }) => 
+        request<{ message: string, data: ProjectData }>('/projects', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+
+    delete: (id: number) => 
+        request<{ message: string }>(`/projects/${id}`, { method: 'DELETE' }),
 };
 
 // ========================
