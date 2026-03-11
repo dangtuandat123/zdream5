@@ -38,6 +38,7 @@ export function AppSidebar() {
   const navigate = useNavigate()
   const { gems, logout } = useAuth()
   const [open, setOpen] = useState(false)
+  const [commandValue, setCommandValue] = useState("")
 
   // Phím tắt ⌘K hoặc Ctrl+K để mở menu
   useEffect(() => {
@@ -55,6 +56,13 @@ export function AppSidebar() {
     if (path === "/app/home") return location.pathname.includes("home")
     return location.pathname.startsWith(path)
   }
+
+  useEffect(() => {
+    if (open) {
+      const activeItem = navItems.find((item) => isActive(item.path))
+      setCommandValue(activeItem ? activeItem.label : "")
+    }
+  }, [open, location.pathname])
 
   const runCommand = (command: () => void) => {
     setOpen(false)
@@ -91,7 +99,7 @@ export function AppSidebar() {
       </header>
 
       {/* Command Palette (Spotlight Navigation) */}
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog open={open} onOpenChange={setOpen} commandProps={{ value: commandValue, onValueChange: setCommandValue }}>
         <CommandInput placeholder="Tìm kiếm trang hoặc tính năng..." />
         <CommandList className="scrollbar-none custom-scrollbar pb-2 pt-1">
           <CommandEmpty>Không tìm thấy phần nào.</CommandEmpty>

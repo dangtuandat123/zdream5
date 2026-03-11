@@ -1329,7 +1329,15 @@ export function GeneratePage() {
                                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                         </Button>
                                     </PopoverTrigger>
-                                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[320px] p-0 shadow-xl rounded-xl border-border/40" align="start">
+                                    <PopoverContent 
+                                        className="w-[calc(100vw-2rem)] sm:w-[320px] p-0 shadow-xl rounded-xl border-border/40" 
+                                        align="start"
+                                        onOpenAutoFocus={(e) => {
+                                            if (window.innerWidth < 768) {
+                                                e.preventDefault()
+                                            }
+                                        }}
+                                    >
                                         <Command value={commandValue} onValueChange={setCommandValue}>
                                             <CommandInput placeholder="Tìm kiếm thư mục..." className="h-10 outline-none border-none ring-0 focus:ring-0" />
                                             <CommandList className="max-h-[300px] overflow-y-auto scrollbar-none custom-scrollbar">
