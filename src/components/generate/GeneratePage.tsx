@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react"
-import { motion, useScroll, useMotionValueEvent } from "framer-motion"
+import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
@@ -25,6 +25,7 @@ import {
     Copy,
     ChevronLeft,
     ChevronRight,
+    ChevronDown,
     History,
     CheckSquare,
     Dices,
@@ -1446,6 +1447,24 @@ export function GeneratePage() {
                             </div>
                         )}
                     </motion.div>
+
+                    {/* Floating Toggle Button (Sticky to stay centered in the exact canvas area) */}
+                    <div className="sticky top-[70px] md:top-6 z-40 w-full flex justify-center items-start pointer-events-none h-0">
+                        <AnimatePresence>
+                            {isHeaderHidden && (
+                                <motion.button
+                                    initial={{ y: -50, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    exit={{ y: -50, opacity: 0 }}
+                                    onClick={() => setIsHeaderHidden(false)}
+                                    className="pointer-events-auto bg-background/90 backdrop-blur-md border border-border shadow-md rounded-full px-4 py-2 flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-shadow mt-1"
+                                >
+                                    <ChevronDown className="size-3.5 text-foreground mr-1.5" />
+                                    <span className="text-[12px] font-bold text-foreground">Hiện công cụ</span>
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Solid, Neo-brutalism flat design */}
