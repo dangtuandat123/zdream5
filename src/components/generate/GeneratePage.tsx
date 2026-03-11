@@ -29,8 +29,19 @@ import {
     Dices,
     Loader2,
     FolderOpen,
-    FolderPlus
+    LayoutGrid,
+    ChevronsUpDown
 } from "lucide-react"
+
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+    CommandSeparator,
+} from "@/components/ui/command"
 
 import { Button } from "@/components/ui/button"
 import { Slider } from "@/components/ui/slider"
@@ -411,6 +422,7 @@ export function GeneratePage() {
     const [projects, setProjects] = useState<ProjectData[]>([])
     const [currentProjectId, setCurrentProjectId] = useState<string>("all")
     const [isCreatingProject, setIsCreatingProject] = useState(false)
+    const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false)
     const [newProjectName, setNewProjectName] = useState("")
     const [showZoomHint, setShowZoomHint] = useState(true)
     // @Mention popover state
@@ -1263,66 +1275,123 @@ export function GeneratePage() {
 
                 {/* === CANVAS AREA — Gallery full-width, justified layout === */}
                 <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
-                    {/* Top Canvas Header: Project Context */}
-                    <div className="w-full flex flex-col sm:flex-row sm:items-end justify-between pb-4 border-b border-border/40 mb-4 sm:mb-6 gap-4">
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="text-[10px] uppercase font-semibold tracking-wider text-muted-foreground ml-1">
-                                Không gian làm việc
-                            </Label>
-                            <div className="flex items-center gap-1">
-                                <Select value={currentProjectId} onValueChange={setCurrentProjectId}>
-                                    <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-muted/50 px-2 text-lg sm:text-xl font-bold shadow-none focus:ring-0 w-auto gap-2 data-[state=open]:bg-muted/50 transition-colors">
-                                        <FolderOpen className="size-5 text-primary" />
-                                        <SelectValue placeholder="Chọn dự án..." />
-                                    </SelectTrigger>
-                                    <SelectContent align="start" className="w-[240px]">
-                                        <SelectItem value="all" className="font-medium">Tất cả ảnh</SelectItem>
-                                        {projects.length > 0 && <div className="h-px bg-border/50 my-1 mx-2" />}
-                                        {projects.map(p => (
-                                            <SelectItem key={p.id} value={String(p.id)} className="pl-6">{p.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                    {/* Top Canvas Header: Workspace Switcher */}
+                    <div className="w-full flex flex-col gap-3 pb-3 sm:pb-4 border-b border-border/40 mb-4 sm:mb-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-0">
+                            <div className="flex items-center gap-3 w-full sm:w-auto">
+                                <Label className="text-[11px] sm:text-[12px] uppercase font-bold tracking-widest text-muted-foreground whitespace-nowrap hidden sm:inline-block">
+                                    Thư viện
+                                </Label>
                                 
-                                <Dialog open={isCreatingProject} onOpenChange={setIsCreatingProject}>
-                                    <DialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground rounded-full">
-                                            <FolderPlus className="size-4.5" />
-                                        </Button>
-                                    </DialogTrigger>
-                                    <DialogContent className="sm:max-w-md rounded-xl">
-                                        <DialogTitle>Tạo thư mục mới</DialogTitle>
-                                        <div className="flex flex-col gap-4 py-4">
-                                            <div className="space-y-2">
-                                                <Label>Tên thư mục</Label>
-                                                <Input 
-                                                    autoFocus
-                                                    placeholder="Ví dụ: Cảnh quan Cyberpunk..."
-                                                    value={newProjectName}
-                                                    onChange={e => setNewProjectName(e.target.value)}
-                                                    onKeyDown={e => e.key === 'Enter' && handleCreateProject()}
-                                                />
+                                <Popover open={isProjectMenuOpen} onOpenChange={setIsProjectMenuOpen}>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            role="combobox"
+                                            aria-expanded={isProjectMenuOpen}
+                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 border-muted-foreground/20 hover:border-muted-foreground/40 hover:bg-transparent"
+                                        >
+                                            <div className="flex items-center truncate">
+                                                <FolderOpen className="mr-2 h-4 w-4 shrink-0 text-primary" />
+                                                <span className="truncate">
+                                                    {currentProjectId === 'all' 
+                                                        ? 'Tất cả ảnh' 
+                                                        : projects.find((project) => String(project.id) === currentProjectId)?.name || 'Tất cả ảnh'}
+                                                </span>
                                             </div>
-                                        </div>
-                                        <div className="flex justify-end gap-2">
-                                            <Button variant="ghost" onClick={() => setIsCreatingProject(false)}>Hủy</Button>
-                                            <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>Tạo mới</Button>
-                                        </div>
-                                    </DialogContent>
-                                </Dialog>
+                                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[320px] p-0 shadow-xl rounded-xl border-border/40" align="start">
+                                        <Command>
+                                            <CommandInput placeholder="Tìm kiếm thư mục..." className="h-10 outline-none border-none ring-0 focus:ring-0" />
+                                            <CommandList className="max-h-[300px] overflow-y-auto scrollbar-none custom-scrollbar">
+                                                <CommandEmpty>Không tìm thấy thư mục nào.</CommandEmpty>
+                                                <CommandGroup heading="Mặc định">
+                                                    <CommandItem
+                                                        value="all"
+                                                        onSelect={() => {
+                                                            setCurrentProjectId("all")
+                                                            setIsProjectMenuOpen(false)
+                                                        }}
+                                                        className="font-medium cursor-pointer h-9"
+                                                    >
+                                                        <LayoutGrid className="mr-2 h-4 w-4" />
+                                                        Tất cả ảnh
+                                                        <Check
+                                                            className={`ml-auto h-4 w-4 ${currentProjectId === "all" ? "opacity-100" : "opacity-0"}`}
+                                                        />
+                                                    </CommandItem>
+                                                </CommandGroup>
+                                                <CommandSeparator />
+                                                <CommandGroup heading="Thư mục của bạn">
+                                                    {projects.map((project) => (
+                                                        <CommandItem
+                                                            key={project.id}
+                                                            value={project.name}
+                                                            onSelect={(currentValue) => {
+                                                                const selected = projects.find(p => p.name.toLowerCase() === currentValue.toLowerCase())
+                                                                if (selected) {
+                                                                    setCurrentProjectId(String(selected.id))
+                                                                }
+                                                                setIsProjectMenuOpen(false)
+                                                            }}
+                                                            className="cursor-pointer h-9"
+                                                        >
+                                                            <FolderOpen className="mr-2 h-4 w-4 opacity-70" />
+                                                            <span className="truncate">{project.name}</span>
+                                                            <Check
+                                                                className={`ml-auto h-4 w-4 ${currentProjectId === String(project.id) ? "opacity-100" : "opacity-0"}`}
+                                                            />
+                                                        </CommandItem>
+                                                    ))}
+                                                </CommandGroup>
+                                            </CommandList>
+                                            <CommandSeparator />
+                                            <div className="p-1.5">
+                                                <Dialog open={isCreatingProject} onOpenChange={setIsCreatingProject}>
+                                                    <DialogTrigger asChild>
+                                                        <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/50 h-9 px-2 rounded-md">
+                                                            <Plus className="mr-2 h-4 w-4" />
+                                                            Tạo thư mục mới
+                                                        </Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent className="w-[95vw] max-w-md rounded-xl">
+                                                        <DialogTitle>Tạo thư mục mới</DialogTitle>
+                                                        <div className="flex flex-col gap-4 py-4">
+                                                            <div className="space-y-2">
+                                                                <Label>Tên thư mục</Label>
+                                                                <Input 
+                                                                    autoFocus
+                                                                    placeholder="Ví dụ: Cảnh quan Cyberpunk..."
+                                                                    value={newProjectName}
+                                                                    onChange={e => setNewProjectName(e.target.value)}
+                                                                    onKeyDown={e => e.key === 'Enter' && handleCreateProject()}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-2">
+                                                            <Button variant="ghost" className="w-full sm:w-auto" onClick={() => setIsCreatingProject(false)}>Hủy</Button>
+                                                            <Button className="w-full sm:w-auto" onClick={handleCreateProject} disabled={!newProjectName.trim()}>Tạo mới</Button>
+                                                        </div>
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
+                                        </Command>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
-                        </div>
-                        
-                        {/* Right side actions (Delete) */}
-                        <div className="flex items-center ml-1 sm:ml-0">
+                            
+                            {/* Nút xóa thư mục chỉ hiện khi chọn 1 thư mục cụ thể */}
                             {currentProjectId !== 'all' && (
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" size="sm" className="h-8 text-xs bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-colors shadow-none">
-                                            <Trash2 className="size-3.5 mr-1.5" /> Xóa thư mục
+                                        <Button variant="ghost" size="sm" className="h-9 sm:h-auto text-xs sm:text-[11px] text-destructive hover:bg-destructive/10 px-3 sm:px-2 rounded-md transition-colors w-full sm:w-auto justify-start sm:justify-center border sm:border-transparent border-destructive/20 mt-2 sm:mt-0">
+                                            <Trash2 className="size-3.5 sm:size-3 mr-1.5" /> 
+                                            Xóa thư mục đang chọn
                                         </Button>
                                     </AlertDialogTrigger>
-                                    <AlertDialogContent>
+                                    <AlertDialogContent className="w-[95vw] max-w-md rounded-xl">
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Xóa thư mục làm việc?</AlertDialogTitle>
                                             <AlertDialogDescription>
@@ -1330,9 +1399,9 @@ export function GeneratePage() {
                                                 Các ảnh bên trong sẽ KHÔNG bị xóa mà được chuyển về kho chung "Tất cả ảnh".
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Hủy</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteProject(Number(currentProjectId))} className="bg-destructive text-destructive-foreground">Đồng ý xóa</AlertDialogAction>
+                                        <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
+                                            <AlertDialogCancel className="w-full sm:w-auto mt-0">Hủy</AlertDialogCancel>
+                                            <AlertDialogAction onClick={() => handleDeleteProject(Number(currentProjectId))} className="w-full sm:w-auto bg-destructive text-destructive-foreground">Đồng ý xóa</AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
                                 </AlertDialog>
