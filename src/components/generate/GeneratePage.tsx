@@ -4,6 +4,7 @@ import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
 import { imageApi, projectApi, type GeneratedImageData, type ProjectData } from "@/lib/api"
+import { cn } from "@/lib/utils"
 import {
     Wand2,
     Download,
@@ -154,7 +155,7 @@ async function downloadImage(url: string, filename: string) {
 
 // === Justified Gallery Component ===
 type GalleryItem =
-    | { type: 'skeleton'; ratio: number; key: string }
+    | { type: 'skeleton'; ratio: number; key: string; variant: 'generate' | 'history' }
     | { type: 'image'; img: GeneratedImage; ratio: number; key: string }
 
 interface JustifiedRow {
@@ -226,6 +227,146 @@ function computeRows(items: GalleryItem[], containerWidth: number, targetHeight:
     return rows
 }
 
+function ImageSkeleton({ variant, progress }: { ratio?: number; variant: 'generate' | 'history'; progress?: number }) {
+    return (
+        <div
+            className="relative w-full h-full rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate"
+        >
+            {/* Shimmer overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+            <Skeleton className="absolute inset-0 h-full w-full rounded-none opacity-20" />
+
+            <div className="flex flex-col items-center gap-3 z-10">
+                {variant === 'generate' ? (
+                    <Wand2 className="size-6 text-muted-foreground/40 animate-pulse" />
+                ) : (
+                    <div className="size-10 rounded-full bg-muted/20 flex items-center justify-center">
+                        <ImageIcon className="size-5 text-muted-foreground/30" />
+                    </div>
+                )}
+                
+                {variant === 'generate' && progress !== undefined && (
+                    <div className="flex gap-1.5 items-center">
+                        <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                        <span className="text-[10px] text-muted-foreground/50 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
+                    </div>
+                )}
+            </div>
+
+            {/* Progress bar (Chỉ cho generate) */}
+            {variant === 'generate' && progress !== undefined && (
+                <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/30">
+                    <div
+                        className="h-full bg-primary/60 transition-all duration-300 ease-out"
+                        style={{ width: `${Math.min(progress, 100)}%` }}
+                    />
+                </div>
+            )}
+        </div>
+    )
+}
+
+function GalleryImage({
+    item,
+    itemStyle,
+    selectionMode,
+    selectedIds,
+    onToggleSelection,
+    onSelectImage,
+    onImageDragStart,
+    onImageTouchStart,
+    onSetReferenceImage,
+    onDownloadImage,
+    onDeleteImage,
+}: {
+    item: { type: 'image'; img: GeneratedImage; ratio: number; key: string }
+    itemStyle: React.CSSProperties
+    selectionMode: boolean
+    selectedIds: Set<string>
+    onToggleSelection: (id: string) => void
+    onSelectImage: (img: GeneratedImage) => void
+    onImageDragStart: (e: React.DragEvent, url: string) => void
+    onImageTouchStart: (url: string, x: number, y: number) => void
+    onSetReferenceImage: (url: string) => void
+    onDownloadImage: (url: string, id: string) => void
+    onDeleteImage: (id: string) => void
+}) {
+    const [isLoaded, setIsLoaded] = useState(false)
+    const img = item.img
+    const isSelected = selectedIds.has(img.id)
+
+    return (
+        <div
+            className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
+            style={{ ...itemStyle, WebkitTouchCallout: 'none' }}
+            onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
+            draggable
+            onDragStart={(e) => onImageDragStart(e, img.url)}
+            onContextMenu={(e) => e.preventDefault()}
+            onTouchStart={(e) => {
+                const touch = e.touches[0]
+                onImageTouchStart(img.url, touch.clientX, touch.clientY)
+            }}
+        >
+            {/* Show skeleton with the EXACT same ratio while loading */}
+            {!isLoaded && <ImageSkeleton variant="history" />}
+
+            <img
+                src={img.url}
+                alt={img.prompt}
+                className={cn(
+                    "h-full w-full object-cover transition-opacity duration-300",
+                    isLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
+                )}
+                onLoad={() => setIsLoaded(true)}
+            />
+            {isLoaded && (
+                <>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
+
+                    {/* Batch selection checkbox */}
+                    {selectionMode && (
+                        <div className={`absolute top-2 left-2 size-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-white/70 bg-black/30'}`}>
+                            {isSelected && <Check className="size-3 text-primary-foreground" />}
+                        </div>
+                    )}
+
+                    <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onSetReferenceImage(img.url) }}>
+                                    <ImageIcon className="size-3 text-white" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">Dùng làm ảnh tham chiếu</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDownloadImage(img.url, img.id) }}>
+                                    <Download className="size-3 text-white" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">Tải xuống</TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDeleteImage(img.id) }}>
+                                    <Trash2 className="size-3 text-white" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="text-xs">Xoá</TooltipContent>
+                        </Tooltip>
+                    </div>
+                </>
+            )}
+        </div>
+    )
+}
+
 function JustifiedGallery({
     items,
     targetHeight,
@@ -289,98 +430,27 @@ function JustifiedGallery({
 
                         if (item.type === 'skeleton') {
                             return (
-                                <div
-                                    key={item.key}
-                                    className="relative rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate"
-                                    style={itemStyle}
-                                >
-                                    {/* Shimmer overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                                    <Skeleton className="absolute inset-0 h-full w-full rounded-none opacity-20" />
-
-                                    <div className="flex flex-col items-center gap-3 z-10">
-                                        <Wand2 className="size-6 text-muted-foreground/40 animate-pulse" />
-                                        <div className="flex gap-1.5 items-center">
-                                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                                            <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
-                                            <span className="text-[10px] text-muted-foreground/50 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Progress bar dưới cùng */}
-                                    <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/30">
-                                        <div
-                                            className="h-full bg-primary/60 transition-all duration-300 ease-out"
-                                            style={{ width: `${Math.min(progress, 100)}%` }}
-                                        />
-                                    </div>
+                                <div key={item.key} style={itemStyle}>
+                                    <ImageSkeleton ratio={item.ratio} variant={item.variant} progress={progress} />
                                 </div>
                             )
                         }
 
-                        const img = item.img
-                        const isSelected = selectedIds.has(img.id)
                         return (
-                            <div
+                            <GalleryImage
                                 key={item.key}
-                                className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
-                                style={{ ...itemStyle, WebkitTouchCallout: 'none' }}
-                                onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
-                                draggable
-                                onDragStart={(e) => onImageDragStart(e, img.url)}
-                                onContextMenu={(e) => {
-                                    // Chặn menu ngữ cảnh gốc trên mobile (để không cản trở Long Press 1.5s)
-                                    e.preventDefault()
-                                }}
-                                onTouchStart={(e) => {
-                                    const touch = e.touches[0]
-                                    onImageTouchStart(img.url, touch.clientX, touch.clientY)
-                                }}
-                            >
-                                <img
-                                    src={img.url}
-                                    alt={img.prompt}
-                                    className="h-full w-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
-
-                                {/* Batch selection checkbox */}
-                                {selectionMode && (
-                                    <div className={`absolute top-2 left-2 size-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-white/70 bg-black/30'}`}>
-                                        {isSelected && <Check className="size-3 text-primary-foreground" />}
-                                    </div>
-                                )}
-
-                                <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onSetReferenceImage(img.url) }}>
-                                                <ImageIcon className="size-3 text-white" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="text-xs">Dùng làm ảnh tham chiếu</TooltipContent>
-                                    </Tooltip>
-                                    
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDownloadImage(img.url, img.id) }}>
-                                                <Download className="size-3 text-white" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="text-xs">Tải xuống</TooltipContent>
-                                    </Tooltip>
-                                    
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onDeleteImage(img.id) }}>
-                                                <Trash2 className="size-3 text-white" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="top" className="text-xs">Xoá</TooltipContent>
-                                    </Tooltip>
-                                </div>
-                            </div>
+                                item={item}
+                                itemStyle={itemStyle}
+                                selectionMode={selectionMode}
+                                selectedIds={selectedIds}
+                                onToggleSelection={onToggleSelection}
+                                onSelectImage={onSelectImage}
+                                onImageDragStart={onImageDragStart}
+                                onImageTouchStart={onImageTouchStart}
+                                onSetReferenceImage={onSetReferenceImage}
+                                onDownloadImage={onDownloadImage}
+                                onDeleteImage={onDeleteImage}
+                            />
                         )
                     })}
                 </div>
@@ -430,7 +500,13 @@ export function GeneratePage() {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [promptHistory, setPromptHistory] = useState<string[]>(getPromptHistory)
     const [showHistory, setShowHistory] = useState(false)
+    const [isHistoryLoading, setIsHistoryLoading] = useState(true)
+    const [isLoadingMore, setIsLoadingMore] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [lastPage, setLastPage] = useState(1)
+    const [totalImages, setTotalImages] = useState(0)
     const [isDragging, setIsDragging] = useState(false)
+    const loadMoreRef = useRef<HTMLDivElement>(null)
 
     // Projects (Folders) state
     const [projects, setProjects] = useState<ProjectData[]>([])
@@ -520,43 +596,94 @@ export function GeneratePage() {
     }
 
     // Load lịch sử ảnh khi component mount hoặc chuyển dự án
+    // Helper: parse API response thành GeneratedImage[]
+    const parseImageData = (data: GeneratedImageData[]): GeneratedImage[] => {
+        return data.map((img) => {
+            let arNumber = 1
+            if (img.aspect_ratio) {
+                const parts = img.aspect_ratio.split(':')
+                if (parts.length === 2 && !isNaN(Number(parts[0])) && !isNaN(Number(parts[1]))) {
+                    arNumber = Number(parts[0]) / Number(parts[1])
+                }
+            }
+            return {
+                id: String(img.id),
+                batchId: String(img.id),
+                url: img.file_url,
+                prompt: img.prompt,
+                negativePrompt: img.negative_prompt || undefined,
+                seed: img.seed ?? 0,
+                model: img.model,
+                style: img.style,
+                aspectRatio: arNumber,
+                aspectLabel: img.aspect_ratio,
+                createdAt: new Date(img.created_at),
+                isNew: false,
+            }
+        })
+    }
+
+    // Load trang đầu tiên khi mount hoặc chuyển dự án
     useEffect(() => {
         const fetchHistory = async () => {
+            setIsHistoryLoading(true)
+            setImages([])
+            setCurrentPage(1)
+            setLastPage(1)
+            setTotalImages(0)
             try {
                 const paramProjectId = currentProjectId === "all" ? undefined : currentProjectId
-                const res = await imageApi.list(1, 100, paramProjectId)
+                const res = await imageApi.list(1, 50, paramProjectId)
                 if (res.data) {
-                    const loadedImages: GeneratedImage[] = res.data.map((img) => {
-                        let arNumber = 1
-                        if (img.aspect_ratio) {
-                            const parts = img.aspect_ratio.split(':')
-                            if (parts.length === 2 && !isNaN(Number(parts[0])) && !isNaN(Number(parts[1]))) {
-                                arNumber = Number(parts[0]) / Number(parts[1])
-                            }
-                        }
-                        return {
-                            id: String(img.id),
-                            batchId: String(img.id),
-                            url: img.file_url,
-                            prompt: img.prompt,
-                            negativePrompt: img.negative_prompt || undefined,
-                            seed: img.seed ?? 0,
-                            model: img.model,
-                            style: img.style,
-                            aspectRatio: arNumber,
-                            aspectLabel: img.aspect_ratio,
-                            createdAt: new Date(img.created_at),
-                            isNew: false,
-                        }
-                    })
-                    setImages(loadedImages)
+                    setImages(parseImageData(res.data))
+                    setCurrentPage(res.current_page)
+                    setLastPage(res.last_page)
+                    setTotalImages(res.total)
                 }
             } catch (err) {
                 console.error("Failed to load history:", err)
+            } finally {
+                setIsHistoryLoading(false)
             }
         }
         fetchHistory()
     }, [currentProjectId])
+
+    // Load thêm ảnh khi cuộn tới cuối (infinite scroll)
+    const loadMoreImages = useCallback(async () => {
+        if (isLoadingMore || currentPage >= lastPage) return
+        setIsLoadingMore(true)
+        try {
+            const nextPage = currentPage + 1
+            const paramProjectId = currentProjectId === "all" ? undefined : currentProjectId
+            const res = await imageApi.list(nextPage, 50, paramProjectId)
+            if (res.data && res.data.length > 0) {
+                setImages(prev => [...prev, ...parseImageData(res.data)])
+                setCurrentPage(res.current_page)
+                setLastPage(res.last_page)
+            }
+        } catch (err) {
+            console.error("Failed to load more images:", err)
+        } finally {
+            setIsLoadingMore(false)
+        }
+    }, [isLoadingMore, currentPage, lastPage, currentProjectId])
+
+    // IntersectionObserver: tự load trang tiếp khi user cuộn gần cuối
+    useEffect(() => {
+        const el = loadMoreRef.current
+        if (!el) return
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && currentPage < lastPage && !isLoadingMore) {
+                    loadMoreImages()
+                }
+            },
+            { rootMargin: '400px' } // Trigger trước 400px để load trước khi user thấy cuối
+        )
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [currentPage, lastPage, isLoadingMore, loadMoreImages])
 
     // Track cursor position for custom drag avatar (desktop DnD)
     // NOTE: mousemove is suppressed during HTML5 drag — must use the `drag` event instead
@@ -1354,8 +1481,8 @@ export function GeneratePage() {
                                         }}
                                     >
                                         <Command value={commandValue} onValueChange={setCommandValue}>
-                                            <CommandInput placeholder="Tìm kiếm thư mục..." className="h-10 outline-none border-none ring-0 focus:ring-0" />
-                                            <CommandList className="max-h-[300px] overflow-y-auto scrollbar-none custom-scrollbar">
+                                            <CommandInput placeholder="Tìm kiếm thư mục..." />
+                                            <CommandList className="custom-scrollbar">
                                                 <CommandEmpty>Không tìm thấy thư mục nào.</CommandEmpty>
                                                 <CommandGroup heading="Mặc định">
                                                     <CommandItem
@@ -1364,12 +1491,11 @@ export function GeneratePage() {
                                                             setCurrentProjectId("all")
                                                             setIsProjectMenuOpen(false)
                                                         }}
-                                                        className="font-medium cursor-pointer h-9"
                                                     >
-                                                        <LayoutGrid className="mr-2 h-4 w-4" />
-                                                        Tất cả ảnh
+                                                        <LayoutGrid />
+                                                        <span>Tất cả ảnh</span>
                                                         <Check
-                                                            className={`ml-auto h-4 w-4 ${currentProjectId === "all" ? "opacity-100" : "opacity-0"}`}
+                                                            className={cn("ml-auto", currentProjectId === "all" ? "opacity-100" : "opacity-0")}
                                                         />
                                                     </CommandItem>
                                                 </CommandGroup>
@@ -1383,12 +1509,11 @@ export function GeneratePage() {
                                                                 setCurrentProjectId(String(project.id))
                                                                 setIsProjectMenuOpen(false)
                                                             }}
-                                                            className="cursor-pointer h-9"
                                                         >
-                                                            <FolderOpen className="mr-2 h-4 w-4 opacity-70" />
+                                                            <FolderOpen />
                                                             <span className="truncate">{project.name}</span>
                                                             <Check
-                                                                className={`ml-auto h-4 w-4 ${currentProjectId === String(project.id) ? "opacity-100" : "opacity-0"}`}
+                                                                className={cn("ml-auto", currentProjectId === String(project.id) ? "opacity-100" : "opacity-0")}
                                                             />
                                                         </CommandItem>
                                                     ))}
@@ -1456,7 +1581,7 @@ export function GeneratePage() {
                         </div>
                         
                         {/* Stats bar (Sticky) */}
-                        {images.length > 0 && (
+                        {images.length > 0 && !isHistoryLoading && (
                             <div className="relative z-10 flex items-center justify-between px-1 sm:px-0 mt-3">
                                 <Badge variant="default" className="font-semibold bg-black text-white hover:bg-black pointer-events-none rounded-md px-2.5">
                                     {images.length} ảnh đã tạo
@@ -1496,7 +1621,7 @@ export function GeneratePage() {
 
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Solid, Neo-brutalism flat design */}
-                        {images.length === 0 && !isGenerating && (
+                        {images.length === 0 && !isGenerating && !isHistoryLoading && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 px-4 -mt-12">
 
                                 {/* Typography */}
@@ -1542,7 +1667,7 @@ export function GeneratePage() {
                         )}
 
                         {/* === Gallery — Justified rows (Google Photos style) === */}
-                        {(images.length > 0 || isGenerating) && (() => {
+                        {(images.length > 0 || isGenerating || isHistoryLoading) && (() => {
                             // Xây dựng danh sách item: skeleton trước, ảnh thật sau
                             const GAP = 6 // gap giữa ảnh (px)
                             const TARGET_H = Math.max(160, Math.min(window.innerWidth * 0.22, 280))
@@ -1554,9 +1679,22 @@ export function GeneratePage() {
                                 const count = parseInt(imageCount)
                                 const ratio = getAspectRatio(aspectRatioValue).ratio
                                 for (let i = 0; i < count; i++) {
-                                    items.push({ type: 'skeleton', ratio, key: `skeleton-${i}` })
+                                    items.push({ type: 'skeleton', ratio, key: `skeleton-gen-${i}`, variant: 'generate' })
                                 }
                             }
+
+                            if (isHistoryLoading && !isGenerating && images.length === 0) {
+                                // API đang fetch metadata — chỉ hiện spinner nhẹ, KHÔNG dùng skeleton giả tỉ lệ
+                                return (
+                                    <div className="flex items-center justify-center py-20 w-full">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="size-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                            <span className="text-xs text-muted-foreground">Đang tải ảnh...</span>
+                                        </div>
+                                    </div>
+                                )
+                            }
+
                             for (const img of images) {
                                 items.push({ type: 'image', img, ratio: img.aspectRatio, key: img.id })
                             }
@@ -1606,6 +1744,25 @@ export function GeneratePage() {
                                         onToggleSelection={toggleSelection}
                                         progress={generateProgress}
                                     />
+
+                                    {/* Infinite scroll sentinel + Loading more indicator */}
+                                    {currentPage < lastPage && (
+                                        <div ref={loadMoreRef} className="flex items-center justify-center py-6 w-full">
+                                            {isLoadingMore && (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="size-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                                    <span className="text-xs text-muted-foreground">Đang tải thêm...</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Stat bar — Hiện khi đã load xong trang đầu */}
+                                    {images.length > 0 && !isHistoryLoading && (
+                                        <div className="text-xs text-muted-foreground text-center py-2">
+                                            Đã hiển thị {images.length}/{totalImages} ảnh
+                                        </div>
+                                    )}
 
                                 </div>
                             )
