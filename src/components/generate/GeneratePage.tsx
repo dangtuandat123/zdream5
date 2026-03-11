@@ -2069,7 +2069,7 @@ export function GeneratePage() {
                                         }}
                                     >
                                         <div className="size-3.5 border-[2px] border-[#a1a1aa]/30 border-t-[#a1a1aa] rounded-full animate-spin group-hover:border-t-white" />
-                                        <span className="text-[12px] md:text-[13px] font-semibold tracking-wide whitespace-nowrap">Đang tạo...</span>
+                                        <span className="text-[12px] md:text-[13px] font-semibold tracking-wide whitespace-nowrap">0/{imageCount} Đang tạo...</span>
                                         {isScrolledDown && (
                                             <>
                                                 <div className="w-px h-3.5 bg-[#303030] mx-0.5" />
