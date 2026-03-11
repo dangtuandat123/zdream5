@@ -93,20 +93,26 @@ export function AppSidebar() {
       {/* Command Palette (Spotlight Navigation) */}
       <CommandDialog open={open} onOpenChange={setOpen}>
         <CommandInput placeholder="Tìm kiếm trang hoặc tính năng..." />
-        <CommandList>
+        <CommandList className="scrollbar-none custom-scrollbar pb-2 pt-1">
           <CommandEmpty>Không tìm thấy phần nào.</CommandEmpty>
           
           <CommandGroup heading="Truy cập nhanh">
-            {navItems.map((item) => (
-              <CommandItem
-                key={item.path}
-                onSelect={() => runCommand(() => navigate(item.path))}
-                className="cursor-pointer py-3"
-              >
-                <item.icon className="mr-2 size-4 text-muted-foreground" />
-                <span className="font-medium">{item.label}</span>
-              </CommandItem>
-            ))}
+            {navItems.map((item) => {
+              const active = isActive(item.path)
+              return (
+                <CommandItem
+                  key={item.path}
+                  onSelect={() => runCommand(() => navigate(item.path))}
+                  className={cn(
+                    "cursor-pointer py-3",
+                    active && "bg-secondary text-foreground font-semibold"
+                  )}
+                >
+                  <item.icon className={cn("mr-2 size-4 text-muted-foreground", active && "text-foreground")} />
+                  <span className={cn("font-medium", active && "font-bold tracking-tight text-foreground")}>{item.label}</span>
+                </CommandItem>
+              )
+            })}
           </CommandGroup>
           
           <CommandSeparator />
