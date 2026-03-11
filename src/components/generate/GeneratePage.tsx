@@ -230,7 +230,7 @@ function computeRows(items: GalleryItem[], containerWidth: number, targetHeight:
 function ImageSkeleton({ variant, progress }: { ratio?: number; variant: 'generate' | 'history'; progress?: number }) {
     return (
         <div
-            className="relative w-full h-full rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate"
+            className="relative w-full h-full rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate transition-all duration-500 ease-in-out"
         >
             {/* Shimmer overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
@@ -299,7 +299,7 @@ function GalleryImage({
 
     return (
         <div
-            className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
+            className={`group/img relative cursor-pointer overflow-hidden rounded-xl border border-border/40 select-none transition-all duration-500 ease-in-out ${isSelected ? 'ring-2 ring-primary' : ''} ${img.isNew ? 'animate-in fade-in-0 zoom-in-[0.98] slide-in-from-bottom-4 duration-700 ease-out fill-mode-both' : ''}`}
             style={{ ...itemStyle, WebkitTouchCallout: 'none' }}
             onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
             draggable
@@ -417,7 +417,7 @@ function JustifiedGallery({
     return (
         <div ref={containerRef} className="w-full flex flex-col" style={{ gap: `${gap}px` }}>
             {rows.map((row, rowIdx) => (
-                <div key={rowIdx} className="flex w-full" style={{ gap: `${gap}px` }}>
+                <div key={rowIdx} className="flex w-full transition-all duration-500 ease-in-out" style={{ gap: `${gap}px`, height: `${row.height}px` }}>
                     {row.items.map((item) => {
                         const w = row.height * item.ratio
 
