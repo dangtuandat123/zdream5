@@ -1385,7 +1385,7 @@ export function GeneratePage() {
                                                 </CommandGroup>
                                             </CommandList>
                                             <CommandSeparator />
-                                            <div className="p-1.5">
+                                            <div className="p-1.5 space-y-1">
                                                 <Dialog open={isCreatingProject} onOpenChange={setIsCreatingProject}>
                                                     <DialogTrigger asChild>
                                                         <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/50 h-9 px-2 rounded-md">
@@ -1413,36 +1413,36 @@ export function GeneratePage() {
                                                         </div>
                                                     </DialogContent>
                                                 </Dialog>
+                                                {/* Nút xóa thư mục - chỉ hiện khi đang chọn 1 thư mục cụ thể */}
+                                                {currentProjectId !== 'all' && (
+                                                    <AlertDialog>
+                                                        <AlertDialogTrigger asChild>
+                                                            <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10 h-9 px-2 rounded-md">
+                                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                                Xóa thư mục "{projects.find(p => String(p.id) === currentProjectId)?.name}"
+                                                            </Button>
+                                                        </AlertDialogTrigger>
+                                                        <AlertDialogContent className="w-[95vw] max-w-md rounded-xl">
+                                                            <AlertDialogHeader>
+                                                                <AlertDialogTitle>Xóa thư mục làm việc?</AlertDialogTitle>
+                                                                <AlertDialogDescription>
+                                                                    Hành động này sẽ xóa vĩnh viễn thư mục <b className="text-foreground">{projects.find(p => String(p.id) === currentProjectId)?.name}</b>.<br/>
+                                                                    Các ảnh bên trong sẽ KHÔNG bị xóa mà được chuyển về kho chung "Tất cả ảnh".
+                                                                </AlertDialogDescription>
+                                                            </AlertDialogHeader>
+                                                            <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
+                                                                <AlertDialogCancel className="w-full sm:w-auto mt-0">Hủy</AlertDialogCancel>
+                                                                <AlertDialogAction onClick={() => handleDeleteProject(Number(currentProjectId))} className="w-full sm:w-auto bg-destructive text-destructive-foreground">Đồng ý xóa</AlertDialogAction>
+                                                            </AlertDialogFooter>
+                                                        </AlertDialogContent>
+                                                    </AlertDialog>
+                                                )}
                                             </div>
                                         </Command>
                                     </PopoverContent>
                                 </Popover>
                             </div>
-                            
-                            {/* Nút xóa thư mục chỉ hiện khi chọn 1 thư mục cụ thể */}
-                            {currentProjectId !== 'all' && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="sm" className="h-9 sm:h-auto text-xs sm:text-[11px] text-destructive hover:bg-destructive/10 px-3 sm:px-2 rounded-md transition-colors w-full sm:w-auto justify-start sm:justify-center border sm:border-transparent border-destructive/20 mt-2 sm:mt-0">
-                                            <Trash2 className="size-3.5 sm:size-3 mr-1.5" /> 
-                                            Xóa thư mục đang chọn
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent className="w-[95vw] max-w-md rounded-xl">
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Xóa thư mục làm việc?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                Hành động này sẽ xóa vĩnh viễn thư mục <b className="text-foreground">{projects.find(p => String(p.id) === currentProjectId)?.name}</b>.<br/>
-                                                Các ảnh bên trong sẽ KHÔNG bị xóa mà được chuyển về kho chung "Tất cả ảnh".
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
-                                            <AlertDialogCancel className="w-full sm:w-auto mt-0">Hủy</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteProject(Number(currentProjectId))} className="w-full sm:w-auto bg-destructive text-destructive-foreground">Đồng ý xóa</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
+
                         </div>
                         
                         {/* Stats bar (Sticky) */}
@@ -1488,13 +1488,6 @@ export function GeneratePage() {
                         {/* Empty State — Solid, Neo-brutalism flat design */}
                         {images.length === 0 && !isGenerating && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 px-4 -mt-12">
-
-                                {/* Core Icon - Flat Design */}
-                                <div className="relative mb-6 sm:mb-8 flex items-center justify-center">
-                                    <div className="size-16 sm:size-24 rounded-full border-2 border-border bg-card flex items-center justify-center">
-                                        <Wand2 className="size-6 sm:size-8 text-primary" />
-                                    </div>
-                                </div>
 
                                 {/* Typography */}
                                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-center mb-2 sm:mb-3 text-foreground text-balance">
