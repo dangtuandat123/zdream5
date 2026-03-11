@@ -437,6 +437,14 @@ export function GeneratePage() {
     const [currentProjectId, setCurrentProjectId] = useState<string>("all")
     const [isCreatingProject, setIsCreatingProject] = useState(false)
     const [isProjectMenuOpen, setIsProjectMenuOpen] = useState(false)
+    const [commandValue, setCommandValue] = useState("all")
+
+    useEffect(() => {
+        if (isProjectMenuOpen) {
+            setCommandValue(currentProjectId === "all" ? "all" : projects.find(p => String(p.id) === currentProjectId)?.name || "all")
+        }
+    }, [isProjectMenuOpen, currentProjectId, projects])
+
     const [newProjectName, setNewProjectName] = useState("")
     const [showZoomHint, setShowZoomHint] = useState(true)
     // @Mention popover state
@@ -1322,7 +1330,7 @@ export function GeneratePage() {
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-[calc(100vw-2rem)] sm:w-[320px] p-0 shadow-xl rounded-xl border-border/40" align="start">
-                                        <Command>
+                                        <Command value={commandValue} onValueChange={setCommandValue}>
                                             <CommandInput placeholder="Tìm kiếm thư mục..." className="h-10 outline-none border-none ring-0 focus:ring-0" />
                                             <CommandList className="max-h-[300px] overflow-y-auto scrollbar-none custom-scrollbar">
                                                 <CommandEmpty>Không tìm thấy thư mục nào.</CommandEmpty>
@@ -1348,11 +1356,8 @@ export function GeneratePage() {
                                                         <CommandItem
                                                             key={project.id}
                                                             value={project.name}
-                                                            onSelect={(currentValue) => {
-                                                                const selected = projects.find(p => p.name.toLowerCase() === currentValue.toLowerCase())
-                                                                if (selected) {
-                                                                    setCurrentProjectId(String(selected.id))
-                                                                }
+                                                            onSelect={() => {
+                                                                setCurrentProjectId(String(project.id))
                                                                 setIsProjectMenuOpen(false)
                                                             }}
                                                             className="cursor-pointer h-9"
