@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react"
+import { motion, useScroll, useMotionValueEvent } from "framer-motion"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
@@ -398,6 +399,18 @@ const ASPECT_RATIOS = [
 export function GeneratePage() {
     // === State ===
     const { updateGems, refreshUser } = useAuth()
+    
+    // Header Scroll State (Headroom)
+    const { scrollY } = useScroll()
+    const [isHeaderHidden, setIsHeaderHidden] = useState(false)
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        const previous = scrollY.getPrevious() ?? 0
+        if (latest > previous && latest > 150) {
+            setIsHeaderHidden(true)
+        } else {
+            setIsHeaderHidden(false)
+        }
+    })
     const isMobile = useIsMobile()
     const [isGenerating, setIsGenerating] = useState(false)
     const [prompt, setPrompt] = useState("")
@@ -1275,8 +1288,13 @@ export function GeneratePage() {
 
                 {/* === CANVAS AREA — Gallery full-width, justified layout === */}
                 <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
-                    {/* Top Canvas Header: Workspace Switcher */}
-                    <div className="w-full flex flex-col gap-3 pb-3 sm:pb-4 border-b border-border/40 mb-4 sm:mb-6">
+                    {/* Top Canvas Header: Smart Sticky Header (Headroom pattern) */}
+                    <motion.div 
+                        variants={{ visible: { y: 0, opacity: 1 }, hidden: { y: "-110%", opacity: 0 } }}
+                        animate={isHeaderHidden ? "hidden" : "visible"}
+                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        className="sticky top-[60px] md:top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border/40 pt-2 pb-3 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 shadow-sm mb-4 sm:mb-6"
+                    >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-0">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <Label className="text-[11px] sm:text-[12px] uppercase font-bold tracking-widest text-muted-foreground whitespace-nowrap hidden sm:inline-block">
@@ -1407,7 +1425,27 @@ export function GeneratePage() {
                                 </AlertDialog>
                             )}
                         </div>
-                    </div>
+                        
+                        {/* Stats bar (Sticky) */}
+                        {images.length > 0 && (
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
+                                <span className="text-xs font-semibold text-muted-foreground">
+                                    {images.length} ảnh đã tạo
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant={selectionMode ? "secondary" : "ghost"}
+                                        size="sm"
+                                        className="h-7 text-xs rounded-full px-3"
+                                        onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()) }}
+                                    >
+                                        <CheckSquare className="size-3.5 mr-1.5" />
+                                        {selectionMode ? "Bỏ chọn" : "Chọn"}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </motion.div>
 
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Solid, Neo-brutalism flat design */}
@@ -1485,26 +1523,6 @@ export function GeneratePage() {
 
                             return (
                                 <div className="flex flex-col gap-3">
-                                    {/* Stats bar */}
-                                    {images.length > 0 && (
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-xs text-muted-foreground">
-                                                {images.length} ảnh đã tạo
-                                            </span>
-                                            <div className="flex items-center gap-2">
-                                                <Button
-                                                    variant={selectionMode ? "secondary" : "ghost"}
-                                                    size="sm"
-                                                    className="h-7 text-xs rounded-full px-3"
-                                                    onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()) }}
-                                                >
-                                                    <CheckSquare className="size-3.5 mr-1.5" />
-                                                    {selectionMode ? "Bỏ chọn" : "Chọn"}
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    )}
-
                                     <JustifiedGallery
                                         items={items}
                                         targetHeight={TARGET_H}
