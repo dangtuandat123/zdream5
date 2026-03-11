@@ -1304,9 +1304,19 @@ export function GeneratePage() {
                         transition={{ duration: 0.35, ease: "easeInOut" }}
                         className="sticky top-[60px] md:top-0 z-30 py-3 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 mb-4 sm:mb-6"
                     >
-                        {/* Fading Blur Background Layer */}
-                        <div 
-                            className="absolute inset-0 -z-10 bg-background/20 backdrop-blur-[5px] pointer-events-none"
+                        {/* Fading Blur Background Layer — Animated for smooth entry/exit */}
+                        <motion.div 
+                            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                            animate={{ 
+                                opacity: isHeaderHidden ? 0 : 1,
+                                backdropFilter: isHeaderHidden ? "blur(0px)" : "blur(5px)"
+                            }}
+                            transition={{ 
+                                duration: 0.3, 
+                                ease: "easeOut",
+                                delay: isHeaderHidden ? 0 : 0.4 
+                            }}
+                            className="absolute inset-0 -z-10 bg-background/20 pointer-events-none"
                             style={{ 
                                 maskImage: 'linear-gradient(to bottom, black calc(100% - 25px), transparent 100%)', 
                                 WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 25px), transparent 100%)' 
