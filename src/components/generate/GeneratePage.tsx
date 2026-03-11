@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react"
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react"
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion"
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
@@ -268,34 +268,32 @@ function ImageSkeleton({ variant, progress }: { ratio?: number; variant: 'genera
     )
 }
 
-function GalleryImage({
-    item,
+const GalleryImage = React.memo(({
+    img,
     itemStyle,
-    selectionMode,
-    selectedIds,
-    onToggleSelection,
     onSelectImage,
+    onDeleteImage,
+    onDownloadImage,
+    onSetReferenceImage,
     onImageDragStart,
     onImageTouchStart,
-    onSetReferenceImage,
-    onDownloadImage,
-    onDeleteImage,
+    selectionMode,
+    isSelected,
+    onToggleSelection,
 }: {
-    item: { type: 'image'; img: GeneratedImage; ratio: number; key: string }
+    img: GeneratedImage
     itemStyle: React.CSSProperties
-    selectionMode: boolean
-    selectedIds: Set<string>
-    onToggleSelection: (id: string) => void
     onSelectImage: (img: GeneratedImage) => void
+    onDeleteImage: (id: string) => void
+    onDownloadImage: (url: string, id: string) => void
+    onSetReferenceImage: (url: string) => void
     onImageDragStart: (e: React.DragEvent, url: string) => void
     onImageTouchStart: (url: string, x: number, y: number) => void
-    onSetReferenceImage: (url: string) => void
-    onDownloadImage: (url: string, id: string) => void
-    onDeleteImage: (id: string) => void
-}) {
-    const [isLoaded, setIsLoaded] = useState(false)
-    const img = item.img
-    const isSelected = selectedIds.has(img.id)
+    selectionMode: boolean
+    isSelected: boolean
+    onToggleSelection: (id: string) => void
+}) => {
+    const [isImageLoading, setIsImageLoading] = useState(true)
 
     return (
         <div
@@ -304,43 +302,38 @@ function GalleryImage({
             onClick={() => selectionMode ? onToggleSelection(img.id) : onSelectImage(img)}
             draggable
             onDragStart={(e) => onImageDragStart(e, img.url)}
-            onContextMenu={(e) => e.preventDefault()}
             onTouchStart={(e) => {
                 const touch = e.touches[0]
                 onImageTouchStart(img.url, touch.clientX, touch.clientY)
             }}
         >
-            {/* Show skeleton with the EXACT same ratio while loading */}
-            {!isLoaded && <ImageSkeleton variant="history" />}
+            {/* Skeleton while image stays loading or if url is somehow broken */}
+            {isImageLoading && (
+                <div className="absolute inset-0 z-10">
+                    <ImageSkeleton variant="history" />
+                </div>
+            )}
 
             <img
                 src={img.url}
                 alt={img.prompt}
-                className={cn(
-                    "h-full w-full object-cover transition-opacity duration-300",
-                    isLoaded ? "opacity-100" : "opacity-0 absolute inset-0"
-                )}
-                onLoad={() => setIsLoaded(true)}
+                className={`h-full w-full object-cover transition-all duration-700 ${isImageLoading ? 'scale-110 blur-xl opacity-0' : 'scale-100 blur-0 opacity-100'}`}
+                onLoad={() => setIsImageLoading(false)}
             />
-            {isLoaded && (
+
+            {!selectionMode && (
                 <>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300" />
-
-                    {/* Batch selection checkbox */}
-                    {selectionMode && (
-                        <div className={`absolute top-2 left-2 size-5 rounded-md border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'border-white/70 bg-black/30'}`}>
-                            {isSelected && <Check className="size-3 text-primary-foreground" />}
-                        </div>
-                    )}
-
-                    <div className="absolute bottom-1.5 right-1.5 flex gap-1 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                    {/* Hover overlay content */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    
+                    <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onSetReferenceImage(img.url) }}>
-                                    <ImageIcon className="size-3 text-white" />
+                                    <Wand2 className="size-3 text-white" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">Dùng làm ảnh tham chiếu</TooltipContent>
+                            <TooltipContent side="left" className="text-xs">Dùng làm tham chiếu</TooltipContent>
                         </Tooltip>
 
                         <Tooltip>
@@ -349,7 +342,7 @@ function GalleryImage({
                                     <Download className="size-3 text-white" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">Tải xuống</TooltipContent>
+                            <TooltipContent side="left" className="text-xs">Tải xuống</TooltipContent>
                         </Tooltip>
 
                         <Tooltip>
@@ -358,14 +351,15 @@ function GalleryImage({
                                     <Trash2 className="size-3 text-white" />
                                 </Button>
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="text-xs">Xoá</TooltipContent>
+                            <TooltipContent side="left" className="text-xs">Xoá</TooltipContent>
                         </Tooltip>
                     </div>
                 </>
             )}
         </div>
     )
-}
+})
+GalleryImage.displayName = 'GalleryImage'
 
 function JustifiedGallery({
     items,
@@ -412,13 +406,13 @@ function JustifiedGallery({
         return () => ro.disconnect()
     }, [])
 
-    const rows = computeRows(items, containerWidth, targetHeight, gap)
+    const rows = useMemo(() => computeRows(items, containerWidth, targetHeight, gap), [items, containerWidth, targetHeight, gap])
 
     return (
         <div ref={containerRef} className="w-full flex flex-col" style={{ gap: `${gap}px` }}>
-            {rows.map((row, rowIdx) => (
+            {rows.map((row: JustifiedRow, rowIdx: number) => (
                 <div key={rowIdx} className="flex w-full transition-all duration-500 ease-in-out" style={{ gap: `${gap}px`, height: `${row.height}px` }}>
-                    {row.items.map((item) => {
+                    {row.items.map((item: GalleryItem) => {
                         const w = row.height * item.ratio
 
                         const itemStyle: React.CSSProperties = {
@@ -439,10 +433,10 @@ function JustifiedGallery({
                         return (
                             <GalleryImage
                                 key={item.key}
-                                item={item}
+                                img={item.img}
+                                isSelected={selectedIds.has(item.img.id)}
                                 itemStyle={itemStyle}
                                 selectionMode={selectionMode}
-                                selectedIds={selectedIds}
                                 onToggleSelection={onToggleSelection}
                                 onSelectImage={onSelectImage}
                                 onImageDragStart={onImageDragStart}
@@ -963,6 +957,10 @@ export function GeneratePage() {
     // === Handlers ===
     const handleGenerate = useCallback(async () => {
         if (!prompt.trim() || isGenerating) return
+        
+        // Cuộn lên đầu trang để người dùng thấy skeleton progress
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+
         setIsGenerating(true)
         setGenerateProgress(0)
 
@@ -1416,6 +1414,114 @@ export function GeneratePage() {
         </div>
     )
 
+    const galleryMemo = useMemo(() => {
+        if (images.length === 0 && !isGenerating && !isHistoryLoading) return null
+
+        // Xây dựng danh sách item: skeleton trước, ảnh thật sau
+        const GAP = 6 // gap giữa ảnh (px)
+        const TARGET_H = Math.max(160, Math.min(window.innerWidth * 0.22, 280))
+
+        // Tạo items list: skeleton + ảnh
+        const items: GalleryItem[] = []
+
+        if (isGenerating) {
+            const count = parseInt(imageCount)
+            const ratio = getAspectRatio(aspectRatioValue).ratio
+            for (let i = 0; i < count; i++) {
+                items.push({ type: 'skeleton', ratio, key: `skeleton-gen-${i}`, variant: 'generate' })
+            }
+        }
+
+        if (isHistoryLoading && !isGenerating && images.length === 0) {
+            // API đang fetch metadata — chỉ hiện spinner nhẹ, KHÔNG dùng skeleton giả tỉ lệ
+            return (
+                <div className="flex items-center justify-center py-20 w-full">
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="size-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                        <span className="text-xs text-muted-foreground">Đang tải ảnh...</span>
+                    </div>
+                </div>
+            )
+        }
+
+        for (const img of images) {
+            items.push({ type: 'image', img, ratio: img.aspectRatio, key: img.id })
+        }
+
+        return (
+            <div className="flex flex-col gap-3">
+                <JustifiedGallery
+                    items={items}
+                    targetHeight={TARGET_H}
+                    gap={GAP}
+                    onSelectImage={setSelectedImage}
+                    onDeleteImage={handleDelete}
+                    onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
+                    onSetReferenceImage={(url) => {
+                        setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
+                        toast.success('Đã thêm vào ảnh tham chiếu')
+                    }}
+                    onImageDragStart={(e, url) => {
+                        e.dataTransfer.setData('text/plain', url)
+                        // Ẩn native ghost
+                        const emptyCanvas = document.createElement('canvas')
+                        emptyCanvas.width = 1; emptyCanvas.height = 1
+                        document.body.appendChild(emptyCanvas)
+                        e.dataTransfer.setDragImage(emptyCanvas, 0, 0)
+                        setTimeout(() => document.body.removeChild(emptyCanvas), 0)
+                        // Kích hoạt custom floating overlay
+                        const initial = { url, x: e.clientX, y: e.clientY }
+                        dragStateRef.current = initial
+                        setDragState(initial)
+                    }}
+                    onImageTouchStart={(url, x, y) => {
+                        touchStartRef.current = { url, startX: x, startY: y }
+                        touchDragActiveRef.current = false
+                        
+                        if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
+                        longPressTimerRef.current = setTimeout(() => {
+                            touchDragActiveRef.current = true
+                            const initial = { url, x, y }
+                            dragStateRef.current = initial
+                            setDragState(initial)
+                            // Optional haptic feedback
+                            if (navigator.vibrate) navigator.vibrate(50)
+                        }, 1500)
+                    }}
+                    selectionMode={selectionMode}
+                    selectedIds={selectedIds}
+                    onToggleSelection={toggleSelection}
+                    progress={generateProgress}
+                />
+
+                {/* Infinite scroll sentinel + Loading more indicator */}
+                {currentPage < lastPage && (
+                    <div ref={loadMoreRef} className="flex items-center justify-center py-6 w-full">
+                        {isLoadingMore && (
+                            <div className="flex items-center gap-2">
+                                <div className="size-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                <span className="text-xs text-muted-foreground">Đang tải thêm...</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Stat bar — Hiện khi đã load xong trang đầu */}
+                {images.length > 0 && !isHistoryLoading && (
+                    <div className="text-xs text-muted-foreground text-center py-2">
+                        Đã hiển thị {images.length}/{totalImages} ảnh
+                    </div>
+                )}
+
+            </div>
+        )
+    }, [
+        images, isGenerating, isHistoryLoading, imageCount, aspectRatioValue, 
+        selectionMode, selectedIds, generateProgress, currentPage, lastPage, 
+        isLoadingMore, totalImages,
+        setSelectedImage, handleDelete, toggleSelection
+    ])
+
     return (
         <>  
         <TooltipProvider>
@@ -1667,106 +1773,7 @@ export function GeneratePage() {
                         )}
 
                         {/* === Gallery — Justified rows (Google Photos style) === */}
-                        {(images.length > 0 || isGenerating || isHistoryLoading) && (() => {
-                            // Xây dựng danh sách item: skeleton trước, ảnh thật sau
-                            const GAP = 6 // gap giữa ảnh (px)
-                            const TARGET_H = Math.max(160, Math.min(window.innerWidth * 0.22, 280))
-
-                            // Tạo items list: skeleton + ảnh
-                            const items: GalleryItem[] = []
-
-                            if (isGenerating) {
-                                const count = parseInt(imageCount)
-                                const ratio = getAspectRatio(aspectRatioValue).ratio
-                                for (let i = 0; i < count; i++) {
-                                    items.push({ type: 'skeleton', ratio, key: `skeleton-gen-${i}`, variant: 'generate' })
-                                }
-                            }
-
-                            if (isHistoryLoading && !isGenerating && images.length === 0) {
-                                // API đang fetch metadata — chỉ hiện spinner nhẹ, KHÔNG dùng skeleton giả tỉ lệ
-                                return (
-                                    <div className="flex items-center justify-center py-20 w-full">
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="size-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                            <span className="text-xs text-muted-foreground">Đang tải ảnh...</span>
-                                        </div>
-                                    </div>
-                                )
-                            }
-
-                            for (const img of images) {
-                                items.push({ type: 'image', img, ratio: img.aspectRatio, key: img.id })
-                            }
-
-                            return (
-                                <div className="flex flex-col gap-3">
-                                    <JustifiedGallery
-                                        items={items}
-                                        targetHeight={TARGET_H}
-                                        gap={GAP}
-                                        onSelectImage={setSelectedImage}
-                                        onDeleteImage={handleDelete}
-                                        onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
-                                        onSetReferenceImage={(url) => {
-                                            setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
-                                            toast.success('Đã thêm vào ảnh tham chiếu')
-                                        }}
-                                        onImageDragStart={(e, url) => {
-                                            e.dataTransfer.setData('text/plain', url)
-                                            // Ẩn native ghost
-                                            const emptyCanvas = document.createElement('canvas')
-                                            emptyCanvas.width = 1; emptyCanvas.height = 1
-                                            document.body.appendChild(emptyCanvas)
-                                            e.dataTransfer.setDragImage(emptyCanvas, 0, 0)
-                                            setTimeout(() => document.body.removeChild(emptyCanvas), 0)
-                                            // Kích hoạt custom floating overlay
-                                            const initial = { url, x: e.clientX, y: e.clientY }
-                                            dragStateRef.current = initial
-                                            setDragState(initial)
-                                        }}
-                                        onImageTouchStart={(url, x, y) => {
-                                            touchStartRef.current = { url, startX: x, startY: y }
-                                            touchDragActiveRef.current = false
-                                            
-                                            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current)
-                                            longPressTimerRef.current = setTimeout(() => {
-                                                touchDragActiveRef.current = true
-                                                const initial = { url, x, y }
-                                                dragStateRef.current = initial
-                                                setDragState(initial)
-                                                // Optional haptic feedback
-                                                if (navigator.vibrate) navigator.vibrate(50)
-                                            }, 1500)
-                                        }}
-                                        selectionMode={selectionMode}
-                                        selectedIds={selectedIds}
-                                        onToggleSelection={toggleSelection}
-                                        progress={generateProgress}
-                                    />
-
-                                    {/* Infinite scroll sentinel + Loading more indicator */}
-                                    {currentPage < lastPage && (
-                                        <div ref={loadMoreRef} className="flex items-center justify-center py-6 w-full">
-                                            {isLoadingMore && (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="size-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                                    <span className="text-xs text-muted-foreground">Đang tải thêm...</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {/* Stat bar — Hiện khi đã load xong trang đầu */}
-                                    {images.length > 0 && !isHistoryLoading && (
-                                        <div className="text-xs text-muted-foreground text-center py-2">
-                                            Đã hiển thị {images.length}/{totalImages} ảnh
-                                        </div>
-                                    )}
-
-                                </div>
-                            )
-                        })()}
+                        {galleryMemo}
                     </div>
                 </div>
 

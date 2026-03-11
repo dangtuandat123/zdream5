@@ -111,12 +111,23 @@ class OpenRouterService
 
         $data = $response->json();
 
+        // Kiểm tra lỗi trong payload (OpenRouter đôi khi trả 200 nhưng body chứa error)
+        if (isset($data['error'])) {
+            $errMessage = $data['error']['message'] ?? 'Lỗi không xác định từ OpenRouter';
+            $errCode = $data['error']['code'] ?? 500;
+            throw new \RuntimeException(
+                "OpenRouter API trả về lỗi ($errCode): $errMessage"
+            );
+        }
+
         // Trích xuất ảnh từ response
         $images = data_get($data, 'choices.0.message.images', []);
 
         if (empty($images)) {
+            // Log lại payload để debug nếu cần
+            \Illuminate\Support\Facades\Log::error('OpenRouter Response missing images', ['response' => $data]);
             throw new \RuntimeException(
-                "OpenRouter không trả về ảnh. Response: " . json_encode($data)
+                "OpenRouter không trả về ảnh. Có thể model này chưa hỗ trợ tạo ảnh trực tiếp."
             );
         }
 
