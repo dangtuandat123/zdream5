@@ -1302,7 +1302,7 @@ export function GeneratePage() {
                         variants={{ visible: { y: 0, opacity: 1 }, hidden: { y: "-110%", opacity: 0 } }}
                         animate={isHeaderHidden ? "hidden" : "visible"}
                         transition={{ duration: 0.35, ease: "easeInOut" }}
-                        className="sticky top-[60px] md:top-0 z-30 bg-background/20 backdrop-blur-[5px] border-b border-border/20 pt-2 pb-3 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 mb-4 sm:mb-6"
+                        className="sticky top-[60px] md:top-0 z-30 bg-background/20 backdrop-blur-[5px] border-b border-border/20 py-3 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 mb-4 sm:mb-6"
                     >
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-0">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1442,22 +1442,25 @@ export function GeneratePage() {
                         
                         {/* Stats bar (Sticky) */}
                         {images.length > 0 && (
-                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
-                                <Badge variant="default" className="font-semibold bg-black text-white hover:bg-black pointer-events-none rounded-md px-2.5">
-                                    {images.length} ảnh đã tạo
-                                </Badge>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant={selectionMode ? "secondary" : "default"}
-                                        size="sm"
-                                        className="h-7 text-xs rounded-full px-4"
-                                        onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()) }}
-                                    >
-                                        <CheckSquare className="size-3.5 mr-1.5" />
-                                        {selectionMode ? "Hủy chọn" : "Chọn"}
-                                    </Button>
+                            <>
+                                <div className="h-px bg-border/40 w-full my-3" />
+                                <div className="flex items-center justify-between px-1 sm:px-0">
+                                    <Badge variant="default" className="font-semibold bg-black text-white hover:bg-black pointer-events-none rounded-md px-2.5">
+                                        {images.length} ảnh đã tạo
+                                    </Badge>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant={selectionMode ? "secondary" : "default"}
+                                            size="sm"
+                                            className="h-7 text-xs rounded-full px-4"
+                                            onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()) }}
+                                        >
+                                            <CheckSquare className="size-3.5 mr-1.5" />
+                                            {selectionMode ? "Hủy chọn" : "Chọn"}
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            </>
                         )}
                     </motion.div>
 
