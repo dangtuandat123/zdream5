@@ -54,7 +54,7 @@ async function request<T>(
     });
 
     // Xử lý 401 — Token hết hạn hoặc không hợp lệ
-    if (response.status === 401) {
+    if (response.status === 401 && endpoint !== '/login') {
         clearToken();
         localStorage.removeItem('auth_user');
         window.location.href = '/login';

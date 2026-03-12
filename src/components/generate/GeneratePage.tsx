@@ -572,9 +572,9 @@ export function GeneratePage() {
             setCurrentProjectId(String(res.data.id))
             setNewProjectName("")
             setIsCreatingProject(false)
-            toast.success("Đã tạo dự án mới")
+            toast.success("Đã tạo dự án mới", { id: 'create-proj-success' })
         } catch (e: any) {
-            toast.error("Không thể tạo dự án")
+            toast.error("Không thể tạo dự án", { id: 'create-proj-error' })
         }
     }
 
@@ -586,9 +586,9 @@ export function GeneratePage() {
             if (currentProjectId === String(id)) {
                 setCurrentProjectId("all")
             }
-            toast.success("Đã xóa dự án")
+            toast.success("Đã xóa dự án", { id: 'delete-proj-success' })
         } catch (e: any) {
-            toast.error("Lỗi khi xóa dự án")
+            toast.error("Lỗi khi xóa dự án", { id: 'delete-proj-error' })
         }
     }
 
@@ -752,7 +752,7 @@ export function GeneratePage() {
                     if (isOver) {
                         const url = touchStartRef.current.url
                         setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
-                        toast.success('Đã thêm vào ảnh tham chiếu')
+                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'drag-add-ref' })
                     }
                 }
             }
@@ -1035,7 +1035,8 @@ export function GeneratePage() {
 
             updateGems(response.gems_remaining)
             refreshUser()
-            toast.success(response.message)
+            setTotalImages(prev => prev + count) // Restored line 1974
+            toast.success(response.message, { id: 'generate-success' })
 
             // Đợi thêm 400ms để animation progress bar chạy tới đích (transition 300ms)
             setTimeout(() => {
@@ -1074,13 +1075,14 @@ export function GeneratePage() {
             }, 400)
 
         } catch (error: any) {
+            console.error('Lỗi khi tạo ảnh:', error)
             clearInterval(interval)
             progressIntervalRef.current = null
             setIsGenerating(false)
             setGenerateProgress(0)
-            toast.error(error.message || 'Lỗi khi tạo ảnh. Vui lòng thử lại.')
+            toast.error(error.message || 'Lỗi khi tạo ảnh. Vui lòng thử lại.', { id: 'generate-error' })
         }
-    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages, updateGems, refreshUser])
+    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages, updateGems, refreshUser, currentProjectId, setTotalImages])
 
     const handleDelete = useCallback((id: string) => {
         setDeleteConfirm({ type: 'single', id })
@@ -1094,20 +1096,20 @@ export function GeneratePage() {
                 await imageApi.delete(Number(deleteConfirm.id))
                 setImages(prev => prev.filter(img => img.id !== deleteConfirm.id))
                 if (selectedImage?.id === deleteConfirm.id) setSelectedImage(null)
-                toast('Đã xoá ảnh', { icon: '🗑️' })
+                toast('Đã xoá ảnh', { icon: '🗑️', id: 'delete-single-success' })
             } else {
                 for (const id of selectedIds) {
                     await imageApi.delete(Number(id))
                 }
                 setImages(prev => prev.filter(img => !selectedIds.has(img.id)))
                 if (selectedImage && selectedIds.has(selectedImage.id)) setSelectedImage(null)
-                toast(`Đã xoá ${selectedIds.size} ảnh`, { icon: '🗑️' })
+                toast(`Đã xoá ${selectedIds.size} ảnh`, { icon: '🗑️', id: 'delete-batch-success' })
                 setSelectedIds(new Set())
                 setSelectionMode(false)
             }
         } catch (e: any) {
             console.error('Lỗi khi xóa ảnh:', e)
-            toast.error("Không thể xoá ảnh trên máy chủ")
+            toast.error("Không thể xoá ảnh trên máy chủ", { id: 'delete-api-error' })
         } finally {
             setDeleteConfirm(null)
         }
@@ -1163,10 +1165,10 @@ export function GeneratePage() {
         setReferenceImages(prev => {
             const newUrls = toAdd.filter(url => !prev.includes(url))
             if (newUrls.length === 0) {
-                toast('Tất cả ảnh này đã có trong tham chiếu rồi', { icon: 'ℹ️' })
+                toast('Tất cả ảnh này đã có trong tham chiếu rồi', { icon: 'ℹ️', id: 'batch-ref-exists' })
                 return prev
             }
-            toast.success(`Đã thêm ${newUrls.length} ảnh vào tham chiếu`)
+            toast.success(`Đã thêm ${newUrls.length} ảnh vào tham chiếu`, { id: 'batch-ref-add' })
             return [...prev, ...newUrls]
         })
         setSelectedIds(new Set())
@@ -1200,7 +1202,7 @@ export function GeneratePage() {
                 const newUrls = urls.filter(u => !prev.includes(u))
                 return [...prev, ...newUrls]
             })
-            toast.success(`Đã thêm ${files.length} ảnh tham chiếu`)
+            toast.success(`Đã thêm ${files.length} ảnh tham chiếu`, { id: 'file-ref-add' })
             return
         }
 
@@ -1209,10 +1211,10 @@ export function GeneratePage() {
         if (textData && (textData.startsWith('http') || textData.startsWith('blob:') || textData.startsWith('data:'))) {
             setReferenceImages(prev => {
                 if (prev.includes(textData)) {
-                    toast('Ảnh này đã có trong phần tham chiếu rồi', { icon: 'ℹ️' })
+                    toast('Ảnh này đã có trong phần tham chiếu rồi', { icon: 'ℹ️', id: 'text-ref-exists' })
                     return prev
                 }
-                toast.success('Đã thêm ảnh tham chiếu')
+                toast.success('Đã thêm ảnh tham chiếu', { id: 'text-ref-add' })
                 return [...prev, textData]
             })
         }
@@ -1459,7 +1461,7 @@ export function GeneratePage() {
                     onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
                     onSetReferenceImage={(url) => {
                         setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
-                        toast.success('Đã thêm vào ảnh tham chiếu')
+                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'gallery-ref-add' })
                     }}
                     onImageDragStart={(e, url) => {
                         e.dataTransfer.setData('text/plain', url)
@@ -1884,7 +1886,7 @@ export function GeneratePage() {
                                                             onClick={() => {
                                                                 navigator.clipboard.writeText(selectedImage.prompt)
                                                                 setIsCopied(true)
-                                                                toast.success('Đã sao chép prompt')
+                                                                toast.success('Đã sao chép prompt', { id: 'copy-prompt' })
                                                                 setTimeout(() => setIsCopied(false), 2000)
                                                             }}
                                                         >
@@ -1929,7 +1931,9 @@ export function GeneratePage() {
                                                         {selectedImage.referenceImages.map((src, i) => (
                                                             <div key={i} className="aspect-square relative group">
                                                                 <img src={src} className="absolute inset-0 w-full h-full rounded-xl object-cover border border-border/40" alt="ref" />
-                                                                <div className="absolute top-0.5 left-0.5 bg-black/60 backdrop-blur-md text-white text-[8px] font-bold size-3.5 rounded-full flex items-center justify-center border border-white/20">{i + 1}</div>
+                                                                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
+                                                                    {i + 1}
+                                                                </div>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -1969,7 +1973,7 @@ export function GeneratePage() {
                                         </Button>
                                         <Button size="sm" variant="secondary" className="w-full border shadow-sm font-medium" onClick={() => {
                                             setReferenceImages(prev => prev.includes(selectedImage.url) ? prev : [...prev, selectedImage.url]);
-                                            toast.success('Đã thêm vào ảnh tham chiếu');
+                                            toast.success('Đã thêm vào ảnh tham chiếu', { id: 'modal-ref-add' });
                                         }}>
                                             <ImageIcon className="mr-2 size-4" /> Dùng làm ảnh tham chiếu
                                         </Button>
