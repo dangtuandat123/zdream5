@@ -1686,15 +1686,12 @@ export function GeneratePage() {
                                 </Popover>
                             </div>
 
-                        </div>
-                        
-                        {/* Stats bar (Sticky) */}
-                        {images.length > 0 && !isHistoryLoading && (
-                            <div className="relative z-10 flex items-center justify-between px-1 sm:px-0 mt-3">
-                                <Badge variant="default" className="font-semibold bg-black text-white hover:bg-black pointer-events-none rounded-md px-2.5">
-                                    {images.length} ảnh đã tạo
-                                </Badge>
-                                <div className="flex items-center gap-2">
+                            {/* Stats & Actions (Moved to same row on desktop) */}
+                            {images.length > 0 && !isHistoryLoading && (
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end mt-3 sm:mt-0">
+                                    <Badge variant="default" className="font-semibold bg-black text-white hover:bg-black pointer-events-none rounded-md px-2.5">
+                                        {images.length} ảnh đã tạo
+                                    </Badge>
                                     <Button
                                         variant={selectionMode ? "secondary" : "default"}
                                         size="sm"
@@ -1705,8 +1702,9 @@ export function GeneratePage() {
                                         {selectionMode ? "Hủy chọn" : "Chọn"}
                                     </Button>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        
                     </motion.div>
 
                     {/* Floating Toggle Button (Sticky to stay centered in the exact canvas area) */}
