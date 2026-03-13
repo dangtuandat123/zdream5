@@ -1892,7 +1892,7 @@ export function GeneratePage() {
                                 </div>
 
                                 {/* Info Panel */}
-                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 pt-16 lg:pt-14 flex flex-col gap-5 bg-background min-h-0 relative">
+                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 pt-16 lg:pt-20 flex flex-col gap-5 bg-background min-h-0 relative">
                                     <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center justify-between gap-2">
