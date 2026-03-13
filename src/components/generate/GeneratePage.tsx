@@ -1782,30 +1782,52 @@ export function GeneratePage() {
                     {selectedImage && (() => {
                         const currentIdx = images.findIndex(img => img.id === selectedImage.id)
                         return (
-                        <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl">
+                        <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl [&>button]:hidden">
                             <DialogTitle className="sr-only">Chi tiết hình ảnh</DialogTitle>
                             <div className="flex flex-col lg:flex-row h-full overflow-hidden w-full">
 
+                                {/* Nút đóng (Custom nổi) */}
+                                <Button 
+                                    variant="outline" 
+                                    size="icon" 
+                                    className="absolute top-4 right-4 lg:top-4 lg:right-4 z-[60] size-10 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg"
+                                    onClick={() => setSelectedImage(null)}
+                                >
+                                    <X className="size-5" />
+                                </Button>
+
                                 {/* Ảnh + Nav arrows */}
                                 <div className="h-[45vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8 group/viewer">
-                                    {/* Nav arrow Left (← ảnh mới hơn, index - 1) */}
-                                    {currentIdx > 0 && (
-                                        <button
-                                            className="absolute left-2 lg:left-4 top-1/2 -translate-y-1/2 z-20 size-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg sm:opacity-0 sm:group-hover/viewer:opacity-100 transition-opacity hover:bg-background"
-                                            onClick={() => setSelectedImage(images[currentIdx - 1])}
+                                    
+                                    {/* Nút Previous */}
+                                    <div className="absolute left-2 lg:left-4 top-1/2 -translate-y-1/2 z-40">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className={`size-10 lg:size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${currentIdx === 0 ? "opacity-0 pointer-events-none" : "opacity-100 sm:opacity-0 sm:group-hover/viewer:opacity-100"}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setSelectedImage(images[currentIdx - 1])
+                                            }}
                                         >
-                                            <ChevronLeft className="size-5" />
-                                        </button>
-                                    )}
-                                    {/* Nav arrow Right (→ ảnh cũ hơn, index + 1) */}
-                                    {currentIdx < images.length - 1 && (
-                                        <button
-                                            className="absolute right-2 lg:right-4 top-1/2 -translate-y-1/2 z-20 size-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg sm:opacity-0 sm:group-hover/viewer:opacity-100 transition-opacity hover:bg-background"
-                                            onClick={() => setSelectedImage(images[currentIdx + 1])}
+                                            <ChevronLeft className="size-6 lg:size-8" />
+                                        </Button>
+                                    </div>
+                                    
+                                    {/* Nút Next */}
+                                    <div className="absolute right-2 lg:right-4 top-1/2 -translate-y-1/2 z-40">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className={`size-10 lg:size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${currentIdx === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 sm:opacity-0 sm:group-hover/viewer:opacity-100"}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setSelectedImage(images[currentIdx + 1])
+                                            }}
                                         >
-                                            <ChevronRight className="size-5" />
-                                        </button>
-                                    )}
+                                            <ChevronRight className="size-6 lg:size-8" />
+                                        </Button>
+                                    </div>
 
                                     {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
                                     <div className="relative flex max-w-full max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 group/img-wrapper isolate">
@@ -1870,7 +1892,7 @@ export function GeneratePage() {
                                 </div>
 
                                 {/* Info Panel */}
-                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background min-h-0">
+                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 pt-16 lg:pt-14 flex flex-col gap-5 bg-background min-h-0 relative">
                                     <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center justify-between gap-2">
