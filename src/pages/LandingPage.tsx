@@ -313,7 +313,7 @@ export default function LandingPage() {
                                 </a>
                             ))}
                         </div>
-                        <Link to="/register">
+                        <Link to="/login">
                             <Button
                                 className="bg-[#222] hover:bg-[#111] text-white rounded-full px-5 h-9 text-[13px] font-semibold gap-2 shadow-sm"
                                 style={{ fontFamily: "'Barlow', sans-serif" }}
@@ -564,7 +564,7 @@ export default function LandingPage() {
                         </Link>
 
                         {/* Card 4: Hệ thống Kim Cương - 7 cols */}
-                        <Link to="/register" className="md:col-span-7 block group">
+                        <Link to="/login" className="md:col-span-7 block group">
                             <Card className="card-shine relative overflow-hidden rounded-[24px] bg-gradient-to-br from-cyan-950/50 via-black to-violet-950/30 border border-cyan-500/10 h-full min-h-[300px] sm:min-h-[340px] cursor-pointer transition-all duration-500 hover:border-cyan-400/25 hover:shadow-[0_0_80px_rgba(6,182,212,0.12)]">
                                 <div className="absolute top-[-10%] right-[10%] w-[200px] h-[200px] bg-cyan-500/10 rounded-full blur-[90px] group-hover:bg-cyan-400/20 transition-all duration-1000"></div>
                                 <div className="absolute bottom-[-10%] left-[20%] w-[200px] h-[200px] bg-violet-500/10 rounded-full blur-[80px]"></div>
@@ -585,7 +585,7 @@ export default function LandingPage() {
                                         Hệ Thống Kim Cương
                                     </h3>
                                     <p className="text-white/50 text-sm sm:text-[15px] leading-relaxed font-medium max-w-sm" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                        Mỗi lượt tạo ảnh tiêu hao Kim Cương. Đăng ký miễn phí nhận 50 💎 ngay. Nạp thêm bất cứ lúc nào để sáng tạo không gián đoạn.
+                                        Mỗi lượt tạo ảnh tiêu hao Kim Cương. Đăng nhập miễn phí nhận 50 💎 ngay. Nạp thêm bất cứ lúc nào để sáng tạo không gián đoạn.
                                     </p>
                                     <div className="flex flex-wrap gap-2 mt-5">
                                         <Badge className="bg-cyan-500/15 text-cyan-200 border-none text-[11px] px-3 py-1 rounded-full">50 💎 Miễn phí</Badge>
@@ -827,7 +827,7 @@ export default function LandingPage() {
                                         ))}
                                     </ul>
 
-                                    <Link to="/register">
+                                    <Link to="/login">
                                         <Button
                                             className={`w-full rounded-full h-11 font-bold text-sm transition-all ${plan.popular
                                                 ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:shadow-[0_6px_30px_rgba(139,92,246,0.5)]"
@@ -903,26 +903,17 @@ export default function LandingPage() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Link to="/register">
+                        <Link to="/login">
                             <Button
                                 size="lg"
                                 className="bg-white hover:bg-white/90 text-[#111] rounded-full h-14 px-10 text-[15px] font-bold shadow-[0_8px_40px_rgba(255,255,255,0.15)] transition-all hover:scale-[1.02] hover:shadow-[0_12px_50px_rgba(255,255,255,0.2)]"
                                 style={{ fontFamily: "'Barlow', sans-serif" }}
                             >
-                                Đăng Ký Miễn Phí
+                                Đăng Nhập / Đăng Ký
                                 <ArrowUpRight className="size-4 ml-2" />
                             </Button>
                         </Link>
-                        <Link to="/login">
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="rounded-full h-14 px-10 text-[15px] font-bold border-white/10 text-white hover:bg-white/5 hover:border-white/20 transition-all"
-                                style={{ fontFamily: "'Barlow', sans-serif" }}
-                            >
-                                Đăng Nhập
-                            </Button>
-                        </Link>
+                        
                     </div>
 
                     {/* Free badge */}

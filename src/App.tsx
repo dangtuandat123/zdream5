@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Toaster } from "sonner";
 import LandingPage from "@/pages/LandingPage";
 import { Login } from "@/components/auth/Login";
-import { Register } from "@/components/auth/Register";
 import { AppShell } from "@/components/layout/AppShell";
 import { Layout } from "@/components/layout/Layout";
 import { Dashboard } from "@/components/dashboard/Dashboard";
@@ -28,7 +27,6 @@ function App() {
         {/* Auth Routes (No layout, full screen) */}
         <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
         </Route>
 
         {/* Google OAuth Callback */}

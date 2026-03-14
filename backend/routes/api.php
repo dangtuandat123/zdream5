@@ -21,8 +21,6 @@ use Illuminate\Support\Facades\Route;
 // ========================
 // Public Routes (Không cần đăng nhập)
 // ========================
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
 
 // ========================

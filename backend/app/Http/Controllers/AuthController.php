@@ -20,68 +20,6 @@ use Illuminate\Support\Facades\Auth;
 class AuthController extends Controller
 {
     /**
-     * Đăng ký tài khoản mới.
-     * 
-     * POST /api/register
-     * Body: { name, email, password, password_confirmation }
-     */
-    public function register(RegisterRequest $request): JsonResponse
-    {
-        $user = User::create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => $request->validated('password'),
-            'gems' => 50, // Tặng 50 💎 miễn phí khi đăng ký
-        ]);
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Đăng ký thành công! Bạn được tặng 50 💎.',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'gems' => $user->gems,
-                'avatar' => $user->avatar,
-            ],
-            'token' => $token,
-        ], 201);
-    }
-
-    /**
-     * Đăng nhập.
-     * 
-     * POST /api/login
-     * Body: { email, password }
-     */
-    public function login(LoginRequest $request): JsonResponse
-    {
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response()->json([
-                'message' => 'Email hoặc mật khẩu không đúng.',
-            ], 401);
-        }
-
-        /** @var User $user */
-        $user = Auth::user();
-
-        $token = $user->createToken('auth-token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Đăng nhập thành công!',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'gems' => $user->gems,
-                'avatar' => $user->avatar,
-            ],
-            'token' => $token,
-        ]);
-    }
-
-    /**
      * Đăng xuất (revoke token hiện tại).
      * 
      * POST /api/logout
