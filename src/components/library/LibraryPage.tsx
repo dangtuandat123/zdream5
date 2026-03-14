@@ -680,8 +680,13 @@ export function LibraryPage() {
             </div>
 
             {/* Grid */}
-            {filteredItems.length > 0 ? (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 pt-1">
+            {isLoading ? (
+                <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+                    <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-muted-foreground">Đang tải thư viện...</p>
+                </div>
+            ) : filteredItems.length > 0 ? (
+                <><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 pt-1">
                     {filteredItems.map((item, index) => (
                         <Card
                             key={item.id}
@@ -773,11 +778,7 @@ export function LibraryPage() {
                         </Button>
                     </div>
                 )}
-            ) : isLoading ? (
-                <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-                    <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                    <p className="text-sm text-muted-foreground">Đang tải thư viện...</p>
-                </div>
+                </>
             ) : (
                 // Empty state
                 <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">

@@ -18,6 +18,10 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    outDir: path.resolve(__dirname, 'backend/public'),
+    emptyOutDir: false,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
