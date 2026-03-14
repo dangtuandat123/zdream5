@@ -19,6 +19,12 @@ import {
     ZoomInIcon,
     ZoomOutIcon,
     MaximizeIcon,
+    InfoIcon,
+    CopyIcon,
+    ClockIcon,
+    BoxIcon,
+    RulerIcon,
+    HashIcon,
 } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
@@ -68,8 +74,15 @@ interface MediaItem {
     type: MediaType
     thumbnail: string
     createdAt: string
+    createdAtFull: string // dd/MM/yyyy HH:mm
     prompt?: string
+    negativePrompt?: string
     templateName?: string
+    model?: string
+    style?: string
+    aspectRatio?: string
+    gemsCost?: number
+    seed?: number
     numericId?: number // for API delete
 }
 
@@ -89,6 +102,17 @@ const TYPE_CONFIG: Record<MediaType, { label: string; icon: typeof SparklesIcon;
 }
 
 // === Map API data → MediaItem ===
+/** Format ISO date → "dd/MM/yyyy HH:mm" */
+function formatDate(iso: string): string {
+    try {
+        const d = new Date(iso)
+        const pad = (n: number) => String(n).padStart(2, '0')
+        return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+    } catch {
+        return iso.split('T')[0]
+    }
+}
+
 function apiToMediaItem(img: GeneratedImageData): MediaItem {
     return {
         id: String(img.id),
@@ -96,7 +120,14 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
         type: (img.type as any) || "ai",
         thumbnail: img.file_url,
         createdAt: img.created_at.split('T')[0],
+        createdAtFull: formatDate(img.created_at),
         prompt: img.prompt,
+        negativePrompt: img.negative_prompt || undefined,
+        model: img.model,
+        style: img.style,
+        aspectRatio: img.aspect_ratio,
+        gemsCost: img.gems_cost,
+        seed: img.seed,
     }
 }
 
@@ -150,7 +181,8 @@ export function LibraryPage() {
     
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-    
+    const [showInfo, setShowInfo] = useState(false)
+
     // Pan & Zoom State
     const [zoom, setZoom] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -875,147 +907,279 @@ export function LibraryPage() {
                     className="fixed inset-0 z-50 bg-black/95 text-slate-200"
                     style={{ touchAction: 'none' }}
                 >
-                    <div className="relative w-full h-[100dvh] flex items-center justify-center">
-                        {/* Nút đóng */}
-                        <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="absolute top-4 right-4 z-50 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg pointer-events-auto"
-                            onClick={() => setSelectedIndex(null)}
-                        >
-                            <XIcon className="size-6" />
-                        </Button>
+                    <div className="relative w-full h-[100dvh] flex">
+                        {/* === Phần chính: ảnh + controls === */}
+                        <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
+                            {/* Top bar — đóng, counter, info toggle */}
+                            <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 pointer-events-none">
+                                {/* Trái: type badge + counter */}
+                                <div className="flex items-center gap-2.5 pointer-events-auto">
+                                    {(() => { const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
+                                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm ${cfg.className}`}>
+                                            <Icon className="size-3.5" />
+                                            {cfg.label}
+                                        </div>
+                                    )})()}
+                                    <span className="text-xs text-white/50 font-medium tabular-nums">
+                                        {selectedIndex + 1} / {filteredItems.length}
+                                    </span>
+                                </div>
 
-                        {/* Thông tin Ảnh (Góc trên trái) */}
-                        <div className="absolute top-4 left-4 z-50 max-w-[60vw] space-y-2 pointer-events-none">
-                            <div className="flex items-center gap-3">
-                                {(() => { const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
-                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm ${cfg.className}`}>
-                                        <Icon className="size-3.5" />
-                                        {cfg.label}
-                                    </div>
-                                )})()}
-                                <span className="text-xs text-white/60 drop-shadow-md">
-                                    {selectedItem.createdAt}
-                                </span>
-                            </div>
-                            <h3 className="text-sm md:text-base font-medium text-white/90 drop-shadow-lg line-clamp-2">
-                                {selectedItem.prompt || selectedItem.templateName || "Tài nguyên tải lên"}
-                            </h3>
-                        </div>
-
-                        {/* Action Bar (Góc dưới) */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
-                            {/* Group: Zoom Controls */}
-                            <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    title="Thu nhỏ"
-                                    className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
-                                    onClick={handleZoomOut}
-                                    disabled={zoom <= 1}
-                                >
-                                    <ZoomOutIcon className="size-4" />
-                                </Button>
-                                <span className="text-xs font-medium w-10 text-center text-white/80 select-none">
-                                    {Math.round(zoom * 100)}%
-                                </span>
-                                <Button 
-                                    variant="ghost" 
-                                    size="icon" 
-                                    title="Phóng to"
-                                    className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
-                                    onClick={handleZoomIn}
-                                    disabled={zoom >= 3}
-                                >
-                                    <ZoomInIcon className="size-4" />
-                                </Button>
-                                {zoom > 1 && (
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        title="Đặt lại"
-                                        className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
-                                        onClick={resetZoom}
+                                {/* Phải: info toggle + close */}
+                                <div className="flex items-center gap-1.5 pointer-events-auto">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Chi tiết ảnh"
+                                        className={`rounded-full h-9 w-9 border-none shadow-lg transition-colors ${showInfo ? 'bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                                        onClick={() => setShowInfo(!showInfo)}
                                     >
-                                        <MaximizeIcon className="size-4" />
+                                        <InfoIcon className="size-4" />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className="rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg h-9 w-9"
+                                        onClick={() => { setSelectedIndex(null); setShowInfo(false) }}
+                                    >
+                                        <XIcon className="size-5" />
+                                    </Button>
+                                </div>
+                            </div>
+
+                            {/* Action Bar (Góc dưới) */}
+                            <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                                {/* Group: Zoom Controls */}
+                                <div className="flex items-center gap-0.5 sm:gap-1 border-r border-white/10 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Thu nhỏ"
+                                        className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl"
+                                        onClick={handleZoomOut}
+                                        disabled={zoom <= 1}
+                                    >
+                                        <ZoomOutIcon className="size-4" />
+                                    </Button>
+                                    <span className="text-[11px] sm:text-xs font-medium w-9 sm:w-10 text-center text-white/80 select-none tabular-nums">
+                                        {Math.round(zoom * 100)}%
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Phóng to"
+                                        className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl"
+                                        onClick={handleZoomIn}
+                                        disabled={zoom >= 3}
+                                    >
+                                        <ZoomInIcon className="size-4" />
+                                    </Button>
+                                    {zoom > 1 && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            title="Đặt lại"
+                                            className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl"
+                                            onClick={resetZoom}
+                                        >
+                                            <MaximizeIcon className="size-4" />
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Group: Actions */}
+                                {(selectedItem.type === "ai" || selectedItem.type === "template") && (
+                                    <Button variant="ghost" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3">
+                                        <WandIcon className="size-4" />
+                                        <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
                                     </Button>
                                 )}
+                                <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl">
+                                    <DownloadIcon className="size-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" title="Xóa ảnh" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5"
+                                    onClick={(e) => selectedItem && handleDeleteImage(selectedItem, e)}>
+                                    <Trash2Icon className="size-4" />
+                                </Button>
                             </div>
 
-                            {/* Group: Actions */}
-                            {(selectedItem.type === "ai" || selectedItem.type === "template") && (
-                                <Button variant="ghost" className="text-white hover:bg-white/20 gap-2 h-9 rounded-xl px-3">
-                                    <WandIcon className="size-4" />
-                                    <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
+                            {/* Nút Previous */}
+                            <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${selectedIndex === 0 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handlePrev()
+                                    }}
+                                >
+                                    <ChevronLeftIcon className="size-5 sm:size-8" />
                                 </Button>
-                            )}
-                            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl">
-                                <DownloadIcon className="size-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-9 w-9 py-0 rounded-xl mr-0.5"
-                                onClick={(e) => selectedItem && handleDeleteImage(selectedItem, e)}>
-                                <Trash2Icon className="size-4" />
-                            </Button>
-                        </div>
+                            </div>
 
-                        {/* Nút Previous */}
-                        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${selectedIndex === 0 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handlePrev()
-                                }}
+                            {/* Nút Next */}
+                            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${selectedIndex === filteredItems.length - 1 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleNext()
+                                    }}
+                                >
+                                    <ChevronRightIcon className="size-5 sm:size-8" />
+                                </Button>
+                            </div>
+
+                            {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
+                            <div
+                                ref={imageContainerRef}
+                                className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                                style={{ touchAction: 'none' }}
+                                onWheel={handleWheelZoom}
+                                onMouseDown={handleMouseDownPan}
+                                onMouseMove={handleMouseMovePan}
+                                onMouseUp={handleMouseUpPan}
+                                onMouseLeave={handleMouseUpPan}
+                                onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
                             >
-                                <ChevronLeftIcon className="size-5 sm:size-8" />
-                            </Button>
+                                <img
+                                    ref={imgRef}
+                                    src={selectedItem.thumbnail}
+                                    alt={selectedItem.prompt || "Preview"}
+                                    className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
+                                    style={{
+                                        transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
+                                        transitionProperty: 'transform',
+                                        transitionTimingFunction: 'ease-out',
+                                        transitionDuration: '0ms',
+                                    }}
+                                    draggable={false}
+                                />
+                            </div>
                         </div>
 
-                        {/* Nút Next */}
-                        <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${selectedIndex === filteredItems.length - 1 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleNext()
-                                }}
-                            >
-                                <ChevronRightIcon className="size-5 sm:size-8" />
-                            </Button>
-                        </div>
+                        {/* === Info Panel — sidebar trên desktop, bottom sheet trên mobile === */}
+                        {showInfo && (
+                            <div className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300">
+                                {/* Header panel */}
+                                <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
+                                    <h3 className="text-sm font-semibold text-white">Chi tiết ảnh</h3>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 rounded-full text-white/60 hover:text-white hover:bg-white/10"
+                                        onClick={() => setShowInfo(false)}
+                                    >
+                                        <XIcon className="size-4" />
+                                    </Button>
+                                </div>
 
-                        {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
-                        <div
-                            ref={imageContainerRef}
-                            className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
-                            style={{ touchAction: 'none' }}
-                            onWheel={handleWheelZoom}
-                            onMouseDown={handleMouseDownPan}
-                            onMouseMove={handleMouseMovePan}
-                            onMouseUp={handleMouseUpPan}
-                            onMouseLeave={handleMouseUpPan}
-                            onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
-                        >
-                            <img
-                                ref={imgRef}
-                                src={selectedItem.thumbnail}
-                                alt="Preview"
-                                className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
-                                style={{
-                                    transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
-                                    transitionProperty: 'transform',
-                                    transitionTimingFunction: 'ease-out',
-                                    transitionDuration: '0ms',
-                                }}
-                                draggable={false}
-                            />
-                        </div>
+                                {/* Thumbnail nhỏ trong panel */}
+                                <div className="px-5 pt-4 pb-2">
+                                    <img
+                                        src={selectedItem.thumbnail}
+                                        alt=""
+                                        className="w-full aspect-video object-cover rounded-xl border border-white/10"
+                                    />
+                                </div>
+
+                                {/* Prompt — phần quan trọng nhất */}
+                                {selectedItem.prompt && (
+                                    <div className="px-5 py-3 space-y-2">
+                                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
+                                        <p className="text-sm text-white/85 leading-relaxed">
+                                            {selectedItem.prompt}
+                                        </p>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(selectedItem.prompt || '')
+                                                toast({ title: "Đã sao chép prompt" })
+                                            }}
+                                        >
+                                            <CopyIcon className="size-3" />
+                                            Sao chép
+                                        </Button>
+                                    </div>
+                                )}
+
+                                {/* Negative Prompt */}
+                                {selectedItem.negativePrompt && (
+                                    <div className="px-5 py-3 space-y-2 border-t border-white/5">
+                                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Negative Prompt</p>
+                                        <p className="text-sm text-white/65 leading-relaxed">
+                                            {selectedItem.negativePrompt}
+                                        </p>
+                                    </div>
+                                )}
+
+                                {/* Metadata grid */}
+                                <div className="px-5 py-3 border-t border-white/5">
+                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {selectedItem.model && (
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <BoxIcon className="size-3" />
+                                                    <span className="text-[11px]">Model</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium truncate" title={selectedItem.model}>
+                                                    {selectedItem.model.split('/').pop() || selectedItem.model}
+                                                </p>
+                                            </div>
+                                        )}
+                                        {selectedItem.style && (
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <PaletteIcon className="size-3" />
+                                                    <span className="text-[11px]">Style</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium">{selectedItem.style}</p>
+                                            </div>
+                                        )}
+                                        {selectedItem.aspectRatio && (
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <RulerIcon className="size-3" />
+                                                    <span className="text-[11px]">Tỷ lệ</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium">{selectedItem.aspectRatio}</p>
+                                            </div>
+                                        )}
+                                        {selectedItem.seed !== undefined && selectedItem.seed !== null && (
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <HashIcon className="size-3" />
+                                                    <span className="text-[11px]">Seed</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium tabular-nums">{selectedItem.seed}</p>
+                                            </div>
+                                        )}
+                                        {selectedItem.gemsCost !== undefined && selectedItem.gemsCost > 0 && (
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <SparklesIcon className="size-3" />
+                                                    <span className="text-[11px]">Chi phí</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium">{selectedItem.gemsCost} 💎</p>
+                                            </div>
+                                        )}
+                                        <div className="space-y-1">
+                                            <div className="flex items-center gap-1.5 text-white/40">
+                                                <ClockIcon className="size-3" />
+                                                <span className="text-[11px]">Ngày tạo</span>
+                                            </div>
+                                            <p className="text-xs text-white/80 font-medium">{selectedItem.createdAtFull}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>,
                 document.body
