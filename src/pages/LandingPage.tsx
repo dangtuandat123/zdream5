@@ -152,12 +152,23 @@ export default function LandingPage() {
                     to { opacity: 1; transform: scale(1); }
                 }
                 @keyframes shimmer {
-                    0% { background-position: -200% center; }
+                    0% { background-position: 0% center; }
                     100% { background-position: 200% center; }
+                }
+                @keyframes aurora {
+                    0% { transform: rotate(0deg) scale(1); opacity: 0.4; }
+                    33% { transform: rotate(120deg) scale(1.2); opacity: 0.6; }
+                    66% { transform: rotate(240deg) scale(0.9); opacity: 0.5; }
+                    100% { transform: rotate(360deg) scale(1); opacity: 0.4; }
+                }
+                @keyframes color-shift {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
                 }
                 @keyframes twinkle {
                     0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); box-shadow: none; }
-                    50% { opacity: 1; transform: scale(1.2) rotate(180deg); box-shadow: 0 0 8px 2px rgba(255,255,255,0.6); }
+                    50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
                 }
                 @keyframes sparkle-float {
                     0% { opacity: 0; transform: translateY(0) scale(0); }
@@ -166,8 +177,19 @@ export default function LandingPage() {
                     100% { opacity: 0; transform: translateY(-80px) scale(0); }
                 }
                 @keyframes glow-pulse {
-                    0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
-                    50% { box-shadow: 0 0 40px rgba(139,92,246,0.6), 0 0 80px rgba(139,92,246,0.2); }
+                    0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.4), 0 0 60px rgba(139,92,246,0.15); }
+                    50% { box-shadow: 0 0 40px rgba(168,85,247,0.7), 0 0 100px rgba(139,92,246,0.3), 0 0 150px rgba(236,72,153,0.15); }
+                }
+                @keyframes neon-border {
+                    0%, 100% { border-color: rgba(139,92,246,0.4); box-shadow: 0 0 15px rgba(139,92,246,0.2); }
+                    33% { border-color: rgba(236,72,153,0.4); box-shadow: 0 0 15px rgba(236,72,153,0.2); }
+                    66% { border-color: rgba(96,165,250,0.4); box-shadow: 0 0 15px rgba(96,165,250,0.2); }
+                }
+                @keyframes float-neon {
+                    0%, 100% { transform: translate(0, 0) scale(1); }
+                    25% { transform: translate(30px, -40px) scale(1.1); }
+                    50% { transform: translate(-20px, -60px) scale(0.95); }
+                    75% { transform: translate(-30px, -20px) scale(1.05); }
                 }
                 .marquee-track {
                     display: flex;
@@ -181,27 +203,38 @@ export default function LandingPage() {
                 .orb-float-delay { animation: float-orb 8s ease-in-out infinite 2s; }
                 .pulse-ring { animation: pulse-ring 3s ease-in-out infinite; }
                 .gradient-text {
-                    background: linear-gradient(135deg, #a78bfa, #f472b6, #60a5fa);
-                    background-size: 200% auto;
+                    background: linear-gradient(90deg, #a78bfa, #f472b6, #60a5fa, #34d399, #fbbf24, #a78bfa);
+                    background-size: 300% auto;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
-                    animation: shimmer 4s ease-in-out infinite;
+                    animation: color-shift 6s ease-in-out infinite;
+                }
+                .hero-headline-glow {
+                    background: linear-gradient(90deg, #fff, #e0c3fc, #8ec5fc, #f9d423, #ff6b6b, #fff);
+                    background-size: 300% auto;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    animation: color-shift 8s ease-in-out infinite;
+                    filter: drop-shadow(0 0 30px rgba(167,139,250,0.4));
                 }
                 .card-shine::before {
                     content: '';
                     position: absolute;
                     inset: 0;
                     border-radius: inherit;
-                    background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
+                    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%);
                     pointer-events: none;
                 }
                 .reveal { opacity: 0; transform: translateY(60px) scale(0.95); transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1); }
                 .reveal.visible { opacity: 1; transform: translateY(0) scale(1); }
                 .reveal-scale { opacity: 0; transform: scale(0.85); transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1); }
                 .reveal-scale.visible { opacity: 1; transform: scale(1); }
-                .twinkle-star { position: absolute; background: white; border-radius: 50%; animation: twinkle ease-in-out infinite; }
+                .twinkle-star { position: absolute; border-radius: 50%; animation: twinkle ease-in-out infinite; }
                 .glow-cta { animation: glow-pulse 2.5s ease-in-out infinite; }
+                .aurora-orb { position: absolute; border-radius: 50%; filter: blur(80px); animation: float-neon 12s ease-in-out infinite; pointer-events: none; }
+                .neon-badge { animation: neon-border 4s ease-in-out infinite; }
             `}</style>
 
             {/* =============================================
@@ -221,20 +254,31 @@ export default function LandingPage() {
                         type="video/mp4"
                     />
                 </video>
-                <div className="absolute inset-0 bg-black/40 z-[1]"></div>
+                <div className="absolute inset-0 bg-black/30 z-[1]"></div>
 
-                {/* ---- Twinkling Stars / Nhấp nháy ---- */}
-                {[...Array(30)].map((_, i) => {
-                    const size = 3 + Math.random() * 6;
+                {/* ---- Aurora Orbs / Quầng sáng màu ---- */}
+                <div className="aurora-orb z-[2] w-[400px] h-[400px] bg-violet-500/30" style={{ top: '10%', left: '15%', animationDelay: '0s' }} />
+                <div className="aurora-orb z-[2] w-[350px] h-[350px] bg-fuchsia-500/25" style={{ top: '30%', right: '10%', animationDelay: '3s', animationDuration: '15s' }} />
+                <div className="aurora-orb z-[2] w-[300px] h-[300px] bg-cyan-500/20" style={{ bottom: '15%', left: '40%', animationDelay: '6s', animationDuration: '18s' }} />
+                <div className="aurora-orb z-[2] w-[250px] h-[250px] bg-pink-500/20" style={{ top: '50%', left: '5%', animationDelay: '2s', animationDuration: '14s' }} />
+                <div className="aurora-orb z-[2] w-[200px] h-[200px] bg-amber-500/15" style={{ top: '20%', right: '25%', animationDelay: '4s', animationDuration: '16s' }} />
+
+                {/* ---- Twinkling Stars / Nhấp nháy màu sắc ---- */}
+                {[...Array(40)].map((_, i) => {
+                    const size = 3 + Math.random() * 7;
+                    const colors = ['#a78bfa', '#f472b6', '#60a5fa', '#34d399', '#fbbf24', '#f87171', '#e879f9', '#22d3ee', '#ffffff'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
                     return (
                         <div
                             key={`star-${i}`}
-                            className="twinkle-star z-[2]"
+                            className="twinkle-star z-[3]"
                             style={{
                                 top: `${5 + Math.random() * 90}%`,
                                 left: `${Math.random() * 100}%`,
                                 width: `${size}px`,
                                 height: `${size}px`,
+                                background: color,
+                                boxShadow: `0 0 ${size * 2}px ${color}`,
                                 animationDelay: `${Math.random() * 6}s`,
                                 animationDuration: `${1.5 + Math.random() * 2.5}s`,
                             }}
@@ -285,7 +329,7 @@ export default function LandingPage() {
 
                 {/* ---- Hero Content ---- */}
                 <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto">
-                    <Badge variant="outline" className="mb-8 bg-white/10 text-white/90 border-white/20 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-medium tracking-wide" style={{ animation: 'fade-up 1s cubic-bezier(0.16,1,0.3,1) 0.3s both' }}>
+                    <Badge variant="outline" className="mb-8 bg-white/10 text-white/90 border-violet-400/30 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-medium tracking-wide neon-badge" style={{ animation: 'fade-up 1s cubic-bezier(0.16,1,0.3,1) 0.3s both' }}>
                         <Zap className="size-3 mr-1.5 text-yellow-400 fill-yellow-400" /> AI-Powered Creative Platform
                     </Badge>
                     <h1 className="mb-6" style={{ animation: 'fade-up 1.1s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
@@ -296,7 +340,7 @@ export default function LandingPage() {
                             Nền tảng giúp bạn tạo
                         </span>
                         <span
-                            className="block text-[clamp(40px,7vw,84px)] text-white leading-[1.1] mt-2 font-bold"
+                            className="block text-[clamp(40px,7vw,84px)] leading-[1.1] mt-2 font-bold hero-headline-glow"
                             style={{ fontFamily: "'Dancing Script', cursive", letterSpacing: "-1px" }}
                         >
                             ảnh AI chất lượng cao
@@ -313,7 +357,7 @@ export default function LandingPage() {
                         <Link to="/app/generate">
                             <Button
                                 size="lg"
-                                className="bg-white hover:bg-white/90 text-[#111] rounded-full h-14 px-8 text-[15px] font-bold gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] hover:scale-[1.02]"
+                                className="glow-cta bg-white hover:bg-white/90 text-[#111] rounded-full h-14 px-8 text-[15px] font-bold gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] hover:scale-[1.05]"
                                 style={{ fontFamily: "'Barlow', sans-serif" }}
                             >
                                 <span className="flex items-center justify-center size-8 rounded-full bg-[#111] text-white">
