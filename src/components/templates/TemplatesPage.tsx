@@ -1,10 +1,8 @@
 import { useState, useMemo } from "react"
 import { Link } from "react-router-dom"
-import { SearchIcon, SparklesIcon } from "lucide-react"
+import { SearchIcon, SparklesIcon, ArrowRightIcon } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
@@ -120,41 +118,57 @@ export function TemplatesPage() {
                 {filteredTemplates.length} mẫu
             </p>
 
-            {/* Template Grid */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+            {/* Template Grid — card nghệ thuật, overlay text trên ảnh */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {paginatedTemplates.map((template) => (
                     <Link
                         key={template.id}
                         to={`/app/templates/${template.id}`}
-                        className="group"
+                        className="group relative block overflow-hidden rounded-2xl bg-muted aspect-[3/4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                        <Card className="overflow-hidden transition-all hover:shadow-md hover:border-primary/30">
-                            <CardContent className="p-0">
-                                <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-                                    <img
-                                        src={template.thumbnail}
-                                        alt={template.name}
-                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                    />
-                                    {/* Hover overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
-                                        <div className="flex items-center gap-2 text-white text-sm font-medium">
-                                            <SparklesIcon className="size-4" />
-                                            Sử dụng mẫu
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-3 space-y-1">
-                                    <p className="text-sm font-medium truncate">{template.name}</p>
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-xs text-muted-foreground truncate">{template.description}</p>
-                                        <Badge variant="secondary" className="text-[10px] shrink-0 ml-2">
-                                            {template.category}
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        {/* Ảnh nền */}
+                        <img
+                            src={template.thumbnail}
+                            alt={template.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                            loading="lazy"
+                        />
+
+                        {/* Category badge — góc trên trái, backdrop-blur */}
+                        <div className="absolute top-2.5 left-2.5 z-10">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/40 text-white backdrop-blur-md">
+                                {template.category}
+                            </span>
+                        </div>
+
+                        {/* Gradient overlay dưới — luôn hiển thị để text đọc được */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+                        {/* Hover overlay — hiệu ứng khi rê chuột/chạm */}
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* CTA button — hiện khi hover (desktop), luôn hiện nhẹ trên mobile */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
+                            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-xs font-semibold shadow-lg backdrop-blur-sm">
+                                <SparklesIcon className="size-3.5" />
+                                Sử dụng mẫu
+                            </span>
+                        </div>
+
+                        {/* Text info — góc dưới trái, trên gradient */}
+                        <div className="absolute bottom-0 left-0 right-0 z-10 p-3 space-y-0.5">
+                            <h3 className="text-sm font-semibold text-white truncate drop-shadow-md">
+                                {template.name}
+                            </h3>
+                            <p className="text-[11px] text-white/70 truncate drop-shadow-sm">
+                                {template.description}
+                            </p>
+                            {/* Arrow hint — subtle trên mobile */}
+                            <div className="flex items-center gap-1 pt-1 text-white/50 group-hover:text-white/80 transition-colors">
+                                <span className="text-[10px] font-medium">Xem chi tiết</span>
+                                <ArrowRightIcon className="size-3 transition-transform duration-300 group-hover:translate-x-0.5" />
+                            </div>
+                        </div>
                     </Link>
                 ))}
             </div>
