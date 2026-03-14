@@ -115,7 +115,14 @@ export function LibraryPage() {
     const [zoom, setZoom] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [isDraggingZoom, setIsDraggingZoom] = useState(false)
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+    const dragStart = useRef({ x: 0, y: 0 })
+    const lastTouchDistance = useRef<number | null>(null)
+    const lastTouchCenter = useRef<{ x: number; y: number } | null>(null)
+    const isTouchPanning = useRef(false)
+    const imageContainerRef = useRef<HTMLDivElement>(null)
+    const imgRef = useRef<HTMLImageElement>(null)
+    const lastTapTime = useRef(0)
+    const touchStartPos = useRef<{ x: number; y: number } | null>(null)
     
     // Upload refs & state
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -264,54 +271,205 @@ export function LibraryPage() {
 
     const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
 
-    // Reset pan & zoom
-    const resetZoom = useCallback(() => {
-        setZoom(1)
-        setPosition({ x: 0, y: 0 })
+    // ── Perf-critical: all gesture math uses mutable refs, DOM writes bypass React ──
+    const transformRef = useRef({ x: 0, y: 0, zoom: 1 })
+    const gestureActive = useRef(false)
+    const mouseDragStart = useRef({ x: 0, y: 0 })
+    const isMouseDragging = useRef(false)
+
+    const clampPos = (x: number, y: number, z: number) => {
+        const container = imageContainerRef.current
+        const img = imgRef.current
+        if (!container || !img) return { x, y }
+        const cw = container.clientWidth, ch = container.clientHeight
+        const nw = img.naturalWidth || cw, nh = img.naturalHeight || ch
+        const r = nw / nh, cr = cw / ch
+        const dw = r > cr ? cw : ch * r
+        const dh = r > cr ? cw / r : ch
+        const mx = Math.max(0, (dw * z - cw) / 2)
+        const my = Math.max(0, (dh * z - ch) / 2)
+        return { x: Math.max(-mx, Math.min(mx, x)), y: Math.max(-my, Math.min(my, y)) }
+    }
+
+    const applyTransformDOM = () => {
+        const img = imgRef.current
+        if (!img) return
+        const { x, y, zoom: z } = transformRef.current
+        img.style.transform = `translate(${x}px, ${y}px) scale(${z})`
+    }
+
+    // Sync ref → React state (for UI like zoom % display)
+    const syncToState = useCallback(() => {
+        const { x, y, zoom: z } = transformRef.current
+        setZoom(z)
+        setPosition({ x, y })
+        setIsDraggingZoom(false)
     }, [])
 
-    // Handle Zoom interactions
-    const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.5, 5))
-    const handleZoomOut = () => setZoom(prev => {
-        const newZoom = Math.max(prev - 0.5, 1)
-        if (newZoom === 1) setPosition({ x: 0, y: 0 }) // tự focus lại góc 0 khi thuề nhỏ nhất
-        return newZoom
-    })
-    
-    // Reset zoom khi chuyển ảnh hoặc đóng
+    const resetZoom = useCallback(() => {
+        transformRef.current = { x: 0, y: 0, zoom: 1 }
+        applyTransformDOM()
+        syncToState()
+    }, [syncToState])
+
+    const applyZoom = useCallback((newZ: number) => {
+        const z = Math.min(Math.max(newZ, 1), 5)
+        const pos = z === 1 ? { x: 0, y: 0 } : clampPos(transformRef.current.x, transformRef.current.y, z)
+        transformRef.current = { ...pos, zoom: z }
+        applyTransformDOM()
+        syncToState()
+    }, [syncToState])
+
+    const handleZoomIn = useCallback(() => applyZoom(transformRef.current.zoom + 0.5), [applyZoom])
+    const handleZoomOut = useCallback(() => applyZoom(transformRef.current.zoom - 0.5), [applyZoom])
+
     useEffect(() => {
-        resetZoom()
-    }, [selectedIndex, resetZoom])
+        transformRef.current = { x: 0, y: 0, zoom: 1 }
+        applyTransformDOM()
+        syncToState()
+    }, [selectedIndex, syncToState])
 
-    // Handlers cho việc Drag Pan Image
+    // Mouse drag pan (desktop) — also uses direct DOM
     const handleMouseDownPan = (e: React.MouseEvent) => {
-        if (zoom <= 1) return // Không cho kéo nếu chưa zoom
+        if (transformRef.current.zoom <= 1) return
         e.preventDefault()
+        isMouseDragging.current = true
         setIsDraggingZoom(true)
-        setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+        mouseDragStart.current = { x: e.clientX - transformRef.current.x, y: e.clientY - transformRef.current.y }
     }
-
     const handleMouseMovePan = (e: React.MouseEvent) => {
-        if (!isDraggingZoom || zoom <= 1) return
+        if (!isMouseDragging.current) return
         e.preventDefault()
-        setPosition({
-            x: e.clientX - dragStart.x,
-            y: e.clientY - dragStart.y
-        })
+        const z = transformRef.current.zoom
+        const p = clampPos(e.clientX - mouseDragStart.current.x, e.clientY - mouseDragStart.current.y, z)
+        transformRef.current = { ...p, zoom: z }
+        applyTransformDOM()
     }
-
     const handleMouseUpPan = () => {
-        setIsDraggingZoom(false)
+        if (!isMouseDragging.current) return
+        isMouseDragging.current = false
+        syncToState()
     }
 
     const handleWheelZoom = (e: React.WheelEvent) => {
-        // e.deltaY > 0 là cuộn xuống (Zoom out), < 0 là lên (Zoom in)
-        if (e.deltaY < 0) {
-            handleZoomIn()
-        } else {
-            handleZoomOut()
-        }
+        e.deltaY < 0 ? handleZoomIn() : handleZoomOut()
     }
+
+    // Native touch listeners — zero React re-renders during gesture
+    useEffect(() => {
+        const el = imageContainerRef.current
+        if (!el || selectedIndex === null) return
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2) {
+                e.preventDefault()
+                gestureActive.current = true
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                lastTouchDistance.current = Math.hypot(dx, dy)
+                lastTouchCenter.current = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                }
+                isTouchPanning.current = false
+                touchStartPos.current = null
+            } else if (e.touches.length === 1) {
+                const t = e.touches[0]
+                touchStartPos.current = { x: t.clientX, y: t.clientY }
+
+                if (transformRef.current.zoom > 1) {
+                    gestureActive.current = true
+                    isTouchPanning.current = true
+                    dragStart.current = {
+                        x: t.clientX - transformRef.current.x,
+                        y: t.clientY - transformRef.current.y
+                    }
+                }
+
+                // Double-tap
+                const now = Date.now()
+                if (now - lastTapTime.current < 300) {
+                    e.preventDefault()
+                    if (transformRef.current.zoom > 1) resetZoom()
+                    else applyZoom(2.5)
+                    lastTapTime.current = 0
+                    touchStartPos.current = null
+                } else {
+                    lastTapTime.current = now
+                }
+            }
+        }
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (e.touches.length === 2 && lastTouchDistance.current !== null) {
+                e.preventDefault()
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                const distance = Math.hypot(dx, dy)
+                const scale = distance / lastTouchDistance.current
+
+                const newZ = Math.min(Math.max(transformRef.current.zoom * scale, 1), 5)
+
+                if (newZ === 1) {
+                    transformRef.current = { x: 0, y: 0, zoom: 1 }
+                } else if (lastTouchCenter.current) {
+                    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
+                    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    const np = clampPos(
+                        transformRef.current.x + (cx - lastTouchCenter.current.x),
+                        transformRef.current.y + (cy - lastTouchCenter.current.y),
+                        newZ
+                    )
+                    transformRef.current = { ...np, zoom: newZ }
+                    lastTouchCenter.current = { x: cx, y: cy }
+                } else {
+                    transformRef.current.zoom = newZ
+                }
+
+                applyTransformDOM()
+                lastTouchDistance.current = distance
+            } else if (e.touches.length === 1 && isTouchPanning.current && transformRef.current.zoom > 1) {
+                e.preventDefault()
+                const t = e.touches[0]
+                const np = clampPos(
+                    t.clientX - dragStart.current.x,
+                    t.clientY - dragStart.current.y,
+                    transformRef.current.zoom
+                )
+                transformRef.current = { ...np, zoom: transformRef.current.zoom }
+                applyTransformDOM()
+            }
+        }
+
+        const onTouchEnd = (e: TouchEvent) => {
+            // Swipe navigation (not zoomed)
+            if (touchStartPos.current && transformRef.current.zoom <= 1 && e.changedTouches.length === 1) {
+                const dx = e.changedTouches[0].clientX - touchStartPos.current.x
+                const dy = e.changedTouches[0].clientY - touchStartPos.current.y
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                    dx > 0 ? handlePrevRef.current() : handleNextRef.current()
+                }
+            }
+            lastTouchDistance.current = null
+            lastTouchCenter.current = null
+            isTouchPanning.current = false
+            touchStartPos.current = null
+            if (gestureActive.current) {
+                gestureActive.current = false
+                syncToState()
+            }
+        }
+
+        el.addEventListener('touchstart', onTouchStart, { passive: false })
+        el.addEventListener('touchmove', onTouchMove, { passive: false })
+        el.addEventListener('touchend', onTouchEnd)
+        return () => {
+            el.removeEventListener('touchstart', onTouchStart)
+            el.removeEventListener('touchmove', onTouchMove)
+            el.removeEventListener('touchend', onTouchEnd)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedIndex, syncToState, resetZoom, applyZoom])
 
     // Handlers for Navigation
     const handleNext = useCallback(() => {
@@ -325,6 +483,12 @@ export function LibraryPage() {
             setSelectedIndex(selectedIndex - 1)
         }
     }, [selectedIndex])
+
+    // Refs for touch swipe navigation (avoids stale closure in native listener)
+    const handleNextRef = useRef(handleNext)
+    const handlePrevRef = useRef(handlePrev)
+    useEffect(() => { handleNextRef.current = handleNext }, [handleNext])
+    useEffect(() => { handlePrevRef.current = handlePrev }, [handlePrev])
 
     // Lắng nghe phím mũi tên khi xem ảnh
     useEffect(() => {
@@ -586,7 +750,7 @@ export function LibraryPage() {
             {/* Fullscreen Image Lightbox */}
             <Dialog open={selectedIndex !== null} onOpenChange={(open) => !open && setSelectedIndex(null)}>
                 <DialogContent 
-                    className="max-w-none w-screen h-screen p-0 m-0 border-none bg-black/95 rounded-none overflow-hidden [&>button]:hidden text-slate-200"
+                    className="max-w-none w-screen h-dvh p-0 m-0 border-none bg-black/95 rounded-none overflow-hidden [&>button]:hidden text-slate-200"
                     aria-describedby="Image viewer"
                 >
                     <DialogTitle className="sr-only">Trình xem ảnh toàn màn hình</DialogTitle>
@@ -676,38 +840,40 @@ export function LibraryPage() {
                             </div>
 
                             {/* Nút Previous */}
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-40">
+                            <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40">
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className={`size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handlePrev()
                                     }}
                                 >
-                                    <ChevronLeftIcon className="size-8" />
+                                    <ChevronLeftIcon className="size-5 sm:size-8" />
                                 </Button>
                             </div>
 
                             {/* Nút Next */}
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 z-40">
+                            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40">
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className={`size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === filteredItems.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === filteredItems.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handleNext()
                                     }}
                                 >
-                                    <ChevronRightIcon className="size-8" />
+                                    <ChevronRightIcon className="size-5 sm:size-8" />
                                 </Button>
                             </div>
 
                             {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
-                            <div 
+                            <div
+                                ref={imageContainerRef}
                                 className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                                style={{ touchAction: 'none' }}
                                 onWheel={handleWheelZoom}
                                 onMouseDown={handleMouseDownPan}
                                 onMouseMove={handleMouseMovePan}
@@ -715,13 +881,14 @@ export function LibraryPage() {
                                 onMouseLeave={handleMouseUpPan}
                                 onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
                             >
-                                <img 
-                                    src={selectedItem.thumbnail} 
-                                    alt="Preview" 
-                                    className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform ease-out will-change-transform pointer-events-auto"
+                                <img
+                                    ref={imgRef}
+                                    src={selectedItem.thumbnail}
+                                    alt="Preview"
+                                    className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform ease-out will-change-transform"
                                     style={{
                                         transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                                        transitionDuration: isDraggingZoom ? '0ms' : '200ms' // Tắt chuyển động mượt khi đang kéo thả cho cảm giác 1:1 realtime
+                                        transitionDuration: isDraggingZoom ? '0ms' : '200ms'
                                     }}
                                     draggable={false}
                                 />
