@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { SearchIcon, SparklesIcon } from "lucide-react"
 
@@ -7,6 +7,15 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 
 const CATEGORIES = ["Tất cả", "Chân dung", "Phong cảnh", "Anime", "3D", "Logo", "Sản phẩm"]
 
@@ -25,16 +34,47 @@ const TEMPLATES = [
     { id: "12", name: "Watercolor Portrait", category: "Chân dung", description: "Chân dung phong cách màu nước", thumbnail: "https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?q=80&w=400&auto=format&fit=crop" },
 ]
 
+const PER_PAGE = 12
+
 export function TemplatesPage() {
     const [search, setSearch] = useState("")
     const [category, setCategory] = useState("Tất cả")
+    const [page, setPage] = useState(1)
 
-    const filteredTemplates = TEMPLATES.filter((t) => {
-        const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
-            t.description.toLowerCase().includes(search.toLowerCase())
-        const matchesCategory = category === "Tất cả" || t.category === category
-        return matchesSearch && matchesCategory
-    })
+    // Lọc theo search + category
+    const filteredTemplates = useMemo(() => {
+        return TEMPLATES.filter((t) => {
+            const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
+                t.description.toLowerCase().includes(search.toLowerCase())
+            const matchesCategory = category === "Tất cả" || t.category === category
+            return matchesSearch && matchesCategory
+        })
+    }, [search, category])
+
+    // Phân trang client-side
+    const totalPages = Math.ceil(filteredTemplates.length / PER_PAGE)
+    const paginatedTemplates = useMemo(() => {
+        const start = (page - 1) * PER_PAGE
+        return filteredTemplates.slice(start, start + PER_PAGE)
+    }, [filteredTemplates, page])
+
+    // Reset về trang 1 khi thay đổi bộ lọc
+    const handleSearchChange = (value: string) => {
+        setSearch(value)
+        setPage(1)
+    }
+    const handleCategoryChange = (value: string) => {
+        if (value) {
+            setCategory(value)
+            setPage(1)
+        }
+    }
+
+    const goToPage = (p: number) => {
+        if (p < 1 || p > totalPages || p === page) return
+        setPage(p)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }
 
     return (
         <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
@@ -52,7 +92,7 @@ export function TemplatesPage() {
                         placeholder="Tìm mẫu..."
                         className="pl-9 h-9"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                     />
                 </div>
             </div>
@@ -61,7 +101,7 @@ export function TemplatesPage() {
             <ToggleGroup
                 type="single"
                 value={category}
-                onValueChange={(v) => v && setCategory(v)}
+                onValueChange={handleCategoryChange}
                 className="flex flex-wrap justify-start gap-1"
             >
                 {CATEGORIES.map((cat) => (
@@ -80,9 +120,9 @@ export function TemplatesPage() {
                 {filteredTemplates.length} mẫu
             </p>
 
-            {/* Template Grid — với ảnh thumbnail thật */}
+            {/* Template Grid */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                {filteredTemplates.map((template) => (
+                {paginatedTemplates.map((template) => (
                     <Link
                         key={template.id}
                         to={`/app/templates/${template.id}`}
@@ -119,6 +159,63 @@ export function TemplatesPage() {
                 ))}
             </div>
 
+            {/* Phân trang */}
+            {totalPages > 1 && (
+                <div className="flex justify-center pt-2 pb-4">
+                    <Pagination>
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    onClick={() => goToPage(page - 1)}
+                                    className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+
+                            {page > 2 && (
+                                <PaginationItem>
+                                    <PaginationLink onClick={() => goToPage(1)}>1</PaginationLink>
+                                </PaginationItem>
+                            )}
+                            {page > 3 && (
+                                <PaginationItem><PaginationEllipsis /></PaginationItem>
+                            )}
+
+                            {page > 1 && (
+                                <PaginationItem>
+                                    <PaginationLink onClick={() => goToPage(page - 1)}>{page - 1}</PaginationLink>
+                                </PaginationItem>
+                            )}
+
+                            <PaginationItem>
+                                <PaginationLink isActive>{page}</PaginationLink>
+                            </PaginationItem>
+
+                            {page < totalPages && (
+                                <PaginationItem>
+                                    <PaginationLink onClick={() => goToPage(page + 1)}>{page + 1}</PaginationLink>
+                                </PaginationItem>
+                            )}
+
+                            {page < totalPages - 2 && (
+                                <PaginationItem><PaginationEllipsis /></PaginationItem>
+                            )}
+                            {page < totalPages - 1 && (
+                                <PaginationItem>
+                                    <PaginationLink onClick={() => goToPage(totalPages)}>{totalPages}</PaginationLink>
+                                </PaginationItem>
+                            )}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    onClick={() => goToPage(page + 1)}
+                                    className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </div>
+            )}
+
             {filteredTemplates.length === 0 && (
                 <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
                     <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
@@ -126,7 +223,7 @@ export function TemplatesPage() {
                     </div>
                     <p className="text-base font-medium">Không tìm thấy mẫu nào</p>
                     <p className="text-sm text-muted-foreground">Thử thay đổi từ khóa hoặc danh mục.</p>
-                    <Button variant="outline" size="sm" onClick={() => { setSearch(""); setCategory("Tất cả") }}>
+                    <Button variant="outline" size="sm" onClick={() => { setSearch(""); setCategory("Tất cả"); setPage(1) }}>
                         Xoá bộ lọc
                     </Button>
                 </div>

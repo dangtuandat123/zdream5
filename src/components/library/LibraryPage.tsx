@@ -46,6 +46,15 @@ import {
     DrawerHeader,
     DrawerTitle,
 } from "@/components/ui/drawer"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 
 import { useToast } from "@/hooks/use-toast"
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -110,34 +119,34 @@ export function LibraryPage() {
     const [sort, setSort] = useState("newest")
     const [isLoading, setIsLoading] = useState(true)
     const [page, setPage] = useState(1)
-    const [hasMore, setHasMore] = useState(true)
-    const loadingMore = useRef(false)
+    const [totalPages, setTotalPages] = useState(1)
+    const PER_PAGE = 30
 
-    // Fetch images from API
-    const fetchImages = useCallback(async (pageNum: number, append = false) => {
+    // Fetch images from API — phân trang server-side
+    const fetchImages = useCallback(async (pageNum: number) => {
         try {
-            if (pageNum === 1) setIsLoading(true)
-            loadingMore.current = true
-            const res = await imageApi.list(pageNum, 30)
+            setIsLoading(true)
+            const res = await imageApi.list(pageNum, PER_PAGE)
             const mapped = res.data.map(apiToMediaItem)
-            setItems(prev => append ? [...prev, ...mapped] : mapped)
-            setHasMore(res.current_page < res.last_page)
+            setItems(mapped)
+            setTotalPages(res.last_page)
             setPage(res.current_page)
         } catch {
             toast({ variant: "destructive", title: "Lỗi", description: "Không thể tải ảnh từ thư viện." })
         } finally {
             setIsLoading(false)
-            loadingMore.current = false
         }
     }, [toast])
 
     useEffect(() => { fetchImages(1) }, [fetchImages])
 
-    // Infinite scroll - load more
-    const loadMore = useCallback(() => {
-        if (!hasMore || loadingMore.current) return
-        fetchImages(page + 1, true)
-    }, [hasMore, page, fetchImages])
+    // Chuyển trang
+    const goToPage = useCallback((p: number) => {
+        if (p < 1 || p > totalPages || p === page) return
+        fetchImages(p)
+        // Scroll lên đầu danh sách khi chuyển trang
+        window.scrollTo({ top: 0, behavior: "smooth" })
+    }, [page, totalPages, fetchImages])
     
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -270,7 +279,6 @@ export function LibraryPage() {
             // Reset input
             if (fileInputRef.current) fileInputRef.current.value = ""
         } catch (error: any) {
-            console.error("Upload error detail:", error)
             toast({
                 variant: "destructive",
                 title: "Tải lên thất bại",
@@ -749,11 +757,65 @@ export function LibraryPage() {
                         )
                     })}
                 </div>
-                {hasMore && (
+                {/* Phân trang */}
+                {totalPages > 1 && (
                     <div className="flex justify-center pt-6 pb-2">
-                        <Button variant="outline" size="sm" onClick={loadMore} disabled={loadingMore.current}>
-                            Tải thêm ảnh
-                        </Button>
+                        <Pagination>
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        onClick={() => goToPage(page - 1)}
+                                        className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+
+                                {/* Trang đầu */}
+                                {page > 2 && (
+                                    <PaginationItem>
+                                        <PaginationLink onClick={() => goToPage(1)}>1</PaginationLink>
+                                    </PaginationItem>
+                                )}
+                                {page > 3 && (
+                                    <PaginationItem><PaginationEllipsis /></PaginationItem>
+                                )}
+
+                                {/* Trang trước */}
+                                {page > 1 && (
+                                    <PaginationItem>
+                                        <PaginationLink onClick={() => goToPage(page - 1)}>{page - 1}</PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                {/* Trang hiện tại */}
+                                <PaginationItem>
+                                    <PaginationLink isActive>{page}</PaginationLink>
+                                </PaginationItem>
+
+                                {/* Trang sau */}
+                                {page < totalPages && (
+                                    <PaginationItem>
+                                        <PaginationLink onClick={() => goToPage(page + 1)}>{page + 1}</PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                {page < totalPages - 2 && (
+                                    <PaginationItem><PaginationEllipsis /></PaginationItem>
+                                )}
+                                {/* Trang cuối */}
+                                {page < totalPages - 1 && (
+                                    <PaginationItem>
+                                        <PaginationLink onClick={() => goToPage(totalPages)}>{totalPages}</PaginationLink>
+                                    </PaginationItem>
+                                )}
+
+                                <PaginationItem>
+                                    <PaginationNext
+                                        onClick={() => goToPage(page + 1)}
+                                        className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
                     </div>
                 )}
                 </>
