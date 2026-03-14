@@ -759,6 +759,9 @@ export function LibraryPage() {
                 <DialogContent 
                     className="max-w-none w-screen h-[100dvh] p-0 m-0 border-none bg-black/95 rounded-none overflow-hidden [&>button]:hidden text-slate-200"
                     aria-describedby="Image viewer"
+                    onInteractOutside={(e) => e.preventDefault()}
+                    onPointerDownOutside={(e) => e.preventDefault()}
+                    style={{ touchAction: 'none' }}
                 >
                     <DialogTitle className="sr-only">Trình xem ảnh toàn màn hình</DialogTitle>
                     
@@ -768,7 +771,7 @@ export function LibraryPage() {
                             <Button 
                                 variant="outline" 
                                 size="icon" 
-                                className="absolute top-4 right-4 z-50 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg"
+                                className="absolute top-4 right-4 z-50 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg pointer-events-auto"
                                 onClick={() => setSelectedIndex(null)}
                             >
                                 <XIcon className="size-6" />
@@ -847,11 +850,11 @@ export function LibraryPage() {
                             </div>
 
                             {/* Nút Previous */}
-                            <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40">
+                            <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === 0 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${selectedIndex === 0 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handlePrev()
@@ -862,11 +865,11 @@ export function LibraryPage() {
                             </div>
 
                             {/* Nút Next */}
-                            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40">
+                            <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
                                 <Button
                                     variant="outline"
                                     size="icon"
-                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${selectedIndex === filteredItems.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+                                    className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${selectedIndex === filteredItems.length - 1 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handleNext()
