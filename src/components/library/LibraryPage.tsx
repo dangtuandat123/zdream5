@@ -620,15 +620,14 @@ export function LibraryPage() {
                 </div>
             </div>
 
-            {/* Tabs filter + Sort — một hàng duy nhất, gọn gàng */}
-            <div className="flex items-center justify-between gap-3 border-b pb-3">
-                <Tabs value={tab} onValueChange={setTab}>
-                    <TabsList>
+            {/* Tabs filter + Sort */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3">
+                <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
+                    <TabsList className="w-full sm:w-auto">
                         {TABS.map((t) => (
-                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs">
+                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs flex-1 sm:flex-initial">
                                 <t.icon className="size-3.5" />
                                 {t.label}
-                                {/* Hiển thị số lượng cho từng tab */}
                                 {tab === t.value && (
                                     <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px] font-medium">
                                         {filteredItems.length}
@@ -640,7 +639,7 @@ export function LibraryPage() {
                 </Tabs>
 
                 <Select value={sort} onValueChange={setSort}>
-                    <SelectTrigger className="w-[120px] h-8 text-xs">
+                    <SelectTrigger className="w-full sm:w-[120px] h-8 text-xs shrink-0">
                         <CalendarIcon className="size-3 mr-1.5 text-muted-foreground" />
                         <SelectValue />
                     </SelectTrigger>
