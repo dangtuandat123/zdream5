@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('images', function (Blueprint $table) {
-            $table->string('type', 20)->default('ai')->after('user_id');
-            $table->index(['user_id', 'type']);
-        });
+        if (!Schema::hasColumn('images', 'type')) {
+            Schema::table('images', function (Blueprint $table) {
+                $table->string('type', 20)->default('ai')->after('user_id');
+                $table->index(['user_id', 'type']);
+            });
+        }
     }
 
     /**
