@@ -111,27 +111,11 @@ export function LibraryPage() {
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
     
-    // Pan & Zoom State (dùng cho UI controls & mouse; touch bypass hoàn toàn)
+    // Pan & Zoom State
     const [zoom, setZoom] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
     const [isDraggingZoom, setIsDraggingZoom] = useState(false)
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-
-    // Refs cho direct DOM manipulation (bypass React khi touch — zero re-render)
-    const imageContainerRef = useRef<HTMLDivElement>(null)
-    const imgRef = useRef<HTMLImageElement>(null)
-    const zoomRef = useRef(1)
-    const posRef = useRef({ x: 0, y: 0 })
-    const isTouchActive = useRef(false)
-    const lastTouchDist = useRef<number | null>(null)
-    const touchStartZoom = useRef(1)
-    const touchStartPos = useRef({ x: 0, y: 0 })
-    const singleTouchStart = useRef<{ x: number; y: number; posX: number; posY: number } | null>(null)
-    // Swipe navigation & double-tap refs
-    const swipeStartRef = useRef<{ x: number; y: number } | null>(null)
-    const lastTapRef = useRef<{ time: number; x: number; y: number } | null>(null)
-    const handleNextRef = useRef<() => void>(() => {})
-    const handlePrevRef = useRef<() => void>(() => {})
     
     // Upload refs & state
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -280,51 +264,24 @@ export function LibraryPage() {
 
     const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
 
-    // Helper: ghi trực tiếp DOM transform — KHÔNG qua React
-    const applyTransform = useCallback((z: number, x: number, y: number, animate: boolean) => {
-        const img = imgRef.current
-        if (!img) return
-        img.style.transition = animate ? 'transform 200ms ease-out' : 'none'
-        img.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`
-    }, [])
-
-    // Sync React state → refs (cho UI controls dùng state, ref luôn đúng)
-    useEffect(() => { zoomRef.current = zoom; posRef.current = position }, [zoom, position])
-
     // Reset pan & zoom
     const resetZoom = useCallback(() => {
-        zoomRef.current = 1
-        posRef.current = { x: 0, y: 0 }
         setZoom(1)
         setPosition({ x: 0, y: 0 })
-        applyTransform(1, 0, 0, true)
-    }, [applyTransform])
+    }, [])
 
-    // Handle Zoom interactions (buttons/wheel — dùng state vì tần suất thấp)
-    const handleZoomIn = () => {
-        const z = Math.min(zoomRef.current + 0.5, 5)
-        zoomRef.current = z
-        setZoom(z)
-        applyTransform(z, posRef.current.x, posRef.current.y, true)
-    }
-    const handleZoomOut = () => {
-        const z = Math.max(zoomRef.current - 0.5, 1)
-        const p = z === 1 ? { x: 0, y: 0 } : posRef.current
-        zoomRef.current = z
-        posRef.current = p
-        setZoom(z)
-        setPosition(p)
-        applyTransform(z, p.x, p.y, true)
-    }
-
+    // Handle Zoom interactions
+    const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.5, 5))
+    const handleZoomOut = () => setZoom(prev => {
+        const newZoom = Math.max(prev - 0.5, 1)
+        if (newZoom === 1) setPosition({ x: 0, y: 0 }) // tự focus lại góc 0 khi thuề nhỏ nhất
+        return newZoom
+    })
+    
     // Reset zoom khi chuyển ảnh hoặc đóng
     useEffect(() => {
-        zoomRef.current = 1
-        posRef.current = { x: 0, y: 0 }
-        setZoom(1)
-        setPosition({ x: 0, y: 0 })
-        // applyTransform sẽ chạy tự động khi img mount lại
-    }, [selectedIndex])
+        resetZoom()
+    }, [selectedIndex, resetZoom])
 
     // Handlers cho việc Drag Pan Image
     const handleMouseDownPan = (e: React.MouseEvent) => {
@@ -356,130 +313,6 @@ export function LibraryPage() {
         }
     }
 
-    // Touch handlers: ghi thẳng DOM, KHÔNG gọi setState nào khi đang touch
-    // Chỉ sync lại React state 1 lần duy nhất khi thả tay (touchend)
-    useEffect(() => {
-        const el = imageContainerRef.current
-        if (!el) return
-
-        const dist2 = (t: TouchList) => Math.hypot(
-            t[0].clientX - t[1].clientX,
-            t[0].clientY - t[1].clientY
-        )
-
-        const onTouchStart = (e: TouchEvent) => {
-            e.preventDefault()
-            isTouchActive.current = true
-            if (imgRef.current) imgRef.current.style.filter = 'none'
-
-            if (e.touches.length === 2) {
-                // --- Pinch zoom start ---
-                lastTouchDist.current = dist2(e.touches)
-                touchStartZoom.current = zoomRef.current
-                singleTouchStart.current = null
-                swipeStartRef.current = null
-            } else if (e.touches.length === 1) {
-                const t = e.touches[0]
-                if (zoomRef.current > 1) {
-                    // --- Pan start (đang zoom) ---
-                    singleTouchStart.current = {
-                        x: t.clientX, y: t.clientY,
-                        posX: posRef.current.x, posY: posRef.current.y,
-                    }
-                    swipeStartRef.current = null
-                } else {
-                    // --- Swipe/tap start (zoom = 1) ---
-                    swipeStartRef.current = { x: t.clientX, y: t.clientY }
-                    singleTouchStart.current = null
-                }
-            }
-        }
-
-        const onTouchMove = (e: TouchEvent) => {
-            e.preventDefault()
-            if (e.touches.length === 2 && lastTouchDist.current !== null) {
-                // --- Pinch zoom ---
-                const scale = dist2(e.touches) / lastTouchDist.current
-                const z = Math.min(Math.max(touchStartZoom.current * scale, 1), 5)
-                const p = z <= 1 ? { x: 0, y: 0 } : posRef.current
-                zoomRef.current = z
-                posRef.current = p
-                applyTransform(z, p.x, p.y, false)
-            } else if (e.touches.length === 1 && singleTouchStart.current && zoomRef.current > 1) {
-                // --- Pan ---
-                const x = singleTouchStart.current.posX + (e.touches[0].clientX - singleTouchStart.current.x)
-                const y = singleTouchStart.current.posY + (e.touches[0].clientY - singleTouchStart.current.y)
-                posRef.current = { x, y }
-                applyTransform(zoomRef.current, x, y, false)
-            }
-            // Nếu zoom=1, không làm gì (để touchend quyết định swipe hay tap)
-        }
-
-        const onTouchEnd = (e: TouchEvent) => {
-            if (e.touches.length < 2) lastTouchDist.current = null
-            if (e.touches.length !== 0) return
-
-            const changed = e.changedTouches[0]
-            isTouchActive.current = false
-            if (imgRef.current) imgRef.current.style.filter = ''
-
-            // --- Double-tap detection ---
-            const now = Date.now()
-            const lastTap = lastTapRef.current
-            const isDoubleTap = lastTap &&
-                now - lastTap.time < 350 &&
-                Math.hypot(changed.clientX - lastTap.x, changed.clientY - lastTap.y) < 40
-
-            if (isDoubleTap) {
-                lastTapRef.current = null
-                if (zoomRef.current > 1) {
-                    // Reset về zoom 1
-                    zoomRef.current = 1; posRef.current = { x: 0, y: 0 }
-                    setZoom(1); setPosition({ x: 0, y: 0 })
-                    applyTransform(1, 0, 0, true)
-                } else {
-                    // Zoom in 2.5x
-                    zoomRef.current = 2.5
-                    setZoom(2.5)
-                    applyTransform(2.5, 0, 0, true)
-                }
-                swipeStartRef.current = null
-                singleTouchStart.current = null
-                return
-            }
-            lastTapRef.current = { time: now, x: changed.clientX, y: changed.clientY }
-
-            // --- Swipe navigation (chỉ khi zoom = 1) ---
-            if (swipeStartRef.current && zoomRef.current <= 1) {
-                const dx = changed.clientX - swipeStartRef.current.x
-                const dy = changed.clientY - swipeStartRef.current.y
-                // Swipe ngang > 60px và chiều ngang lớn hơn dọc 1.5 lần
-                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-                    if (dx < 0) handleNextRef.current() // Swipe trái → ảnh kế
-                    else handlePrevRef.current()         // Swipe phải → ảnh trước
-                    swipeStartRef.current = null
-                    return
-                }
-            }
-
-            swipeStartRef.current = null
-            singleTouchStart.current = null
-            // Sync lại React state 1 lần duy nhất
-            setZoom(zoomRef.current)
-            setPosition({ ...posRef.current })
-        }
-
-        el.addEventListener('touchstart', onTouchStart, { passive: false })
-        el.addEventListener('touchmove', onTouchMove, { passive: false })
-        el.addEventListener('touchend', onTouchEnd)
-
-        return () => {
-            el.removeEventListener('touchstart', onTouchStart)
-            el.removeEventListener('touchmove', onTouchMove)
-            el.removeEventListener('touchend', onTouchEnd)
-        }
-    }, [selectedIndex, applyTransform])
-
     // Handlers for Navigation
     const handleNext = useCallback(() => {
         if (selectedIndex !== null && selectedIndex < filteredItems.length - 1) {
@@ -492,12 +325,6 @@ export function LibraryPage() {
             setSelectedIndex(selectedIndex - 1)
         }
     }, [selectedIndex])
-
-    // Sync navigation handlers vào refs để dùng trong touch effect (tránh stale closure)
-    useEffect(() => {
-        handleNextRef.current = handleNext
-        handlePrevRef.current = handlePrev
-    }, [handleNext, handlePrev])
 
     // Lắng nghe phím mũi tên khi xem ảnh
     useEffect(() => {
@@ -606,25 +433,25 @@ export function LibraryPage() {
                     
                     {/* Filter phụ chỉ hiện khi ở tab Kết quả AI */}
                     {tab === "generated" && (
-                        <div className="flex items-center gap-1 px-2 py-1 bg-muted/50 rounded-full border border-border/50">
-                            <span className="text-[10px] text-muted-foreground mx-1 hidden sm:inline">Lọc:</span>
-                            <button
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-muted/50 rounded-full border border-border/50">
+                            <span className="text-[10px] text-muted-foreground mr-1">Lọc:</span>
+                            <button 
                                 onClick={() => setGeneratedSubFilter("all")}
-                                className={`text-[10px] px-3 py-1.5 min-h-[30px] rounded-full transition-colors ${generatedSubFilter === "all" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                                className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${generatedSubFilter === "all" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
                             >
                                 Tất cả
                             </button>
-                            <button
+                            <button 
                                 onClick={() => setGeneratedSubFilter("ai")}
-                                className={`text-[10px] px-3 py-1.5 min-h-[30px] rounded-full transition-colors ${generatedSubFilter === "ai" ? "bg-blue-500/15 text-blue-400 font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                                className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${generatedSubFilter === "ai" ? "bg-blue-500/15 text-blue-400 font-medium" : "text-muted-foreground hover:text-foreground"}`}
                             >
-                                Prompt
+                                Chỉ Prompt
                             </button>
-                            <button
+                            <button 
                                 onClick={() => setGeneratedSubFilter("template")}
-                                className={`text-[10px] px-3 py-1.5 min-h-[30px] rounded-full transition-colors ${generatedSubFilter === "template" ? "bg-purple-500/15 text-purple-400 font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                                className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${generatedSubFilter === "template" ? "bg-purple-500/15 text-purple-400 font-medium" : "text-muted-foreground hover:text-foreground"}`}
                             >
-                                Mẫu
+                                Chỉ Mẫu
                             </button>
                         </div>
                     )}
@@ -661,8 +488,8 @@ export function LibraryPage() {
                                         loading="lazy"
                                     />
 
-                                    {/* Hover overlay — luôn hiện trên mobile (không có hover), hover trên desktop */}
-                                    <div className="absolute inset-0 flex items-end justify-between p-2 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                                    {/* Hover overlay */}
+                                    <div className="absolute inset-0 flex items-end justify-between p-2 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100">
                                         <div className="flex gap-1">
                                             <Button
                                                 variant="secondary"
@@ -794,8 +621,7 @@ export function LibraryPage() {
                             </div>
 
                             {/* Action Bar (Góc dưới) - Gộp chung Zoom Tool & Tools Khác */}
-                            {/* bottom safe area cho iPhone notch/home indicator */}
-                            <div className="absolute left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto" style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
                                 {/* Group: Zoom Controls */}
                                 <div className="flex items-center gap-1 border-r border-white/10 pr-2 mr-1">
                                     <Button 
@@ -849,8 +675,8 @@ export function LibraryPage() {
                                 </Button>
                             </div>
 
-                            {/* Nút Previous — ẩn trên mobile, dùng swipe thay */}
-                            <div className="hidden sm:block absolute left-4 top-1/2 -translate-y-1/2 z-40">
+                            {/* Nút Previous */}
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-40">
                                 <Button
                                     variant="outline"
                                     size="icon"
@@ -864,8 +690,8 @@ export function LibraryPage() {
                                 </Button>
                             </div>
 
-                            {/* Nút Next — ẩn trên mobile, dùng swipe thay */}
-                            <div className="hidden sm:block absolute right-4 top-1/2 -translate-y-1/2 z-40">
+                            {/* Nút Next */}
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 z-40">
                                 <Button
                                     variant="outline"
                                     size="icon"
@@ -880,10 +706,8 @@ export function LibraryPage() {
                             </div>
 
                             {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
-                            <div
-                                ref={imageContainerRef}
+                            <div 
                                 className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
-                                style={{ touchAction: 'none' }}
                                 onWheel={handleWheelZoom}
                                 onMouseDown={handleMouseDownPan}
                                 onMouseMove={handleMouseMovePan}
@@ -891,14 +715,13 @@ export function LibraryPage() {
                                 onMouseLeave={handleMouseUpPan}
                                 onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
                             >
-                                <img
-                                    ref={imgRef}
-                                    src={selectedItem.thumbnail}
-                                    alt="Preview"
-                                    className="max-w-full max-h-full object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform pointer-events-none"
+                                <img 
+                                    src={selectedItem.thumbnail} 
+                                    alt="Preview" 
+                                    className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform ease-out will-change-transform pointer-events-auto"
                                     style={{
-                                        transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
-                                        transition: isDraggingZoom ? 'none' : 'transform 200ms ease-out',
+                                        transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                                        transitionDuration: isDraggingZoom ? '0ms' : '200ms' // Tắt chuyển động mượt khi đang kéo thả cho cảm giác 1:1 realtime
                                     }}
                                     draggable={false}
                                 />
