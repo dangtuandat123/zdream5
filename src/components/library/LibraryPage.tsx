@@ -25,7 +25,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
     Select,
     SelectContent,
@@ -56,14 +56,13 @@ interface MediaItem {
     numericId?: number // for API delete
 }
 
-// === Cấu hình tabs ===
+// === Cấu hình tabs — flat, mỗi tab = 1 loại, không sub-filter ===
 const TABS = [
-    { value: "all", label: "Tất cả", icon: null },
-    { value: "generated", label: "Kết quả AI", icon: SparklesIcon }, // Gộp AI + Template
-    { value: "upload", label: "Tài nguyên gốc", icon: UploadIcon },
+    { value: "all", label: "Tất cả", icon: LayoutGridIcon },
+    { value: "ai", label: "AI", icon: SparklesIcon },
+    { value: "template", label: "Mẫu", icon: PaletteIcon },
+    { value: "upload", label: "Tải lên", icon: UploadIcon },
 ] as const
-
-type GeneratedFilter = "all" | "ai" | "template"
 
 // === Badge config theo loại ===
 const TYPE_CONFIG: Record<MediaType, { label: string; className: string }> = {
@@ -87,8 +86,9 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
 // === Empty state config ===
 const EMPTY_STATES: Record<string, { icon: typeof ImageIcon; title: string; desc: string; cta?: { label: string; to: string } }> = {
     all: { icon: ImageIcon, title: "Thư viện trống", desc: "Bắt đầu tạo ảnh AI hoặc tải ảnh lên để xây dựng bộ sưu tập của bạn.", cta: { label: "Tạo ảnh đầu tiên", to: "/app/generate" } },
-    generated: { icon: SparklesIcon, title: "Chưa có kết quả AI nào", desc: "Hãy tạo ảnh bằng cách nhập prompt hoặc sử dụng mẫu thiết kế.", cta: { label: "Tạo ảnh ngay", to: "/app/generate" } },
-    upload: { icon: UploadIcon, title: "Chưa có tài nguyên gốc", desc: "Tải ảnh lên để sử dụng với các mẫu thiết kế hoặc làm tài liệu tham khảo." },
+    ai: { icon: SparklesIcon, title: "Chưa có ảnh AI nào", desc: "Hãy tạo ảnh bằng cách nhập prompt sáng tạo của bạn.", cta: { label: "Tạo ảnh ngay", to: "/app/generate" } },
+    template: { icon: PaletteIcon, title: "Chưa có ảnh từ mẫu", desc: "Khám phá các mẫu thiết kế để tạo ảnh nhanh chóng.", cta: { label: "Xem mẫu", to: "/app/templates" } },
+    upload: { icon: UploadIcon, title: "Chưa có ảnh tải lên", desc: "Tải ảnh lên để sử dụng làm tài liệu tham khảo." },
 }
 
 export function LibraryPage() {
@@ -96,7 +96,6 @@ export function LibraryPage() {
     const [items, setItems] = useState<MediaItem[]>([])
     const [search, setSearch] = useState("")
     const [tab, setTab] = useState<string>("all")
-    const [generatedSubFilter, setGeneratedSubFilter] = useState<GeneratedFilter>("all")
     const [sort, setSort] = useState("newest")
     const [isLoading, setIsLoading] = useState(true)
     const [page, setPage] = useState(1)
@@ -275,15 +274,9 @@ export function LibraryPage() {
     const filteredItems = useMemo(() => {
         let currentItems = [...items]
 
-        // Lọc theo tab lớn
-        if (tab === "generated") {
-            currentItems = currentItems.filter((item) => item.type === "ai" || item.type === "template")
-            // Lọc phụ bên trong tab generated
-            if (generatedSubFilter !== "all") {
-                currentItems = currentItems.filter((item) => item.type === generatedSubFilter)
-            }
-        } else if (tab === "upload") {
-            currentItems = currentItems.filter((item) => item.type === "upload")
+        // Lọc theo tab — flat, mỗi tab = 1 loại
+        if (tab !== "all") {
+            currentItems = currentItems.filter((item) => item.type === tab)
         }
 
         // Lọc theo search
@@ -310,7 +303,7 @@ export function LibraryPage() {
         })
 
         return currentItems
-    }, [items, tab, generatedSubFilter, search, sort])
+    }, [items, tab, search, sort])
 
     const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
 
@@ -616,65 +609,27 @@ export function LibraryPage() {
                 </div>
             </div>
 
-            {/* Tab filter chính */}
-            <ToggleGroup
-                type="single"
-                value={tab}
-                onValueChange={(v) => {
-                    if (v) {
-                        setTab(v)
-                        setGeneratedSubFilter("all") // Reset sub-filter khi đổi tab
-                    }
-                }}
-                className="flex flex-wrap justify-start gap-1"
-            >
-                {TABS.map((t) => (
-                    <ToggleGroupItem
-                        key={t.value}
-                        value={t.value}
-                        className="rounded-full px-4 text-xs h-8 gap-1.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-                    >
-                        {t.icon && <t.icon className="size-3.5" />}
-                        {t.label}
-                    </ToggleGroupItem>
-                ))}
-            </ToggleGroup>
-
-            {/* Toolbar: Counter + Sub-filter + Sort */}
-            <div className="flex flex-wrap items-center justify-between gap-3 -mt-1 border-b pb-3">
-                <div className="flex items-center gap-4">
-                    <p className="text-xs text-muted-foreground whitespace-nowrap">
-                        {filteredItems.length} mục
-                    </p>
-                    
-                    {/* Filter phụ chỉ hiện khi ở tab Kết quả AI */}
-                    {tab === "generated" && (
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-muted/50 rounded-full border border-border/50">
-                            <span className="text-[10px] text-muted-foreground mr-1">Lọc:</span>
-                            <button 
-                                onClick={() => setGeneratedSubFilter("all")}
-                                className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${generatedSubFilter === "all" ? "bg-background shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                            >
-                                Tất cả
-                            </button>
-                            <button 
-                                onClick={() => setGeneratedSubFilter("ai")}
-                                className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${generatedSubFilter === "ai" ? "bg-blue-500/15 text-blue-400 font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                            >
-                                Chỉ Prompt
-                            </button>
-                            <button 
-                                onClick={() => setGeneratedSubFilter("template")}
-                                className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${generatedSubFilter === "template" ? "bg-purple-500/15 text-purple-400 font-medium" : "text-muted-foreground hover:text-foreground"}`}
-                            >
-                                Chỉ Mẫu
-                            </button>
-                        </div>
-                    )}
-                </div>
+            {/* Tabs filter + Sort — một hàng duy nhất, gọn gàng */}
+            <div className="flex items-center justify-between gap-3 border-b pb-3">
+                <Tabs value={tab} onValueChange={setTab}>
+                    <TabsList>
+                        {TABS.map((t) => (
+                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs">
+                                <t.icon className="size-3.5" />
+                                {t.label}
+                                {/* Hiển thị số lượng cho từng tab */}
+                                {tab === t.value && (
+                                    <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px] font-medium">
+                                        {filteredItems.length}
+                                    </Badge>
+                                )}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                </Tabs>
 
                 <Select value={sort} onValueChange={setSort}>
-                    <SelectTrigger className="w-[120px] h-7 text-xs bg-background">
+                    <SelectTrigger className="w-[120px] h-8 text-xs">
                         <CalendarIcon className="size-3 mr-1.5 text-muted-foreground" />
                         <SelectValue />
                     </SelectTrigger>
