@@ -907,7 +907,7 @@ export function LibraryPage() {
                     className="fixed inset-0 z-50 bg-black/95 text-slate-200"
                     style={{ touchAction: 'none' }}
                 >
-                    <div className="relative w-full h-[100dvh] flex">
+                    <div className="relative w-full h-[100dvh] flex overflow-hidden">
                         {/* === Phần chính: ảnh + controls === */}
                         <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
                             {/* Top bar — đóng, counter, info toggle */}
@@ -929,12 +929,12 @@ export function LibraryPage() {
                                 <div className="flex items-center gap-1.5 pointer-events-auto">
                                     <Button
                                         variant="ghost"
-                                        size="icon"
-                                        title="Chi tiết ảnh"
-                                        className={`rounded-full h-9 w-9 border-none shadow-lg transition-colors ${showInfo ? 'bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                                        title="Thông tin ảnh"
+                                        className={`rounded-full h-9 px-3.5 border-none shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-white/15 text-white hover:bg-white/25'}`}
                                         onClick={() => setShowInfo(!showInfo)}
                                     >
-                                        <InfoIcon className="size-4" />
+                                        <InfoIcon className="size-3.5" />
+                                        <span className="hidden sm:inline">Thông tin</span>
                                     </Button>
                                     <Button
                                         variant="outline"
@@ -1077,18 +1077,9 @@ export function LibraryPage() {
                                     </Button>
                                 </div>
 
-                                {/* Thumbnail nhỏ trong panel */}
-                                <div className="px-5 pt-4 pb-2">
-                                    <img
-                                        src={selectedItem.thumbnail}
-                                        alt=""
-                                        className="w-full aspect-video object-cover rounded-xl border border-white/10"
-                                    />
-                                </div>
-
                                 {/* Prompt — phần quan trọng nhất */}
                                 {selectedItem.prompt && (
-                                    <div className="px-5 py-3 space-y-2">
+                                    <div className="px-5 pt-4 pb-3 space-y-2">
                                         <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
                                         <p className="text-sm text-white/85 leading-relaxed">
                                             {selectedItem.prompt}
