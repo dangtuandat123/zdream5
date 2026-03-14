@@ -178,7 +178,7 @@ export function LibraryPage() {
         // Scroll lên đầu danh sách khi chuyển trang
         window.scrollTo({ top: 0, behavior: "smooth" })
     }, [page, totalPages, fetchImages])
-    
+
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
     const [showInfo, setShowInfo] = useState(false)
@@ -194,7 +194,7 @@ export function LibraryPage() {
     const imgRef = useRef<HTMLImageElement>(null)
     const lastTapTime = useRef(0)
     const touchStartPos = useRef<{ x: number; y: number } | null>(null)
-    
+
     // Delete image via API
     const handleDeleteImage = useCallback(async (item: MediaItem, e?: React.MouseEvent) => {
         e?.stopPropagation()
@@ -296,7 +296,7 @@ export function LibraryPage() {
             // Upload song song tất cả các tệp
             const uploadPromises = imageFiles.map(file => imageApi.upload(file))
             const results = await Promise.all(uploadPromises)
-            
+
             // Map kết quả từ API sang MediaItem format
             const uploadedItems: MediaItem[] = results.map(res => apiToMediaItem(res.image as any))
 
@@ -343,10 +343,10 @@ export function LibraryPage() {
 
         // Sắp xếp
         currentItems.sort((a, b) => {
-            const dateDiff = sort === "newest" 
-                ? b.createdAt.localeCompare(a.createdAt) 
+            const dateDiff = sort === "newest"
+                ? b.createdAt.localeCompare(a.createdAt)
                 : a.createdAt.localeCompare(b.createdAt)
-            
+
             if (dateDiff === 0) {
                 return b.id.localeCompare(a.id)
             }
@@ -586,7 +586,7 @@ export function LibraryPage() {
             el.removeEventListener('touchmove', onTouchMove)
             el.removeEventListener('touchend', onTouchEnd)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedIndex, syncToState, resetZoom, applyZoom])
 
     // Handlers for Navigation
@@ -667,7 +667,7 @@ export function LibraryPage() {
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
-                    <Button 
+                    <Button
                         onClick={handleUploadClick}
                         className="h-9 whitespace-nowrap px-4 w-full sm:w-auto"
                         disabled={isUploading}
@@ -680,10 +680,10 @@ export function LibraryPage() {
                         Tải ảnh lên
                     </Button>
                     {/* Hidden file input (hỗ trợ multiple) */}
-                    <input 
-                        type="file" 
+                    <input
+                        type="file"
                         ref={fileInputRef}
-                        className="hidden" 
+                        className="hidden"
                         accept="image/*"
                         multiple
                         onChange={handleFileChange}
@@ -733,154 +733,154 @@ export function LibraryPage() {
                         const typeConfig = TYPE_CONFIG[item.type]
                         const TypeIcon = typeConfig.icon
                         return (
-                        <Card
-                            key={item.id}
-                            className="group cursor-pointer overflow-hidden border-transparent transition-all duration-200 hover:shadow-lg hover:border-border"
-                            onClick={() => setSelectedIndex(index)}
-                        >
-                            <CardContent className="p-0">
-                                {/* Thumbnail — square cho gallery đều đặn */}
-                                <div className="relative aspect-square bg-muted overflow-hidden">
-                                    <img
-                                        src={item.thumbnail}
-                                        alt={item.prompt || `Item ${item.id}`}
-                                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                        loading="lazy"
-                                    />
+                            <Card
+                                key={item.id}
+                                className="group cursor-pointer overflow-hidden border-transparent transition-all duration-200 hover:shadow-lg hover:border-border"
+                                onClick={() => setSelectedIndex(index)}
+                            >
+                                <CardContent className="p-0">
+                                    {/* Thumbnail — square cho gallery đều đặn */}
+                                    <div className="relative aspect-square bg-muted overflow-hidden">
+                                        <img
+                                            src={item.thumbnail}
+                                            alt={item.prompt || `Item ${item.id}`}
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            loading="lazy"
+                                        />
 
-                                    {/* Type badge — pill nhỏ gọn, backdrop-blur dễ đọc trên mọi nền */}
-                                    <div className={`absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-md shadow-sm ${typeConfig.className}`}>
-                                        <TypeIcon className="size-3" />
-                                        {typeConfig.label}
+                                        {/* Type badge — pill nhỏ gọn, backdrop-blur dễ đọc trên mọi nền */}
+                                        <div className={`absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-md shadow-sm ${typeConfig.className}`}>
+                                            <TypeIcon className="size-3" />
+                                            {typeConfig.label}
+                                        </div>
+
+                                        {/* Nút ⋯ .— luôn hiện trên mobile, hover hiện trên desktop */}
+                                        {isMobile ? (
+                                            <Button
+                                                variant="secondary"
+                                                size="icon"
+                                                className="absolute top-1.5 right-1.5 size-8 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border-0"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setActionItem(item)
+                                                }}
+                                            >
+                                                <MoreHorizontalIcon className="size-4" />
+                                            </Button>
+                                        ) : (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="icon"
+                                                        className="absolute top-1.5 right-1.5 size-8 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    >
+                                                        <MoreHorizontalIcon className="size-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-44">
+                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                        <DownloadIcon className="size-4 mr-2" />
+                                                        Tải xuống
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                        <WandIcon className="size-4 mr-2" />
+                                                        Tạo tương tự
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                        <LayoutGridIcon className="size-4 mr-2" />
+                                                        Dùng làm mẫu
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        className="text-destructive focus:text-destructive"
+                                                        onClick={(e) => handleDeleteImage(item, e)}
+                                                    >
+                                                        <Trash2Icon className="size-4 mr-2" />
+                                                        Xóa ảnh
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        )}
+
+                                        {/* Hover gradient nhẹ cho desktop — tạo chiều sâu */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
                                     </div>
 
-                                    {/* Nút ⋯ — luôn hiện trên mobile, hover hiện trên desktop */}
-                                    {isMobile ? (
-                                        <Button
-                                            variant="secondary"
-                                            size="icon"
-                                            className="absolute top-1.5 right-1.5 size-8 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border-0"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setActionItem(item)
-                                            }}
-                                        >
-                                            <MoreHorizontalIcon className="size-4" />
-                                        </Button>
-                                    ) : (
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button
-                                                    variant="secondary"
-                                                    size="icon"
-                                                    className="absolute top-1.5 right-1.5 size-8 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <MoreHorizontalIcon className="size-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-44">
-                                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                                    <DownloadIcon className="size-4 mr-2" />
-                                                    Tải xuống
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                                    <WandIcon className="size-4 mr-2" />
-                                                    Tạo tương tự
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                                    <LayoutGridIcon className="size-4 mr-2" />
-                                                    Dùng làm mẫu
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem
-                                                    className="text-destructive focus:text-destructive"
-                                                    onClick={(e) => handleDeleteImage(item, e)}
-                                                >
-                                                    <Trash2Icon className="size-4 mr-2" />
-                                                    Xóa ảnh
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    )}
-
-                                    {/* Hover gradient nhẹ cho desktop — tạo chiều sâu */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
-                                </div>
-
-                                {/* Footer — prompt + date, gọn gàng */}
-                                <div className="px-2.5 py-2 space-y-0.5">
-                                    <p className="text-xs font-medium truncate leading-tight">
-                                        {item.prompt || item.templateName || "Tài nguyên tải lên"}
-                                    </p>
-                                    <p className="text-[11px] text-muted-foreground">{item.createdAt}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                    {/* Footer — prompt + date, gọn gàng */}
+                                    <div className="px-2.5 py-2 space-y-0.5">
+                                        <p className="text-xs font-medium truncate leading-tight">
+                                            {item.prompt || item.templateName || "Tài nguyên tải lên"}
+                                        </p>
+                                        <p className="text-[11px] text-muted-foreground">{item.createdAt}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         )
                     })}
                 </div>
-                {/* Phân trang */}
-                {totalPages > 1 && (
-                    <div className="flex justify-center pt-6 pb-2">
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        onClick={() => goToPage(page - 1)}
-                                        className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-                                    />
-                                </PaginationItem>
-
-                                {/* Trang đầu */}
-                                {page > 2 && (
+                    {/* Phân trang */}
+                    {totalPages > 1 && (
+                        <div className="flex justify-center pt-6 pb-2">
+                            <Pagination>
+                                <PaginationContent>
                                     <PaginationItem>
-                                        <PaginationLink onClick={() => goToPage(1)}>1</PaginationLink>
+                                        <PaginationPrevious
+                                            onClick={() => goToPage(page - 1)}
+                                            className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+                                        />
                                     </PaginationItem>
-                                )}
-                                {page > 3 && (
-                                    <PaginationItem><PaginationEllipsis /></PaginationItem>
-                                )}
 
-                                {/* Trang trước */}
-                                {page > 1 && (
+                                    {/* Trang đầu */}
+                                    {page > 2 && (
+                                        <PaginationItem>
+                                            <PaginationLink onClick={() => goToPage(1)}>1</PaginationLink>
+                                        </PaginationItem>
+                                    )}
+                                    {page > 3 && (
+                                        <PaginationItem><PaginationEllipsis /></PaginationItem>
+                                    )}
+
+                                    {/* Trang trước */}
+                                    {page > 1 && (
+                                        <PaginationItem>
+                                            <PaginationLink onClick={() => goToPage(page - 1)}>{page - 1}</PaginationLink>
+                                        </PaginationItem>
+                                    )}
+
+                                    {/* Trang hiện tại */}
                                     <PaginationItem>
-                                        <PaginationLink onClick={() => goToPage(page - 1)}>{page - 1}</PaginationLink>
+                                        <PaginationLink isActive>{page}</PaginationLink>
                                     </PaginationItem>
-                                )}
 
-                                {/* Trang hiện tại */}
-                                <PaginationItem>
-                                    <PaginationLink isActive>{page}</PaginationLink>
-                                </PaginationItem>
+                                    {/* Trang sau */}
+                                    {page < totalPages && (
+                                        <PaginationItem>
+                                            <PaginationLink onClick={() => goToPage(page + 1)}>{page + 1}</PaginationLink>
+                                        </PaginationItem>
+                                    )}
 
-                                {/* Trang sau */}
-                                {page < totalPages && (
+                                    {page < totalPages - 2 && (
+                                        <PaginationItem><PaginationEllipsis /></PaginationItem>
+                                    )}
+                                    {/* Trang cuối */}
+                                    {page < totalPages - 1 && (
+                                        <PaginationItem>
+                                            <PaginationLink onClick={() => goToPage(totalPages)}>{totalPages}</PaginationLink>
+                                        </PaginationItem>
+                                    )}
+
                                     <PaginationItem>
-                                        <PaginationLink onClick={() => goToPage(page + 1)}>{page + 1}</PaginationLink>
+                                        <PaginationNext
+                                            onClick={() => goToPage(page + 1)}
+                                            className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+                                        />
                                     </PaginationItem>
-                                )}
-
-                                {page < totalPages - 2 && (
-                                    <PaginationItem><PaginationEllipsis /></PaginationItem>
-                                )}
-                                {/* Trang cuối */}
-                                {page < totalPages - 1 && (
-                                    <PaginationItem>
-                                        <PaginationLink onClick={() => goToPage(totalPages)}>{totalPages}</PaginationLink>
-                                    </PaginationItem>
-                                )}
-
-                                <PaginationItem>
-                                    <PaginationNext
-                                        onClick={() => goToPage(page + 1)}
-                                        className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
-                    </div>
-                )}
+                                </PaginationContent>
+                            </Pagination>
+                        </div>
+                    )}
                 </>
             ) : (
                 // Empty state
@@ -922,12 +922,14 @@ export function LibraryPage() {
                             <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 pointer-events-none">
                                 {/* Trái: type badge + counter */}
                                 <div className="flex items-center gap-2.5 pointer-events-auto">
-                                    {(() => { const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
-                                        <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm ${cfg.className}`}>
-                                            <Icon className="size-3.5" />
-                                            {cfg.label}
-                                        </div>
-                                    )})()}
+                                    {(() => {
+                                        const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
+                                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm ${cfg.className}`}>
+                                                <Icon className="size-3.5" />
+                                                {cfg.label}
+                                            </div>
+                                        )
+                                    })()}
                                     <span className="text-xs text-white/50 font-medium tabular-nums">
                                         {selectedIndex + 1} / {filteredItems.length}
                                     </span>
@@ -1204,11 +1206,13 @@ export function LibraryPage() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs font-medium truncate">{actionItem.prompt || actionItem.templateName || "Tài nguyên tải lên"}</p>
                                     <div className="flex items-center gap-2 mt-1">
-                                        {(() => { const cfg = TYPE_CONFIG[actionItem.type]; const Icon = cfg.icon; return (
-                                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${cfg.className}`}>
-                                                <Icon className="size-2.5" />{cfg.label}
-                                            </span>
-                                        )})()}
+                                        {(() => {
+                                            const cfg = TYPE_CONFIG[actionItem.type]; const Icon = cfg.icon; return (
+                                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${cfg.className}`}>
+                                                    <Icon className="size-2.5" />{cfg.label}
+                                                </span>
+                                            )
+                                        })()}
                                         <span className="text-[11px] text-muted-foreground">{actionItem.createdAt}</span>
                                     </div>
                                 </div>
