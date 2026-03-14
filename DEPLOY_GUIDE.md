@@ -50,6 +50,7 @@ Các Key API và cấu hình Database được lưu tại: `/home/zdream/reposit
 ---
 
 ## ⚠️ 4. CÁC LƯU Ý KỸ THUẬT
+- **Ưu tiên React**: Trong file `.htaccess`, dòng `DirectoryIndex index.html index.php` cực kỳ quan trọng để trình duyệt chọn React thay vì Laravel.
 - **Migration**: Nếu có lỗi "Duplicate column", hãy kiểm tra xem có file Migration nào bị Git tải lại làm trùng tên hay không và xóa nó đi.
 - **Storage**: Thư mục ảnh được link bằng lệnh `ln -s repositories/zdream5/backend/storage/app/public public_html/storage`.
 - **.htaccess**: File này điều hướng toàn bộ `/api` về Laravel và các link còn lại về React `index.html`. Không được xoá dòng `RewriteEngine On`.

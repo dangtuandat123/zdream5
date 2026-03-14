@@ -3,6 +3,9 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    # Ưu tiên index.html của React lên trước index.php của Laravel
+    DirectoryIndex index.html index.php
+
     RewriteEngine On
 
     # Xử lý Header cấp quyền Token
@@ -22,7 +25,7 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 
-    # Gửi toàn bộ các requesst giao diện còn lại cho React (index.html)
+    # Gửi toàn bộ các request giao diện còn lại cho React (index.html)
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.html [L]
