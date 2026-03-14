@@ -942,7 +942,7 @@ export function LibraryPage() {
                                         onClick={() => setShowInfo(!showInfo)}
                                     >
                                         <InfoIcon className="size-3.5" />
-                                        <span className="hidden sm:inline">Thông tin</span>
+                                        <span>Thông tin</span>
                                     </Button>
                                     <Button
                                         variant="outline"
