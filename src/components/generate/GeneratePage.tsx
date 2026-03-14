@@ -34,7 +34,15 @@ import {
     Loader2,
     FolderOpen,
     LayoutGrid,
-    ChevronsUpDown
+    ChevronsUpDown,
+    Info,
+    ZoomIn,
+    ZoomOut,
+    Box,
+    Palette,
+    Ruler,
+    Hash,
+    Clock
 } from "lucide-react"
 
 import {
@@ -106,8 +114,8 @@ import {
 } from "@/components/ui/alert-dialog"
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import Zoom from 'react-medium-image-zoom'
-import 'react-medium-image-zoom/dist/styles.css'
+// Lightbox zoom/pan constants
+const MAX_ZOOM = 3
 
 // === Types ===
 interface GeneratedImage {
@@ -484,6 +492,9 @@ export function GeneratePage() {
     const [prompt, setPrompt] = useState("")
     const [images, setImages] = useState<GeneratedImage[]>([])
     const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null)
+    const [showInfo, setShowInfo] = useState(false)
+    const [lightboxZoom, setLightboxZoom] = useState(1)
+    const [lightboxPosition, setLightboxPosition] = useState({ x: 0, y: 0 })
     const [referenceImages, setReferenceImages] = useState<string[]>([])
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
@@ -519,7 +530,6 @@ export function GeneratePage() {
     }, [isProjectMenuOpen, currentProjectId, projects])
 
     const [newProjectName, setNewProjectName] = useState("")
-    const [showZoomHint, setShowZoomHint] = useState(true)
     // @Mention popover state
     const [showMentionPopover, setShowMentionPopover] = useState(false)
     const mentionInsertPosRef = useRef<number>(0)
@@ -537,18 +547,249 @@ export function GeneratePage() {
     const touchDragActiveRef = useRef(false)
     const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Reset copied + zoom hint khi image thay đổi
+    // Reset copied khi image thay đổi
     useEffect(() => {
         setIsCopied(false)
-        if (selectedImage) setShowZoomHint(true)
     }, [selectedImage])
 
-    // Auto-hide zoom hint sau 3s khi mở Dialog
+    // ── Lightbox zoom/pan infrastructure ──
+    const lbTransformRef = useRef({ x: 0, y: 0, zoom: 1 })
+    const lbGestureActive = useRef(false)
+    const lbMouseDragStart = useRef({ x: 0, y: 0 })
+    const lbIsMouseDragging = useRef(false)
+    const lbDimsCache = useRef({ cw: 0, ch: 0, dw: 0, dh: 0 })
+    const lbImageContainerRef = useRef<HTMLDivElement>(null)
+    const lbImgRef = useRef<HTMLImageElement>(null)
+    const lbDragStart = useRef({ x: 0, y: 0 })
+    const lbLastTouchDistance = useRef<number | null>(null)
+    const lbLastTouchCenter = useRef<{ x: number; y: number } | null>(null)
+    const lbIsTouchPanning = useRef(false)
+    const lbTouchStartPos = useRef<{ x: number; y: number } | null>(null)
+    const lbLastTapTime = useRef(0)
+
+    const lbUpdateDimsCache = () => {
+        const container = lbImageContainerRef.current
+        const img = lbImgRef.current
+        if (!container || !img) return
+        const cw = container.clientWidth, ch = container.clientHeight
+        const nw = img.naturalWidth || cw, nh = img.naturalHeight || ch
+        const r = nw / nh, cr = cw / ch
+        lbDimsCache.current = {
+            cw, ch,
+            dw: r > cr ? cw : ch * r,
+            dh: r > cr ? cw / r : ch,
+        }
+    }
+
+    const lbClampPos = (x: number, y: number, z: number) => {
+        const { cw, ch, dw, dh } = lbDimsCache.current
+        if (cw === 0) return { x, y }
+        const mx = Math.max(0, (dw * z - cw) / 2)
+        const my = Math.max(0, (dh * z - ch) / 2)
+        return { x: Math.max(-mx, Math.min(mx, x)), y: Math.max(-my, Math.min(my, y)) }
+    }
+
+    const lbApplyTransformDOM = () => {
+        const img = lbImgRef.current
+        if (!img) return
+        const { x, y, zoom: z } = lbTransformRef.current
+        img.style.transitionDuration = '0ms'
+        img.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`
+    }
+
+    const lbSyncToState = useCallback(() => {
+        const { x, y, zoom: z } = lbTransformRef.current
+        setLightboxZoom(z)
+        setLightboxPosition({ x, y })
+        if (lbImgRef.current) lbImgRef.current.style.transitionDuration = '200ms'
+    }, [])
+
+    const lbResetZoom = useCallback(() => {
+        lbTransformRef.current = { x: 0, y: 0, zoom: 1 }
+        lbApplyTransformDOM()
+        lbSyncToState()
+    }, [lbSyncToState])
+
+    const lbApplyZoom = useCallback((newZ: number) => {
+        const z = Math.min(Math.max(newZ, 1), MAX_ZOOM)
+        const pos = z === 1 ? { x: 0, y: 0 } : lbClampPos(lbTransformRef.current.x, lbTransformRef.current.y, z)
+        lbTransformRef.current = { ...pos, zoom: z }
+        lbApplyTransformDOM()
+        lbSyncToState()
+    }, [lbSyncToState])
+
+    const lbHandleZoomIn = useCallback(() => lbApplyZoom(lbTransformRef.current.zoom + 0.5), [lbApplyZoom])
+    const lbHandleZoomOut = useCallback(() => lbApplyZoom(lbTransformRef.current.zoom - 0.5), [lbApplyZoom])
+
+    // Reset zoom khi thay đổi ảnh
     useEffect(() => {
-        if (!selectedImage || !showZoomHint) return
-        const t = setTimeout(() => setShowZoomHint(false), 3000)
-        return () => clearTimeout(t)
-    }, [selectedImage, showZoomHint])
+        lbTransformRef.current = { x: 0, y: 0, zoom: 1 }
+        lbApplyTransformDOM()
+        lbSyncToState()
+        const img = lbImgRef.current
+        if (img) {
+            const onLoad = () => lbUpdateDimsCache()
+            img.addEventListener('load', onLoad)
+            requestAnimationFrame(lbUpdateDimsCache)
+            return () => img.removeEventListener('load', onLoad)
+        }
+    }, [selectedImage, lbSyncToState])
+
+    // Mouse drag pan (desktop)
+    const lbHandleMouseDownPan = (e: React.MouseEvent) => {
+        if (lbTransformRef.current.zoom <= 1) return
+        e.preventDefault()
+        lbIsMouseDragging.current = true
+        lbMouseDragStart.current = { x: e.clientX - lbTransformRef.current.x, y: e.clientY - lbTransformRef.current.y }
+    }
+    const lbHandleMouseMovePan = (e: React.MouseEvent) => {
+        if (!lbIsMouseDragging.current) return
+        e.preventDefault()
+        const z = lbTransformRef.current.zoom
+        const p = lbClampPos(e.clientX - lbMouseDragStart.current.x, e.clientY - lbMouseDragStart.current.y, z)
+        lbTransformRef.current = { ...p, zoom: z }
+        lbApplyTransformDOM()
+    }
+    const lbHandleMouseUpPan = () => {
+        if (!lbIsMouseDragging.current) return
+        lbIsMouseDragging.current = false
+        lbSyncToState()
+    }
+    const lbHandleWheelZoom = (e: React.WheelEvent) => {
+        if (e.deltaY < 0) lbHandleZoomIn()
+        else lbHandleZoomOut()
+    }
+
+    // Lightbox navigation helpers
+    const lbCurrentIdx = selectedImage ? images.findIndex(img => img.id === selectedImage.id) : -1
+    const lbHandleNext = useCallback(() => {
+        const idx = images.findIndex(img => img.id === selectedImage?.id)
+        if (idx !== -1 && idx < images.length - 1) setSelectedImage(images[idx + 1])
+    }, [selectedImage, images])
+    const lbHandlePrev = useCallback(() => {
+        const idx = images.findIndex(img => img.id === selectedImage?.id)
+        if (idx > 0) setSelectedImage(images[idx - 1])
+    }, [selectedImage, images])
+
+    // Refs for touch swipe (avoid stale closures)
+    const lbHandleNextRef = useRef(lbHandleNext)
+    const lbHandlePrevRef = useRef(lbHandlePrev)
+    useEffect(() => { lbHandleNextRef.current = lbHandleNext }, [lbHandleNext])
+    useEffect(() => { lbHandlePrevRef.current = lbHandlePrev }, [lbHandlePrev])
+
+    // Native touch listeners — zero React re-renders during gesture
+    useEffect(() => {
+        const el = lbImageContainerRef.current
+        if (!el || !selectedImage) return
+        lbUpdateDimsCache()
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2) {
+                e.preventDefault()
+                lbGestureActive.current = true
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                lbLastTouchDistance.current = Math.hypot(dx, dy)
+                lbLastTouchCenter.current = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                }
+                lbIsTouchPanning.current = false
+                lbTouchStartPos.current = null
+            } else if (e.touches.length === 1) {
+                const t = e.touches[0]
+                lbTouchStartPos.current = { x: t.clientX, y: t.clientY }
+                if (lbTransformRef.current.zoom > 1) {
+                    lbGestureActive.current = true
+                    lbIsTouchPanning.current = true
+                    lbDragStart.current = { x: t.clientX - lbTransformRef.current.x, y: t.clientY - lbTransformRef.current.y }
+                }
+                // Double-tap
+                const now = Date.now()
+                if (now - lbLastTapTime.current < 300) {
+                    e.preventDefault()
+                    if (lbTransformRef.current.zoom > 1) lbResetZoom()
+                    else lbApplyZoom(2.5)
+                    lbLastTapTime.current = 0
+                    lbTouchStartPos.current = null
+                } else {
+                    lbLastTapTime.current = now
+                }
+            }
+        }
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (e.touches.length === 2 && lbLastTouchDistance.current !== null) {
+                e.preventDefault()
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                const distance = Math.hypot(dx, dy)
+                const scale = distance / lbLastTouchDistance.current
+                const newZ = Math.min(Math.max(lbTransformRef.current.zoom * scale, 1), MAX_ZOOM)
+                if (newZ === 1) {
+                    lbTransformRef.current = { x: 0, y: 0, zoom: 1 }
+                } else if (lbLastTouchCenter.current) {
+                    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
+                    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    const np = lbClampPos(
+                        lbTransformRef.current.x + (cx - lbLastTouchCenter.current.x),
+                        lbTransformRef.current.y + (cy - lbLastTouchCenter.current.y),
+                        newZ
+                    )
+                    lbTransformRef.current = { ...np, zoom: newZ }
+                    lbLastTouchCenter.current = { x: cx, y: cy }
+                } else {
+                    lbTransformRef.current.zoom = newZ
+                }
+                lbApplyTransformDOM()
+                lbLastTouchDistance.current = distance
+            } else if (e.touches.length === 1 && lbIsTouchPanning.current && lbTransformRef.current.zoom > 1) {
+                e.preventDefault()
+                const t = e.touches[0]
+                const np = lbClampPos(t.clientX - lbDragStart.current.x, t.clientY - lbDragStart.current.y, lbTransformRef.current.zoom)
+                lbTransformRef.current = { ...np, zoom: lbTransformRef.current.zoom }
+                lbApplyTransformDOM()
+            }
+        }
+
+        const onTouchEnd = (e: TouchEvent) => {
+            // Swipe navigation (not zoomed)
+            if (lbTouchStartPos.current && lbTransformRef.current.zoom <= 1 && e.changedTouches.length === 1) {
+                const dx = e.changedTouches[0].clientX - lbTouchStartPos.current.x
+                const dy = e.changedTouches[0].clientY - lbTouchStartPos.current.y
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                    if (dx > 0) lbHandlePrevRef.current()
+                    else lbHandleNextRef.current()
+                }
+            }
+            lbLastTouchDistance.current = null
+            lbLastTouchCenter.current = null
+            lbIsTouchPanning.current = false
+            lbTouchStartPos.current = null
+            if (lbGestureActive.current) {
+                lbGestureActive.current = false
+                lbSyncToState()
+            }
+        }
+
+        el.addEventListener('touchstart', onTouchStart, { passive: false })
+        el.addEventListener('touchmove', onTouchMove, { passive: false })
+        el.addEventListener('touchend', onTouchEnd)
+        return () => {
+            el.removeEventListener('touchstart', onTouchStart)
+            el.removeEventListener('touchmove', onTouchMove)
+            el.removeEventListener('touchend', onTouchEnd)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedImage, lbSyncToState, lbResetZoom, lbApplyZoom])
+
+    // Lock body scroll khi lightbox mở
+    useEffect(() => {
+        if (selectedImage) {
+            document.body.style.overflow = 'hidden'
+            return () => { document.body.style.overflow = '' }
+        }
+    }, [selectedImage])
 
     // Load danh sách projects
     useEffect(() => {
@@ -1123,10 +1364,11 @@ export function GeneratePage() {
         setSelectedImage(null)
     }, [])
 
-    // Keyboard navigation trong Dialog (← →)
+    // Keyboard navigation trong lightbox (← → ESC)
     useEffect(() => {
         if (!selectedImage) return
         const handler = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') { setSelectedImage(null); setShowInfo(false); return }
             const idx = images.findIndex(img => img.id === selectedImage.id)
             if (idx === -1) return
             if (e.key === 'ArrowLeft' && idx > 0) {
@@ -1777,253 +2019,266 @@ export function GeneratePage() {
                     </div>
                 </div>
 
-                {/* === IMAGE VIEWER — Dialog modal === */}
-                <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-                    {selectedImage && (() => {
-                        const currentIdx = images.findIndex(img => img.id === selectedImage.id)
-                        return (
-                        <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl [&>button]:hidden">
-                            <DialogTitle className="sr-only">Chi tiết hình ảnh</DialogTitle>
-                            <div className="flex flex-col lg:flex-row h-full overflow-hidden w-full">
-
-                                {/* Nút đóng (Custom nổi) */}
-                                <Button 
-                                    variant="outline" 
-                                    size="icon" 
-                                    className="absolute top-4 right-4 lg:top-4 lg:right-4 z-[60] size-10 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg"
-                                    onClick={() => setSelectedImage(null)}
-                                >
-                                    <X className="size-5" />
-                                </Button>
-
-                                {/* Ảnh + Nav arrows */}
-                                <div className="h-[45vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 lg:p-8 group/viewer">
-                                    
-                                    {/* Nút Previous */}
-                                    <div className="absolute left-2 lg:left-4 top-1/2 -translate-y-1/2 z-40">
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className={`size-10 lg:size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${currentIdx === 0 ? "opacity-0 pointer-events-none" : "opacity-100 sm:opacity-0 sm:group-hover/viewer:opacity-100"}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setSelectedImage(images[currentIdx - 1])
-                                            }}
-                                        >
-                                            <ChevronLeft className="size-6 lg:size-8" />
-                                        </Button>
-                                    </div>
-                                    
-                                    {/* Nút Next */}
-                                    <div className="absolute right-2 lg:right-4 top-1/2 -translate-y-1/2 z-40">
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            className={`size-10 lg:size-12 rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity ${currentIdx === images.length - 1 ? "opacity-0 pointer-events-none" : "opacity-100 sm:opacity-0 sm:group-hover/viewer:opacity-100"}`}
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                setSelectedImage(images[currentIdx + 1])
-                                            }}
-                                        >
-                                            <ChevronRight className="size-6 lg:size-8" />
-                                        </Button>
-                                    </div>
-
-                                    {/* Khối chứa ép tỉ lệ (SVG Spacer Bounding Box) */}
-                                    <div className="relative flex max-w-full max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 group/img-wrapper isolate">
-
-                                        {/* Invisible SVG spacer for aspect ratio */}
-                                        <img
-                                            src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${selectedImage.aspectRatio * 10000}" height="10000"></svg>`)}`}
-                                            alt="spacer"
-                                            className="w-auto h-auto max-w-full max-h-full object-contain invisible pointer-events-none"
-                                            style={{
-                                                maxHeight: isMobile ? 'calc(100vh - 12rem)' : 'calc(85vh - 4rem)',
-                                            }}
-                                        />
-
-                                        {/* Actual image wrapper */}
-                                        <div className="absolute inset-0 w-full h-full">
-                                            <Zoom zoomMargin={isMobile ? 0 : 40} classDialog="custom-zoom-overlay">
-                                                <img
-                                                    src={selectedImage.url}
-                                                    alt={selectedImage.prompt}
-                                                    className="w-full h-full object-cover cursor-grab active:cursor-grabbing"
-                                                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                                                    draggable
-                                                    onDragStart={(e) => {
-                                                        e.dataTransfer.setData('text/plain', selectedImage.url)
-                                                        // Ẩn native ghost
-                                                        const emptyCanvas = document.createElement('canvas')
-                                                        emptyCanvas.width = 1; emptyCanvas.height = 1
-                                                        document.body.appendChild(emptyCanvas)
-                                                        e.dataTransfer.setDragImage(emptyCanvas, 0, 0)
-                                                        setTimeout(() => document.body.removeChild(emptyCanvas), 0)
-                                                        // Kích hoạt custom floating overlay
-                                                        const initial = { url: selectedImage.url, x: e.clientX, y: e.clientY }
-                                                        dragStateRef.current = initial
-                                                        setDragState(initial)
-                                                    }}
-                                                />
-                                            </Zoom>
-
-                                            {/* Hover overlay — không dùng backdrop-blur vì nó bỏ qua overflow-hidden, gây lòe góc */}
-                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img-wrapper:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                                                <div className="absolute inset-0 bg-black/30" />
-                                                <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover/img-wrapper:translate-y-0 transition-all duration-300 relative z-10">
-                                                    <Maximize2 className="size-4" />
-                                                    Xem chuẩn gốc
-                                                </div>
-                                            </div>
-
-                                            {/* Mobile zoom hint */}
-                                            {isMobile && showZoomHint && (
-                                                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-3 py-1.5 rounded-full animate-pulse pointer-events-none z-20">
-                                                    Chạm để phóng to
-                                                </div>
-                                            )}
+                {/* === IMAGE VIEWER — Fullscreen Portal Lightbox === */}
+                {selectedImage && createPortal(
+                    <div
+                        className="fixed inset-0 z-50 bg-black/95 text-slate-200"
+                        style={{ touchAction: 'none' }}
+                    >
+                        <div className="relative w-full h-[100dvh] flex overflow-hidden">
+                            {/* === Phần chính: ảnh + controls === */}
+                            <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
+                                {/* Top bar — counter, info toggle, close */}
+                                <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 pointer-events-none">
+                                    {/* Trái: counter */}
+                                    <div className="flex items-center gap-2.5 pointer-events-auto">
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                                            <Wand2 className="size-3.5" />
+                                            AI
                                         </div>
+                                        <span className="text-xs text-white/50 font-medium tabular-nums">
+                                            {lbCurrentIdx + 1} / {images.length}
+                                        </span>
                                     </div>
 
-                                    {/* Keyboard hint (desktop only) */}
-                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground/60 opacity-0 group-hover/viewer:opacity-100 transition-opacity hidden sm:block">
-                                        ← → để chuyển ảnh
+                                    {/* Phải: info toggle + close */}
+                                    <div className="flex items-center gap-1.5 pointer-events-auto">
+                                        <Button
+                                            variant="ghost"
+                                            title="Thông tin ảnh"
+                                            className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'border border-white bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                                            onClick={() => setShowInfo(!showInfo)}
+                                        >
+                                            <Info className="size-3.5" />
+                                            <span>Thông tin</span>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            className="rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg h-9 w-9"
+                                            onClick={() => { setSelectedImage(null); setShowInfo(false) }}
+                                        >
+                                            <X className="size-5" />
+                                        </Button>
                                     </div>
                                 </div>
 
-                                {/* Info Panel */}
-                                <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 pt-16 lg:pt-20 flex flex-col gap-5 bg-background min-h-0 relative">
-                                    <div className="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-2 -mr-2">
-                                        <div className="flex flex-col gap-2">
-                                            <div className="flex items-center justify-between gap-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Prompt</Label>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="icon"
-                                                            className="size-6 rounded-md hover:bg-muted"
-                                                            onClick={() => {
-                                                                navigator.clipboard.writeText(selectedImage.prompt)
-                                                                setIsCopied(true)
-                                                                toast.success('Đã sao chép prompt', { id: 'copy-prompt' })
-                                                                setTimeout(() => setIsCopied(false), 2000)
-                                                            }}
-                                                        >
-                                                            {isCopied ? (
-                                                                <Check className="size-3.5 text-green-500" />
-                                                            ) : (
-                                                                <Copy className="size-3.5 text-muted-foreground" />
-                                                            )}
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent side="top">Sao chép prompt</TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                            <div className="text-sm leading-relaxed bg-muted/40 hover:bg-muted/60 transition-colors p-3.5 rounded-lg break-words whitespace-pre-wrap shadow-inner border border-foreground/5 relative group">
-                                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)/gi).map((part, i) =>
-                                                    /^(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)$/i.test(part)
-                                                        ? <span key={i} className="text-primary bg-primary/15 rounded px-1 py-0.5 text-xs font-semibold">{part}</span>
-                                                        : <span key={i}>{part}</span>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Negative Prompt */}
-                                        {selectedImage.negativePrompt && (
-                                            <div className="flex flex-col gap-2">
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Negative Prompt</Label>
-                                                <div className="text-xs leading-relaxed bg-muted/30 p-3 rounded-lg break-words whitespace-pre-wrap border border-border/30">
-                                                    {selectedImage.negativePrompt}
-                                                </div>
-                                            </div>
+                                {/* Action Bar (Góc dưới) */}
+                                <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                                    {/* Group: Zoom Controls */}
+                                    <div className="flex items-center gap-0.5 sm:gap-1 border-r border-white/10 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1">
+                                        <Button variant="ghost" size="icon" title="Thu nhỏ" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={lbHandleZoomOut} disabled={lightboxZoom <= 1}>
+                                            <ZoomOut className="size-4" />
+                                        </Button>
+                                        <span className="text-[11px] sm:text-xs font-medium w-9 sm:w-10 text-center text-white/80 select-none tabular-nums">
+                                            {Math.round(lightboxZoom * 100)}%
+                                        </span>
+                                        <Button variant="ghost" size="icon" title="Phóng to" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={lbHandleZoomIn} disabled={lightboxZoom >= MAX_ZOOM}>
+                                            <ZoomIn className="size-4" />
+                                        </Button>
+                                        {lightboxZoom > 1 && (
+                                            <Button variant="ghost" size="icon" title="Đặt lại" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={lbResetZoom}>
+                                                <Maximize2 className="size-4" />
+                                            </Button>
                                         )}
-
-                                        <Separator />
-                                        {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
-                                            <>
-                                                <div>
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Ảnh tham chiếu</Label>
-                                                        <Badge variant="secondary" className="h-4 px-1.5 text-[9px] rounded-sm font-semibold">{selectedImage.referenceImages.length}</Badge>
-                                                    </div>
-                                                    <div className="grid grid-cols-5 gap-2 mt-2">
-                                                        {selectedImage.referenceImages.map((src, i) => (
-                                                            <div key={i} className="aspect-square relative group">
-                                                                <img src={src} className="absolute inset-0 w-full h-full rounded-xl object-cover border border-border/40" alt="ref" />
-                                                                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
-                                                                    {i + 1}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                                <Separator />
-                                            </>
-                                        )}
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Model</Label>
-                                                <p className="text-xs font-semibold mt-0.5">{selectedImage.model.toUpperCase()}</p>
-                                            </div>
-                                            <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Phong cách</Label>
-                                                <p className="text-xs font-semibold mt-0.5 capitalize">{selectedImage.style}</p>
-                                            </div>
-                                            <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Tỷ lệ</Label>
-                                                <p className="text-xs font-semibold mt-0.5">{selectedImage.aspectLabel}</p>
-                                            </div>
-                                            <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Thời gian</Label>
-                                                <p className="text-xs font-semibold mt-0.5">
-                                                    {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground/80 font-bold">Seed</Label>
-                                                <p className="text-xs font-semibold mt-0.5 tabular-nums">{selectedImage.seed}</p>
-                                            </div>
-                                        </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-2 shrink-0">
-                                        <Button size="sm" className="w-full" onClick={() => downloadImage(selectedImage.url, `zdream-${selectedImage.id}.jpg`)}>
-                                            <Download className="mr-2 size-4" /> Tải xuống
-                                        </Button>
-                                        <Button size="sm" variant="secondary" className="w-full border shadow-sm font-medium" onClick={() => {
-                                            setReferenceImages(prev => prev.includes(selectedImage.url) ? prev : [...prev, selectedImage.url]);
-                                            toast.success('Đã thêm vào ảnh tham chiếu', { id: 'modal-ref-add' });
-                                        }}>
-                                            <ImageIcon className="mr-2 size-4" /> Dùng làm ảnh tham chiếu
-                                        </Button>
+                                    {/* Group: Actions */}
+                                    <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={() => downloadImage(selectedImage.url, `zdream-${selectedImage.id}.jpg`)}>
+                                        <Download className="size-4" />
+                                    </Button>
+                                    <Button variant="ghost" title="Ảnh tham chiếu" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3" onClick={() => {
+                                        setReferenceImages(prev => prev.includes(selectedImage.url) ? prev : [...prev, selectedImage.url])
+                                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'modal-ref-add' })
+                                    }}>
+                                        <ImageIcon className="size-4" />
+                                        <span className="hidden sm:inline text-xs font-medium">Tham chiếu</span>
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        title="Tạo lại"
+                                        className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3"
+                                        disabled={isGenerating}
+                                        onClick={() => handleRegenerate(selectedImage)}
+                                    >
+                                        {isGenerating ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
+                                        <span className="hidden sm:inline text-xs font-medium">{isGenerating ? 'Đang tạo...' : 'Tạo lại'}</span>
+                                    </Button>
+                                    <Button variant="ghost" size="icon" title="Xoá ảnh" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5" onClick={() => handleDelete(selectedImage.id)}>
+                                        <Trash2 className="size-4" />
+                                    </Button>
+                                </div>
 
-                                        <div className="flex gap-2">
-                                            <Button 
-                                                size="sm" 
-                                                variant="ghost" 
-                                                className="flex-1 transition-all" 
-                                                disabled={isGenerating}
-                                                onClick={() => handleRegenerate(selectedImage)}
-                                            >
-                                                {isGenerating ? (
-                                                    <Loader2 className="mr-2 size-3.5 animate-spin" />
-                                                ) : (
-                                                    <RotateCcw className="mr-2 size-3.5" />
-                                                )}
-                                                {isGenerating ? 'Đang tạo...' : 'Tạo lại'}
-                                            </Button>
-                                            <Button size="sm" variant="ghost" className="flex-1 text-destructive hover:text-destructive" onClick={() => handleDelete(selectedImage.id)}>
-                                                <Trash2 className="mr-2 size-3.5" /> Xoá
-                                            </Button>
-                                        </div>
-                                    </div>
+                                {/* Nút Previous */}
+                                <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${lbCurrentIdx === 0 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
+                                        onClick={(e) => { e.stopPropagation(); lbHandlePrev() }}
+                                    >
+                                        <ChevronLeft className="size-5 sm:size-8" />
+                                    </Button>
+                                </div>
+
+                                {/* Nút Next */}
+                                <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${lbCurrentIdx === images.length - 1 ? "opacity-0 !pointer-events-none" : "opacity-100"}`}
+                                        onClick={(e) => { e.stopPropagation(); lbHandleNext() }}
+                                    >
+                                        <ChevronRight className="size-5 sm:size-8" />
+                                    </Button>
+                                </div>
+
+                                {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
+                                <div
+                                    ref={lbImageContainerRef}
+                                    className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${lightboxZoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                                    style={{ touchAction: 'none' }}
+                                    onWheel={lbHandleWheelZoom}
+                                    onMouseDown={lbHandleMouseDownPan}
+                                    onMouseMove={lbHandleMouseMovePan}
+                                    onMouseUp={lbHandleMouseUpPan}
+                                    onMouseLeave={lbHandleMouseUpPan}
+                                    onDoubleClick={lightboxZoom > 1 ? lbResetZoom : lbHandleZoomIn}
+                                >
+                                    <img
+                                        ref={lbImgRef}
+                                        src={selectedImage.url}
+                                        alt={selectedImage.prompt}
+                                        className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
+                                        style={{
+                                            transform: `translate3d(${lightboxPosition.x}px, ${lightboxPosition.y}px, 0) scale(${lightboxZoom})`,
+                                            transitionProperty: 'transform',
+                                            transitionTimingFunction: 'ease-out',
+                                            transitionDuration: '0ms',
+                                        }}
+                                        draggable={false}
+                                    />
                                 </div>
                             </div>
-                        </DialogContent>
-                        )
-                    })()}
-                </Dialog>
+
+                            {/* === Info Panel — sidebar trên desktop, bottom sheet trên mobile === */}
+                            {showInfo && (
+                                <div className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300">
+                                    {/* Header panel */}
+                                    <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
+                                        <h3 className="text-sm font-semibold text-white">Chi tiết ảnh</h3>
+                                        <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-white/60 hover:text-white hover:bg-white/10" onClick={() => setShowInfo(false)}>
+                                            <X className="size-4" />
+                                        </Button>
+                                    </div>
+
+                                    {/* Prompt */}
+                                    <div className="px-5 pt-4 pb-3 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(selectedImage.prompt)
+                                                    setIsCopied(true)
+                                                    toast.success('Đã sao chép prompt', { id: 'copy-prompt' })
+                                                    setTimeout(() => setIsCopied(false), 2000)
+                                                }}
+                                            >
+                                                {isCopied ? <Check className="size-3 text-green-400" /> : <Copy className="size-3" />}
+                                                {isCopied ? 'Đã chép' : 'Sao chép'}
+                                            </Button>
+                                        </div>
+                                        <p className="text-sm text-white/85 leading-relaxed">
+                                            {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)/gi).map((part, i) =>
+                                                /^(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)$/i.test(part)
+                                                    ? <span key={i} className="text-violet-400 bg-violet-500/15 rounded px-1 py-0.5 text-xs font-semibold">{part}</span>
+                                                    : <span key={i}>{part}</span>
+                                            )}
+                                        </p>
+                                    </div>
+
+                                    {/* Negative Prompt */}
+                                    {selectedImage.negativePrompt && (
+                                        <div className="px-5 py-3 space-y-2 border-t border-white/5">
+                                            <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Negative Prompt</p>
+                                            <p className="text-sm text-white/65 leading-relaxed">{selectedImage.negativePrompt}</p>
+                                        </div>
+                                    )}
+
+                                    {/* Ảnh tham chiếu */}
+                                    {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
+                                        <div className="px-5 py-3 space-y-2 border-t border-white/5">
+                                            <div className="flex items-center gap-1.5">
+                                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
+                                                <span className="text-[9px] font-bold bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{selectedImage.referenceImages.length}</span>
+                                            </div>
+                                            <div className="grid grid-cols-5 gap-2">
+                                                {selectedImage.referenceImages.map((src, i) => (
+                                                    <div key={i} className="aspect-square relative">
+                                                        <img src={src} className="absolute inset-0 w-full h-full rounded-lg object-cover border border-white/10" alt="ref" />
+                                                        <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
+                                                            {i + 1}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Metadata grid */}
+                                    <div className="px-5 py-3 border-t border-white/5">
+                                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <Box className="size-3" />
+                                                    <span className="text-[11px]">Model</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium truncate" title={selectedImage.model}>
+                                                    {selectedImage.model.split('/').pop() || selectedImage.model}
+                                                </p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <Palette className="size-3" />
+                                                    <span className="text-[11px]">Style</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium capitalize">{selectedImage.style}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <Ruler className="size-3" />
+                                                    <span className="text-[11px]">Tỷ lệ</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium">{selectedImage.aspectLabel}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <Hash className="size-3" />
+                                                    <span className="text-[11px]">Seed</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium tabular-nums">{selectedImage.seed}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <div className="flex items-center gap-1.5 text-white/40">
+                                                    <Clock className="size-3" />
+                                                    <span className="text-[11px]">Ngày tạo</span>
+                                                </div>
+                                                <p className="text-xs text-white/80 font-medium">
+                                                    {selectedImage.createdAt.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })} {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>,
+                    document.body
+                )}
 
                 {/* === XÁC NHẬN XOÁ === */}
                 <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
