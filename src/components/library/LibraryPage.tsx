@@ -331,16 +331,28 @@ export function LibraryPage() {
     const gestureActive = useRef(false)
     const mouseDragStart = useRef({ x: 0, y: 0 })
     const isMouseDragging = useRef(false)
+    // Cache container/image dimensions to avoid layout thrashing on every touchmove
+    const dimsCache = useRef({ cw: 0, ch: 0, dw: 0, dh: 0 })
+    const MAX_ZOOM = 3
 
-    const clampPos = (x: number, y: number, z: number) => {
+    const updateDimsCache = () => {
         const container = imageContainerRef.current
         const img = imgRef.current
-        if (!container || !img) return { x, y }
+        if (!container || !img) return
         const cw = container.clientWidth, ch = container.clientHeight
         const nw = img.naturalWidth || cw, nh = img.naturalHeight || ch
         const r = nw / nh, cr = cw / ch
-        const dw = r > cr ? cw : ch * r
-        const dh = r > cr ? cw / r : ch
+        // dw/dh = rendered size of the image at scale=1 (object-contain)
+        dimsCache.current = {
+            cw, ch,
+            dw: r > cr ? cw : ch * r,
+            dh: r > cr ? cw / r : ch,
+        }
+    }
+
+    const clampPos = (x: number, y: number, z: number) => {
+        const { cw, ch, dw, dh } = dimsCache.current
+        if (cw === 0) return { x, y }
         const mx = Math.max(0, (dw * z - cw) / 2)
         const my = Math.max(0, (dh * z - ch) / 2)
         return { x: Math.max(-mx, Math.min(mx, x)), y: Math.max(-my, Math.min(my, y)) }
@@ -351,7 +363,7 @@ export function LibraryPage() {
         if (!img) return
         const { x, y, zoom: z } = transformRef.current
         img.style.transitionDuration = '0ms'
-        img.style.transform = `translate(${x}px, ${y}px) scale(${z})`
+        img.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`
     }
 
     // Sync ref → React state (for UI like zoom % display)
@@ -369,7 +381,7 @@ export function LibraryPage() {
     }, [syncToState])
 
     const applyZoom = useCallback((newZ: number) => {
-        const z = Math.min(Math.max(newZ, 1), 5)
+        const z = Math.min(Math.max(newZ, 1), MAX_ZOOM)
         const pos = z === 1 ? { x: 0, y: 0 } : clampPos(transformRef.current.x, transformRef.current.y, z)
         transformRef.current = { ...pos, zoom: z }
         applyTransformDOM()
@@ -383,6 +395,15 @@ export function LibraryPage() {
         transformRef.current = { x: 0, y: 0, zoom: 1 }
         applyTransformDOM()
         syncToState()
+        // Recalculate dims when image loads or selection changes
+        const img = imgRef.current
+        if (img) {
+            const onLoad = () => updateDimsCache()
+            img.addEventListener('load', onLoad)
+            // Also update on next frame in case the image is already cached
+            requestAnimationFrame(updateDimsCache)
+            return () => img.removeEventListener('load', onLoad)
+        }
     }, [selectedIndex, syncToState])
 
     // Mouse drag pan (desktop) — also uses direct DOM
@@ -418,6 +439,8 @@ export function LibraryPage() {
     useEffect(() => {
         const el = imageContainerRef.current
         if (!el || selectedIndex === null) return
+        // Pre-cache dims at gesture start for zero-thrash during gesture
+        updateDimsCache()
 
         const onTouchStart = (e: TouchEvent) => {
             if (e.touches.length === 2) {
@@ -467,7 +490,7 @@ export function LibraryPage() {
                 const distance = Math.hypot(dx, dy)
                 const scale = distance / lastTouchDistance.current
 
-                const newZ = Math.min(Math.max(transformRef.current.zoom * scale, 1), 5)
+                const newZ = Math.min(Math.max(transformRef.current.zoom * scale, 1), MAX_ZOOM)
 
                 if (newZ === 1) {
                     transformRef.current = { x: 0, y: 0, zoom: 1 }
@@ -904,7 +927,7 @@ export function LibraryPage() {
                                     title="Phóng to"
                                     className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl"
                                     onClick={handleZoomIn}
-                                    disabled={zoom >= 5}
+                                    disabled={zoom >= 3}
                                 >
                                     <ZoomInIcon className="size-4" />
                                 </Button>
@@ -983,9 +1006,9 @@ export function LibraryPage() {
                                 ref={imgRef}
                                 src={selectedItem.thumbnail}
                                 alt="Preview"
-                                className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
+                                className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
                                 style={{
-                                    transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                                    transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
                                     transitionProperty: 'transform',
                                     transitionTimingFunction: 'ease-out',
                                     transitionDuration: '0ms',
