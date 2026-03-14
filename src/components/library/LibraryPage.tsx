@@ -608,6 +608,14 @@ export function LibraryPage() {
     useEffect(() => { handleNextRef.current = handleNext }, [handleNext])
     useEffect(() => { handlePrevRef.current = handlePrev }, [handlePrev])
 
+    // Lock body scroll khi lightbox mở — ngăn cuộn trang phía sau
+    useEffect(() => {
+        if (selectedIndex !== null) {
+            document.body.style.overflow = 'hidden'
+            return () => { document.body.style.overflow = '' }
+        }
+    }, [selectedIndex])
+
     // Lắng nghe phím mũi tên và ESC khi xem ảnh
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
