@@ -114,7 +114,6 @@ export function LibraryPage() {
     // Pan & Zoom State
     const [zoom, setZoom] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
-    const [isDraggingZoom, setIsDraggingZoom] = useState(false)
     const dragStart = useRef({ x: 0, y: 0 })
     const lastTouchDistance = useRef<number | null>(null)
     const lastTouchCenter = useRef<{ x: number; y: number } | null>(null)
@@ -295,6 +294,7 @@ export function LibraryPage() {
         const img = imgRef.current
         if (!img) return
         const { x, y, zoom: z } = transformRef.current
+        img.style.transitionDuration = '0ms'
         img.style.transform = `translate(${x}px, ${y}px) scale(${z})`
     }
 
@@ -303,7 +303,7 @@ export function LibraryPage() {
         const { x, y, zoom: z } = transformRef.current
         setZoom(z)
         setPosition({ x, y })
-        setIsDraggingZoom(false)
+        if (imgRef.current) imgRef.current.style.transitionDuration = '200ms'
     }, [])
 
     const resetZoom = useCallback(() => {
@@ -334,7 +334,6 @@ export function LibraryPage() {
         if (transformRef.current.zoom <= 1) return
         e.preventDefault()
         isMouseDragging.current = true
-        setIsDraggingZoom(true)
         mouseDragStart.current = { x: e.clientX - transformRef.current.x, y: e.clientY - transformRef.current.y }
     }
     const handleMouseMovePan = (e: React.MouseEvent) => {
@@ -352,7 +351,11 @@ export function LibraryPage() {
     }
 
     const handleWheelZoom = (e: React.WheelEvent) => {
-        e.deltaY < 0 ? handleZoomIn() : handleZoomOut()
+        if (e.deltaY < 0) {
+            handleZoomIn()
+        } else {
+            handleZoomOut()
+        }
     }
 
     // Native touch listeners — zero React re-renders during gesture
@@ -447,7 +450,11 @@ export function LibraryPage() {
                 const dx = e.changedTouches[0].clientX - touchStartPos.current.x
                 const dy = e.changedTouches[0].clientY - touchStartPos.current.y
                 if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-                    dx > 0 ? handlePrevRef.current() : handleNextRef.current()
+                    if (dx > 0) {
+                        handlePrevRef.current()
+                    } else {
+                        handleNextRef.current()
+                    }
                 }
             }
             lastTouchDistance.current = null
@@ -750,7 +757,7 @@ export function LibraryPage() {
             {/* Fullscreen Image Lightbox */}
             <Dialog open={selectedIndex !== null} onOpenChange={(open) => !open && setSelectedIndex(null)}>
                 <DialogContent 
-                    className="max-w-none w-screen h-dvh p-0 m-0 border-none bg-black/95 rounded-none overflow-hidden [&>button]:hidden text-slate-200"
+                    className="max-w-none w-screen h-[100dvh] p-0 m-0 border-none bg-black/95 rounded-none overflow-hidden [&>button]:hidden text-slate-200"
                     aria-describedby="Image viewer"
                 >
                     <DialogTitle className="sr-only">Trình xem ảnh toàn màn hình</DialogTitle>
@@ -887,8 +894,7 @@ export function LibraryPage() {
                                     alt="Preview"
                                     className="max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform ease-out will-change-transform"
                                     style={{
-                                        transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
-                                        transitionDuration: isDraggingZoom ? '0ms' : '200ms'
+                                        transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`
                                     }}
                                     draggable={false}
                                 />
