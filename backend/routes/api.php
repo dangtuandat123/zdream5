@@ -33,8 +33,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 
-    // Image Generation
+    // Image Generation & Upload
     Route::post('/images/generate', [ImageController::class, 'generate']);
+    Route::post('/images/upload', [ImageController::class, 'upload']);
     Route::get('/images', [ImageController::class, 'index']);
     Route::delete('/images/{id}', [ImageController::class, 'destroy']);
 

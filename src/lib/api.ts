@@ -40,9 +40,13 @@ async function request<T>(
 
     const headers: Record<string, string> = {
         'Accept': 'application/json',
-        'Content-Type': 'application/json',
         ...(options.headers as Record<string, string> || {}),
     };
+
+    // Chỉ set JSON content-type nếu body không phải FormData
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;
@@ -128,6 +132,7 @@ export const authApi = {
 
 export interface GeneratedImageData {
     id: number;
+    type: string;
     prompt: string;
     negative_prompt: string | null;
     model: string;
@@ -152,6 +157,11 @@ export interface GenerateResponse {
     message: string;
     images: GeneratedImageData[];
     gems_remaining: number;
+}
+
+export interface UploadResponse {
+    message: string;
+    image: GeneratedImageData;
 }
 
 export const imageApi = {
@@ -179,6 +189,19 @@ export const imageApi = {
             last_page: number;
             total: number;
         }>(url);
+    },
+
+    upload: (file: File, projectId?: number | null) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        if (projectId) formData.append('project_id', projectId.toString());
+        
+        return request<UploadResponse>('/images/upload', {
+            method: 'POST',
+            body: formData,
+            // Header Content-Type sẽ tự động được set bởi fetch khi dùng FormData
+            headers: {} 
+        });
     },
 
     delete: (id: number) =>

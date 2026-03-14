@@ -77,7 +77,7 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
     return {
         id: String(img.id),
         numericId: img.id,
-        type: "ai",
+        type: (img.type as any) || "ai",
         thumbnail: img.file_url,
         createdAt: img.created_at.split('T')[0],
         prompt: img.prompt,
@@ -227,7 +227,7 @@ export function LibraryPage() {
         processFiles(Array.from(files))
     }
 
-    const processFiles = (files: File[]) => {
+    const processFiles = async (files: File[]) => {
         // Lọc chỉ lấy file ảnh
         const imageFiles = files.filter(file => file.type.startsWith("image/"))
         if (imageFiles.length === 0) {
@@ -241,18 +241,15 @@ export function LibraryPage() {
 
         setIsUploading(true)
 
-        // TODO: Fake upload delay. Thay bằng logic up từng file lên server
-        setTimeout(() => {
-            const newUploads: MediaItem[] = imageFiles.map((file, index) => ({
-                id: `upload-${Date.now()}-${index}`,
-                type: "upload",
-                thumbnail: URL.createObjectURL(file), // Preview ngay lập tức
-                createdAt: new Date().toISOString().split('T')[0],
-                prompt: file.name // Dùng tên file làm tooltip/label hiển thị tạm
-            }))
+        try {
+            // Upload song song tất cả các tệp
+            const uploadPromises = imageFiles.map(file => imageApi.upload(file))
+            const results = await Promise.all(uploadPromises)
+            
+            // Map kết quả từ API sang MediaItem format
+            const uploadedItems: MediaItem[] = results.map(res => apiToMediaItem(res.image as any))
 
-            setIsUploading(false)
-            setItems(prev => [...newUploads, ...prev])
+            setItems(prev => [...uploadedItems, ...prev])
             setTab("upload")
 
             toast({
@@ -262,7 +259,16 @@ export function LibraryPage() {
 
             // Reset input
             if (fileInputRef.current) fileInputRef.current.value = ""
-        }, 1500) // Giả lập tổng thời gian upload
+        } catch (error) {
+            console.error("Upload error:", error)
+            toast({
+                variant: "destructive",
+                title: "Tải lên thất bại",
+                description: "Có lỗi xảy ra khi gửi tệp lên máy chủ.",
+            })
+        } finally {
+            setIsUploading(false)
+        }
     }
 
     // Lọc và sắp xếp

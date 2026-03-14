@@ -10,6 +10,8 @@ use App\Services\OpenRouterService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Controller xử lý tạo ảnh AI, xem danh sách, xoá ảnh.
@@ -70,6 +72,7 @@ class ImageController extends Controller
                 // Lưu vào database
                 $image = Image::create([
                     'user_id' => $user->id,
+                    'type' => 'ai',
                     'project_id' => $validated['project_id'] ?? null,
                     'prompt' => $validated['prompt'],
                     'negative_prompt' => $validated['negative_prompt'] ?? null,
@@ -110,6 +113,46 @@ class ImageController extends Controller
     }
 
     /**
+     * Upload ảnh người dùng.
+     * 
+     * POST /api/images/upload
+     */
+    public function upload(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
+            'project_id' => 'nullable|integer',
+        ]);
+
+        $file = $request->file('image');
+        $user = $request->user();
+
+        // Tạo đường dẫn file unique tương tự AI images
+        $filename = 'uploads/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+        // Lưu vào storage
+        $disk = config('filesystems.default');
+        Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');
+
+        // Lưu database
+        $image = Image::create([
+            'user_id' => $user->id,
+            'type' => 'upload',
+            'project_id' => $request->input('project_id'),
+            'prompt' => $file->getClientOriginalName(), // Lưu tên gốc vào prompt để ref
+            'model' => 'user-upload',
+            'file_path' => $filename,
+            'file_url' => Storage::disk($disk)->url($filename),
+            'gems_cost' => 0,
+        ]);
+
+        return response()->json([
+            'message' => 'Tải lên thành công!',
+            'image' => $image,
+        ], 201);
+    }
+
+    /**
      * Danh sách ảnh đã tạo (có phân trang).
      * 
      * GET /api/images?page=1&per_page=20
@@ -123,6 +166,10 @@ class ImageController extends Controller
 
         if ($projectId) {
             $query->where('project_id', $projectId);
+        }
+
+        if ($request->has('type')) {
+            $query->where('type', $request->input('type'));
         }
 
         $images = $query->paginate($perPage);

@@ -12,7 +12,8 @@ class Image extends Model
 {
     protected $fillable = [
         'user_id',
-        'project_id', // Added this line
+        'type',
+        'project_id',
         'prompt',
         'negative_prompt',
         'model',
