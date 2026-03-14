@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-REPO_DIR="/home/zdream/public_html"
+REPO_DIR="/home/zdream/repositories/zdream5"
 WEB_ROOT="/home/zdream/public_html"
 BUILD_DIR="$REPO_DIR/backend/public"
 BACKEND_DIR="$REPO_DIR/backend"
