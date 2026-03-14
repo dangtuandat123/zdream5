@@ -64,11 +64,11 @@ const TABS = [
     { value: "upload", label: "Tải lên", icon: UploadIcon },
 ] as const
 
-// === Badge config theo loại ===
-const TYPE_CONFIG: Record<MediaType, { label: string; className: string }> = {
-    ai: { label: "AI", className: "bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300" },
-    template: { label: "Mẫu", className: "bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300" },
-    upload: { label: "Upload", className: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" },
+// === Badge config theo loại — icon + backdrop cho dễ nhìn trên mọi nền ===
+const TYPE_CONFIG: Record<MediaType, { label: string; icon: typeof SparklesIcon; className: string }> = {
+    ai: { label: "AI", icon: SparklesIcon, className: "bg-blue-500/80 text-white" },
+    template: { label: "Mẫu", icon: PaletteIcon, className: "bg-purple-500/80 text-white" },
+    upload: { label: "Upload", icon: UploadIcon, className: "bg-emerald-500/80 text-white" },
 }
 
 // === Map API data → MediaItem ===
@@ -648,29 +648,38 @@ export function LibraryPage() {
                 </div>
             ) : filteredItems.length > 0 ? (
                 <><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 pt-1">
-                    {filteredItems.map((item, index) => (
+                    {filteredItems.map((item, index) => {
+                        const typeConfig = TYPE_CONFIG[item.type]
+                        const TypeIcon = typeConfig.icon
+                        return (
                         <Card
                             key={item.id}
-                            className="group cursor-pointer overflow-hidden transition-all hover:shadow-md hover:border-primary/30"
+                            className="group cursor-pointer overflow-hidden border-transparent transition-all duration-200 hover:shadow-lg hover:border-border"
                             onClick={() => setSelectedIndex(index)}
                         >
                             <CardContent className="p-0">
-                                {/* Thumbnail */}
-                                <div className="relative aspect-[4/3] bg-muted overflow-hidden">
+                                {/* Thumbnail — square cho gallery đều đặn */}
+                                <div className="relative aspect-square bg-muted overflow-hidden">
                                     <img
                                         src={item.thumbnail}
-                                        alt={`Item ${item.id}`}
+                                        alt={item.prompt || `Item ${item.id}`}
                                         className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         loading="lazy"
                                     />
 
-                                    {/* Hover overlay */}
-                                    <div className="absolute inset-0 flex items-end justify-between p-2 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100">
-                                        <div className="flex gap-1">
+                                    {/* Type badge — pill nhỏ gọn, backdrop-blur dễ đọc trên mọi nền */}
+                                    <div className={`absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-md shadow-sm ${typeConfig.className}`}>
+                                        <TypeIcon className="size-3" />
+                                        {typeConfig.label}
+                                    </div>
+
+                                    {/* Hover overlay — actions */}
+                                    <div className="absolute inset-0 flex items-end justify-between p-2.5 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <div className="flex gap-1.5">
                                             <Button
                                                 variant="secondary"
                                                 size="icon"
-                                                className="size-7 rounded-lg bg-white/15 hover:bg-white/25 text-white backdrop-blur-sm border-0"
+                                                className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0"
                                                 onClick={(e) => e.stopPropagation()}
                                             >
                                                 <DownloadIcon className="size-3.5" />
@@ -678,7 +687,7 @@ export function LibraryPage() {
                                             <Button
                                                 variant="secondary"
                                                 size="icon"
-                                                className="size-7 rounded-lg bg-white/15 hover:bg-white/25 text-white backdrop-blur-sm border-0"
+                                                className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0"
                                                 onClick={(e) => handleDeleteImage(item, e)}
                                             >
                                                 <Trash2Icon className="size-3.5" />
@@ -689,7 +698,7 @@ export function LibraryPage() {
                                                 <Button
                                                     variant="secondary"
                                                     size="icon"
-                                                    className="size-7 rounded-lg bg-white/15 hover:bg-white/25 text-white backdrop-blur-sm border-0"
+                                                    className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <MoreHorizontalIcon className="size-3.5" />
@@ -707,30 +716,19 @@ export function LibraryPage() {
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </div>
-
-                                    {/* Type badge — góc trên trái */}
-                                    <Badge
-                                        className={`absolute top-2 left-2 text-[10px] sm:text-[9px] font-semibold px-2 sm:px-1.5 py-0.5 sm:py-0 border-none rounded-md shadow-sm ${TYPE_CONFIG[item.type].className}`}
-                                    >
-                                        {TYPE_CONFIG[item.type].label}
-                                    </Badge>
                                 </div>
 
-                                {/* Footer info (simplified without artificial title) */}
-                                <div className="p-2 sm:p-2.5 flex items-center justify-between text-[10px] text-muted-foreground bg-muted/30">
-                                    <span className="flex items-center gap-1.5 truncate pr-2 max-w-[75%]">
-                                        {item.type === "ai" && <SparklesIcon className="size-3 text-blue-500/70" />}
-                                        {item.type === "template" && <PaletteIcon className="size-3 text-purple-500/70" />}
-                                        {item.type === "upload" && <UploadIcon className="size-3 text-emerald-500/70" />}
-                                        <span className="truncate">
-                                            {item.prompt || item.templateName || "Tài nguyên gốc"}
-                                        </span>
-                                    </span>
-                                    <span className="shrink-0">{item.createdAt}</span>
+                                {/* Footer — prompt + date, gọn gàng */}
+                                <div className="px-2.5 py-2 space-y-0.5">
+                                    <p className="text-xs font-medium truncate leading-tight">
+                                        {item.prompt || item.templateName || "Tài nguyên tải lên"}
+                                    </p>
+                                    <p className="text-[11px] text-muted-foreground">{item.createdAt}</p>
                                 </div>
                             </CardContent>
                         </Card>
-                    ))}
+                        )
+                    })}
                 </div>
                 {hasMore && (
                     <div className="flex justify-center pt-6 pb-2">
@@ -787,11 +785,12 @@ export function LibraryPage() {
                         {/* Thông tin Ảnh (Góc trên trái) */}
                         <div className="absolute top-4 left-4 z-50 max-w-[60vw] space-y-2 pointer-events-none">
                             <div className="flex items-center gap-3">
-                                <Badge
-                                    className={`px-2.5 py-0.5 text-xs font-semibold shadow-sm border-none ${TYPE_CONFIG[selectedItem.type].className}`}
-                                >
-                                    {TYPE_CONFIG[selectedItem.type].label}
-                                </Badge>
+                                {(() => { const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
+                                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm ${cfg.className}`}>
+                                        <Icon className="size-3.5" />
+                                        {cfg.label}
+                                    </div>
+                                )})()}
                                 <span className="text-xs text-white/60 drop-shadow-md">
                                     {selectedItem.createdAt}
                                 </span>
