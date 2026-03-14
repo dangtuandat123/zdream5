@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { useToast } from "@/hooks/use-toast"
+import { imageApi, type GeneratedImageData } from "@/lib/api"
 
 // === Kiểu dữ liệu ===
 type MediaType = "ai" | "template" | "upload"
@@ -52,6 +53,7 @@ interface MediaItem {
     createdAt: string
     prompt?: string
     templateName?: string
+    numericId?: number // for API delete
 }
 
 // === Cấu hình tabs ===
@@ -70,24 +72,17 @@ const TYPE_CONFIG: Record<MediaType, { label: string; className: string }> = {
     upload: { label: "Upload", className: "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300" },
 }
 
-// === Mock data ===
-const INITIAL_MOCK_ITEMS: MediaItem[] = [
-    { id: "1", type: "ai", thumbnail: "https://images.unsplash.com/photo-1542442828-287217bfb21f?w=400&auto=format&fit=crop", createdAt: "2025-03-09", prompt: "A cyberpunk city at night with neon lights" },
-    { id: "2", type: "template", thumbnail: "https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?w=400&auto=format&fit=crop", createdAt: "2025-03-08", templateName: "Phong cảnh Ghibli" },
-    { id: "3", type: "upload", thumbnail: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&auto=format&fit=crop", createdAt: "2025-03-08" },
-    { id: "4", type: "ai", thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&auto=format&fit=crop", createdAt: "2025-03-07", prompt: "A majestic dragon in a fantasy realm" },
-    { id: "5", type: "template", thumbnail: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&auto=format&fit=crop", createdAt: "2025-03-07", templateName: "Anime Waifu" },
-    { id: "6", type: "upload", thumbnail: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=400&auto=format&fit=crop", createdAt: "2025-03-06" },
-    { id: "7", type: "ai", thumbnail: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&auto=format&fit=crop", createdAt: "2025-03-06", prompt: "Oil painting of a mountain landscape, baroque style" },
-    { id: "8", type: "template", thumbnail: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&auto=format&fit=crop", createdAt: "2025-03-05", templateName: "Ảnh thời trang" },
-    { id: "9", type: "upload", thumbnail: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&auto=format&fit=crop", createdAt: "2025-03-05" },
-    { id: "10", type: "ai", thumbnail: "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&auto=format&fit=crop", createdAt: "2025-03-04", prompt: "Abstract galaxy nebula, vibrant colors" },
-    { id: "11", type: "template", thumbnail: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&auto=format&fit=crop", createdAt: "2025-03-04", templateName: "Watercolor Portrait" },
-    { id: "12", type: "upload", thumbnail: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&auto=format&fit=crop", createdAt: "2025-03-03" },
-    { id: "13", type: "ai", thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&auto=format&fit=crop", createdAt: "2025-03-03", prompt: "A samurai in neon armor, rain, dramatic lighting" },
-    { id: "14", type: "template", thumbnail: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&auto=format&fit=crop", createdAt: "2025-03-02", templateName: "Render sản phẩm 3D" },
-    { id: "15", type: "upload", thumbnail: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&auto=format&fit=crop", createdAt: "2025-03-01" },
-]
+// === Map API data → MediaItem ===
+function apiToMediaItem(img: GeneratedImageData): MediaItem {
+    return {
+        id: String(img.id),
+        numericId: img.id,
+        type: "ai",
+        thumbnail: img.file_url,
+        createdAt: img.created_at.split('T')[0],
+        prompt: img.prompt,
+    }
+}
 
 // === Empty state config ===
 const EMPTY_STATES: Record<string, { icon: typeof ImageIcon; title: string; desc: string; cta?: { label: string; to: string } }> = {
@@ -98,11 +93,41 @@ const EMPTY_STATES: Record<string, { icon: typeof ImageIcon; title: string; desc
 
 export function LibraryPage() {
     const { toast } = useToast()
-    const [items, setItems] = useState<MediaItem[]>(INITIAL_MOCK_ITEMS)
+    const [items, setItems] = useState<MediaItem[]>([])
     const [search, setSearch] = useState("")
     const [tab, setTab] = useState<string>("all")
     const [generatedSubFilter, setGeneratedSubFilter] = useState<GeneratedFilter>("all")
     const [sort, setSort] = useState("newest")
+    const [isLoading, setIsLoading] = useState(true)
+    const [page, setPage] = useState(1)
+    const [hasMore, setHasMore] = useState(true)
+    const loadingMore = useRef(false)
+
+    // Fetch images from API
+    const fetchImages = useCallback(async (pageNum: number, append = false) => {
+        try {
+            if (pageNum === 1) setIsLoading(true)
+            loadingMore.current = true
+            const res = await imageApi.list(pageNum, 30)
+            const mapped = res.data.map(apiToMediaItem)
+            setItems(prev => append ? [...prev, ...mapped] : mapped)
+            setHasMore(res.current_page < res.last_page)
+            setPage(res.current_page)
+        } catch {
+            toast({ variant: "destructive", title: "Lỗi", description: "Không thể tải ảnh từ thư viện." })
+        } finally {
+            setIsLoading(false)
+            loadingMore.current = false
+        }
+    }, [toast])
+
+    useEffect(() => { fetchImages(1) }, [fetchImages])
+
+    // Infinite scroll - load more
+    const loadMore = useCallback(() => {
+        if (!hasMore || loadingMore.current) return
+        fetchImages(page + 1, true)
+    }, [hasMore, page, fetchImages])
     
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -119,6 +144,23 @@ export function LibraryPage() {
     const lastTapTime = useRef(0)
     const touchStartPos = useRef<{ x: number; y: number } | null>(null)
     
+    // Delete image via API
+    const handleDeleteImage = useCallback(async (item: MediaItem, e?: React.MouseEvent) => {
+        e?.stopPropagation()
+        if (!item.numericId) {
+            setItems(prev => prev.filter(i => i.id !== item.id))
+            return
+        }
+        try {
+            await imageApi.delete(item.numericId)
+            setItems(prev => prev.filter(i => i.id !== item.id))
+            if (selectedIndex !== null) setSelectedIndex(null)
+            toast({ title: "Đã xóa", description: "Ảnh đã được xóa khỏi thư viện." })
+        } catch {
+            toast({ variant: "destructive", title: "Lỗi", description: "Không thể xóa ảnh." })
+        }
+    }, [selectedIndex, toast])
+
     // Upload refs & state
     const fileInputRef = useRef<HTMLInputElement>(null)
     const [isUploading, setIsUploading] = useState(false)
@@ -671,7 +713,7 @@ export function LibraryPage() {
                                                 variant="secondary"
                                                 size="icon"
                                                 className="size-7 rounded-lg bg-white/15 hover:bg-white/25 text-white backdrop-blur-sm border-0"
-                                                onClick={(e) => e.stopPropagation()}
+                                                onClick={(e) => handleDeleteImage(item, e)}
                                             >
                                                 <Trash2Icon className="size-3.5" />
                                             </Button>
@@ -723,6 +765,18 @@ export function LibraryPage() {
                             </CardContent>
                         </Card>
                     ))}
+                </div>
+                {hasMore && (
+                    <div className="flex justify-center pt-6 pb-2">
+                        <Button variant="outline" size="sm" onClick={loadMore} disabled={loadingMore.current}>
+                            Tải thêm ảnh
+                        </Button>
+                    </div>
+                )}
+            ) : isLoading ? (
+                <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+                    <div className="size-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-muted-foreground">Đang tải thư viện...</p>
                 </div>
             ) : (
                 // Empty state
@@ -835,7 +889,8 @@ export function LibraryPage() {
                             <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-9 w-9 py-0 rounded-xl">
                                 <DownloadIcon className="size-4" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-9 w-9 py-0 rounded-xl mr-0.5">
+                            <Button variant="ghost" size="icon" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-9 w-9 py-0 rounded-xl mr-0.5"
+                                onClick={(e) => selectedItem && handleDeleteImage(selectedItem, e)}>
                                 <Trash2Icon className="size-4" />
                             </Button>
                         </div>
