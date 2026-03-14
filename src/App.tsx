@@ -32,7 +32,7 @@ function App() {
         </Route>
 
         {/* Google OAuth Callback */}
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
+        <Route path="/login/google/success" element={<GoogleCallback />} />
 
         {/* Protected App Routes with Sidebar Shell */}
         <Route element={<ProtectedRoute />}>

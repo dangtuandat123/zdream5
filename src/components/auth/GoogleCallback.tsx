@@ -12,14 +12,14 @@ export function GoogleCallback() {
         const error = params.get("error")
 
         if (error || !token) {
-            navigate("/login?error=google_failed", { replace: true })
+            navigate("/login", { replace: true })
             return
         }
 
         loginWithToken(token).then(() => {
             navigate("/app/home", { replace: true })
         }).catch(() => {
-            navigate("/login?error=google_failed", { replace: true })
+            navigate("/login", { replace: true })
         })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])

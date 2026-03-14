@@ -55,6 +55,7 @@ class SocialAuthController extends Controller
 
         $frontendUrl = config('app.frontend_url', 'https://zdream.vn');
 
-        return redirect("{$frontendUrl}/auth/google/callback?token={$token}");
+        // Redirect về /login/google/success để tránh .htaccess gửi lại vào Laravel
+        return redirect("{$frontendUrl}/login/google/success?token={$token}");
     }
 }
