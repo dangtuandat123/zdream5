@@ -2045,12 +2045,12 @@ export function GeneratePage() {
                                     <div className="flex items-center gap-1.5 pointer-events-auto">
                                         <Button
                                             variant="ghost"
-                                            title="Thông tin ảnh"
+                                            title="Chi tiết ảnh"
                                             className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'border border-white bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-black/60 text-white hover:bg-black/80'}`}
                                             onClick={() => setShowInfo(!showInfo)}
                                         >
                                             <Info className="size-3.5" />
-                                            <span>Thông tin</span>
+                                            <span>Chi tiết ảnh</span>
                                         </Button>
                                         <Button
                                             variant="outline"
