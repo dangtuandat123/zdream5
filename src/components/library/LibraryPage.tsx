@@ -37,10 +37,18 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Drawer,
+    DrawerContent,
+    DrawerHeader,
+    DrawerTitle,
+} from "@/components/ui/drawer"
 
 import { useToast } from "@/hooks/use-toast"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { imageApi, type GeneratedImageData } from "@/lib/api"
 
 // === Kiểu dữ liệu ===
@@ -93,8 +101,11 @@ const EMPTY_STATES: Record<string, { icon: typeof ImageIcon; title: string; desc
 
 export function LibraryPage() {
     const { toast } = useToast()
+    const isMobile = useIsMobile()
     const [items, setItems] = useState<MediaItem[]>([])
     const [search, setSearch] = useState("")
+    // Action menu state — mobile dùng Drawer, desktop dùng DropdownMenu
+    const [actionItem, setActionItem] = useState<MediaItem | null>(null)
     const [tab, setTab] = useState<string>("all")
     const [sort, setSort] = useState("newest")
     const [isLoading, setIsLoading] = useState(true)
@@ -673,49 +684,58 @@ export function LibraryPage() {
                                         {typeConfig.label}
                                     </div>
 
-                                    {/* Hover overlay — actions */}
-                                    <div className="absolute inset-0 flex items-end justify-between p-2.5 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                        <div className="flex gap-1.5">
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0"
-                                                onClick={(e) => e.stopPropagation()}
-                                            >
-                                                <DownloadIcon className="size-3.5" />
-                                            </Button>
-                                            <Button
-                                                variant="secondary"
-                                                size="icon"
-                                                className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0"
-                                                onClick={(e) => handleDeleteImage(item, e)}
-                                            >
-                                                <Trash2Icon className="size-3.5" />
-                                            </Button>
-                                        </div>
+                                    {/* Nút ⋯ — luôn hiện trên mobile, hover hiện trên desktop */}
+                                    {isMobile ? (
+                                        <Button
+                                            variant="secondary"
+                                            size="icon"
+                                            className="absolute top-1.5 right-1.5 size-8 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border-0"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                setActionItem(item)
+                                            }}
+                                        >
+                                            <MoreHorizontalIcon className="size-4" />
+                                        </Button>
+                                    ) : (
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
                                                     variant="secondary"
                                                     size="icon"
-                                                    className="size-8 rounded-full bg-white/20 hover:bg-white/30 text-white backdrop-blur-md border-0"
+                                                    className="absolute top-1.5 right-1.5 size-8 rounded-full bg-black/40 hover:bg-black/60 text-white backdrop-blur-md border-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
-                                                    <MoreHorizontalIcon className="size-3.5" />
+                                                    <MoreHorizontalIcon className="size-4" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-40">
-                                                <DropdownMenuItem>
-                                                    <WandIcon className="size-3.5 mr-2" />
+                                            <DropdownMenuContent align="end" className="w-44">
+                                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                    <DownloadIcon className="size-4 mr-2" />
+                                                    Tải xuống
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                    <WandIcon className="size-4 mr-2" />
                                                     Tạo tương tự
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem>
-                                                    <LayoutGridIcon className="size-3.5 mr-2" />
+                                                <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                    <LayoutGridIcon className="size-4 mr-2" />
                                                     Dùng làm mẫu
+                                                </DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem
+                                                    className="text-destructive focus:text-destructive"
+                                                    onClick={(e) => handleDeleteImage(item, e)}
+                                                >
+                                                    <Trash2Icon className="size-4 mr-2" />
+                                                    Xóa ảnh
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
-                                    </div>
+                                    )}
+
+                                    {/* Hover gradient nhẹ cho desktop — tạo chiều sâu */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
                                 </div>
 
                                 {/* Footer — prompt + date, gọn gàng */}
@@ -916,6 +936,76 @@ export function LibraryPage() {
                 </div>,
                 document.body
             )}
+
+            {/* Mobile Action Drawer — bottom sheet dễ bấm trên điện thoại */}
+            <Drawer open={!!actionItem} onOpenChange={(open) => !open && setActionItem(null)}>
+                <DrawerContent>
+                    <DrawerHeader className="pb-2">
+                        <DrawerTitle className="text-sm font-medium truncate">
+                            {actionItem?.prompt || actionItem?.templateName || "Tài nguyên tải lên"}
+                        </DrawerTitle>
+                    </DrawerHeader>
+                    <div className="px-4 pb-6 space-y-1">
+                        {/* Thumbnail preview nhỏ */}
+                        {actionItem && (
+                            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 mb-3">
+                                <img
+                                    src={actionItem.thumbnail}
+                                    alt=""
+                                    className="size-14 rounded-lg object-cover shrink-0"
+                                />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-xs font-medium truncate">{actionItem.prompt || actionItem.templateName || "Tài nguyên tải lên"}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        {(() => { const cfg = TYPE_CONFIG[actionItem.type]; const Icon = cfg.icon; return (
+                                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${cfg.className}`}>
+                                                <Icon className="size-2.5" />{cfg.label}
+                                            </span>
+                                        )})()}
+                                        <span className="text-[11px] text-muted-foreground">{actionItem.createdAt}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Actions — vùng bấm lớn, icon rõ ràng */}
+                        <button
+                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
+                            onClick={() => { setActionItem(null) }}
+                        >
+                            <DownloadIcon className="size-5 text-muted-foreground" />
+                            Tải xuống
+                        </button>
+                        <button
+                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
+                            onClick={() => { setActionItem(null) }}
+                        >
+                            <WandIcon className="size-5 text-muted-foreground" />
+                            Tạo tương tự
+                        </button>
+                        <button
+                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
+                            onClick={() => { setActionItem(null) }}
+                        >
+                            <LayoutGridIcon className="size-5 text-muted-foreground" />
+                            Dùng làm mẫu
+                        </button>
+
+                        {/* Separator + Delete */}
+                        <div className="border-t my-1" />
+                        <button
+                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                            onClick={() => {
+                                if (actionItem) handleDeleteImage(actionItem)
+                                setActionItem(null)
+                            }}
+                        >
+                            <Trash2Icon className="size-5" />
+                            Xóa ảnh
+                        </button>
+                    </div>
+                </DrawerContent>
+            </Drawer>
         </div>
     )
 }
