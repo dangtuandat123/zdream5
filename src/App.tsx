@@ -11,7 +11,8 @@ import { TemplatesPage } from "@/components/templates/TemplatesPage";
 import { LibraryPage } from "@/components/library/LibraryPage";
 import { TemplateDetailPage } from "@/components/templates/TemplateDetailPage";
 import { TopUpPage } from "@/components/topup/TopUpPage";
-import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute";
+import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute"
+import { GoogleCallback } from "@/components/auth/GoogleCallback";
 
 function App() {
   return (
@@ -29,6 +30,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
+
+        {/* Google OAuth Callback */}
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
 
         {/* Protected App Routes with Sidebar Shell */}
         <Route element={<ProtectedRoute />}>

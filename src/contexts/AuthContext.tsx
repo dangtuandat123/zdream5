@@ -6,6 +6,7 @@ interface AuthContextType {
     user: AuthUser | null;
     gems: number;
     login: (email: string, password: string) => Promise<void>;
+    loginWithToken: (token: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     refreshUser: () => Promise<void>;
@@ -58,6 +59,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLoggedIn(true);
     }, []);
 
+    // Đăng nhập bằng token (Google OAuth)
+    const loginWithToken = useCallback(async (token: string) => {
+        setToken(token)
+        const data = await authApi.getUser()
+        setUser(data.user)
+        setIsLoggedIn(true)
+    }, [])
+
     // Đăng ký
     const register = useCallback(async (name: string, email: string, password: string) => {
         const data = await authApi.register({
@@ -105,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             user,
             gems,
             login,
+            loginWithToken,
             register,
             logout,
             refreshUser,

@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node -e \"const fs=require('fs'),p='backend/public/assets';if(fs.existsSync(p))fs.rmSync(p,{recursive:true})\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"

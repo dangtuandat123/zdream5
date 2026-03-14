@@ -66,8 +66,6 @@ class AuthController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        // Xoá token cũ (chỉ cho phép 1 phiên đăng nhập)
-        $user->tokens()->delete();
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
