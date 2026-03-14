@@ -938,7 +938,7 @@ export function LibraryPage() {
                                     <Button
                                         variant="ghost"
                                         title="Thông tin ảnh"
-                                        className={`rounded-full h-9 px-3.5 border-none shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-white/15 text-white hover:bg-white/25'}`}
+                                        className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium border ${showInfo ? 'bg-white text-black hover:bg-neutral-200 hover:text-black border-white' : 'bg-black/60 text-white hover:bg-black/80 border-white/60'}`}
                                         onClick={() => setShowInfo(!showInfo)}
                                     >
                                         <InfoIcon className="size-3.5" />
