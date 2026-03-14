@@ -32,7 +32,8 @@ rm -f "$WEB_ROOT/assets/index-"*.js "$WEB_ROOT/assets/index-"*.css
 cp "$BUILD_DIR/assets/index-"*.js "$WEB_ROOT/assets/"
 cp "$BUILD_DIR/assets/index-"*.css "$WEB_ROOT/assets/"
 
-# Copy index.html mới
+# Copy index.html và .htaccess mới (KHÔNG copy index.php — hosting cần path riêng)
 cp "$BUILD_DIR/index.html" "$WEB_ROOT/index.html"
+cp "$BUILD_DIR/.htaccess" "$WEB_ROOT/.htaccess"
 
 echo "==> Done! Deploy completed."
