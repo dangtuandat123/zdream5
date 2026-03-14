@@ -144,11 +144,11 @@ export default function LandingPage() {
                     100% { transform: scale(0.9); opacity: 0.8; }
                 }
                 @keyframes fade-up {
-                    from { opacity: 0; transform: translateY(30px); }
-                    to { opacity: 1; transform: translateY(0); }
+                    from { opacity: 0; transform: translateY(60px) scale(0.95); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
                 }
                 @keyframes scale-in {
-                    from { opacity: 0; transform: scale(0.92); }
+                    from { opacity: 0; transform: scale(0.85); }
                     to { opacity: 1; transform: scale(1); }
                 }
                 @keyframes shimmer {
@@ -156,14 +156,14 @@ export default function LandingPage() {
                     100% { background-position: 200% center; }
                 }
                 @keyframes twinkle {
-                    0%, 100% { opacity: 0; transform: scale(0.5) rotate(0deg); }
-                    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+                    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); box-shadow: none; }
+                    50% { opacity: 1; transform: scale(1.2) rotate(180deg); box-shadow: 0 0 8px 2px rgba(255,255,255,0.6); }
                 }
                 @keyframes sparkle-float {
                     0% { opacity: 0; transform: translateY(0) scale(0); }
-                    20% { opacity: 1; transform: translateY(-10px) scale(1); }
-                    80% { opacity: 1; transform: translateY(-40px) scale(0.8); }
-                    100% { opacity: 0; transform: translateY(-60px) scale(0); }
+                    20% { opacity: 1; transform: translateY(-15px) scale(1.3); }
+                    80% { opacity: 0.8; transform: translateY(-50px) scale(0.8); }
+                    100% { opacity: 0; transform: translateY(-80px) scale(0); }
                 }
                 @keyframes glow-pulse {
                     0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.3); }
@@ -196,12 +196,12 @@ export default function LandingPage() {
                     background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 50%);
                     pointer-events: none;
                 }
-                .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
-                .reveal.visible { opacity: 1; transform: translateY(0); }
-                .reveal-scale { opacity: 0; transform: scale(0.92); transition: opacity 0.7s cubic-bezier(0.16,1,0.3,1), transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+                .reveal { opacity: 0; transform: translateY(60px) scale(0.95); transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1); }
+                .reveal.visible { opacity: 1; transform: translateY(0) scale(1); }
+                .reveal-scale { opacity: 0; transform: scale(0.85); transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1); }
                 .reveal-scale.visible { opacity: 1; transform: scale(1); }
-                .twinkle-star { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
-                .glow-cta { animation: glow-pulse 3s ease-in-out infinite; }
+                .twinkle-star { position: absolute; background: white; border-radius: 50%; animation: twinkle ease-in-out infinite; }
+                .glow-cta { animation: glow-pulse 2.5s ease-in-out infinite; }
             `}</style>
 
             {/* =============================================
@@ -224,23 +224,26 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-black/40 z-[1]"></div>
 
                 {/* ---- Twinkling Stars / Nhấp nháy ---- */}
-                {[...Array(20)].map((_, i) => (
-                    <div
-                        key={`star-${i}`}
-                        className="twinkle-star z-[2]"
-                        style={{
-                            top: `${10 + Math.random() * 80}%`,
-                            left: `${Math.random() * 100}%`,
-                            width: `${2 + Math.random() * 4}px`,
-                            height: `${2 + Math.random() * 4}px`,
-                            animationDelay: `${Math.random() * 5}s`,
-                            animationDuration: `${2 + Math.random() * 3}s`,
-                        }}
-                    />
-                ))}
+                {[...Array(30)].map((_, i) => {
+                    const size = 3 + Math.random() * 6;
+                    return (
+                        <div
+                            key={`star-${i}`}
+                            className="twinkle-star z-[2]"
+                            style={{
+                                top: `${5 + Math.random() * 90}%`,
+                                left: `${Math.random() * 100}%`,
+                                width: `${size}px`,
+                                height: `${size}px`,
+                                animationDelay: `${Math.random() * 6}s`,
+                                animationDuration: `${1.5 + Math.random() * 2.5}s`,
+                            }}
+                        />
+                    );
+                })}
 
                 {/* ---- Floating Navigation Bar ---- */}
-                <nav className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl transition-all duration-500 ${scrolled ? 'top-2' : 'top-4'}`} style={{ animation: 'fade-up 0.8s ease-out' }}>
+                <nav className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl transition-all duration-500 ${scrolled ? 'top-2' : 'top-4'}`}>
                     <div className={`flex items-center justify-between backdrop-blur-xl rounded-2xl px-5 shadow-[0_4px_30px_rgba(0,0,0,0.08)] transition-all duration-500 ${scrolled ? 'bg-white/[0.98] py-2 shadow-[0_8px_40px_rgba(0,0,0,0.12)]' : 'bg-white/[0.85] py-2.5'}`}>
                         <Link to="/" className="flex items-center gap-2 shrink-0">
                             <div className="size-8 rounded-lg bg-black flex items-center justify-center">
@@ -282,10 +285,10 @@ export default function LandingPage() {
 
                 {/* ---- Hero Content ---- */}
                 <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-4 max-w-4xl mx-auto">
-                    <Badge variant="outline" className="mb-8 bg-white/10 text-white/90 border-white/20 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-medium tracking-wide" style={{ animation: 'fade-up 0.8s ease-out 0.2s both' }}>
+                    <Badge variant="outline" className="mb-8 bg-white/10 text-white/90 border-white/20 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-medium tracking-wide" style={{ animation: 'fade-up 1s cubic-bezier(0.16,1,0.3,1) 0.3s both' }}>
                         <Zap className="size-3 mr-1.5 text-yellow-400 fill-yellow-400" /> AI-Powered Creative Platform
                     </Badge>
-                    <h1 className="mb-6" style={{ animation: 'fade-up 0.8s ease-out 0.4s both' }}>
+                    <h1 className="mb-6" style={{ animation: 'fade-up 1.1s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
                         <span
                             className="block text-[clamp(32px,5.5vw,72px)] font-semibold text-white leading-[1.05]"
                             style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-3px" }}
@@ -301,12 +304,12 @@ export default function LandingPage() {
                     </h1>
                     <p
                         className="text-white/70 text-[clamp(14px,1.2vw,18px)] max-w-lg mb-10 font-medium leading-relaxed"
-                        style={{ fontFamily: "'Barlow', sans-serif", animation: 'fade-up 0.8s ease-out 0.6s both' }}
+                        style={{ fontFamily: "'Barlow', sans-serif", animation: 'fade-up 1s cubic-bezier(0.16,1,0.3,1) 0.8s both' }}
                     >
                         Tạo ảnh từ văn bản, áp dụng kiểu mẫu có sẵn, quản lý thư viện cá nhân.
                         Dành cho Nhà Sáng Tạo, Designer và Thương Hiệu.
                     </p>
-                    <div className="flex flex-col sm:flex-row items-center gap-4" style={{ animation: 'fade-up 0.8s ease-out 0.8s both' }}>
+                    <div className="flex flex-col sm:flex-row items-center gap-4" style={{ animation: 'fade-up 1s cubic-bezier(0.16,1,0.3,1) 1.1s both' }}>
                         <Link to="/app/generate">
                             <Button
                                 size="lg"
