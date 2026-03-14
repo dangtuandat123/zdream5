@@ -119,6 +119,12 @@ class ImageController extends Controller
      */
     public function upload(Request $request): JsonResponse
     {
+        \Illuminate\Support\Facades\Log::debug('Upload request received', [
+            'has_file' => $request->hasFile('image'),
+            'file_name' => $request->file('image')?->getClientOriginalName(),
+            'file_size' => $request->file('image')?->getSize(),
+        ]);
+
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
             'project_id' => 'nullable|integer',
@@ -132,24 +138,36 @@ class ImageController extends Controller
 
         // Lưu vào storage
         $disk = config('filesystems.default');
-        Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');
+        $stored = Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');
 
-        // Lưu database
-        $image = Image::create([
-            'user_id' => $user->id,
-            'type' => 'upload',
-            'project_id' => $request->input('project_id'),
-            'prompt' => $file->getClientOriginalName(), // Lưu tên gốc vào prompt để ref
-            'model' => 'user-upload',
-            'file_path' => $filename,
-            'file_url' => Storage::disk($disk)->url($filename),
-            'gems_cost' => 0,
-        ]);
+        \Illuminate\Support\Facades\Log::debug('File storage result', ['filename' => $filename, 'stored' => $stored]);
 
-        return response()->json([
-            'message' => 'Tải lên thành công!',
-            'image' => $image,
-        ], 201);
+        try {
+            // Lưu database
+            $image = Image::create([
+                'user_id' => $user->id,
+                'type' => 'upload',
+                'project_id' => $request->input('project_id'),
+                'prompt' => $file->getClientOriginalName(), // Lưu tên gốc vào prompt để ref
+                'model' => 'user-upload',
+                'file_path' => $filename,
+                'file_url' => Storage::disk($disk)->url($filename),
+                'gems_cost' => 0,
+            ]);
+
+            return response()->json([
+                'message' => 'Tải lên thành công!',
+                'image' => $image,
+            ], 201);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Database error during upload', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json([
+                'message' => 'Lỗi lưu trữ dữ liệu: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

@@ -259,12 +259,12 @@ export function LibraryPage() {
 
             // Reset input
             if (fileInputRef.current) fileInputRef.current.value = ""
-        } catch (error) {
-            console.error("Upload error:", error)
+        } catch (error: any) {
+            console.error("Upload error detail:", error)
             toast({
                 variant: "destructive",
                 title: "Tải lên thất bại",
-                description: "Có lỗi xảy ra khi gửi tệp lên máy chủ.",
+                description: error.message || "Có lỗi xảy ra khi gửi tệp lên máy chủ.",
             })
         } finally {
             setIsUploading(false)
