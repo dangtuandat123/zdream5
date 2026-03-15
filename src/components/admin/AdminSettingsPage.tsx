@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Save, RefreshCw, Settings2, Image, CreditCard, Globe } from 'lucide-react';
+import { Save, RefreshCw, Settings2, CreditCard, Globe } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { adminApi, type AdminAiModelData } from '@/lib/api';
+import { adminApi } from '@/lib/api';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
@@ -21,41 +19,12 @@ interface SettingItem {
 }
 
 // Metadata cho từng setting key: label thân thiện, mô tả, loại input
-const settingMeta: Record<string, { label: string; description: string; type: 'text' | 'number' | 'boolean' | 'select'; options?: { value: string; label: string }[] }> = {
+const settingMeta: Record<string, { label: string; description: string; type: 'text' | 'number' | 'boolean' }> = {
     // General
     site_name: { label: 'Tên trang web', description: 'Tên hiển thị của nền tảng', type: 'text' },
     site_description: { label: 'Mô tả trang web', description: 'Mô tả ngắn gọn về nền tảng', type: 'text' },
     new_user_gems: { label: 'Gems tặng user mới', description: 'Số gems tặng khi đăng ký tài khoản', type: 'number' },
     maintenance_mode: { label: 'Chế độ bảo trì', description: 'Bật để tạm ngưng truy cập cho user thường', type: 'boolean' },
-
-    // Generation
-    default_model: { label: 'Model mặc định', description: 'Model AI sử dụng khi user không chọn', type: 'text' },
-    default_gems_per_image: { label: 'Gems mỗi ảnh', description: 'Chi phí gems mặc định cho 1 ảnh (nếu model không có giá riêng)', type: 'number' },
-    max_images_per_request: { label: 'Tối đa ảnh/lần', description: 'Số ảnh tối đa user có thể tạo trong 1 request', type: 'number' },
-    default_aspect_ratio: {
-        label: 'Tỉ lệ mặc định', description: 'Tỉ lệ ảnh mặc định', type: 'select',
-        options: [
-            { value: '1:1', label: '1:1 (Vuông)' },
-            { value: '16:9', label: '16:9 (Ngang)' },
-            { value: '9:16', label: '9:16 (Dọc)' },
-            { value: '4:3', label: '4:3' },
-            { value: '3:4', label: '3:4' },
-            { value: '3:2', label: '3:2' },
-            { value: '2:3', label: '2:3' },
-        ],
-    },
-    default_style: {
-        label: 'Phong cách mặc định', description: 'Phong cách ảnh mặc định', type: 'select',
-        options: [
-            { value: 'photorealistic', label: 'Chân thực' },
-            { value: 'anime', label: 'Anime' },
-            { value: 'digital-art', label: 'Digital Art' },
-            { value: 'oil-painting', label: 'Sơn dầu' },
-            { value: 'watercolor', label: 'Màu nước' },
-            { value: '3d-render', label: '3D Render' },
-            { value: 'pixel-art', label: 'Pixel Art' },
-        ],
-    },
 
     // Billing
     gem_price_vnd: { label: 'Giá 1 gem (VNĐ)', description: 'Tỷ giá quy đổi VNĐ sang gems', type: 'number' },
@@ -70,28 +39,28 @@ const settingMeta: Record<string, { label: string; description: string; type: 't
     max_upload_size_mb: { label: 'Upload tối đa (MB)', description: 'Dung lượng file upload tối đa', type: 'number' },
 };
 
-// Cấu hình hiển thị cho từng nhóm setting
+// Cấu hình hiển thị cho từng nhóm setting (không bao gồm generation — đã có tab "Tạo ảnh" riêng)
 const groupConfig: Record<string, { label: string; icon: LucideIcon; description: string }> = {
     general: { label: 'Chung', icon: Settings2, description: 'Cài đặt chung của hệ thống' },
-    generation: { label: 'Tạo ảnh', icon: Image, description: 'Cấu hình liên quan đến tạo ảnh AI' },
     billing: { label: 'Thanh toán', icon: CreditCard, description: 'Cài đặt thanh toán và ngân hàng' },
     api: { label: 'API', icon: Globe, description: 'Cấu hình kết nối API bên ngoài' },
 };
 
-// Thứ tự hiển thị cố định cho các group
-const GROUP_ORDER = ['general', 'generation', 'billing', 'api'];
+// Thứ tự hiển thị cố định cho các group (ẩn generation)
+const GROUP_ORDER = ['general', 'billing', 'api'];
 
 // Thứ tự hiển thị cố định cho settings trong mỗi group
 const SETTING_ORDER: Record<string, string[]> = {
     general: ['site_name', 'site_description', 'new_user_gems', 'maintenance_mode'],
-    generation: ['default_model', 'default_gems_per_image', 'max_images_per_request', 'default_aspect_ratio', 'default_style'],
     billing: ['gem_price_vnd', 'min_topup_gems', 'bank_name', 'bank_account', 'bank_owner'],
     api: ['openrouter_base_url', 'openrouter_timeout', 'max_upload_size_mb'],
 };
 
+// Groups bị ẩn khỏi Settings page (đã được quản lý ở tab riêng)
+const HIDDEN_GROUPS = ['generation'];
+
 export default function AdminSettingsPage() {
     const [settings, setSettings] = useState<Record<string, SettingItem[]>>({});
-    const [models, setModels] = useState<AdminAiModelData[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [edits, setEdits] = useState<Record<string, string>>({});
@@ -100,14 +69,17 @@ export default function AdminSettingsPage() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [data, allModels] = await Promise.all([
-                adminApi.settings(),
-                adminApi.models(),
-            ]);
-            setSettings(data);
-            setModels(allModels);
+            const data = await adminApi.settings();
+            // Loại bỏ groups đã có tab riêng
+            const filtered: Record<string, SettingItem[]> = {};
+            for (const [group, items] of Object.entries(data)) {
+                if (!HIDDEN_GROUPS.includes(group)) {
+                    filtered[group] = items as SettingItem[];
+                }
+            }
+            setSettings(filtered);
             const initial: Record<string, string> = {};
-            Object.values(data).flat().forEach((s: SettingItem) => {
+            Object.values(filtered).flat().forEach((s: SettingItem) => {
                 initial[s.key] = s.value ?? '';
             });
             setEdits(initial);
@@ -119,16 +91,6 @@ export default function AdminSettingsPage() {
     };
 
     useEffect(() => { fetchData(); }, []);
-
-    const handleToggleModel = async (id: number) => {
-        try {
-            await adminApi.toggleModel(id);
-            const updated = await adminApi.models();
-            setModels(updated);
-        } catch {
-            toast.error('Không thể thay đổi trạng thái model');
-        }
-    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -232,21 +194,6 @@ export default function AdminSettingsPage() {
                         {value === '1' || value === 'true' ? 'Đang bật' : 'Đang tắt'}
                     </span>
                 </div>
-            );
-        }
-
-        if (meta.type === 'select' && meta.options) {
-            return (
-                <Select value={value} onValueChange={(v) => updateEdit(s.key, v)}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Chọn..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {meta.options.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
             );
         }
 
@@ -358,49 +305,6 @@ export default function AdminSettingsPage() {
                             )}
                         </CardContent>
                     </Card>
-
-                    {/* Card toggle models — chỉ hiện khi group "generation" */}
-                    {activeGroup === 'generation' && (
-                        <Card className="mt-4">
-                            <CardHeader className="pb-3">
-                                <CardTitle className="text-base">Models khả dụng</CardTitle>
-                                <CardDescription className="text-xs">
-                                    Bật/tắt model hiển thị trên trang tạo ảnh. Quản lý chi tiết tại tab Mô hình AI.
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="divide-y">
-                                    {models.map((m) => (
-                                        <div key={m.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                                            <div className="min-w-0">
-                                                <p className="font-medium text-sm">{m.name}</p>
-                                                <p className="text-xs text-muted-foreground font-mono">{m.model_id}</p>
-                                            </div>
-                                            <div className="flex items-center gap-3 shrink-0">
-                                                <Badge variant="secondary" className="text-xs tabular-nums">
-                                                    {m.gems_cost} gems/ảnh
-                                                </Badge>
-                                                <div className="flex items-center gap-2">
-                                                    <Switch
-                                                        checked={m.is_active}
-                                                        onCheckedChange={() => handleToggleModel(m.id)}
-                                                    />
-                                                    <span className={`text-xs font-medium ${m.is_active ? 'text-green-500' : 'text-muted-foreground'}`}>
-                                                        {m.is_active ? 'Bật' : 'Tắt'}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    {models.length === 0 && (
-                                        <p className="text-sm text-muted-foreground text-center py-4">
-                                            Chưa có model nào. Thêm tại tab Mô hình AI.
-                                        </p>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
             </div>
         </div>
