@@ -2332,7 +2332,7 @@ export function GeneratePage() {
                 </AlertDialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background to-[40%] sm:bg-none">
+                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background/60 to-[40%] sm:bg-none">
                     {/* Floating Indicators Container */}
                     <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
                         <AnimatePresence>
