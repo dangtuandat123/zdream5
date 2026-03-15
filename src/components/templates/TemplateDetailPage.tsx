@@ -57,6 +57,13 @@ const SIZE_OPTIONS = [
 // Số lượng ảnh
 const COUNT_OPTIONS = [1, 2, 3, 4]
 
+// Độ phân giải — theo OpenRouter image_config.image_size
+const RESOLUTION_OPTIONS = [
+    { value: "1K", label: "1K", desc: "Chuẩn" },
+    { value: "2K", label: "2K", desc: "Nét hơn" },
+    { value: "4K", label: "4K", desc: "Siêu nét" },
+]
+
 interface GeneratedImage {
     id: string | number
     url: string
@@ -140,6 +147,7 @@ export function TemplateDetailPage() {
     const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
     const [historyLoading, setHistoryLoading] = useState(true)
     const [outputSize, setOutputSize] = useState("1:1")
+    const [imageSize, setImageSize] = useState("1K")
     const [imageCount, setImageCount] = useState(1)
     const [isDragging, setIsDragging] = useState(false)
     const [hasError, setHasError] = useState(false)
@@ -251,6 +259,7 @@ export function TemplateDetailPage() {
                 prompt: finalPrompt,
                 model: template.model || undefined,
                 aspect_ratio: outputSize,
+                image_size: imageSize,
                 count: imageCount,
                 reference_images: [uploadedImage],
                 template_slug: slug,
@@ -282,7 +291,7 @@ export function TemplateDetailPage() {
             setIsGenerating(false)
             setGenerateProgress(0)
         }
-    }, [uploadedImage, isGenerating, template, outputSize, imageCount, effectSelections, extraPrompt, effectGroups, updateGems])
+    }, [uploadedImage, isGenerating, template, outputSize, imageSize, imageCount, effectSelections, extraPrompt, effectGroups, updateGems, slug])
 
     const handleDownload = useCallback(async (url: string) => {
         try {
@@ -419,6 +428,25 @@ export function TemplateDetailPage() {
                             onClick={() => setImageCount(n)}
                         >
                             {n}
+                        </Button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Độ phân giải */}
+            <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">ĐỘ PHÂN GIẢI</Label>
+                <div className="grid grid-cols-3 gap-2">
+                    {RESOLUTION_OPTIONS.map(opt => (
+                        <Button
+                            key={opt.value}
+                            variant={imageSize === opt.value ? "default" : "outline"}
+                            size="sm"
+                            className="flex flex-col items-center gap-0.5 h-auto py-2"
+                            onClick={() => setImageSize(opt.value)}
+                        >
+                            <span className="text-xs font-semibold">{opt.label}</span>
+                            <span className="text-[9px] opacity-60">{opt.desc}</span>
                         </Button>
                     ))}
                 </div>

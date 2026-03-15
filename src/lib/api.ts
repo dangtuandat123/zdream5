@@ -183,11 +183,12 @@ export const imageApi = {
         body: JSON.stringify(data),
     }),
 
-    list: (page = 1, perPage = 20, projectId?: string | null, type?: string | null, templateSlug?: string | null) => {
+    list: (page = 1, perPage = 20, projectId?: string | null, type?: string | null, templateSlug?: string | null, excludeTemplate = false) => {
         let url = `/images?page=${page}&per_page=${perPage}`;
         if (projectId) url += `&project_id=${projectId}`;
         if (type) url += `&type=${type}`;
         if (templateSlug) url += `&template_slug=${encodeURIComponent(templateSlug)}`;
+        if (excludeTemplate) url += `&exclude_template=1`;
         return request<{
             data: GeneratedImageData[];
             current_page: number;

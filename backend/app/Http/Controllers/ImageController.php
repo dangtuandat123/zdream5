@@ -206,6 +206,11 @@ class ImageController extends Controller
             $query->where('template_slug', $request->input('template_slug'));
         }
 
+        // Loại trừ ảnh tạo từ template khi không filter cụ thể template
+        if ($request->boolean('exclude_template', false)) {
+            $query->whereNull('template_slug');
+        }
+
         $images = $query->paginate($perPage);
 
         return response()->json($images);

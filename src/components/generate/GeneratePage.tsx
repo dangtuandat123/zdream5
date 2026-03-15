@@ -886,7 +886,7 @@ export function GeneratePage() {
             setTotalImages(0)
             try {
                 const paramProjectId = currentProjectId === "all" ? undefined : currentProjectId
-                const res = await imageApi.list(1, 50, paramProjectId, "ai")
+                const res = await imageApi.list(1, 50, paramProjectId, "ai", null, true)
                 if (res.data) {
                     setImages(parseImageData(res.data))
                     setCurrentPage(res.current_page)
@@ -909,7 +909,7 @@ export function GeneratePage() {
         try {
             const nextPage = currentPage + 1
             const paramProjectId = currentProjectId === "all" ? undefined : currentProjectId
-            const res = await imageApi.list(nextPage, 50, paramProjectId, "ai")
+            const res = await imageApi.list(nextPage, 50, paramProjectId, "ai", null, true)
             if (res.data && res.data.length > 0) {
                 setImages(prev => [...prev, ...parseImageData(res.data)])
                 setCurrentPage(res.current_page)
