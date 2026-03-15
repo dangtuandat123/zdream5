@@ -172,6 +172,7 @@ export const imageApi = {
         model?: string;
         style?: string;
         aspect_ratio?: string;
+        image_size?: string;
         seed?: number;
         count?: number;
         reference_images?: string[];

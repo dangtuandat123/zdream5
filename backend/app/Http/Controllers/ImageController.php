@@ -65,7 +65,9 @@ class ImageController extends Controller
                     prompt: $validated['prompt'],
                     negativePrompt: $validated['negative_prompt'] ?? null,
                     aspectRatio: $aspectRatio,
+                    imageSize: $validated['image_size'] ?? '1K',
                     model: $model,
+                    style: $style,
                     referenceImages: $validated['reference_images'] ?? null,
                 );
 

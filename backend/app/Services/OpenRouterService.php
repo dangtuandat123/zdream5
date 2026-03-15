@@ -27,12 +27,15 @@ class OpenRouterService
     }
 
     /**
-     * Tạo ảnh AI từ prompt.
+     * Tạo ảnh AI từ prompt thông qua OpenRouter API.
      *
      * @param string $prompt Prompt mô tả ảnh
      * @param string|null $negativePrompt Negative prompt (không bắt buộc)
-     * @param string $aspectRatio Tỉ lệ ảnh (1:1, 16:9, 9:16, 4:3)
+     * @param string $aspectRatio Tỉ lệ ảnh theo OpenRouter (1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9)
+     * @param string $imageSize Độ phân giải: 1K (mặc định), 2K, 4K
      * @param string|null $model Model AI (mặc định từ config)
+     * @param string|null $style Phong cách ảnh — nhúng vào prompt text
+     * @param array|null $referenceImages Mảng ảnh tham chiếu (base64 data URL)
      * @return array{file_path: string, file_url: string} Đường dẫn và URL ảnh
      *
      * @throws \RuntimeException Nếu API lỗi hoặc không trả ảnh
@@ -41,19 +44,22 @@ class OpenRouterService
         string $prompt,
         ?string $negativePrompt = null,
         string $aspectRatio = '1:1',
+        string $imageSize = '1K',
         ?string $model = null,
+        ?string $style = null,
         ?array $referenceImages = null,
     ): array {
         $model = $model ?? $this->defaultModel;
 
-        // Xây dựng nội dung message
-        $messageText = $prompt;
+        // Xây dựng nội dung message — nhúng style và negative prompt vào text
+        $messageText = '';
+        if ($style && $style !== 'photorealistic') {
+            $messageText .= "Style: {$style}. ";
+        }
+        $messageText .= $prompt;
         if ($negativePrompt) {
             $messageText .= "\n\nAvoid: " . $negativePrompt;
         }
-
-        // Thêm hướng dẫn tỉ lệ ảnh vào prompt vì 1 số model không hỗ trợ image_config
-        $messageText .= "\n\nPlease ensure the aspect ratio is {$aspectRatio}.";
 
         // Mảng chứa cả Text và Image nếu có ảnh tham chiếu
         if (!empty($referenceImages)) {
@@ -63,7 +69,7 @@ class OpenRouterService
                     'text' => $messageText,
                 ]
             ];
-            
+
             foreach ($referenceImages as $imgBase64) {
                 // Thêm tiền tố data:image nếu có lỗi thiếu từ Frontend
                 if (!str_starts_with($imgBase64, 'data:image/')) {
@@ -80,7 +86,7 @@ class OpenRouterService
             $finalContent = $messageText;
         }
 
-        // Payload gửi đến OpenRouter
+        // Payload gửi đến OpenRouter — sử dụng image_config theo API docs
         $payload = [
             'model' => $model,
             'messages' => [
@@ -90,6 +96,10 @@ class OpenRouterService
                 ],
             ],
             'modalities' => ['image', 'text'],
+            'image_config' => [
+                'aspect_ratio' => $aspectRatio,
+                'image_size' => $imageSize,
+            ],
         ];
 
         // Gọi API OpenRouter

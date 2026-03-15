@@ -56,8 +56,6 @@ import {
 } from "@/components/ui/command"
 
 import { Button } from "@/components/ui/button"
-import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -463,12 +461,25 @@ function JustifiedGallery({
 }
 
 
-// Aspect ratio configs — value dùng cho AspectRatio component
+// Aspect ratio configs — đầy đủ 10 tỉ lệ theo OpenRouter API docs cho Gemini
 const ASPECT_RATIOS = [
     { value: "1", label: "1:1", ratio: 1, icon: Square },
-    { value: "16/9", label: "16:9", ratio: 16 / 9, icon: RectangleHorizontal },
-    { value: "9/16", label: "9:16", ratio: 9 / 16, icon: RectangleVertical },
+    { value: "2/3", label: "2:3", ratio: 2 / 3, icon: RectangleVertical },
+    { value: "3/2", label: "3:2", ratio: 3 / 2, icon: RectangleHorizontal },
+    { value: "3/4", label: "3:4", ratio: 3 / 4, icon: RectangleVertical },
     { value: "4/3", label: "4:3", ratio: 4 / 3, icon: RectangleHorizontal },
+    { value: "4/5", label: "4:5", ratio: 4 / 5, icon: RectangleVertical },
+    { value: "5/4", label: "5:4", ratio: 5 / 4, icon: RectangleHorizontal },
+    { value: "9/16", label: "9:16", ratio: 9 / 16, icon: RectangleVertical },
+    { value: "16/9", label: "16:9", ratio: 16 / 9, icon: RectangleHorizontal },
+    { value: "21/9", label: "21:9", ratio: 21 / 9, icon: RectangleHorizontal },
+]
+
+// Image size configs — theo OpenRouter image_config.image_size
+const IMAGE_SIZES = [
+    { value: "1K", label: "1K", desc: "Chuẩn" },
+    { value: "2K", label: "2K", desc: "Nét hơn" },
+    { value: "4K", label: "4K", desc: "Cao nhất" },
 ]
 export function GeneratePage() {
     // === State ===
@@ -1195,8 +1206,7 @@ export function GeneratePage() {
     const [model, setModel] = useState("google/gemini-2.5-flash-image")
     const [style, setStyle] = useState("photorealistic")
     const [aspectRatioValue, setAspectRatioValue] = useState("1")
-    const [creativity, setCreativity] = useState([75])
-    const [highRes, setHighRes] = useState(false)
+    const [imageSize, setImageSize] = useState("1K")
     const [imageCount, setImageCount] = useState("1")
 
     // Helper
@@ -1270,6 +1280,7 @@ export function GeneratePage() {
                 model,
                 style,
                 aspect_ratio: ar.label,
+                image_size: imageSize,
                 seed: currentSeed,
                 count,
                 reference_images: base64Refs.length > 0 ? base64Refs : undefined,
@@ -1328,7 +1339,7 @@ export function GeneratePage() {
             setGenerateProgress(0)
             toast.error(error.message || 'Lỗi khi tạo ảnh. Vui lòng thử lại.', { id: 'generate-error' })
         }
-    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, negativePrompt, seed, referenceImages, updateGems, refreshUser, currentProjectId, setTotalImages])
+    }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, imageSize, negativePrompt, seed, referenceImages, updateGems, refreshUser, currentProjectId, setTotalImages])
 
     const handleDelete = useCallback((id: string) => {
         setDeleteConfirm({ type: 'single', id })
@@ -1660,9 +1671,7 @@ export function GeneratePage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="google/gemini-2.5-flash-image">Gemini 2.5 Flash</SelectItem>
-                        <SelectItem value="stabilityai/stable-diffusion-3">Stable Diffusion 3</SelectItem>
-                        <SelectItem value="openai/dall-e-3">DALL·E 3</SelectItem>
-                        <SelectItem value="black-forest-labs/flux-1.1-pro">Flux Pro</SelectItem>
+                        <SelectItem value="google/gemini-3.1-flash-image-preview">Gemini 3.1 Flash</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -1674,7 +1683,7 @@ export function GeneratePage() {
                     type="single"
                     value={aspectRatioValue}
                     onValueChange={(v) => v && setAspectRatioValue(v)}
-                    className="grid grid-cols-4 gap-1.5"
+                    className="grid grid-cols-5 gap-1.5"
                 >
                     {ASPECT_RATIOS.map((ar) => (
                         <ToggleGroupItem
@@ -1728,19 +1737,26 @@ export function GeneratePage() {
                 </Select>
             </div>
 
-            {/* Creativity */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Sáng tạo</Label>
-                    <span className="text-xs font-medium">{creativity[0]}%</span>
-                </div>
-                <Slider value={creativity} onValueChange={setCreativity} max={100} step={1} />
-            </div>
-
-            {/* High-res */}
-            <div className="flex items-center justify-between">
-                <Label htmlFor="hr" className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">HD (2x)</Label>
-                <Switch id="hr" checked={highRes} onCheckedChange={setHighRes} />
+            {/* Độ phân giải (Image Size) — theo OpenRouter image_config */}
+            <div className="space-y-2">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Độ phân giải</Label>
+                <ToggleGroup
+                    type="single"
+                    value={imageSize}
+                    onValueChange={(v) => v && setImageSize(v)}
+                    className="grid grid-cols-3 gap-1.5"
+                >
+                    {IMAGE_SIZES.map((s) => (
+                        <ToggleGroupItem
+                            key={s.value}
+                            value={s.value}
+                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                        >
+                            <span className="font-semibold">{s.label}</span>
+                            <span className="text-[9px] opacity-60">{s.desc}</span>
+                        </ToggleGroupItem>
+                    ))}
+                </ToggleGroup>
             </div>
 
             <Separator />
@@ -2860,9 +2876,7 @@ export function GeneratePage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="google/gemini-2.5-flash-image">Gemini 2.5 Flash</SelectItem>
-                                                <SelectItem value="stabilityai/stable-diffusion-3">Stable Diffusion 3</SelectItem>
-                                                <SelectItem value="openai/dall-e-3">DALL·E 3</SelectItem>
-                                                <SelectItem value="black-forest-labs/flux-1.1-pro">Flux Pro</SelectItem>
+                                                <SelectItem value="google/gemini-3.1-flash-image-preview">Gemini 3.1 Flash</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
