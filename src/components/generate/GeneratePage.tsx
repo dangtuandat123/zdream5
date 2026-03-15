@@ -2478,15 +2478,18 @@ export function GeneratePage() {
                             <div className="relative px-2 py-2">
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
-                                    <div className="absolute bottom-full mb-2 left-2 right-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                                        <div className="bg-[#1c1c1e] border border-[#333] rounded-xl shadow-lg p-2">
-                                            <p className="text-[10px] text-[#888] px-1 mb-1.5 select-none">Ảnh tham chiếu</p>
-                                            {referenceImages.length > 0 ? (
-                                                <div className="flex flex-col gap-px">
-                                                    {referenceImages.map((src, idx) => (
+                                    <div className="absolute bottom-full mb-1 left-0 right-0 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                                        <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar">
+                                            <div className="p-1.5">
+                                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2.5 py-1.5 select-none flex items-center gap-1.5">
+                                                    <ImageIcon className="size-3" />
+                                                    Ảnh tham chiếu
+                                                </div>
+                                                {referenceImages.length > 0 ? (
+                                                    referenceImages.map((src, idx) => (
                                                         <button
                                                             key={idx}
-                                                            className="flex items-center gap-2.5 w-full px-1.5 py-1.5 rounded-lg hover:bg-white/[0.06] transition-colors text-left"
+                                                            className="flex items-center gap-3 w-full px-2.5 py-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left active:bg-accent/80"
                                                             onClick={() => {
                                                                 const mention = `@Ảnh ${idx + 1} `
                                                                 const pos = mentionInsertPosRef.current
@@ -2501,9 +2504,7 @@ export function GeneratePage() {
                                                                         const savedScroll = el.scrollTop
                                                                         el.focus({ preventScroll: true })
                                                                         setCursorPosition(el, pos + mention.length)
-                                                                        // Phục hồi scroll rồi cuộn nhẹ để cursor vừa vặn hiện ra
                                                                         el.scrollTop = savedScroll
-                                                                        // Đảm bảo cursor nằm trong vùng nhìn thấy
                                                                         const sel = window.getSelection()
                                                                         if (sel && sel.rangeCount > 0) {
                                                                             const rect = sel.getRangeAt(0).getBoundingClientRect()
@@ -2518,19 +2519,30 @@ export function GeneratePage() {
                                                                 })
                                                             }}
                                                         >
-                                                            <img src={src} alt={`Ảnh ${idx + 1}`} className="size-8 rounded object-cover shrink-0" />
-                                                            <span className="text-[13px] text-[#ccc]">Ảnh tham chiếu {idx + 1}</span>
+                                                            <div className="relative shrink-0">
+                                                                <img src={src} alt={`Ảnh ${idx + 1}`} className="size-10 rounded-lg object-cover border border-border/40" />
+                                                                <div className="absolute -top-1 -left-1 bg-primary text-primary-foreground text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
+                                                                    {idx + 1}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex flex-col min-w-0">
+                                                                <span className="text-sm font-medium truncate">@Ảnh {idx + 1}</span>
+                                                                <span className="text-[11px] text-muted-foreground">Chèn tham chiếu vào prompt</span>
+                                                            </div>
                                                         </button>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center gap-2 px-1 py-1.5">
-                                                    <div className="size-7 rounded-md border border-dashed border-[#444] flex items-center justify-center">
-                                                        <ImageIcon className="size-3.5 text-[#555]" />
+                                                    ))
+                                                ) : (
+                                                    <div className="flex items-center gap-3 px-2.5 py-3">
+                                                        <div className="size-10 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0">
+                                                            <ImageIcon className="size-4 text-muted-foreground/50" />
+                                                        </div>
+                                                        <div className="flex flex-col gap-0.5">
+                                                            <span className="text-xs text-muted-foreground">Chưa có ảnh tham chiếu</span>
+                                                            <span className="text-[11px] text-muted-foreground/60">Bấm nút + để thêm ảnh</span>
+                                                        </div>
                                                     </div>
-                                                    <span className="text-[11px] text-[#666]">Chưa có ảnh tham chiếu</span>
-                                                </div>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
