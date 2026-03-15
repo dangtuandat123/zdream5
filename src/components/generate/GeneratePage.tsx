@@ -783,6 +783,30 @@ export function GeneratePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedImage, lbSyncToState, lbResetZoom, lbApplyZoom])
 
+    // Mobile keyboard: điều chỉnh vị trí prompt bar khi bàn phím ảo mở trên iOS Safari
+    useEffect(() => {
+        const vv = window.visualViewport
+        if (!vv) return
+        const onResize = () => {
+            const el = promptContainerRef.current
+            if (!el) return
+            // Khi bàn phím mở, visualViewport.height < window.innerHeight
+            const keyboardOffset = window.innerHeight - vv.height - vv.offsetTop
+            if (keyboardOffset > 50) {
+                // Bàn phím đang mở — đẩy prompt bar lên trên bàn phím
+                el.style.transform = `translateY(-${keyboardOffset}px)`
+            } else {
+                el.style.transform = ''
+            }
+        }
+        vv.addEventListener('resize', onResize)
+        vv.addEventListener('scroll', onResize)
+        return () => {
+            vv.removeEventListener('resize', onResize)
+            vv.removeEventListener('scroll', onResize)
+        }
+    }, [])
+
     // Lock body scroll khi lightbox mở
     useEffect(() => {
         if (selectedImage) {
@@ -798,7 +822,7 @@ export function GeneratePage() {
                 const res = await projectApi.list()
                 if (res.data) setProjects(res.data)
             } catch (err) {
-                console.error("Failed to load projects:", err)
+                // silently fail
             }
         }
         fetchProjects()
@@ -879,7 +903,7 @@ export function GeneratePage() {
                     setTotalImages(res.total)
                 }
             } catch (err) {
-                console.error("Failed to load history:", err)
+                // silently fail
             } finally {
                 setIsHistoryLoading(false)
             }
@@ -901,7 +925,7 @@ export function GeneratePage() {
                 setLastPage(res.last_page)
             }
         } catch (err) {
-            console.error("Failed to load more images:", err)
+            // silently fail
         } finally {
             setIsLoadingMore(false)
         }
@@ -1052,6 +1076,7 @@ export function GeneratePage() {
     // --- Prompt Bar refs ---
     const textareaRef = useRef<HTMLDivElement>(null)
     const promptContainerRef = useRef<HTMLDivElement>(null)
+    const isComposingRef = useRef(false)
 
     // Hàm tiện ích: render prompt thành HTML với mention highlight
     const renderPromptHTML = (text: string): string => {
@@ -1251,7 +1276,7 @@ export function GeneratePage() {
                             reader.readAsDataURL(blob)
                         })
                     } catch (e) {
-                        console.error('Lỗi convert ảnh tham chiếu:', e)
+                        // fallback: dùng URL gốc
                         return url
                     }
                 })
@@ -1316,7 +1341,7 @@ export function GeneratePage() {
             }, 400)
 
         } catch (error: any) {
-            console.error('Lỗi khi tạo ảnh:', error)
+            // Đã toast.error bên dưới
             clearInterval(interval)
             progressIntervalRef.current = null
             setIsGenerating(false)
@@ -1349,7 +1374,7 @@ export function GeneratePage() {
                 setSelectionMode(false)
             }
         } catch (e: any) {
-            console.error('Lỗi khi xóa ảnh:', e)
+            // Đã toast.error bên dưới
             toast.error("Không thể xoá ảnh trên máy chủ", { id: 'delete-api-error' })
         } finally {
             setDeleteConfirm(null)
@@ -2063,8 +2088,8 @@ export function GeneratePage() {
                                     </div>
                                 </div>
 
-                                {/* Action Bar (Góc dưới) */}
-                                <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                                {/* Action Bar (Góc dưới) — safe-area cho iPhone */}
+                                <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
                                     {/* Group: Zoom Controls */}
                                     <div className="flex items-center gap-0.5 sm:gap-1 border-r border-white/10 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1">
                                         <Button variant="ghost" size="icon" title="Thu nhỏ" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={lbHandleZoomOut} disabled={lightboxZoom <= 1}>
@@ -2163,7 +2188,7 @@ export function GeneratePage() {
 
                             {/* === Info Panel — sidebar trên desktop, bottom sheet trên mobile === */}
                             {showInfo && (
-                                <div className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300">
+                                <div className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300 max-h-[70vh] lg:max-h-none rounded-t-2xl lg:rounded-t-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
                                     {/* Header panel */}
                                     <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
                                         <h3 className="text-sm font-semibold text-white">Chi tiết ảnh</h3>
@@ -2307,7 +2332,7 @@ export function GeneratePage() {
                 </AlertDialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-4 sm:pb-6 pt-6 pointer-events-none">
+                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-6 pointer-events-none">
                     {/* Floating Indicators Container */}
                     <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
                         <AnimatePresence>
@@ -2568,7 +2593,11 @@ export function GeneratePage() {
                                         const text = e.clipboardData.getData('text/plain')
                                         document.execCommand('insertText', false, text)
                                     }}
+                                    onCompositionStart={() => { isComposingRef.current = true }}
+                                    onCompositionEnd={() => { isComposingRef.current = false }}
                                     onKeyDown={(e) => {
+                                        // Bỏ qua Enter khi đang compose (IME/predictive text trên mobile)
+                                        if (isComposingRef.current) return
                                         if (showMentionPopover && e.key === 'Escape') {
                                             e.preventDefault()
                                             setShowMentionPopover(false)
@@ -2580,12 +2609,20 @@ export function GeneratePage() {
                                             handleGenerate()
                                         }
                                     }}
+                                    onFocus={() => {
+                                        // Trên mobile, scroll prompt bar vào view khi bàn phím mở
+                                        if (window.innerWidth < 768) {
+                                            setTimeout(() => {
+                                                promptContainerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+                                            }, 300)
+                                        }
+                                    }}
                                 />
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
-                            <div className="flex items-center justify-between px-3 pb-2.5">
-                                <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pr-2">
+                            <div className="flex items-center justify-between px-3 pb-2.5" style={{ touchAction: 'manipulation' }}>
+                                <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none pr-2">
                                     {/* Prompt History */}
                                     {promptHistory.length > 0 && (
                                         <Tooltip>
