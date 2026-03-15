@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { adminApi } from '@/lib/api';
+import { Badge } from '@/components/ui/badge';
+import { adminApi, type AdminAiModelData } from '@/lib/api';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
@@ -90,16 +91,21 @@ const SETTING_ORDER: Record<string, string[]> = {
 
 export default function AdminSettingsPage() {
     const [settings, setSettings] = useState<Record<string, SettingItem[]>>({});
+    const [models, setModels] = useState<AdminAiModelData[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [edits, setEdits] = useState<Record<string, string>>({});
     const [activeGroup, setActiveGroup] = useState('general');
 
-    const fetchSettings = async () => {
+    const fetchData = async () => {
         setLoading(true);
         try {
-            const data = await adminApi.settings();
+            const [data, allModels] = await Promise.all([
+                adminApi.settings(),
+                adminApi.models(),
+            ]);
             setSettings(data);
+            setModels(allModels);
             const initial: Record<string, string> = {};
             Object.values(data).flat().forEach((s: SettingItem) => {
                 initial[s.key] = s.value ?? '';
@@ -112,7 +118,17 @@ export default function AdminSettingsPage() {
         }
     };
 
-    useEffect(() => { fetchSettings(); }, []);
+    useEffect(() => { fetchData(); }, []);
+
+    const handleToggleModel = async (id: number) => {
+        try {
+            await adminApi.toggleModel(id);
+            const updated = await adminApi.models();
+            setModels(updated);
+        } catch {
+            toast.error('Không thể thay đổi trạng thái model');
+        }
+    };
 
     const handleSave = async () => {
         setSaving(true);
@@ -124,7 +140,7 @@ export default function AdminSettingsPage() {
             }));
             await adminApi.updateSettings(items);
             toast.success('Đã lưu cài đặt');
-            fetchSettings();
+            fetchData();
         } catch {
             toast.error('Không thể lưu');
         } finally {
@@ -342,6 +358,49 @@ export default function AdminSettingsPage() {
                             )}
                         </CardContent>
                     </Card>
+
+                    {/* Card toggle models — chỉ hiện khi group "generation" */}
+                    {activeGroup === 'generation' && (
+                        <Card className="mt-4">
+                            <CardHeader className="pb-3">
+                                <CardTitle className="text-base">Models khả dụng</CardTitle>
+                                <CardDescription className="text-xs">
+                                    Bật/tắt model hiển thị trên trang tạo ảnh. Quản lý chi tiết tại tab Mô hình AI.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="divide-y">
+                                    {models.map((m) => (
+                                        <div key={m.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                                            <div className="min-w-0">
+                                                <p className="font-medium text-sm">{m.name}</p>
+                                                <p className="text-xs text-muted-foreground font-mono">{m.model_id}</p>
+                                            </div>
+                                            <div className="flex items-center gap-3 shrink-0">
+                                                <Badge variant="secondary" className="text-xs tabular-nums">
+                                                    {m.gems_cost} gems/ảnh
+                                                </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Switch
+                                                        checked={m.is_active}
+                                                        onCheckedChange={() => handleToggleModel(m.id)}
+                                                    />
+                                                    <span className={`text-xs font-medium ${m.is_active ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                                        {m.is_active ? 'Bật' : 'Tắt'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {models.length === 0 && (
+                                        <p className="text-sm text-muted-foreground text-center py-4">
+                                            Chưa có model nào. Thêm tại tab Mô hình AI.
+                                        </p>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
                 </div>
             </div>
         </div>
