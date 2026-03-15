@@ -12,6 +12,11 @@ import {
   LogOut,
   Menu,
   ChevronRight,
+  Shield,
+  Users,
+  Layers,
+  Cpu,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
@@ -39,10 +44,19 @@ const navItems = [
   { icon: Images, label: "Thư viện", desc: "Ảnh đã tạo và tải lên", path: "/app/library" },
 ]
 
+// Admin menu items
+const adminItems = [
+  { icon: Shield, label: "Dashboard", desc: "Tổng quan hệ thống", path: "/app/admin" },
+  { icon: Users, label: "Users", desc: "Quản lý người dùng", path: "/app/admin/users" },
+  { icon: Layers, label: "Templates", desc: "Quản lý kiểu mẫu", path: "/app/admin/templates" },
+  { icon: Cpu, label: "Models", desc: "Quản lý mô hình AI", path: "/app/admin/models" },
+  { icon: Settings, label: "Settings", desc: "Cài đặt hệ thống", path: "/app/admin/settings" },
+]
+
 export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { gems, logout } = useAuth()
+  const { gems, isAdmin, logout } = useAuth()
   const isMobile = useIsMobile()
   const [open, setOpen] = useState(false)
   const [commandValue, setCommandValue] = useState("")
@@ -143,6 +157,41 @@ export function AppSidebar() {
                 })}
               </div>
 
+              {/* Admin items */}
+              {isAdmin && (
+                <>
+                  <div className="border-t my-3" />
+                  <p className="px-4 py-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Admin</p>
+                  {adminItems.map((item) => {
+                    const active = isActive(item.path)
+                    return (
+                      <button
+                        key={item.path}
+                        onClick={() => runCommand(() => navigate(item.path))}
+                        className={cn(
+                          "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left",
+                          active
+                            ? "bg-primary/10 text-primary"
+                            : "hover:bg-muted active:bg-muted"
+                        )}
+                      >
+                        <div className={cn(
+                          "flex items-center justify-center size-10 rounded-xl shrink-0",
+                          active ? "bg-primary/15" : "bg-muted"
+                        )}>
+                          <item.icon className={cn("size-5", active ? "text-primary" : "text-muted-foreground")} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn("text-sm", active ? "font-semibold" : "font-medium")}>{item.label}</p>
+                          <p className="text-xs text-muted-foreground">{item.desc}</p>
+                        </div>
+                        {active && <div className="size-2 rounded-full bg-primary shrink-0" />}
+                      </button>
+                    )
+                  })}
+                </>
+              )}
+
               {/* Separator */}
               <div className="border-t my-3" />
 
@@ -201,6 +250,30 @@ export function AppSidebar() {
                 )
               })}
             </CommandGroup>
+
+            {isAdmin && (
+              <>
+                <CommandSeparator />
+                <CommandGroup heading="Admin">
+                  {adminItems.map((item) => {
+                    const active = isActive(item.path)
+                    return (
+                      <CommandItem
+                        key={item.path}
+                        onSelect={() => runCommand(() => navigate(item.path))}
+                        className={cn(
+                          "cursor-pointer py-3",
+                          active && "bg-secondary text-foreground font-semibold"
+                        )}
+                      >
+                        <item.icon className={cn("mr-2 size-4 text-muted-foreground", active && "text-foreground")} />
+                        <span className={cn("font-medium", active && "font-bold tracking-tight text-foreground")}>{item.label}</span>
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+              </>
+            )}
 
             <CommandSeparator />
 
@@ -266,6 +339,38 @@ export function AppSidebar() {
             )
           })}
         </nav>
+
+        {/* Admin nav */}
+        {isAdmin && (
+          <nav className="flex flex-col items-center gap-1 w-full px-2 mt-2 pt-2 border-t border-sidebar-border">
+            {adminItems.map((item) => {
+              const active = isActive(item.path)
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 border border-transparent",
+                    active
+                      ? "bg-white/10 text-white border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                      : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5 active:bg-white/10"
+                  )}
+                >
+                  <item.icon className={cn(
+                    "size-[22px] transition-transform duration-300 ease-out",
+                    active ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "group-hover:scale-110"
+                  )} />
+                  <span className={cn(
+                    "text-[10px] tracking-wide",
+                    active ? "font-bold text-white shadow-black" : "font-medium"
+                  )}>
+                    {item.label}
+                  </span>
+                </Link>
+              )
+            })}
+          </nav>
+        )}
 
         {/* Footer */}
         <div className="flex flex-col items-center gap-1.5 w-full px-2 shrink-0">

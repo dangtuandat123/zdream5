@@ -49,6 +49,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'gems' => $user->gems,
                 'avatar' => $user->avatar,
+                'level' => $user->level,
                 'created_at' => $user->created_at,
             ],
         ]);

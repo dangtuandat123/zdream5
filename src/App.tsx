@@ -12,6 +12,15 @@ import { TemplateDetailPage } from "@/components/templates/TemplateDetailPage";
 import { TopUpPage } from "@/components/topup/TopUpPage";
 import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute"
 import { GoogleCallback } from "@/components/auth/GoogleCallback";
+import AdminRoute from "@/components/auth/AdminRoute";
+import { lazy, Suspense } from "react";
+
+// Lazy load admin components
+const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
+const AdminUsersPage = lazy(() => import("@/components/admin/AdminUsersPage"));
+const AdminTemplatesPage = lazy(() => import("@/components/admin/AdminTemplatesPage"));
+const AdminModelsPage = lazy(() => import("@/components/admin/AdminModelsPage"));
+const AdminSettingsPage = lazy(() => import("@/components/admin/AdminSettingsPage"));
 
 function App() {
   return (
@@ -42,6 +51,15 @@ function App() {
             <Route path="templates/:id" element={<TemplateDetailPage />} />
             <Route path="library" element={<LibraryPage />} />
             <Route path="topup" element={<TopUpPage />} />
+
+            {/* Admin Routes */}
+            <Route path="admin" element={<AdminRoute />}>
+              <Route index element={<Suspense fallback={null}><AdminDashboard /></Suspense>} />
+              <Route path="users" element={<Suspense fallback={null}><AdminUsersPage /></Suspense>} />
+              <Route path="templates" element={<Suspense fallback={null}><AdminTemplatesPage /></Suspense>} />
+              <Route path="models" element={<Suspense fallback={null}><AdminModelsPage /></Suspense>} />
+              <Route path="settings" element={<Suspense fallback={null}><AdminSettingsPage /></Suspense>} />
+            </Route>
           </Route>
         </Route>
 

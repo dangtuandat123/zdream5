@@ -5,6 +5,7 @@ interface AuthContextType {
     isLoggedIn: boolean;
     user: AuthUser | null;
     gems: number;
+    isAdmin: boolean;
     login: (email: string, password: string) => Promise<void>;
     loginWithToken: (token: string) => Promise<void>;
     register: (name: string, email: string, password: string) => Promise<void>;
@@ -107,12 +108,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const gems = user?.gems ?? 0;
+    const isAdmin = (user?.level ?? 0) >= 2;
 
     return (
         <AuthContext.Provider value={{
             isLoggedIn,
             user,
             gems,
+            isAdmin,
             login,
             loginWithToken,
             register,

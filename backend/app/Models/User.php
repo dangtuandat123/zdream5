@@ -14,6 +14,12 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    // Hằng số phân quyền
+    public const LEVEL_USER = 0;
+    public const LEVEL_MOD = 1;
+    public const LEVEL_ADMIN = 2;
+    public const LEVEL_SUPER = 99;
+
     /**
      * @var list<string>
      */
@@ -25,6 +31,7 @@ class User extends Authenticatable
         'avatar',
         'google_id',
         'email_verified_at',
+        'level',
     ];
 
     /**
@@ -44,7 +51,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'gems' => 'integer',
+            'level' => 'integer',
         ];
+    }
+
+    // === Authorization Helpers ===
+
+    public function isSuper(): bool
+    {
+        return $this->level === self::LEVEL_SUPER;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->level >= self::LEVEL_ADMIN;
+    }
+
+    public function isMod(): bool
+    {
+        return $this->level >= self::LEVEL_MOD;
     }
 
     // === Relationships ===

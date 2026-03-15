@@ -95,6 +95,7 @@ export interface AuthUser {
     email: string;
     gems: number;
     avatar: string | null;
+    level: number;
     created_at?: string;
 }
 
@@ -197,12 +198,12 @@ export const imageApi = {
         const formData = new FormData();
         formData.append('image', file);
         if (projectId) formData.append('project_id', projectId.toString());
-        
+
         return request<UploadResponse>('/images/upload', {
             method: 'POST',
             body: formData,
             // Header Content-Type sẽ tự động được set bởi fetch khi dùng FormData
-            headers: {} 
+            headers: {}
         });
     },
 
@@ -216,14 +217,14 @@ export const imageApi = {
 
 export const projectApi = {
     list: () => request<{ data: ProjectData[] }>('/projects'),
-    
-    create: (data: { name: string }) => 
+
+    create: (data: { name: string }) =>
         request<{ message: string, data: ProjectData }>('/projects', {
             method: 'POST',
             body: JSON.stringify(data),
         }),
 
-    delete: (id: number) => 
+    delete: (id: number) =>
         request<{ message: string }>(`/projects/${id}`, { method: 'DELETE' }),
 };
 
@@ -250,4 +251,138 @@ export const walletApi = {
             '/wallet/topup',
             { method: 'POST', body: JSON.stringify(data) }
         ),
+};
+
+// ========================
+// Template API (Public)
+// ========================
+
+export interface TemplateData {
+    id: number;
+    name: string;
+    slug: string;
+    category: string;
+    description: string | null;
+    system_prompt: string;
+    model: string;
+    thumbnail: string | null;
+    sample_images: string[] | null;
+    context_options: Array<{ value: string; label: string; prompt: string; image: string }> | null;
+    material_options: Array<{ value: string; label: string; prompt: string; image: string }> | null;
+}
+
+export const templateApi = {
+    list: () => request<{ data: TemplateData[] }>('/templates'),
+    get: (slug: string) => request<TemplateData>(`/templates/${slug}`),
+};
+
+// ========================
+// AI Model API (Public)
+// ========================
+
+export interface AiModelData {
+    id: number;
+    name: string;
+    model_id: string;
+    gems_cost: number;
+}
+
+export const modelApi = {
+    listActive: () => request<{ data: AiModelData[] }>('/models'),
+};
+
+// ========================
+// Admin API
+// ========================
+
+export interface AdminDashboardData {
+    overview: {
+        total_users: number;
+        total_images: number;
+        total_gems_spent: number;
+        total_gems_topup: number;
+    };
+    users_over_time: Array<{ date: string; count: number }>;
+    images_over_time: Array<{ date: string; count: number }>;
+    recent_activity: Array<{
+        id: number;
+        user_id: number;
+        prompt: string;
+        file_url: string;
+        model: string;
+        gems_cost: number;
+        created_at: string;
+        user: { id: number; name: string; email: string; avatar: string | null };
+    }>;
+}
+
+export interface AdminUserData {
+    id: number;
+    name: string;
+    email: string;
+    gems: number;
+    avatar: string | null;
+    level: number;
+    images_count: number;
+    created_at: string;
+}
+
+export interface AdminTemplateData extends TemplateData {
+    is_active: boolean;
+    sort_order: number;
+    created_by: number | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AdminAiModelData extends AiModelData {
+    provider: string;
+    is_active: boolean;
+    sort_order: number;
+    config: Record<string, unknown> | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export const adminApi = {
+    // Dashboard
+    dashboard: () => request<AdminDashboardData>('/admin/dashboard'),
+    openrouterCredits: () => request<{ balance: number; usage: number; limit: number | null }>('/admin/openrouter-credits'),
+
+    // Users
+    users: (params?: { page?: number; per_page?: number; search?: string; level?: number }) => {
+        const sp = new URLSearchParams();
+        if (params?.page) sp.set('page', String(params.page));
+        if (params?.per_page) sp.set('per_page', String(params.per_page));
+        if (params?.search) sp.set('search', params.search);
+        if (params?.level !== undefined) sp.set('level', String(params.level));
+        return request<{ data: AdminUserData[]; current_page: number; last_page: number; total: number }>(`/admin/users?${sp}`);
+    },
+    getUser: (id: number) => request<{ user: AdminUserData; recent_images: GeneratedImageData[]; transactions: TransactionData[] }>(`/admin/users/${id}`),
+    updateUserLevel: (id: number, level: number) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/level`, { method: 'PATCH', body: JSON.stringify({ level }) }),
+    adjustGems: (id: number, data: { type: string; amount: number; description: string }) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/gems`, { method: 'POST', body: JSON.stringify(data) }),
+
+    // Templates
+    templates: (params?: { search?: string; category?: string }) => {
+        const sp = new URLSearchParams();
+        if (params?.search) sp.set('search', params.search);
+        if (params?.category) sp.set('category', params.category);
+        return request<AdminTemplateData[]>(`/admin/templates?${sp}`);
+    },
+    getTemplate: (id: number) => request<AdminTemplateData>(`/admin/templates/${id}`),
+    createTemplate: (data: Record<string, unknown>) => request<{ message: string; data: AdminTemplateData }>('/admin/templates', { method: 'POST', body: JSON.stringify(data) }),
+    updateTemplate: (id: number, data: Record<string, unknown>) => request<{ message: string; data: AdminTemplateData }>(`/admin/templates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteTemplate: (id: number) => request<{ message: string }>(`/admin/templates/${id}`, { method: 'DELETE' }),
+    reorderTemplates: (items: Array<{ id: number; sort_order: number }>) => request<{ message: string }>('/admin/templates/reorder', { method: 'POST', body: JSON.stringify({ items }) }),
+
+    // AI Models
+    models: () => request<AdminAiModelData[]>('/admin/models'),
+    createModel: (data: Record<string, unknown>) => request<{ message: string; data: AdminAiModelData }>('/admin/models', { method: 'POST', body: JSON.stringify(data) }),
+    updateModel: (id: number, data: Record<string, unknown>) => request<{ message: string; data: AdminAiModelData }>(`/admin/models/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    deleteModel: (id: number) => request<{ message: string }>(`/admin/models/${id}`, { method: 'DELETE' }),
+    toggleModel: (id: number) => request<{ message: string; data: AdminAiModelData }>(`/admin/models/${id}/toggle`, { method: 'PATCH' }),
+
+    // Settings
+    settings: () => request<Record<string, Array<{ id: number; key: string; value: string | null; group: string }>>>('/admin/settings'),
+    updateSettings: (settings: Array<{ key: string; value: string | null; group?: string }>) => request<{ message: string }>('/admin/settings', { method: 'PUT', body: JSON.stringify({ settings }) }),
 };
