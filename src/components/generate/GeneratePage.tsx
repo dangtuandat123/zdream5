@@ -1487,13 +1487,41 @@ export function GeneratePage() {
         }
     }
 
+    // State cho tab thư viện trong reference image picker
+    const [libraryRefImages, setLibraryRefImages] = useState<GeneratedImageData[]>([])
+    const [libraryRefLoading, setLibraryRefLoading] = useState(false)
+    const [libraryRefPage, setLibraryRefPage] = useState(1)
+    const [libraryRefHasMore, setLibraryRefHasMore] = useState(true)
+
+    // Fetch ảnh thư viện khi mở tab
+    const fetchLibraryRefImages = useCallback(async (page = 1, append = false) => {
+        setLibraryRefLoading(true)
+        try {
+            const res = await imageApi.list(page, 20)
+            if (append) {
+                setLibraryRefImages(prev => [...prev, ...res.data])
+            } else {
+                setLibraryRefImages(res.data)
+            }
+            setLibraryRefPage(res.current_page)
+            setLibraryRefHasMore(res.current_page < res.last_page)
+        } catch {
+            // Lỗi fetch thư viện — bỏ qua
+        } finally {
+            setLibraryRefLoading(false)
+        }
+    }, [])
+
     const renderReferenceImageContent = () => (
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-4">
-            <Tabs defaultValue="upload" className="w-full">
+            <Tabs defaultValue="upload" className="w-full" onValueChange={(v) => {
+                if (v === 'library' && libraryRefImages.length === 0) fetchLibraryRefImages(1)
+            }}>
                 <div className="px-4 pt-3 pb-2">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="upload" className="text-xs"><Upload className="size-3 mr-1.5" /> Tải lên</TabsTrigger>
-                        <TabsTrigger value="url" className="text-xs"><Link className="size-3 mr-1.5" /> Link URL</TabsTrigger>
+                        <TabsTrigger value="library" className="text-xs"><LayoutGrid className="size-3 mr-1.5" /> Thư viện</TabsTrigger>
+                        <TabsTrigger value="url" className="text-xs"><Link className="size-3 mr-1.5" /> URL</TabsTrigger>
                     </TabsList>
                 </div>
                 <TabsContent value="upload" className="p-4 pt-0 m-0">
@@ -1512,6 +1540,61 @@ export function GeneratePage() {
                             onChange={handleFileUpload}
                         />
                     </label>
+                </TabsContent>
+                <TabsContent value="library" className="px-4 pt-0 m-0">
+                    {libraryRefLoading && libraryRefImages.length === 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <Skeleton key={i} className="aspect-square rounded-lg" />
+                            ))}
+                        </div>
+                    ) : libraryRefImages.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                            <ImageIcon className="size-8 text-muted-foreground/40 mb-2" />
+                            <span className="text-xs text-muted-foreground">Thư viện trống</span>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+                                {libraryRefImages.map((img) => (
+                                    <button
+                                        key={img.id}
+                                        type="button"
+                                        className="group relative aspect-square rounded-lg overflow-hidden border border-border/30 hover:border-primary/60 transition-all hover:ring-2 hover:ring-primary/30 focus-visible:ring-2 focus-visible:ring-primary"
+                                        onClick={() => {
+                                            setReferenceImages(prev => {
+                                                if (prev.includes(img.file_url)) return prev
+                                                return [...prev, img.file_url]
+                                            })
+                                            toast.success('Đã thêm ảnh tham chiếu', { id: 'lib-ref-add' })
+                                        }}
+                                    >
+                                        <img
+                                            src={img.file_url}
+                                            alt={img.prompt}
+                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                            loading="lazy"
+                                        />
+                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                                            <Plus className="size-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                            {libraryRefHasMore && (
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full mt-2 text-xs text-muted-foreground"
+                                    disabled={libraryRefLoading}
+                                    onClick={() => fetchLibraryRefImages(libraryRefPage + 1, true)}
+                                >
+                                    {libraryRefLoading ? <Loader2 className="size-3 animate-spin mr-1.5" /> : null}
+                                    Tải thêm
+                                </Button>
+                            )}
+                        </>
+                    )}
                 </TabsContent>
                 <TabsContent value="url" className="p-4 pt-0 m-0">
                     <div className="flex gap-2">
@@ -2638,11 +2721,11 @@ export function GeneratePage() {
                                                 <TooltipTrigger asChild>
                                                     <DrawerTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground hover:text-foreground">
-                                                            <Plus className="size-5" />
+                                                            <ImageIcon className="size-[18px]" />
                                                         </Button>
                                                     </DrawerTrigger>
                                                 </TooltipTrigger>
-                                                <TooltipContent side="top">Đính kèm ảnh</TooltipContent>
+                                                <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
                                             </Tooltip>
                                             <DrawerContent>
                                                 <DrawerHeader className="text-left px-4">
@@ -2663,11 +2746,11 @@ export function GeneratePage() {
                                                 <TooltipTrigger asChild>
                                                     <PopoverTrigger asChild>
                                                         <Button variant="ghost" size="icon" className="size-9 rounded-full text-muted-foreground hover:text-foreground">
-                                                            <Plus className="size-5" />
+                                                            <ImageIcon className="size-[18px]" />
                                                         </Button>
                                                     </PopoverTrigger>
                                                 </TooltipTrigger>
-                                                <TooltipContent side="top">Đính kèm ảnh</TooltipContent>
+                                                <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
                                             </Tooltip>
                                             <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
                                                 <div className="p-4 border-b border-border/50">
