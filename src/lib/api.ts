@@ -177,15 +177,17 @@ export const imageApi = {
         seed?: number;
         count?: number;
         reference_images?: string[];
+        template_slug?: string;
     }) => request<GenerateResponse>('/images/generate', {
         method: 'POST',
         body: JSON.stringify(data),
     }),
 
-    list: (page = 1, perPage = 20, projectId?: string | null, type?: string | null) => {
+    list: (page = 1, perPage = 20, projectId?: string | null, type?: string | null, templateSlug?: string | null) => {
         let url = `/images?page=${page}&per_page=${perPage}`;
         if (projectId) url += `&project_id=${projectId}`;
         if (type) url += `&type=${type}`;
+        if (templateSlug) url += `&template_slug=${encodeURIComponent(templateSlug)}`;
         return request<{
             data: GeneratedImageData[];
             current_page: number;

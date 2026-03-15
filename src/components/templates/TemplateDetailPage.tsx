@@ -84,6 +84,35 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
     )
 }
 
+// === Skeleton placeholder khi đang tạo ảnh ===
+function GenerateSkeleton({ progress }: { progress: number }) {
+    return (
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate">
+            {/* Shimmer overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+            <Skeleton className="absolute inset-0 h-full w-full rounded-none opacity-20" />
+
+            <div className="flex flex-col items-center gap-3 z-10">
+                <Wand2 className="size-6 text-muted-foreground/40 animate-pulse" />
+                <div className="flex gap-1.5 items-center">
+                    <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <span className="text-[10px] text-muted-foreground/50 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
+                </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/30">
+                <div
+                    className="h-full bg-primary/60 transition-all duration-300 ease-out"
+                    style={{ width: `${Math.min(progress, 100)}%` }}
+                />
+            </div>
+        </div>
+    )
+}
+
 export function TemplateDetailPage() {
     const { slug } = useParams<{ slug: string }>()
     const isMobile = useIsMobile()
@@ -109,11 +138,33 @@ export function TemplateDetailPage() {
     const [isGenerating, setIsGenerating] = useState(false)
     const [generateProgress, setGenerateProgress] = useState(0)
     const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
+    const [historyLoading, setHistoryLoading] = useState(true)
     const [outputSize, setOutputSize] = useState("1:1")
     const [imageCount, setImageCount] = useState(1)
     const [isDragging, setIsDragging] = useState(false)
     const [hasError, setHasError] = useState(false)
     const [optionsOpen, setOptionsOpen] = useState(false)
+
+    // Tải lịch sử ảnh đã tạo từ template này
+    useEffect(() => {
+        if (!slug) return
+        setHistoryLoading(true)
+        imageApi.list(1, 50, null, null, slug)
+            .then((res) => {
+                const historyImages: GeneratedImage[] = res.data.map((img) => ({
+                    id: img.id,
+                    url: img.file_url,
+                    timestamp: new Date(img.created_at ?? Date.now()).getTime(),
+                    aspectRatio: img.aspect_ratio ?? "1:1",
+                    effects: {},
+                    prompt: img.prompt ?? "",
+                    gems_cost: img.gems_cost,
+                }))
+                setGeneratedImages(historyImages)
+            })
+            .catch(() => { /* Không cần hiển thị lỗi nếu không load được lịch sử */ })
+            .finally(() => setHistoryLoading(false))
+    }, [slug])
     const [effectSelections, setEffectSelections] = useState<Record<string, string>>({})
     const [extraPrompt, setExtraPrompt] = useState("")
 
@@ -202,6 +253,7 @@ export function TemplateDetailPage() {
                 aspect_ratio: outputSize,
                 count: imageCount,
                 reference_images: [uploadedImage],
+                template_slug: slug,
             })
 
             clearInterval(interval)
@@ -475,6 +527,21 @@ export function TemplateDetailPage() {
     const CanvasContent = (
         <ScrollArea className="flex-1">
             <div className="p-4 space-y-6">
+                {/* Skeleton khi đang tạo ảnh */}
+                {isGenerating && (
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                            <Wand2 className="size-4 text-primary animate-pulse" />
+                            <span className="text-sm font-medium">Đang tạo ảnh...</span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                            {Array.from({ length: imageCount }).map((_, i) => (
+                                <GenerateSkeleton key={`gen-skeleton-${i}`} progress={generateProgress} />
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Kết quả đã tạo */}
                 {generatedImages.length > 0 && (
                     <div className="space-y-3">
@@ -522,8 +589,17 @@ export function TemplateDetailPage() {
                     </div>
                 )}
 
-                {/* Empty state — chỉ hiện khi chưa có kết quả */}
-                {generatedImages.length === 0 && (
+                {/* Loading lịch sử */}
+                {historyLoading && generatedImages.length === 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <Skeleton key={`hist-sk-${i}`} className="aspect-square rounded-xl" />
+                        ))}
+                    </div>
+                )}
+
+                {/* Empty state — chỉ hiện khi chưa có kết quả và không loading */}
+                {!isGenerating && !historyLoading && generatedImages.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                         <div className="rounded-full bg-muted p-4 mb-4">
                             <ImageIcon className="size-8 text-muted-foreground" />
@@ -586,6 +662,21 @@ export function TemplateDetailPage() {
 
                         {/* Canvas */}
                         <div className="space-y-4">
+                            {/* Skeleton khi đang tạo ảnh */}
+                            {isGenerating && (
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <Wand2 className="size-4 text-primary animate-pulse" />
+                                        <span className="text-sm font-medium">Đang tạo ảnh...</span>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {Array.from({ length: imageCount }).map((_, i) => (
+                                            <GenerateSkeleton key={`m-gen-sk-${i}`} progress={generateProgress} />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Kết quả đã tạo */}
                             {generatedImages.length > 0 && (
                                 <div className="space-y-3">
@@ -623,8 +714,17 @@ export function TemplateDetailPage() {
                                 </div>
                             )}
 
+                            {/* Loading lịch sử */}
+                            {historyLoading && generatedImages.length === 0 && (
+                                <div className="grid grid-cols-2 gap-3">
+                                    {Array.from({ length: 4 }).map((_, i) => (
+                                        <Skeleton key={`m-hist-sk-${i}`} className="aspect-square rounded-xl" />
+                                    ))}
+                                </div>
+                            )}
+
                             {/* Empty state khi chưa có kết quả */}
-                            {generatedImages.length === 0 && (
+                            {!isGenerating && !historyLoading && generatedImages.length === 0 && (
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <div className="rounded-full bg-muted p-3 mb-3">
                                         <ImageIcon className="size-6 text-muted-foreground" />

@@ -30,6 +30,7 @@ class GenerateImageRequest extends FormRequest
             'count' => ['nullable', 'integer', 'min:1', 'max:4'],
             'reference_images' => ['nullable', 'array', 'max:5'],
             'reference_images.*' => ['string'],
+            'template_slug' => ['nullable', 'string', 'max:255'],
         ];
     }
 

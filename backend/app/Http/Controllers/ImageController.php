@@ -95,6 +95,7 @@ class ImageController extends Controller
                     'seed' => $seed + $i,
                     'gems_cost' => $gemsCostPerImage,
                     'reference_images' => $validated['reference_images'] ?? null,
+                    'template_slug' => $validated['template_slug'] ?? null,
                 ]);
 
                 // Trừ gems
@@ -199,6 +200,10 @@ class ImageController extends Controller
 
         if ($request->has('type')) {
             $query->where('type', $request->input('type'));
+        }
+
+        if ($request->has('template_slug')) {
+            $query->where('template_slug', $request->input('template_slug'));
         }
 
         $images = $query->paginate($perPage);

@@ -23,6 +23,7 @@ class Image extends Model
         'file_url',
         'seed',
         'gems_cost',
+        'template_slug',
     ];
 
     protected function casts(): array
