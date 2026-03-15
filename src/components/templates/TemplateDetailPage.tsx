@@ -23,6 +23,8 @@ import {
     Ban,
     Pencil,
     ZoomIn,
+    ZoomOut,
+    Maximize2,
     Info,
     Layers,
     Ruler,
@@ -762,7 +764,9 @@ export function TemplateDetailPage() {
     )
 }
 
-// === Viewer Lightbox — Fullscreen portal, đồng bộ GeneratePage ===
+// === Viewer Lightbox — Fullscreen portal, đồng bộ GeneratePage (zoom/pan đầy đủ) ===
+const MAX_VIEWER_ZOOM = 5
+
 function ViewerDialog({
     open, onOpenChange, images, index, setIndex, source, generatedImages, onDownload, uploadedImage
 }: {
@@ -777,13 +781,235 @@ function ViewerDialog({
     uploadedImage: string | null
 }) {
     const [showInfo, setShowInfo] = useState(false)
+    const [zoom, setZoom] = useState(1)
+    const [position, setPosition] = useState({ x: 0, y: 0 })
     const safeIndex = Math.min(index, images.length - 1)
     const currentImgUrl = images[safeIndex]
     const currentGenData = source === "generated" && safeIndex < generatedImages.length ? generatedImages[safeIndex] : null
 
-    const handleClose = useCallback(() => { onOpenChange(false); setShowInfo(false) }, [onOpenChange])
+    // Zoom/pan refs (giống GeneratePage — zero React re-render khi gesture)
+    const transformRef = useRef({ x: 0, y: 0, zoom: 1 })
+    const gestureActive = useRef(false)
+    const mouseDragStart = useRef({ x: 0, y: 0 })
+    const isMouseDragging = useRef(false)
+    const dimsCache = useRef({ cw: 0, ch: 0, dw: 0, dh: 0 })
+    const imageContainerRef = useRef<HTMLDivElement>(null)
+    const imgRef = useRef<HTMLImageElement>(null)
+    const dragStart = useRef({ x: 0, y: 0 })
+    const lastTouchDistance = useRef<number | null>(null)
+    const lastTouchCenter = useRef<{ x: number; y: number } | null>(null)
+    const isTouchPanning = useRef(false)
+    const touchStartPos = useRef<{ x: number; y: number } | null>(null)
+    const lastTapTime = useRef(0)
+
+    const updateDimsCache = () => {
+        const container = imageContainerRef.current
+        const img = imgRef.current
+        if (!container || !img) return
+        const cw = container.clientWidth, ch = container.clientHeight
+        const nw = img.naturalWidth || cw, nh = img.naturalHeight || ch
+        const r = nw / nh, cr = cw / ch
+        dimsCache.current = {
+            cw, ch,
+            dw: r > cr ? cw : ch * r,
+            dh: r > cr ? cw / r : ch,
+        }
+    }
+
+    const clampPos = (x: number, y: number, z: number) => {
+        const { cw, ch, dw, dh } = dimsCache.current
+        if (cw === 0) return { x, y }
+        const mx = Math.max(0, (dw * z - cw) / 2)
+        const my = Math.max(0, (dh * z - ch) / 2)
+        return { x: Math.max(-mx, Math.min(mx, x)), y: Math.max(-my, Math.min(my, y)) }
+    }
+
+    const applyTransformDOM = () => {
+        const img = imgRef.current
+        if (!img) return
+        const { x, y, zoom: z } = transformRef.current
+        img.style.transitionDuration = '0ms'
+        img.style.transform = `translate3d(${x}px, ${y}px, 0) scale(${z})`
+    }
+
+    const syncToState = useCallback(() => {
+        const { x, y, zoom: z } = transformRef.current
+        setZoom(z)
+        setPosition({ x, y })
+        if (imgRef.current) imgRef.current.style.transitionDuration = '200ms'
+    }, [])
+
+    const resetZoom = useCallback(() => {
+        transformRef.current = { x: 0, y: 0, zoom: 1 }
+        applyTransformDOM()
+        syncToState()
+    }, [syncToState])
+
+    const applyZoom = useCallback((newZ: number) => {
+        const z = Math.min(Math.max(newZ, 1), MAX_VIEWER_ZOOM)
+        const pos = z === 1 ? { x: 0, y: 0 } : clampPos(transformRef.current.x, transformRef.current.y, z)
+        transformRef.current = { ...pos, zoom: z }
+        applyTransformDOM()
+        syncToState()
+    }, [syncToState])
+
+    const handleZoomIn = useCallback(() => applyZoom(transformRef.current.zoom + 0.5), [applyZoom])
+    const handleZoomOut = useCallback(() => applyZoom(transformRef.current.zoom - 0.5), [applyZoom])
+
+    // Reset zoom khi thay đổi ảnh
+    useEffect(() => {
+        transformRef.current = { x: 0, y: 0, zoom: 1 }
+        applyTransformDOM()
+        syncToState()
+        const img = imgRef.current
+        if (img) {
+            const onLoad = () => updateDimsCache()
+            img.addEventListener('load', onLoad)
+            requestAnimationFrame(updateDimsCache)
+            return () => img.removeEventListener('load', onLoad)
+        }
+    }, [safeIndex, syncToState])
+
+    // Mouse drag pan (desktop)
+    const handleMouseDownPan = (e: React.MouseEvent) => {
+        if (transformRef.current.zoom <= 1) return
+        e.preventDefault()
+        isMouseDragging.current = true
+        mouseDragStart.current = { x: e.clientX - transformRef.current.x, y: e.clientY - transformRef.current.y }
+    }
+    const handleMouseMovePan = (e: React.MouseEvent) => {
+        if (!isMouseDragging.current) return
+        e.preventDefault()
+        const z = transformRef.current.zoom
+        const p = clampPos(e.clientX - mouseDragStart.current.x, e.clientY - mouseDragStart.current.y, z)
+        transformRef.current = { ...p, zoom: z }
+        applyTransformDOM()
+    }
+    const handleMouseUpPan = () => {
+        if (!isMouseDragging.current) return
+        isMouseDragging.current = false
+        syncToState()
+    }
+    const handleWheelZoom = (e: React.WheelEvent) => {
+        if (e.deltaY < 0) handleZoomIn()
+        else handleZoomOut()
+    }
+
+    const handleClose = useCallback(() => { onOpenChange(false); setShowInfo(false); resetZoom() }, [onOpenChange, resetZoom])
     const handlePrev = useCallback(() => { if (safeIndex > 0) setIndex(safeIndex - 1) }, [safeIndex, setIndex])
     const handleNext = useCallback(() => { if (safeIndex < images.length - 1) setIndex(safeIndex + 1) }, [safeIndex, images.length, setIndex])
+
+    // Refs for touch swipe (tránh stale closures)
+    const handleNextRef = useRef(handleNext)
+    const handlePrevRef = useRef(handlePrev)
+    useEffect(() => { handleNextRef.current = handleNext }, [handleNext])
+    useEffect(() => { handlePrevRef.current = handlePrev }, [handlePrev])
+
+    // Native touch listeners — zero React re-renders during gesture
+    useEffect(() => {
+        const el = imageContainerRef.current
+        if (!el || !open) return
+        updateDimsCache()
+
+        const onTouchStart = (e: TouchEvent) => {
+            if (e.touches.length === 2) {
+                e.preventDefault()
+                gestureActive.current = true
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                lastTouchDistance.current = Math.hypot(dx, dy)
+                lastTouchCenter.current = {
+                    x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                    y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+                }
+                isTouchPanning.current = false
+                touchStartPos.current = null
+            } else if (e.touches.length === 1) {
+                const t = e.touches[0]
+                touchStartPos.current = { x: t.clientX, y: t.clientY }
+                if (transformRef.current.zoom > 1) {
+                    gestureActive.current = true
+                    isTouchPanning.current = true
+                    dragStart.current = { x: t.clientX - transformRef.current.x, y: t.clientY - transformRef.current.y }
+                }
+                // Double-tap
+                const now = Date.now()
+                if (now - lastTapTime.current < 300) {
+                    e.preventDefault()
+                    if (transformRef.current.zoom > 1) resetZoom()
+                    else applyZoom(2.5)
+                    lastTapTime.current = 0
+                    touchStartPos.current = null
+                } else {
+                    lastTapTime.current = now
+                }
+            }
+        }
+
+        const onTouchMove = (e: TouchEvent) => {
+            if (e.touches.length === 2 && lastTouchDistance.current !== null) {
+                e.preventDefault()
+                const dx = e.touches[0].clientX - e.touches[1].clientX
+                const dy = e.touches[0].clientY - e.touches[1].clientY
+                const distance = Math.hypot(dx, dy)
+                const scale = distance / lastTouchDistance.current
+                const newZ = Math.min(Math.max(transformRef.current.zoom * scale, 1), MAX_VIEWER_ZOOM)
+                if (newZ === 1) {
+                    transformRef.current = { x: 0, y: 0, zoom: 1 }
+                } else if (lastTouchCenter.current) {
+                    const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
+                    const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
+                    const np = clampPos(
+                        transformRef.current.x + (cx - lastTouchCenter.current.x),
+                        transformRef.current.y + (cy - lastTouchCenter.current.y),
+                        newZ
+                    )
+                    transformRef.current = { ...np, zoom: newZ }
+                    lastTouchCenter.current = { x: cx, y: cy }
+                } else {
+                    transformRef.current.zoom = newZ
+                }
+                applyTransformDOM()
+                lastTouchDistance.current = distance
+            } else if (e.touches.length === 1 && isTouchPanning.current && transformRef.current.zoom > 1) {
+                e.preventDefault()
+                const t = e.touches[0]
+                const np = clampPos(t.clientX - dragStart.current.x, t.clientY - dragStart.current.y, transformRef.current.zoom)
+                transformRef.current = { ...np, zoom: transformRef.current.zoom }
+                applyTransformDOM()
+            }
+        }
+
+        const onTouchEnd = (e: TouchEvent) => {
+            // Swipe navigation (not zoomed)
+            if (touchStartPos.current && transformRef.current.zoom <= 1 && e.changedTouches.length === 1) {
+                const dx = e.changedTouches[0].clientX - touchStartPos.current.x
+                const dy = e.changedTouches[0].clientY - touchStartPos.current.y
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+                    if (dx > 0) handlePrevRef.current()
+                    else handleNextRef.current()
+                }
+            }
+            lastTouchDistance.current = null
+            lastTouchCenter.current = null
+            isTouchPanning.current = false
+            touchStartPos.current = null
+            if (gestureActive.current) {
+                gestureActive.current = false
+                syncToState()
+            }
+        }
+
+        el.addEventListener('touchstart', onTouchStart, { passive: false })
+        el.addEventListener('touchmove', onTouchMove, { passive: false })
+        el.addEventListener('touchend', onTouchEnd)
+        return () => {
+            el.removeEventListener('touchstart', onTouchStart)
+            el.removeEventListener('touchmove', onTouchMove)
+            el.removeEventListener('touchend', onTouchEnd)
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [open, safeIndex, syncToState, resetZoom, applyZoom])
 
     // Keyboard: ← → ESC
     useEffect(() => {
@@ -850,8 +1076,27 @@ function ViewerDialog({
                         </div>
                     </div>
 
-                    {/* Bottom action bar — safe-area cho iPhone */}
+                    {/* Bottom action bar — zoom controls + actions, giống GeneratePage */}
                     <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                        {/* Group: Zoom Controls */}
+                        <div className="flex items-center gap-0.5 sm:gap-1 border-r border-white/10 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1">
+                            <Button variant="ghost" size="icon" title="Thu nhỏ" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={handleZoomOut} disabled={zoom <= 1}>
+                                <ZoomOut className="size-4" />
+                            </Button>
+                            <span className="text-[11px] sm:text-xs font-medium w-9 sm:w-10 text-center text-white/80 select-none tabular-nums">
+                                {Math.round(zoom * 100)}%
+                            </span>
+                            <Button variant="ghost" size="icon" title="Phóng to" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={handleZoomIn} disabled={zoom >= MAX_VIEWER_ZOOM}>
+                                <ZoomIn className="size-4" />
+                            </Button>
+                            {zoom > 1 && (
+                                <Button variant="ghost" size="icon" title="Đặt lại" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={resetZoom}>
+                                    <Maximize2 className="size-4" />
+                                </Button>
+                            )}
+                        </div>
+
+                        {/* Group: Actions */}
                         <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={() => onDownload(currentImgUrl)}>
                             <Download className="size-4" />
                         </Button>
@@ -893,12 +1138,29 @@ function ViewerDialog({
                         </Button>
                     </div>
 
-                    {/* Ảnh chính */}
-                    <div className="w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none cursor-default">
+                    {/* Container Hình Ảnh (Pan & Zoom Wrapper) — giống GeneratePage */}
+                    <div
+                        ref={imageContainerRef}
+                        className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                        style={{ touchAction: 'none' }}
+                        onWheel={handleWheelZoom}
+                        onMouseDown={handleMouseDownPan}
+                        onMouseMove={handleMouseMovePan}
+                        onMouseUp={handleMouseUpPan}
+                        onMouseLeave={handleMouseUpPan}
+                        onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
+                    >
                         <img
+                            ref={imgRef}
                             src={currentImgUrl}
                             alt="Xem ảnh"
-                            className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                            className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
+                            style={{
+                                transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
+                                transitionProperty: 'transform',
+                                transitionTimingFunction: 'ease-out',
+                                transitionDuration: '0ms',
+                            }}
                             draggable={false}
                         />
                     </div>
