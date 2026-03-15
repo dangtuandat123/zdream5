@@ -1514,7 +1514,7 @@ export function GeneratePage() {
     }, [])
 
     const renderReferenceImageContent = () => (
-        <div className="flex-1 overflow-y-auto custom-scrollbar pb-4">
+        <div className="flex-1 overflow-y-auto custom-scrollbar pb-4 overscroll-contain">
             <Tabs defaultValue="upload" className="w-full" onValueChange={(v) => {
                 if (v === 'library' && libraryRefImages.length === 0) fetchLibraryRefImages(1, false, libraryRefType)
             }}>
@@ -1581,7 +1581,7 @@ export function GeneratePage() {
                             <span className="text-xs text-muted-foreground">Thư viện trống</span>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+                        <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1 overscroll-contain">
                                 {libraryRefImages.map((img) => (
                                     <button
                                         key={img.id}
