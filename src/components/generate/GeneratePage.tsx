@@ -3,7 +3,7 @@ import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-
 import { createPortal } from "react-dom"
 import { toast } from "sonner"
 import { useAuth } from "@/contexts/AuthContext"
-import { imageApi, projectApi, type GeneratedImageData, type ProjectData } from "@/lib/api"
+import { imageApi, projectApi, modelApi, type GeneratedImageData, type ProjectData, type AiModelData } from "@/lib/api"
 import { cn } from "@/lib/utils"
 import {
     Wand2,
@@ -1202,8 +1202,22 @@ export function GeneratePage() {
         adjustHeight(el)
     }, [prompt])
 
+    // Danh sách models từ API
+    const [availableModels, setAvailableModels] = useState<AiModelData[]>([])
+    useEffect(() => {
+        modelApi.listActive()
+            .then((res) => {
+                setAvailableModels(res.data)
+                // Đặt model mặc định là model đầu tiên nếu chưa chọn
+                if (res.data.length > 0 && !res.data.find((m) => m.model_id === model)) {
+                    setModel(res.data[0].model_id)
+                }
+            })
+            .catch(() => {})
+    }, [])
+
     // Settings
-    const [model, setModel] = useState("google/gemini-2.5-flash-image")
+    const [model, setModel] = useState("")
     const [style, setStyle] = useState("photorealistic")
     const [aspectRatioValue, setAspectRatioValue] = useState("1")
     const [imageSize, setImageSize] = useState("1K")
@@ -1667,11 +1681,14 @@ export function GeneratePage() {
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Model</Label>
                 <Select value={model} onValueChange={setModel}>
                     <SelectTrigger className="h-8">
-                        <SelectValue />
+                        <SelectValue placeholder="Chọn model" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="google/gemini-2.5-flash-image">Gemini 2.5 Flash</SelectItem>
-                        <SelectItem value="google/gemini-3.1-flash-image-preview">Gemini 3.1 Flash</SelectItem>
+                        {availableModels.map((m) => (
+                            <SelectItem key={m.model_id} value={m.model_id}>
+                                {m.name} <span className="text-muted-foreground">({m.gems_cost} xu)</span>
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
             </div>
@@ -2872,11 +2889,14 @@ export function GeneratePage() {
                                     <div className="hidden sm:block ml-1">
                                         <Select value={model} onValueChange={setModel}>
                                             <SelectTrigger className="h-8 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0">
-                                                <SelectValue />
+                                                <SelectValue placeholder="Model" />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                <SelectItem value="google/gemini-2.5-flash-image">Gemini 2.5 Flash</SelectItem>
-                                                <SelectItem value="google/gemini-3.1-flash-image-preview">Gemini 3.1 Flash</SelectItem>
+                                                {availableModels.map((m) => (
+                                                    <SelectItem key={m.model_id} value={m.model_id}>
+                                                        {m.name} <span className="text-muted-foreground">({m.gems_cost} xu)</span>
+                                                    </SelectItem>
+                                                ))}
                                             </SelectContent>
                                         </Select>
                                     </div>
