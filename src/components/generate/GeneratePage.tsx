@@ -784,26 +784,32 @@ export function GeneratePage() {
     }, [selectedImage, lbSyncToState, lbResetZoom, lbApplyZoom])
 
     // Mobile keyboard: điều chỉnh vị trí prompt bar khi bàn phím ảo mở trên iOS Safari
+    // Chỉ lắng nghe resize (keyboard open/close), KHÔNG lắng nghe scroll để tránh nhảy khi cuộn nhanh
     useEffect(() => {
         const vv = window.visualViewport
         if (!vv) return
+        let rafId = 0
         const onResize = () => {
-            const el = promptContainerRef.current
-            if (!el) return
-            // Khi bàn phím mở, visualViewport.height < window.innerHeight
-            const keyboardOffset = window.innerHeight - vv.height - vv.offsetTop
-            if (keyboardOffset > 50) {
-                // Bàn phím đang mở — đẩy prompt bar lên trên bàn phím
-                el.style.transform = `translateY(-${keyboardOffset}px)`
-            } else {
-                el.style.transform = ''
-            }
+            cancelAnimationFrame(rafId)
+            rafId = requestAnimationFrame(() => {
+                const el = promptContainerRef.current
+                if (!el) return
+                const keyboardOffset = window.innerHeight - vv.height - vv.offsetTop
+                if (keyboardOffset > 50) {
+                    el.style.willChange = 'transform'
+                    el.style.transition = 'transform 0.15s ease-out'
+                    el.style.transform = `translateY(-${keyboardOffset}px)`
+                } else {
+                    el.style.transform = ''
+                    el.style.transition = ''
+                    el.style.willChange = ''
+                }
+            })
         }
         vv.addEventListener('resize', onResize)
-        vv.addEventListener('scroll', onResize)
         return () => {
             vv.removeEventListener('resize', onResize)
-            vv.removeEventListener('scroll', onResize)
+            cancelAnimationFrame(rafId)
         }
     }, [])
 
@@ -2332,7 +2338,7 @@ export function GeneratePage() {
                 </AlertDialog>
 
                 {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background/60 to-[40%] sm:bg-none">
+                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-3xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background to-[40%] sm:bg-none">
                     {/* Floating Indicators Container */}
                     <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
                         <AnimatePresence>
