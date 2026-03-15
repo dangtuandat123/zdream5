@@ -22,10 +22,10 @@ interface UserItem {
 }
 
 const LEVEL_LABELS: Record<number, { label: string; color: string }> = {
-    0: { label: 'User', color: 'bg-zinc-500/10 text-zinc-500' },
-    1: { label: 'Mod', color: 'bg-blue-500/10 text-blue-500' },
-    2: { label: 'Admin', color: 'bg-orange-500/10 text-orange-500' },
-    99: { label: 'Super', color: 'bg-red-500/10 text-red-500' },
+    0: { label: 'Thành viên', color: 'bg-zinc-500/10 text-zinc-500' },
+    1: { label: 'Điều hành', color: 'bg-blue-500/10 text-blue-500' },
+    2: { label: 'Quản trị', color: 'bg-orange-500/10 text-orange-500' },
+    99: { label: 'Tối cao', color: 'bg-red-500/10 text-red-500' },
 };
 
 export default function AdminUsersPage() {
@@ -68,24 +68,24 @@ export default function AdminUsersPage() {
         if (!levelDialog) return;
         try {
             await adminApi.updateUserLevel(levelDialog.id, parseInt(newLevel));
-            toast.success('Đã cập nhật level');
+            toast.success('Đã cập nhật cấp bậc');
             setLevelDialog(null);
             fetchUsers();
         } catch {
-            toast.error('Không thể cập nhật level');
+            toast.error('Không thể cập nhật cấp bậc');
         }
     };
 
     const handleAdjustGems = async () => {
         if (!gemsDialog || !gemsAmount) return;
         try {
-            await adminApi.adjustGems(gemsDialog.id, { type: gemsType, amount: parseInt(gemsAmount), description: `Admin ${gemsType}` });
-            toast.success(`Đã ${gemsType === 'credit' ? 'cộng' : 'trừ'} ${gemsAmount} gems`);
+            await adminApi.adjustGems(gemsDialog.id, { type: gemsType, amount: parseInt(gemsAmount), description: `Admin ${gemsType === 'credit' ? 'cộng' : 'trừ'} xu` });
+            toast.success(`Đã ${gemsType === 'credit' ? 'cộng' : 'trừ'} ${gemsAmount} xu`);
             setGemsDialog(null);
             setGemsAmount('');
             fetchUsers();
         } catch {
-            toast.error('Không thể điều chỉnh gems');
+            toast.error('Không thể điều chỉnh xu');
         }
     };
 
@@ -97,8 +97,8 @@ export default function AdminUsersPage() {
     return (
         <div className="p-4 md:p-6 space-y-4 max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Quản lý Users</h1>
-                <Badge variant="secondary">{total} users</Badge>
+                <h1 className="text-2xl font-bold">Quản lý người dùng</h1>
+                <Badge variant="secondary">{total} người dùng</Badge>
             </div>
 
             {/* Search */}
@@ -119,17 +119,17 @@ export default function AdminUsersPage() {
                         <table className="w-full text-sm">
                             <thead>
                                 <tr className="border-b text-muted-foreground text-left">
-                                    <th className="px-4 py-3 font-medium">User</th>
+                                    <th className="px-4 py-3 font-medium">Người dùng</th>
                                     <th className="px-4 py-3 font-medium hidden sm:table-cell">Email</th>
-                                    <th className="px-4 py-3 font-medium text-center">Level</th>
-                                    <th className="px-4 py-3 font-medium text-right">Gems</th>
+                                    <th className="px-4 py-3 font-medium text-center">Cấp bậc</th>
+                                    <th className="px-4 py-3 font-medium text-right">Xu</th>
                                     <th className="px-4 py-3 font-medium text-right hidden md:table-cell">Ảnh</th>
-                                    <th className="px-4 py-3 font-medium text-right">Actions</th>
+                                    <th className="px-4 py-3 font-medium text-right">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {loading ? (
-                                    <tr><td colSpan={6} className="text-center py-8 text-muted-foreground"><RefreshCw className="size-4 animate-spin inline mr-2" />Đang tải...</td></tr>
+                                    <tr><td colSpan={6} className="text-center py-8 text-muted-foreground"><RefreshCw className="size-4 animate-spin inline mr-2" />Đang tải dữ liệu...</td></tr>
                                 ) : users.length === 0 ? (
                                     <tr><td colSpan={6} className="text-center py-8 text-muted-foreground">Không tìm thấy user nào</td></tr>
                                 ) : users.map((u) => (
@@ -149,10 +149,10 @@ export default function AdminUsersPage() {
                                         <td className="px-4 py-3 text-right">
                                             <div className="flex items-center justify-end gap-1">
                                                 <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setLevelDialog(u); setNewLevel(String(u.level)); }}>
-                                                    <Shield className="size-3 mr-1" />Level
+                                                    <Shield className="size-3 mr-1" />Cấp bậc
                                                 </Button>
                                                 <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setGemsDialog(u); setGemsAmount(''); setGemsType('credit'); }}>
-                                                    <Gem className="size-3 mr-1" />Gems
+                                                    <Gem className="size-3 mr-1" />Xu
                                                 </Button>
                                             </div>
                                         </td>
@@ -170,7 +170,7 @@ export default function AdminUsersPage() {
                     <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
                         <ChevronLeft className="size-4" />
                     </Button>
-                    <span className="text-sm text-muted-foreground">Trang {page} / {lastPage}</span>
+                    <span className="text-sm text-muted-foreground tabular-nums">Trang {page} / {lastPage}</span>
                     <Button variant="outline" size="sm" disabled={page >= lastPage} onClick={() => setPage(p => p + 1)}>
                         <ChevronRight className="size-4" />
                     </Button>
@@ -181,17 +181,17 @@ export default function AdminUsersPage() {
             <Dialog open={!!levelDialog} onOpenChange={() => setLevelDialog(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Đổi Level — {levelDialog?.name}</DialogTitle>
+                        <DialogTitle>Đổi cấp bậc — {levelDialog?.name}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-3">
-                        <Label>Level mới</Label>
+                        <Label>Cấp bậc mới</Label>
                         <Select value={newLevel} onValueChange={setNewLevel}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="0">0 — User</SelectItem>
-                                <SelectItem value="1">1 — Mod</SelectItem>
-                                <SelectItem value="2">2 — Admin</SelectItem>
-                                <SelectItem value="99">99 — Super</SelectItem>
+                                <SelectItem value="0">0 — Thành viên</SelectItem>
+                                <SelectItem value="1">1 — Điều hành</SelectItem>
+                                <SelectItem value="2">2 — Quản trị</SelectItem>
+                                <SelectItem value="99">99 — Tối cao</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -206,19 +206,19 @@ export default function AdminUsersPage() {
             <Dialog open={!!gemsDialog} onOpenChange={() => setGemsDialog(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Điều chỉnh Gems — {gemsDialog?.name}</DialogTitle>
+                        <DialogTitle>Điều chỉnh Xu — {gemsDialog?.name}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-3">
                         <Label>Loại</Label>
                         <Select value={gemsType} onValueChange={(v) => setGemsType(v as 'credit' | 'deduct')}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="credit">Cộng gems</SelectItem>
-                                <SelectItem value="deduct">Trừ gems</SelectItem>
+                                <SelectItem value="credit">Cộng xu</SelectItem>
+                                <SelectItem value="deduct">Trừ xu</SelectItem>
                             </SelectContent>
                         </Select>
                         <Label>Số lượng</Label>
-                        <Input type="number" min="1" value={gemsAmount} onChange={(e) => setGemsAmount(e.target.value)} placeholder="Nhập số gems..." />
+                        <Input type="number" min="1" value={gemsAmount} onChange={(e) => setGemsAmount(e.target.value)} placeholder="Nhập số xu..." />
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setGemsDialog(null)}>Hủy</Button>

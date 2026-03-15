@@ -5,9 +5,9 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 const adminTabs = [
     { icon: LayoutDashboard, label: 'Tổng quan', path: '/app/admin', end: true },
-    { icon: Users, label: 'Users', path: '/app/admin/users', end: false },
-    { icon: SwatchBook, label: 'Templates', path: '/app/admin/templates', end: false },
-    { icon: Cpu, label: 'Models', path: '/app/admin/models', end: false },
+    { icon: Users, label: 'Người dùng', path: '/app/admin/users', end: false },
+    { icon: SwatchBook, label: 'Kiểu mẫu', path: '/app/admin/templates', end: false },
+    { icon: Cpu, label: 'Mô hình AI', path: '/app/admin/models', end: false },
     { icon: Settings, label: 'Cài đặt', path: '/app/admin/settings', end: false },
 ];
 

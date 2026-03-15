@@ -70,6 +70,7 @@ export default function AdminSettingsPage() {
         general: 'Chung',
         generation: 'Tạo ảnh',
         billing: 'Thanh toán',
+        api: 'API',
     };
 
     return (

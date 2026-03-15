@@ -46,17 +46,17 @@ export default function AdminDashboard() {
     const stats = [
         { label: 'Người dùng', value: data?.overview.total_users ?? 0, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10', link: '/app/admin/users' },
         { label: 'Ảnh đã tạo', value: data?.overview.total_images ?? 0, icon: Image, color: 'text-green-500', bg: 'bg-green-500/10' },
-        { label: 'Gems đã tiêu', value: data?.overview.total_gems_spent ?? 0, icon: Gem, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-        { label: 'OpenRouter Credit', value: credits ? `$${credits.balance.toFixed(2)}` : 'N/A', icon: CreditCard, color: 'text-purple-500', bg: 'bg-purple-500/10' },
+        { label: 'Xu đã tiêu', value: data?.overview.total_gems_spent ?? 0, icon: Gem, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+        { label: 'Tín dụng API', value: credits ? `$${credits.balance.toFixed(2)}` : 'N/A', icon: CreditCard, color: 'text-purple-500', bg: 'bg-purple-500/10' },
     ];
 
     return (
         <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+                <h1 className="text-2xl font-bold">Tổng quan</h1>
                 <Button variant="outline" size="sm" onClick={fetchData}>
                     <RefreshCw className="size-4 mr-2" />
-                    Refresh
+                    Làm mới
                 </Button>
             </div>
 
@@ -136,9 +136,9 @@ export default function AdminDashboard() {
                             <div key={a.id} className="flex items-center justify-between py-2 border-b border-border last:border-0 text-sm">
                                 <div className="flex items-center gap-2 min-w-0">
                                     <span className="inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-blue-500/10 text-blue-500">
-                                        image
+                                        ảnh
                                     </span>
-                                    <span className="truncate text-muted-foreground">{a.user?.name ?? 'User'}</span>
+                                    <span className="truncate text-muted-foreground">{a.user?.name ?? 'Ẩn danh'}</span>
                                     <span className="truncate text-xs text-muted-foreground hidden sm:inline">— {a.prompt?.slice(0, 40)}</span>
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">

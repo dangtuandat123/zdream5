@@ -60,15 +60,15 @@ export default function AdminModelsPage() {
 
             if (editId) {
                 await adminApi.updateModel(editId, payload);
-                toast.success('Đã cập nhật model');
+                toast.success('Đã cập nhật mô hình');
             } else {
                 await adminApi.createModel(payload);
-                toast.success('Đã thêm model');
+                toast.success('Đã thêm mô hình');
             }
             setDialogOpen(false);
             fetchModels();
         } catch {
-            toast.error('Không thể lưu model');
+            toast.error('Không thể lưu mô hình');
         } finally {
             setSaving(false);
         }
@@ -84,7 +84,7 @@ export default function AdminModelsPage() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Xóa model này?')) return;
+        if (!confirm('Bạn chắc muốn xóa mô hình này?')) return;
         try {
             await adminApi.deleteModel(id);
             toast.success('Đã xóa');
@@ -97,8 +97,8 @@ export default function AdminModelsPage() {
     return (
         <div className="p-4 md:p-6 space-y-4 max-w-5xl mx-auto">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Quản lý AI Models</h1>
-                <Button onClick={openCreate} size="sm"><Plus className="size-4 mr-2" />Thêm model</Button>
+                <h1 className="text-2xl font-bold">Quản lý mô hình AI</h1>
+                <Button onClick={openCreate} size="sm"><Plus className="size-4 mr-2" />Thêm mô hình</Button>
             </div>
 
             {loading ? (
@@ -110,10 +110,10 @@ export default function AdminModelsPage() {
                             <thead>
                                 <tr className="border-b text-muted-foreground text-left">
                                     <th className="px-4 py-3 font-medium">Tên</th>
-                                    <th className="px-4 py-3 font-medium hidden sm:table-cell">Model ID</th>
-                                    <th className="px-4 py-3 font-medium text-center">Gems</th>
-                                    <th className="px-4 py-3 font-medium text-center">Active</th>
-                                    <th className="px-4 py-3 font-medium text-right">Actions</th>
+                                    <th className="px-4 py-3 font-medium hidden sm:table-cell">Mã mô hình</th>
+                                    <th className="px-4 py-3 font-medium text-center">Xu / ảnh</th>
+                                    <th className="px-4 py-3 font-medium text-center">Trạng thái</th>
+                                    <th className="px-4 py-3 font-medium text-right">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -124,7 +124,7 @@ export default function AdminModelsPage() {
                                         <td className="px-4 py-3 text-center tabular-nums">{m.gems_cost}</td>
                                         <td className="px-4 py-3 text-center">
                                             <Badge variant={m.is_active ? 'default' : 'secondary'} className="text-[10px] cursor-pointer" onClick={() => handleToggle(m.id)}>
-                                                <Power className="size-3 mr-1" />{m.is_active ? 'On' : 'Off'}
+                                                <Power className="size-3 mr-1" />{m.is_active ? 'Bật' : 'Tắt'}
                                             </Badge>
                                         </td>
                                         <td className="px-4 py-3 text-right">
@@ -140,7 +140,7 @@ export default function AdminModelsPage() {
                                     </tr>
                                 ))}
                                 {models.length === 0 && (
-                                    <tr><td colSpan={5} className="text-center py-8 text-muted-foreground">Chưa có model nào</td></tr>
+                                    <tr><td colSpan={5} className="text-center py-8 text-muted-foreground">Chưa có mô hình nào</td></tr>
                                 )}
                             </tbody>
                         </table>
@@ -151,35 +151,35 @@ export default function AdminModelsPage() {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>{editId ? 'Sửa Model' : 'Thêm Model'}</DialogTitle>
+                        <DialogTitle>{editId ? 'Sửa mô hình' : 'Thêm mô hình mới'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-3">
                         <div className="space-y-1.5">
-                            <Label>Tên hiển thị *</Label>
+                            <Label>Tên mô hình *</Label>
                             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Model ID *</Label>
+                            <Label>Mã mô hình *</Label>
                             <Input value={form.model_id} onChange={(e) => setForm({ ...form, model_id: e.target.value })} placeholder="google/gemini-2.5-flash-..." className="font-mono text-xs" />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <Label>Provider</Label>
+                            <Label>Nhà cung cấp</Label>
                                 <Input value={form.provider} onChange={(e) => setForm({ ...form, provider: e.target.value })} />
                             </div>
                             <div className="space-y-1.5">
-                                <Label>Gems Cost</Label>
+                            <Label>Xu / ảnh</Label>
                                 <Input type="number" min={0} value={form.gems_cost} onChange={(e) => setForm({ ...form, gems_cost: parseInt(e.target.value) || 0 })} />
                             </div>
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Config (JSON)</Label>
+                            <Label>Cấu hình (JSON)</Label>
                             <Textarea rows={3} value={configText} onChange={(e) => setConfigText(e.target.value)} className="font-mono text-xs" />
                         </div>
                         <div className="flex items-center gap-3">
                             <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-                            <Label>Active</Label>
-                            <Label className="ml-4">Sort</Label>
+                            <Label>Kích hoạt</Label>
+                            <Label className="ml-4">Thứ tự</Label>
                             <Input type="number" className="w-20" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} />
                         </div>
                     </div>

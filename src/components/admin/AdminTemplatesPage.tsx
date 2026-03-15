@@ -84,25 +84,25 @@ export default function AdminTemplatesPage() {
 
             if (editId) {
                 await adminApi.updateTemplate(editId, payload);
-                toast.success('Đã cập nhật template');
+                toast.success('Đã cập nhật kiểu mẫu');
             } else {
                 await adminApi.createTemplate(payload);
-                toast.success('Đã tạo template mới');
+                toast.success('Đã tạo kiểu mẫu mới');
             }
             setDialogOpen(false);
             fetchTemplates();
         } catch {
-            toast.error('Không thể lưu template');
+            toast.error('Không thể lưu kiểu mẫu');
         } finally {
             setSaving(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Bạn chắc muốn xóa template này?')) return;
+        if (!confirm('Bạn chắc muốn xóa kiểu mẫu này?')) return;
         try {
             await adminApi.deleteTemplate(id);
-            toast.success('Đã xóa template');
+            toast.success('Đã xóa kiểu mẫu');
             fetchTemplates();
         } catch {
             toast.error('Không thể xóa');
@@ -112,7 +112,7 @@ export default function AdminTemplatesPage() {
     return (
         <div className="p-4 md:p-6 space-y-4 max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Quản lý Templates</h1>
+                <h1 className="text-2xl font-bold">Quản lý kiểu mẫu</h1>
                 <Button onClick={openCreate} size="sm">
                     <Plus className="size-4 mr-2" />Thêm mới
                 </Button>
@@ -135,7 +135,7 @@ export default function AdminTemplatesPage() {
                                     </div>
                                     <div className="flex items-center gap-1 shrink-0">
                                         <Badge variant={t.is_active ? 'default' : 'secondary'} className="text-[10px]">
-                                            {t.is_active ? 'Active' : 'Off'}
+                                            {t.is_active ? 'Đang bật' : 'Đã tắt'}
                                         </Badge>
                                     </div>
                                 </div>
@@ -152,7 +152,7 @@ export default function AdminTemplatesPage() {
                         </Card>
                     ))}
                     {templates.length === 0 && (
-                        <p className="text-sm text-muted-foreground col-span-full text-center py-8">Chưa có template nào</p>
+                        <p className="text-sm text-muted-foreground col-span-full text-center py-8">Chưa có kiểu mẫu nào</p>
                     )}
                 </div>
             )}
@@ -161,17 +161,17 @@ export default function AdminTemplatesPage() {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                     <DialogHeader>
-                        <DialogTitle>{editId ? 'Chỉnh sửa Template' : 'Tạo Template mới'}</DialogTitle>
+                        <DialogTitle>{editId ? 'Chỉnh sửa kiểu mẫu' : 'Tạo kiểu mẫu mới'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <Label>Tên template *</Label>
+                                <Label>Tên kiểu mẫu *</Label>
                                 <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
                             </div>
                             <div className="space-y-1.5">
-                                <Label>Category</Label>
-                                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="vd: portrait, landscape..." />
+                                <Label>Danh mục</Label>
+                                <Input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="vd: Chân dung, Phong cảnh..." />
                             </div>
                         </div>
                         <div className="space-y-1.5">
@@ -184,33 +184,33 @@ export default function AdminTemplatesPage() {
                         </div>
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
-                                <Label>Model</Label>
+                                <Label>Mô hình AI</Label>
                                 <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} />
                             </div>
                             <div className="space-y-1.5">
-                                <Label>Thumbnail URL</Label>
+                                <Label>Ảnh đại diện (URL)</Label>
                                 <Input value={form.thumbnail} onChange={(e) => setForm({ ...form, thumbnail: e.target.value })} />
                             </div>
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Sample Images (JSON array of URLs)</Label>
+                            <Label>Ảnh mẫu (JSON mảng URL)</Label>
                             <Textarea rows={3} value={sampleImagesText} onChange={(e) => setSampleImagesText(e.target.value)} placeholder='["url1", "url2"]' className="font-mono text-xs" />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Context Options (JSON array)</Label>
+                            <Label>Tùy chọn bối cảnh (JSON)</Label>
                             <Textarea rows={3} value={contextOptionsText} onChange={(e) => setContextOptionsText(e.target.value)} placeholder='["option1", "option2"]' className="font-mono text-xs" />
                         </div>
                         <div className="space-y-1.5">
-                            <Label>Material Options (JSON array)</Label>
+                            <Label>Tùy chọn chất liệu (JSON)</Label>
                             <Textarea rows={3} value={materialOptionsText} onChange={(e) => setMaterialOptionsText(e.target.value)} placeholder='["material1", "material2"]' className="font-mono text-xs" />
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2">
                                 <Switch checked={form.is_active} onCheckedChange={(v) => setForm({ ...form, is_active: v })} />
-                                <Label>Active</Label>
+                                <Label>Kích hoạt</Label>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Label>Sort order</Label>
+                                <Label>Thứ tự</Label>
                                 <Input type="number" className="w-20" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: parseInt(e.target.value) || 0 })} />
                             </div>
                         </div>
