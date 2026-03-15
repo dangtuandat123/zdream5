@@ -43,7 +43,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-import { templateApi, type TemplateData, type EffectGroup } from "@/lib/api"
+import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
+import { useAuth } from "@/contexts/AuthContext"
 
 // Tỷ lệ khung hình
 const SIZE_OPTIONS = [
@@ -57,12 +58,13 @@ const SIZE_OPTIONS = [
 const COUNT_OPTIONS = [1, 2, 3, 4]
 
 interface GeneratedImage {
-    id: string
+    id: string | number
     url: string
     timestamp: number
     aspectRatio: string
     effects: Record<string, string>
     prompt: string
+    gems_cost?: number
 }
 
 // === Component hiển thị ảnh có skeleton loading ===
@@ -85,6 +87,7 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
 export function TemplateDetailPage() {
     const { slug } = useParams<{ slug: string }>()
     const isMobile = useIsMobile()
+    const { updateGems } = useAuth()
     const [template, setTemplate] = useState<TemplateData | null>(null)
     const [templateLoading, setTemplateLoading] = useState(true)
 
@@ -161,52 +164,90 @@ export function TemplateDetailPage() {
         }
     }, [])
 
-    const handleGenerate = useCallback(() => {
-        if (!uploadedImage || isGenerating) return
+    const handleGenerate = useCallback(async () => {
+        if (!uploadedImage || isGenerating || !template) return
         setIsGenerating(true)
         setGenerateProgress(0)
         setHasError(false)
 
+        // Progress bar giả lập trong khi chờ API
         const interval = setInterval(() => {
             setGenerateProgress(prev => {
-                if (prev >= 95) { clearInterval(interval); return 95 }
-                return prev + Math.random() * 8
+                if (prev >= 90) { clearInterval(interval); return 90 }
+                return prev + Math.random() * 6
             })
-        }, 150)
+        }, 200)
 
-        // Mô phỏng — ngẫu nhiên thành công/thất bại để test error state
-        const willFail = Math.random() < 0.1 // 10% lỗi giả lập
-        setTimeout(() => {
-            clearInterval(interval)
-            if (willFail) {
-                setIsGenerating(false)
-                setGenerateProgress(0)
-                setHasError(true)
-                toast.error("Không thể tạo ảnh. Vui lòng thử lại.")
-                return
+        try {
+            // Ghép prompt từ system_prompt + hiệu ứng đã chọn + mô tả thêm
+            const parts: string[] = []
+            if (template.system_prompt) parts.push(template.system_prompt)
+
+            // Thêm prompt từ các effect option đã chọn
+            for (const group of effectGroups) {
+                const selectedValue = effectSelections[group.name]
+                if (selectedValue) {
+                    const opt = group.options.find(o => o.value === selectedValue)
+                    if (opt?.prompt) parts.push(opt.prompt)
+                }
             }
+
+            if (extraPrompt.trim()) parts.push(extraPrompt.trim())
+            const finalPrompt = parts.join(". ")
+
+            // Gọi API tạo ảnh thật
+            const response = await imageApi.generate({
+                prompt: finalPrompt,
+                model: template.model || undefined,
+                aspect_ratio: outputSize,
+                count: imageCount,
+                reference_images: [uploadedImage],
+            })
+
+            clearInterval(interval)
             setGenerateProgress(100)
-                const newImages: GeneratedImage[] = Array.from({ length: imageCount }).map((_, i) => ({
-                    id: Math.random().toString(),
-                    url: sampleImages[i % Math.max(sampleImages.length, 1)] || "",
-                    timestamp: Date.now(),
-                    aspectRatio: outputSize,
-                    effects: { ...effectSelections },
-                    prompt: extraPrompt
-                }))
+
+            // Cập nhật gems
+            updateGems(response.gems_remaining)
+
+            // Thêm ảnh kết quả vào danh sách
+            const newImages: GeneratedImage[] = response.images.map((img) => ({
+                id: img.id,
+                url: img.file_url,
+                timestamp: Date.now(),
+                aspectRatio: outputSize,
+                effects: { ...effectSelections },
+                prompt: finalPrompt,
+                gems_cost: img.gems_cost,
+            }))
             setGeneratedImages(prev => [...newImages, ...prev])
+            toast.success(`Tạo ${newImages.length} ảnh thành công!`)
+        } catch (err) {
+            clearInterval(interval)
+            setHasError(true)
+            toast.error(err instanceof Error ? err.message : "Không thể tạo ảnh. Vui lòng thử lại.")
+        } finally {
             setIsGenerating(false)
             setGenerateProgress(0)
-            toast.success("Tạo ảnh thành công!")
-        }, 3000)
-    }, [uploadedImage, isGenerating, outputSize, imageCount, effectSelections, extraPrompt, sampleImages])
+        }
+    }, [uploadedImage, isGenerating, template, outputSize, imageCount, effectSelections, extraPrompt, effectGroups, updateGems])
 
-    const handleDownload = useCallback((url: string) => {
-        const a = document.createElement("a")
-        a.href = url
-        a.download = `zdream-${(template?.name ?? "template").replace(/\s+/g, "-")}-${Date.now()}.png`
-        a.click()
-        toast.success("Đang tải xuống")
+    const handleDownload = useCallback(async (url: string) => {
+        try {
+            // Fetch blob để tránh lỗi cross-origin download
+            const res = await fetch(url)
+            const blob = await res.blob()
+            const blobUrl = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = blobUrl
+            a.download = `zdream-${(template?.name ?? "template").replace(/\s+/g, "-")}-${Date.now()}.png`
+            a.click()
+            URL.revokeObjectURL(blobUrl)
+            toast.success("Đang tải xuống")
+        } catch {
+            // Fallback: mở tab mới
+            window.open(url, "_blank")
+        }
     }, [template?.name])
 
     // Viewer helpers — tách biệt sample vs generated
