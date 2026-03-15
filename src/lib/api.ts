@@ -257,6 +257,18 @@ export const walletApi = {
 // Template API (Public)
 // ========================
 
+export interface EffectOption {
+    value: string;
+    label: string;
+    prompt: string;
+    image: string;
+}
+
+export interface EffectGroup {
+    name: string;
+    options: EffectOption[];
+}
+
 export interface TemplateData {
     id: number;
     name: string;
@@ -266,9 +278,7 @@ export interface TemplateData {
     system_prompt: string;
     model: string;
     thumbnail: string | null;
-    sample_images: string[] | null;
-    context_options: Array<{ value: string; label: string; prompt: string; image: string }> | null;
-    material_options: Array<{ value: string; label: string; prompt: string; image: string }> | null;
+    effect_groups: EffectGroup[] | null;
 }
 
 export const templateApi = {
@@ -374,6 +384,15 @@ export const adminApi = {
     updateTemplate: (id: number, data: Record<string, unknown>) => request<{ message: string; data: AdminTemplateData }>(`/admin/templates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     deleteTemplate: (id: number) => request<{ message: string }>(`/admin/templates/${id}`, { method: 'DELETE' }),
     reorderTemplates: (items: Array<{ id: number; sort_order: number }>) => request<{ message: string }>('/admin/templates/reorder', { method: 'POST', body: JSON.stringify({ items }) }),
+    uploadTemplateImage: (file: File) => {
+        const formData = new FormData();
+        formData.append('image', file);
+        return request<{ url: string; path: string }>('/admin/templates/upload-image', {
+            method: 'POST',
+            body: formData,
+            headers: {},
+        });
+    },
 
     // AI Models
     models: () => request<AdminAiModelData[]>('/admin/models'),

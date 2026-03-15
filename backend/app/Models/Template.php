@@ -22,9 +22,7 @@ class Template extends Model
         'system_prompt',
         'model',
         'thumbnail',
-        'sample_images',
-        'context_options',
-        'material_options',
+        'effect_groups',
         'is_active',
         'sort_order',
         'created_by',
@@ -36,9 +34,7 @@ class Template extends Model
     protected function casts(): array
     {
         return [
-            'sample_images' => 'array',
-            'context_options' => 'array',
-            'material_options' => 'array',
+            'effect_groups' => 'array',
             'is_active' => 'boolean',
             'sort_order' => 'integer',
         ];

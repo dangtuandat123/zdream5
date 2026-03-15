@@ -43,9 +43,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-import { templateApi, type TemplateData } from "@/lib/api"
-
-type OptionItem = { value: string; label: string; prompt: string; image: string }
+import { templateApi, type TemplateData, type EffectGroup } from "@/lib/api"
 
 // Tỷ lệ khung hình
 const SIZE_OPTIONS = [
@@ -58,22 +56,12 @@ const SIZE_OPTIONS = [
 // Số lượng ảnh
 const COUNT_OPTIONS = [1, 2, 3, 4]
 
-// Default options khi template không có custom options
-const DEFAULT_contextOptions: OptionItem[] = [
-    { value: "default", label: "Mặc định", prompt: "", image: "" },
-]
-
-const DEFAULT_materialOptions: OptionItem[] = [
-    { value: "default", label: "Mặc định", prompt: "", image: "" },
-]
-
 interface GeneratedImage {
     id: string
     url: string
     timestamp: number
     aspectRatio: string
-    context: string
-    material: string
+    effects: Record<string, string>
     prompt: string
 }
 
@@ -94,41 +82,6 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
     )
 }
 
-// === Hook kéo chuột để scroll ngang (drag-to-scroll desktop) ===
-function useDragScroll() {
-    const ref = useRef<HTMLDivElement>(null)
-    const dragging = useRef(false)
-    const startX = useRef(0)
-    const scrollStart = useRef(0)
-
-    const handlers = {
-        onMouseDown: (e: React.MouseEvent) => {
-            if (!ref.current) return
-            dragging.current = true
-            startX.current = e.pageX
-            scrollStart.current = ref.current.scrollLeft
-            ref.current.style.cursor = "grabbing"
-        },
-        onMouseUp: () => {
-            if (!ref.current) return
-            dragging.current = false
-            ref.current.style.cursor = "grab"
-        },
-        onMouseLeave: () => {
-            if (!ref.current) return
-            dragging.current = false
-            ref.current.style.cursor = "grab"
-        },
-        onMouseMove: (e: React.MouseEvent) => {
-            if (!dragging.current || !ref.current) return
-            e.preventDefault()
-            ref.current.scrollLeft = scrollStart.current - (e.pageX - startX.current)
-        },
-    }
-
-    return { ref, ...handlers }
-}
-
 export function TemplateDetailPage() {
     const { slug } = useParams<{ slug: string }>()
     const isMobile = useIsMobile()
@@ -145,13 +98,8 @@ export function TemplateDetailPage() {
     }, [slug])
 
     // Derived options from template
-    const contextOptions: OptionItem[] = (template?.context_options && template.context_options.length > 0)
-        ? template.context_options
-        : DEFAULT_contextOptions
-    const materialOptions: OptionItem[] = (template?.material_options && template.material_options.length > 0)
-        ? template.material_options
-        : DEFAULT_materialOptions
-    const sampleImages: string[] = template?.sample_images ?? []
+    const effectGroups: EffectGroup[] = template?.effect_groups ?? []
+    const sampleImages: string[] = template?.thumbnail ? [template.thumbnail] : []
 
     // === State ===
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
@@ -163,8 +111,7 @@ export function TemplateDetailPage() {
     const [isDragging, setIsDragging] = useState(false)
     const [hasError, setHasError] = useState(false)
     const [optionsOpen, setOptionsOpen] = useState(false)
-    const [context, setContext] = useState("default")
-    const [material, setMaterial] = useState("default")
+    const [effectSelections, setEffectSelections] = useState<Record<string, string>>({})
     const [extraPrompt, setExtraPrompt] = useState("")
 
     // Viewer state — tách biệt source (sample vs generated)
@@ -173,8 +120,6 @@ export function TemplateDetailPage() {
     const [viewerIndex, setViewerIndex] = useState(0)
 
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const contextScroll = useDragScroll()
-    const materialScroll = useDragScroll()
 
     // === Handlers ===
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,11 +188,10 @@ export function TemplateDetailPage() {
             setGenerateProgress(100)
                 const newImages: GeneratedImage[] = Array.from({ length: imageCount }).map((_, i) => ({
                     id: Math.random().toString(),
-                    url: sampleImages[i % sampleImages.length],
+                    url: sampleImages[i % Math.max(sampleImages.length, 1)] || "",
                     timestamp: Date.now(),
                     aspectRatio: outputSize,
-                    context: contextOptions.find(o => o.value === context)?.label || "Mặc định",
-                    material: materialOptions.find(o => o.value === material)?.label || "Mặc định",
+                    effects: { ...effectSelections },
                     prompt: extraPrompt
                 }))
             setGeneratedImages(prev => [...newImages, ...prev])
@@ -255,7 +199,7 @@ export function TemplateDetailPage() {
             setGenerateProgress(0)
             toast.success("Tạo ảnh thành công!")
         }, 3000)
-    }, [uploadedImage, isGenerating, outputSize, imageCount, context, material, extraPrompt, sampleImages])
+    }, [uploadedImage, isGenerating, outputSize, imageCount, effectSelections, extraPrompt, sampleImages])
 
     const handleDownload = useCallback((url: string) => {
         const a = document.createElement("a")
@@ -399,71 +343,40 @@ export function TemplateDetailPage() {
                     </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-4 pt-2">
-                    {/* Bối cảnh — image cards */}
-                    <div className="space-y-2 overflow-hidden">
-                        <Label className="text-xs font-medium text-muted-foreground">Bối cảnh</Label>
-                        <div ref={contextScroll.ref} onMouseDown={contextScroll.onMouseDown} onMouseUp={contextScroll.onMouseUp} onMouseLeave={contextScroll.onMouseLeave} onMouseMove={contextScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
-                            {contextOptions.map(opt => {
-                                const isActive = context === opt.value
-                                return (
-                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setContext(opt.value)}>
-                                        <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
-                                            isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
-                                        }`}>
-                                            {opt.image ? (
-                                                <ImageWithSkeleton src={opt.image} alt={opt.label} className="absolute inset-0 w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                                                    <Ban className="size-6 text-muted-foreground" />
-                                                </div>
-                                            )}
-                                            {isActive && (
-                                                <div className="absolute top-1 right-1 size-5 rounded-full bg-primary flex items-center justify-center">
-                                                    <Check className="size-3 text-primary-foreground" />
-                                                </div>
-                                            )}
+                    {/* Dynamic Effect Groups */}
+                    {effectGroups.map((group, gi) => (
+                        <div key={gi} className="space-y-2 overflow-hidden">
+                            <Label className="text-xs font-medium text-muted-foreground">{group.name}</Label>
+                            <div className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
+                                {group.options.map(opt => {
+                                    const isActive = effectSelections[group.name] === opt.value
+                                    return (
+                                        <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setEffectSelections(prev => ({ ...prev, [group.name]: opt.value }))}>
+                                            <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
+                                                isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
+                                            }`}>
+                                                {opt.image ? (
+                                                    <ImageWithSkeleton src={opt.image} alt={opt.label} className="absolute inset-0 w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                                                        <Ban className="size-6 text-muted-foreground" />
+                                                    </div>
+                                                )}
+                                                {isActive && (
+                                                    <div className="absolute top-1 right-1 size-5 rounded-full bg-primary flex items-center justify-center">
+                                                        <Check className="size-3 text-primary-foreground" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="min-h-[28px] flex items-start justify-center mt-0.5">
+                                                <span className={`text-[10px] text-center leading-tight font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>{opt.label}</span>
+                                            </div>
                                         </div>
-                                        <div className="min-h-[28px] flex items-start justify-center mt-0.5">
-                                            <span className={`text-[10px] text-center leading-tight font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>{opt.label}</span>
-                                        </div>
-                                    </div>
-                                )
-                            })}
+                                    )
+                                })}
+                            </div>
                         </div>
-                    </div>
-
-                    {/* Chất liệu — image cards */}
-                    <div className="space-y-2 overflow-hidden">
-                        <Label className="text-xs font-medium text-muted-foreground">Chất liệu</Label>
-                        <div ref={materialScroll.ref} onMouseDown={materialScroll.onMouseDown} onMouseUp={materialScroll.onMouseUp} onMouseLeave={materialScroll.onMouseLeave} onMouseMove={materialScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
-                            {materialOptions.map(opt => {
-                                const isActive = material === opt.value
-                                return (
-                                    <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setMaterial(opt.value)}>
-                                        <div className={`relative aspect-square w-full rounded-lg overflow-hidden border-2 transition-all ${
-                                            isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-muted-foreground/40"
-                                        }`}>
-                                            {opt.image ? (
-                                                <ImageWithSkeleton src={opt.image} alt={opt.label} className="absolute inset-0 w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                                                    <Ban className="size-6 text-muted-foreground" />
-                                                </div>
-                                            )}
-                                            {isActive && (
-                                                <div className="absolute top-1 right-1 size-5 rounded-full bg-primary flex items-center justify-center">
-                                                    <Check className="size-3 text-primary-foreground" />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="min-h-[28px] flex items-start justify-center mt-0.5">
-                                            <span className={`text-[10px] text-center leading-tight font-medium ${isActive ? "text-primary" : "text-muted-foreground"}`}>{opt.label}</span>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </div>
+                    ))}
 
                     {/* Mô tả thêm */}
                     <div className="space-y-2">
@@ -1194,22 +1107,16 @@ function ViewerDialog({
                         </div>
 
                         {/* Hiệu ứng */}
-                        {(currentGenData.context !== "Mặc định" || currentGenData.material !== "Mặc định") && (
+                        {currentGenData.effects && Object.keys(currentGenData.effects).length > 0 && (
                             <div className="px-5 py-3 border-b border-white/5 space-y-2">
                                 <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Hiệu ứng</p>
                                 <div className="flex flex-wrap gap-2">
-                                    {currentGenData.context !== "Mặc định" && (
-                                        <Badge variant="secondary" className="bg-white/10 text-white/80 border-white/10 font-medium">
+                                    {Object.entries(currentGenData.effects).map(([groupName, value]) => (
+                                        <Badge key={groupName} variant="secondary" className="bg-white/10 text-white/80 border-white/10 font-medium">
                                             <Layers className="size-3 mr-1.5 opacity-60" />
-                                            {currentGenData.context}
+                                            {groupName}: {value}
                                         </Badge>
-                                    )}
-                                    {currentGenData.material !== "Mặc định" && (
-                                        <Badge variant="secondary" className="bg-white/10 text-white/80 border-white/10 font-medium">
-                                            <Layers className="size-3 mr-1.5 opacity-60" />
-                                            {currentGenData.material}
-                                        </Badge>
-                                    )}
+                                    ))}
                                 </div>
                             </div>
                         )}

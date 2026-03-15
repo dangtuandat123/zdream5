@@ -22,8 +22,7 @@ class TemplateController extends Controller
         $templates = Template::active()
             ->get([
                 'id', 'name', 'slug', 'category', 'description',
-                'system_prompt', 'model', 'thumbnail', 'sample_images',
-                'context_options', 'material_options',
+                'system_prompt', 'model', 'thumbnail', 'effect_groups',
             ]);
 
         return response()->json(['data' => $templates]);

@@ -75,6 +75,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users/{id}/gems', [AdminUserController::class, 'adjustGems']);
 
         // Quản lý Templates
+        Route::post('/templates/upload-image', [AdminTemplateController::class, 'uploadImage']);
         Route::apiResource('templates', AdminTemplateController::class);
         Route::post('/templates/reorder', [AdminTemplateController::class, 'reorder']);
 

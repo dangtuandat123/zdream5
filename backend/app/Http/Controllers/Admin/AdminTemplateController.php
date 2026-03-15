@@ -10,6 +10,7 @@ use App\Http\Requests\Admin\UpdateTemplateRequest;
 use App\Models\Template;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AdminTemplateController extends Controller
@@ -105,6 +106,28 @@ class AdminTemplateController extends Controller
 
         return response()->json([
             'message' => 'Đã xóa template.',
+        ]);
+    }
+
+    /**
+     * Upload ảnh cho template (thumbnail hoặc effect option image).
+     * POST /api/admin/templates/upload-image
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ]);
+
+        $file = $request->file('image');
+        $filename = 'templates/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+        $disk = config('filesystems.default');
+        Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');
+
+        return response()->json([
+            'url' => Storage::disk($disk)->url($filename),
+            'path' => $filename,
         ]);
     }
 
