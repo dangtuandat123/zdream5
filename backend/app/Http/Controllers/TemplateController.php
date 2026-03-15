@@ -20,6 +20,7 @@ class TemplateController extends Controller
     public function publicIndex(): JsonResponse
     {
         $templates = Template::active()
+            ->reorder('created_at', 'desc')
             ->get([
                 'id', 'name', 'slug', 'category', 'description',
                 'system_prompt', 'model', 'thumbnail', 'effect_groups',

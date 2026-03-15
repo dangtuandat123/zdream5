@@ -20,7 +20,7 @@ class AdminTemplateController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Template::orderBy('sort_order');
+        $query = Template::orderByDesc('created_at');
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search): void {
