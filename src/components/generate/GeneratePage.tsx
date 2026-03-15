@@ -2490,6 +2490,8 @@ export function GeneratePage() {
                                                         <button
                                                             key={idx}
                                                             className="flex items-center gap-3 w-full px-2.5 py-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left active:bg-accent/80"
+                                                            // Ngăn button cướp focus → bàn phím không bị đóng/mở lại
+                                                            onPointerDown={(e) => e.preventDefault()}
                                                             onClick={() => {
                                                                 const mention = `@Ảnh ${idx + 1} `
                                                                 const pos = mentionInsertPosRef.current
@@ -2498,13 +2500,11 @@ export function GeneratePage() {
                                                                 const newPrompt = before + mention + after
                                                                 setPrompt(newPrompt)
                                                                 setShowMentionPopover(false)
+                                                                // Không cần re-focus vì contenteditable vẫn giữ focus
                                                                 requestAnimationFrame(() => {
                                                                     if (textareaRef.current) {
                                                                         const el = textareaRef.current
-                                                                        const savedScroll = el.scrollTop
-                                                                        el.focus({ preventScroll: true })
                                                                         setCursorPosition(el, pos + mention.length)
-                                                                        el.scrollTop = savedScroll
                                                                         const sel = window.getSelection()
                                                                         if (sel && sel.rangeCount > 0) {
                                                                             const rect = sel.getRangeAt(0).getBoundingClientRect()
