@@ -783,35 +783,9 @@ export function GeneratePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedImage, lbSyncToState, lbResetZoom, lbApplyZoom])
 
-    // Mobile keyboard: điều chỉnh vị trí prompt bar khi bàn phím ảo mở trên iOS Safari
-    // Chỉ lắng nghe resize (keyboard open/close), KHÔNG lắng nghe scroll để tránh nhảy khi cuộn nhanh
-    useEffect(() => {
-        const vv = window.visualViewport
-        if (!vv) return
-        let rafId = 0
-        const onResize = () => {
-            cancelAnimationFrame(rafId)
-            rafId = requestAnimationFrame(() => {
-                const el = promptContainerRef.current
-                if (!el) return
-                const keyboardOffset = window.innerHeight - vv.height - vv.offsetTop
-                if (keyboardOffset > 50) {
-                    el.style.willChange = 'transform'
-                    el.style.transition = 'transform 0.15s ease-out'
-                    el.style.transform = `translateY(-${keyboardOffset}px)`
-                } else {
-                    el.style.transform = ''
-                    el.style.transition = ''
-                    el.style.willChange = ''
-                }
-            })
-        }
-        vv.addEventListener('resize', onResize)
-        return () => {
-            vv.removeEventListener('resize', onResize)
-            cancelAnimationFrame(rafId)
-        }
-    }, [])
+    // Mobile keyboard: dùng interactive-widget=resizes-content trong viewport meta
+    // để browser tự co layout khi bàn phím mở → sticky bottom-0 tự hoạt động đúng
+    // Không cần visualViewport hack (gây nhảy khi cuộn nhanh và phá sticky positioning)
 
     // Lock body scroll khi lightbox mở
     useEffect(() => {
