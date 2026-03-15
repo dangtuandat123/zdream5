@@ -8,7 +8,8 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { adminApi, type AdminTemplateData } from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { adminApi, type AdminTemplateData, type AdminAiModelData } from '@/lib/api';
 import { toast } from 'sonner';
 
 type OptionItem = { value: string; label: string; prompt: string; image: string };
@@ -26,6 +27,7 @@ export default function AdminTemplatesPage() {
     const [editId, setEditId] = useState<number | null>(null);
     const [form, setForm] = useState(emptyForm);
     const [saving, setSaving] = useState(false);
+    const [availableModels, setAvailableModels] = useState<AdminAiModelData[]>([]);
 
     // JSON input helpers
     const [sampleImagesText, setSampleImagesText] = useState('');
@@ -45,6 +47,7 @@ export default function AdminTemplatesPage() {
     };
 
     useEffect(() => { fetchTemplates(); }, []);
+    useEffect(() => { adminApi.models().then(setAvailableModels).catch(() => {}); }, []);
 
     const openCreate = () => {
         setEditId(null);
@@ -185,7 +188,16 @@ export default function AdminTemplatesPage() {
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="space-y-1.5">
                                 <Label>Mô hình AI</Label>
-                                <Input value={form.model} onChange={(e) => setForm({ ...form, model: e.target.value })} />
+                                <Select value={form.model} onValueChange={(v) => setForm({ ...form, model: v })}>
+                                    <SelectTrigger><SelectValue placeholder="Chọn mô hình" /></SelectTrigger>
+                                    <SelectContent>
+                                        {availableModels.map((m) => (
+                                            <SelectItem key={m.model_id} value={m.model_id}>
+                                                {m.name} <span className="text-muted-foreground text-xs ml-1">({m.model_id})</span>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="space-y-1.5">
                                 <Label>Ảnh đại diện (URL)</Label>
