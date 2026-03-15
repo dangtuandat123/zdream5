@@ -46,12 +46,18 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 
-// Tỷ lệ khung hình
+// Tỷ lệ khung hình — đầy đủ 10 tỉ lệ theo OpenRouter API
 const SIZE_OPTIONS = [
     { value: "1:1", label: "1:1", icon: Square },
-    { value: "16:9", label: "16:9", icon: RectangleHorizontal },
-    { value: "9:16", label: "9:16", icon: RectangleVertical },
+    { value: "2:3", label: "2:3", icon: RectangleVertical },
+    { value: "3:2", label: "3:2", icon: RectangleHorizontal },
+    { value: "3:4", label: "3:4", icon: RectangleVertical },
     { value: "4:3", label: "4:3", icon: RectangleHorizontal },
+    { value: "4:5", label: "4:5", icon: RectangleVertical },
+    { value: "5:4", label: "5:4", icon: RectangleHorizontal },
+    { value: "9:16", label: "9:16", icon: RectangleVertical },
+    { value: "16:9", label: "16:9", icon: RectangleHorizontal },
+    { value: "21:9", label: "21:9", icon: RectangleHorizontal },
 ]
 
 // Số lượng ảnh
@@ -395,7 +401,7 @@ export function TemplateDetailPage() {
             {/* Tỷ lệ khung hình */}
             <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">TỶ LỆ KHUNG HÌNH</Label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-1.5">
                     {SIZE_OPTIONS.map(opt => {
                         const Icon = opt.icon
                         const isActive = outputSize === opt.value
@@ -405,11 +411,11 @@ export function TemplateDetailPage() {
                                 id={`size-${opt.value.replace(":", "x")}`}
                                 variant={isActive ? "default" : "outline"}
                                 size="sm"
-                                className="flex flex-col items-center gap-1 h-auto py-2"
+                                className="flex flex-col items-center gap-0.5 h-auto py-1.5 px-1"
                                 onClick={() => setOutputSize(opt.value)}
                             >
-                                <Icon className="size-4" />
-                                <span className="text-[10px]">{opt.label}</span>
+                                <Icon className="size-3.5" />
+                                <span className="text-[9px]">{opt.label}</span>
                             </Button>
                         )
                     })}
