@@ -1581,8 +1581,7 @@ export function GeneratePage() {
                             <span className="text-xs text-muted-foreground">Thư viện trống</span>
                         </div>
                     ) : (
-                        <>
-                            <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
+                        <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1">
                                 {libraryRefImages.map((img) => (
                                     <button
                                         key={img.id}
@@ -1607,20 +1606,29 @@ export function GeneratePage() {
                                         </div>
                                     </button>
                                 ))}
+                                {/* Sentinel element — infinite scroll trigger */}
+                                {libraryRefHasMore && (
+                                    <div
+                                        ref={(node) => {
+                                            if (!node) return
+                                            const observer = new IntersectionObserver(
+                                                ([entry]) => {
+                                                    if (entry.isIntersecting && !libraryRefLoading && libraryRefHasMore) {
+                                                        fetchLibraryRefImages(libraryRefPage + 1, true, libraryRefType)
+                                                    }
+                                                },
+                                                { rootMargin: '100px' }
+                                            )
+                                            observer.observe(node)
+                                            // Cleanup khi unmount
+                                            return () => observer.disconnect()
+                                        }}
+                                        className="col-span-3 flex justify-center py-3"
+                                    >
+                                        <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                                    </div>
+                                )}
                             </div>
-                            {libraryRefHasMore && (
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full mt-2 text-xs text-muted-foreground"
-                                    disabled={libraryRefLoading}
-                                    onClick={() => fetchLibraryRefImages(libraryRefPage + 1, true, libraryRefType)}
-                                >
-                                    {libraryRefLoading ? <Loader2 className="size-3 animate-spin mr-1.5" /> : null}
-                                    Tải thêm
-                                </Button>
-                            )}
-                        </>
                     )}
                 </TabsContent>
                 <TabsContent value="url" className="p-4 pt-0 m-0">
