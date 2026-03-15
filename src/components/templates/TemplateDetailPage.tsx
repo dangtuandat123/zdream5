@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useParams, Link } from "react-router-dom"
 import { toast } from "sonner"
 import {
@@ -22,11 +23,11 @@ import {
     Ban,
     Pencil,
     ZoomIn,
-    Maximize2,
-    Layers
+    Info,
+    Layers,
+    Ruler,
+    Clock
 } from "lucide-react"
-import Zoom from "react-medium-image-zoom"
-import "react-medium-image-zoom/dist/styles.css"
 
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -39,11 +40,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-} from "@/components/ui/dialog"
 
 // === Dữ liệu mẫu ===
 const TEMPLATES: Record<string, {
@@ -766,7 +762,7 @@ export function TemplateDetailPage() {
     )
 }
 
-// === Viewer Dialog Component — tách riêng, logic rõ ràng ===
+// === Viewer Lightbox — Fullscreen portal, đồng bộ GeneratePage ===
 function ViewerDialog({
     open, onOpenChange, images, index, setIndex, source, generatedImages, onDownload, uploadedImage
 }: {
@@ -780,195 +776,214 @@ function ViewerDialog({
     onDownload: (url: string) => void
     uploadedImage: string | null
 }) {
+    const [showInfo, setShowInfo] = useState(false)
     const safeIndex = Math.min(index, images.length - 1)
     const currentImgUrl = images[safeIndex]
-    
-    // Default mock data if not generated
     const currentGenData = source === "generated" && safeIndex < generatedImages.length ? generatedImages[safeIndex] : null
 
-    // Keyboard navigation: ArrowLeft/Right
+    const handleClose = useCallback(() => { onOpenChange(false); setShowInfo(false) }, [onOpenChange])
+    const handlePrev = useCallback(() => { if (safeIndex > 0) setIndex(safeIndex - 1) }, [safeIndex, setIndex])
+    const handleNext = useCallback(() => { if (safeIndex < images.length - 1) setIndex(safeIndex + 1) }, [safeIndex, images.length, setIndex])
+
+    // Keyboard: ← → ESC
     useEffect(() => {
-        if (!open || images.length <= 1) return
+        if (!open) return
         const handler = (e: KeyboardEvent) => {
-            if (e.key === "ArrowLeft") setIndex((safeIndex - 1 + images.length) % images.length)
-            if (e.key === "ArrowRight") setIndex((safeIndex + 1) % images.length)
+            if (e.key === 'Escape') { handleClose(); return }
+            if (e.key === 'ArrowLeft') handlePrev()
+            if (e.key === 'ArrowRight') handleNext()
         }
-        window.addEventListener("keydown", handler)
-        return () => window.removeEventListener("keydown", handler)
-    }, [open, safeIndex, images.length, setIndex])
+        window.addEventListener('keydown', handler)
+        return () => window.removeEventListener('keydown', handler)
+    }, [open, handleClose, handlePrev, handleNext])
 
-    if (images.length === 0) return null
+    // Lock body scroll khi mở
+    useEffect(() => {
+        if (open) {
+            document.body.style.overflow = 'hidden'
+            return () => { document.body.style.overflow = '' }
+        }
+    }, [open])
 
-    // Use a fixed aspect ratio for the spacer if unknown
-    const defaultAspectRatio = 1
+    if (!open || images.length === 0) return null
 
-    return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-[100vw] sm:max-w-[95vw] lg:max-w-6xl w-full h-[100dvh] sm:h-[85vh] p-0 overflow-hidden gap-0 border-0 sm:border rounded-none sm:rounded-xl bg-background">
-                <DialogTitle className="sr-only">Chi tiết hình ảnh</DialogTitle>
-                
-                <div className="flex flex-col lg:flex-row h-full overflow-hidden w-full">
-                    {/* Left Panel: Image + Nav */}
-                    <div className="h-[55vh] lg:h-auto flex-none lg:flex-1 flex items-center justify-center bg-muted/20 min-h-0 relative p-4 md:p-8 lg:p-12 group/viewer">
-                        {images.length > 1 && (
-                            <>
-                                <button
-                                    className="absolute left-2 lg:left-4 top-1/2 -translate-y-1/2 z-20 size-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg sm:opacity-0 sm:group-hover/viewer:opacity-100 transition-opacity hover:bg-background"
-                                    onClick={() => setIndex((safeIndex - 1 + images.length) % images.length)}
-                                >
-                                    <ChevronLeft className="size-5" />
-                                </button>
-                                <button
-                                    className="absolute right-2 lg:right-4 top-1/2 -translate-y-1/2 z-20 size-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 flex items-center justify-center shadow-lg sm:opacity-0 sm:group-hover/viewer:opacity-100 transition-opacity hover:bg-background"
-                                    onClick={() => setIndex((safeIndex + 1) % images.length)}
-                                >
-                                    <ChevronRight className="size-5" />
-                                </button>
-                            </>
-                        )}
-
-                        {/* Spacer box config */}
-                        <div className="relative flex max-w-[100%] max-h-[100%] gap-4 mx-auto w-full justify-center">
-
-                            {/* Result Image */}
-                            <div className="relative flex min-w-0 max-h-full rounded-xl shadow-2xl border border-border/40 overflow-hidden bg-black/5 max-w-full flex-1 items-center justify-center">
-                                {source === "generated" && uploadedImage && (
-                                    <Badge variant="default" className="absolute top-4 left-4 shadow-md z-10 hidden sm:flex">Kết quả Generation</Badge>
-                                )}
-                                
-
-                                
-                                <img
-                                    src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${defaultAspectRatio * 10000}" height="10000"></svg>`)}`}
-                                    alt="spacer"
-                                    className="w-auto h-auto max-w-[100%] max-h-[100%] lg:max-h-[70vh] object-contain invisible pointer-events-none"
-                                />
-
-                                <div className="absolute inset-0 w-full h-full group flex items-center justify-center">
-                                    <Zoom zoomMargin={40} classDialog="custom-zoom-overlay">
-                                        <img
-                                            src={currentImgUrl}
-                                            alt="Khung nhìn ảnh"
-                                            className="w-full h-full object-contain cursor-grab active:cursor-grabbing"
-                                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-                                        />
-                                    </Zoom>
-
-                                    {/* Hover overlay */}
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-md overflow-hidden shadow-inner hidden md:flex">
-                                        <div className="absolute inset-0 bg-black/15 backdrop-blur-[2px]" />
-                                        <div className="bg-background/90 text-foreground backdrop-blur-md px-4 py-2 rounded-full font-medium text-sm flex items-center gap-2 shadow-xl ring-1 ring-border/50 translate-y-2 group-hover:translate-y-0 transition-all duration-300 relative z-10">
-                                            <Maximize2 className="size-4" />
-                                            Xem chuẩn gốc
-                                        </div>
-                                    </div>
-                                </div>
+    return createPortal(
+        <div className="fixed inset-0 z-50 bg-black/95 text-slate-200" style={{ touchAction: 'none' }}>
+            <div className="relative w-full h-[100dvh] flex overflow-hidden">
+                {/* === Phần chính: ảnh + controls === */}
+                <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
+                    {/* Top bar */}
+                    <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 pointer-events-none">
+                        {/* Trái: counter + badge */}
+                        <div className="flex items-center gap-2.5 pointer-events-auto">
+                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm border ${source === 'generated' ? 'bg-violet-500/20 text-violet-300 border-violet-500/30' : 'bg-white/10 text-white/70 border-white/20'}`}>
+                                {source === 'generated' ? <Wand2 className="size-3.5" /> : <Sparkles className="size-3.5" />}
+                                {source === 'generated' ? 'AI' : 'Mẫu'}
                             </div>
-
-                        </div>
-
-                        {/* Keyboard hint */}
-                        {images.length > 1 && (
-                            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] text-muted-foreground/60 opacity-0 group-hover/viewer:opacity-100 transition-opacity hidden sm:block">
-                                ← → để chuyển ảnh
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right Panel: Data & Actions (GeneratePage strict style) */}
-                    <div className="w-full lg:w-[320px] flex-1 lg:flex-none lg:h-full border-t lg:border-t-0 lg:border-l p-5 lg:pt-14 flex flex-col gap-5 bg-background overflow-y-auto custom-scrollbar min-h-0">
-                        
-                        <div className="space-y-4">
-                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/80 font-semibold mb-2 block">Chi tiết ảnh</Label>
-                            
-                            {currentGenData ? (
-                                <>
-                                    <div className="grid grid-cols-2 gap-y-5 gap-x-4">
-                                        <div>
-                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block mb-1">Tỷ lệ</Label>
-                                            <p className="text-sm font-medium text-foreground">{currentGenData.aspectRatio}</p>
-                                        </div>
-                                        <div>
-                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block mb-1">Thời gian</Label>
-                                            <p className="text-sm font-medium text-foreground">
-                                                {new Date(currentGenData.timestamp).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                            </p>
-                                        </div>
-                                        <div className="col-span-2 pt-1">
-                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block mb-2">Hiệu ứng áp dụng</Label>
-                                            <div className="flex flex-wrap gap-2">
-                                                {currentGenData.context !== "Mặc định" && (
-                                                    <Badge variant="secondary" className="bg-muted/40 hover:bg-muted text-foreground/90 font-medium px-3 py-1 border-border/40 transition-colors">
-                                                        <Layers className="size-[14px] mr-1.5 opacity-60" />
-                                                        Bối cảnh: {currentGenData.context}
-                                                    </Badge>
-                                                )}
-                                                {currentGenData.material !== "Mặc định" && (
-                                                    <Badge variant="secondary" className="bg-muted/40 hover:bg-muted text-foreground/90 font-medium px-3 py-1 border-border/40 transition-colors">
-                                                        <Layers className="size-[14px] mr-1.5 opacity-60" />
-                                                        Chất liệu: {currentGenData.material}
-                                                    </Badge>
-                                                )}
-                                                {currentGenData.context === "Mặc định" && currentGenData.material === "Mặc định" && (
-                                                    <div className="text-sm text-muted-foreground/60 italic w-full pl-1">Không sử dụng</div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {currentGenData.prompt && (
-                                        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/40">
-                                            <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium block">Mô tả thêm</Label>
-                                            <div className="text-[13px] leading-relaxed bg-muted/20 p-3.5 rounded-xl max-h-[120px] overflow-y-auto custom-scrollbar break-words whitespace-pre-wrap border border-border/30 text-foreground/90 shadow-sm">
-                                                {currentGenData.prompt}
-                                            </div>
-                                        </div>
-                                    )}
-
-                    {source === "generated" && uploadedImage && (
-                        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border/40">
-                            <div className="flex items-center gap-2">
-                                <Label className="text-[10px] uppercase tracking-widest text-muted-foreground/70 font-medium">Ảnh tham chiếu</Label>
-                            </div>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                <div className="relative group/ref shrink-0">
-                                    <img
-                                        src={uploadedImage}
-                                        alt="Reference Input"
-                                        className="h-14 w-14 rounded-xl object-cover border border-border/60 shadow-sm bg-muted/30 transition-transform duration-300 origin-top-left group-hover/ref:scale-[2.5] hover:z-50 relative z-10"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                                </>
-                            ) : (
-                                <div className="text-sm text-muted-foreground leading-relaxed">
-                                    Đây là ảnh mẫu tham khảo dành cho template này. Các thông số AI cụ thể sẽ hiển thị khi bạn bắt đầu tạo ảnh.
-                                </div>
+                            {images.length > 1 && (
+                                <span className="text-xs text-white/50 font-medium tabular-nums">
+                                    {safeIndex + 1} / {images.length}
+                                </span>
                             )}
                         </div>
 
-                        {/* Actions (Strict GeneratePage style) */}
-                        <div className="flex flex-col gap-2 mt-auto">
-                            <Button size="sm" className="w-full border shadow-sm font-medium" onClick={() => onDownload(currentImgUrl)}>
-                                <Download className="mr-2 size-4" /> Tải xuống
-                            </Button>
-                            <Button 
-                                size="sm" 
-                                variant="secondary" 
-                                className="w-full border shadow-sm font-medium bg-secondary/50 hover:bg-secondary/80 text-secondary-foreground"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(currentImgUrl)
-                                    toast.success("Đã sao chép liên kết vào bộ nhớ tạm")
-                                }}
+                        {/* Phải: info toggle + close */}
+                        <div className="flex items-center gap-1.5 pointer-events-auto">
+                            {currentGenData && (
+                                <Button
+                                    variant="ghost"
+                                    className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'border border-white bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                                    onClick={() => setShowInfo(!showInfo)}
+                                >
+                                    <Info className="size-3.5" />
+                                    <span className="hidden sm:inline">Chi tiết</span>
+                                </Button>
+                            )}
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg h-9 w-9"
+                                onClick={handleClose}
                             >
-                                <Copy className="mr-2 size-3.5" /> Sao chép liên kết
+                                <X className="size-5" />
                             </Button>
                         </div>
                     </div>
+
+                    {/* Bottom action bar — safe-area cho iPhone */}
+                    <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
+                        <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={() => onDownload(currentImgUrl)}>
+                            <Download className="size-4" />
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            title="Sao chép liên kết"
+                            className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3"
+                            onClick={() => {
+                                navigator.clipboard.writeText(currentImgUrl)
+                                toast.success('Đã sao chép liên kết')
+                            }}
+                        >
+                            <Copy className="size-4" />
+                            <span className="hidden sm:inline text-xs font-medium">Sao chép</span>
+                        </Button>
+                    </div>
+
+                    {/* Nút Previous */}
+                    <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${safeIndex === 0 ? 'opacity-0 !pointer-events-none' : 'opacity-100'}`}
+                            onClick={(e) => { e.stopPropagation(); handlePrev() }}
+                        >
+                            <ChevronLeft className="size-5 sm:size-8" />
+                        </Button>
+                    </div>
+
+                    {/* Nút Next */}
+                    <div className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            className={`size-9 sm:size-12 rounded-full bg-white/80 sm:bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg transition-opacity pointer-events-auto ${safeIndex === images.length - 1 ? 'opacity-0 !pointer-events-none' : 'opacity-100'}`}
+                            onClick={(e) => { e.stopPropagation(); handleNext() }}
+                        >
+                            <ChevronRight className="size-5 sm:size-8" />
+                        </Button>
+                    </div>
+
+                    {/* Ảnh chính */}
+                    <div className="w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none cursor-default">
+                        <img
+                            src={currentImgUrl}
+                            alt="Xem ảnh"
+                            className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                            draggable={false}
+                        />
+                    </div>
                 </div>
-            </DialogContent>
-        </Dialog>
+
+                {/* === Info Panel — sidebar desktop, bottom sheet mobile === */}
+                {showInfo && currentGenData && (
+                    <div className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300 max-h-[70vh] lg:max-h-none rounded-t-2xl lg:rounded-t-none" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+                        {/* Header */}
+                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
+                            <h3 className="text-sm font-semibold text-white">Chi tiết ảnh</h3>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-white/60 hover:text-white hover:bg-white/10" onClick={() => setShowInfo(false)}>
+                                <X className="size-4" />
+                            </Button>
+                        </div>
+
+                        {/* Metadata */}
+                        <div className="px-5 py-3 border-b border-white/5">
+                            <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-white/40">
+                                        <Ruler className="size-3" />
+                                        <span className="text-[11px]">Tỷ lệ</span>
+                                    </div>
+                                    <p className="text-xs text-white/80 font-medium">{currentGenData.aspectRatio}</p>
+                                </div>
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-1.5 text-white/40">
+                                        <Clock className="size-3" />
+                                        <span className="text-[11px]">Thời gian</span>
+                                    </div>
+                                    <p className="text-xs text-white/80 font-medium">
+                                        {new Date(currentGenData.timestamp).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Hiệu ứng */}
+                        {(currentGenData.context !== "Mặc định" || currentGenData.material !== "Mặc định") && (
+                            <div className="px-5 py-3 border-b border-white/5 space-y-2">
+                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Hiệu ứng</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {currentGenData.context !== "Mặc định" && (
+                                        <Badge variant="secondary" className="bg-white/10 text-white/80 border-white/10 font-medium">
+                                            <Layers className="size-3 mr-1.5 opacity-60" />
+                                            {currentGenData.context}
+                                        </Badge>
+                                    )}
+                                    {currentGenData.material !== "Mặc định" && (
+                                        <Badge variant="secondary" className="bg-white/10 text-white/80 border-white/10 font-medium">
+                                            <Layers className="size-3 mr-1.5 opacity-60" />
+                                            {currentGenData.material}
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Mô tả thêm */}
+                        {currentGenData.prompt && (
+                            <div className="px-5 py-3 border-b border-white/5 space-y-2">
+                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Mô tả thêm</p>
+                                <p className="text-sm text-white/85 leading-relaxed">{currentGenData.prompt}</p>
+                            </div>
+                        )}
+
+                        {/* Ảnh tham chiếu */}
+                        {source === "generated" && uploadedImage && (
+                            <div className="px-5 py-3 space-y-2">
+                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
+                                <div className="flex gap-2 mt-1">
+                                    <img
+                                        src={uploadedImage}
+                                        alt="Reference"
+                                        className="h-14 w-14 rounded-lg object-cover border border-white/10 shadow-sm"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>,
+        document.body
     )
 }
