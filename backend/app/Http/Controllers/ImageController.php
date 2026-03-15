@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\GenerateImageRequest;
+use App\Models\AiModel;
 use App\Models\Image;
+use App\Models\Setting;
 use App\Services\OpenRouterService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
@@ -39,8 +41,15 @@ class ImageController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        $count = (int) ($validated['count'] ?? 1);
-        $gemsCostPerImage = 1;
+        $count = min(
+            (int) ($validated['count'] ?? 1),
+            (int) Setting::get('max_images_per_request', 4),
+        );
+
+        // Lấy gems cost từ AI model hoặc setting mặc định
+        $modelId = $validated['model'] ?? Setting::get('default_model', config('services.openrouter.default_model'));
+        $aiModel = AiModel::where('model_id', $modelId)->first();
+        $gemsCostPerImage = $aiModel?->gems_cost ?? (int) Setting::get('default_gems_per_image', 1);
         $totalCost = $count * $gemsCostPerImage;
 
         // Kiểm tra đủ gems
@@ -54,7 +63,7 @@ class ImageController extends Controller
 
         $generatedImages = [];
         $aspectRatio = $validated['aspect_ratio'] ?? '1:1';
-        $model = $validated['model'] ?? null;
+        $model = $validated['model'] ?? Setting::get('default_model', config('services.openrouter.default_model'));
         $style = $validated['style'] ?? 'photorealistic';
         $seed = (int) ($validated['seed'] ?? random_int(0, 999999999));
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -23,7 +24,8 @@ class OpenRouterService
     {
         $this->apiKey = config('services.openrouter.api_key', '');
         $this->baseUrl = config('services.openrouter.base_url', 'https://openrouter.ai/api/v1');
-        $this->defaultModel = config('services.openrouter.default_model', 'google/gemini-2.5-flash-image-preview');
+        $this->defaultModel = Setting::get('default_model')
+            ?? config('services.openrouter.default_model', 'google/gemini-2.5-flash-image-preview');
     }
 
     /**

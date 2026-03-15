@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { adminApi, type AdminAiModelData } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -16,12 +17,37 @@ interface SettingItem {
     group: string;
 }
 
-// Nhãn hiển thị cho từng setting key
-const settingLabels: Record<string, { label: string; description: string }> = {
-    default_model: { label: 'Model mặc định', description: 'Model được chọn sẵn khi vào trang tạo ảnh' },
-    default_gems_per_image: { label: 'Xu mặc định / ảnh', description: 'Giá xu mặc định khi model không có giá riêng' },
-    max_images_per_request: { label: 'Số ảnh tối đa / lượt', description: 'Giới hạn số ảnh người dùng có thể tạo cùng lúc' },
+// Metadata cho settings generation
+const settingMeta: Record<string, { label: string; description: string; type: 'text' | 'number' | 'select'; options?: { value: string; label: string }[] }> = {
+    default_model: { label: 'Model mặc định', description: 'Model được chọn sẵn khi vào trang tạo ảnh', type: 'text' },
+    default_gems_per_image: { label: 'Gems mặc định / ảnh', description: 'Giá gems mặc định khi model không có giá riêng', type: 'number' },
+    max_images_per_request: { label: 'Số ảnh tối đa / lượt', description: 'Giới hạn số ảnh người dùng có thể tạo cùng lúc', type: 'number' },
+    default_aspect_ratio: {
+        label: 'Tỉ lệ mặc định', description: 'Tỉ lệ ảnh mặc định khi tạo ảnh', type: 'select',
+        options: [
+            { value: '1:1', label: '1:1 (Vuông)' },
+            { value: '16:9', label: '16:9 (Ngang)' },
+            { value: '9:16', label: '9:16 (Dọc)' },
+            { value: '4:3', label: '4:3' },
+            { value: '3:2', label: '3:2' },
+        ],
+    },
+    default_style: {
+        label: 'Phong cách mặc định', description: 'Phong cách ảnh mặc định', type: 'select',
+        options: [
+            { value: 'photorealistic', label: 'Chân thực' },
+            { value: 'anime', label: 'Anime' },
+            { value: 'digital-art', label: 'Digital Art' },
+            { value: 'oil-painting', label: 'Sơn dầu' },
+            { value: 'watercolor', label: 'Màu nước' },
+            { value: '3d-render', label: '3D Render' },
+            { value: 'pixel-art', label: 'Pixel Art' },
+        ],
+    },
 };
+
+// Thứ tự hiển thị
+const SETTING_ORDER = ['default_model', 'default_gems_per_image', 'max_images_per_request', 'default_aspect_ratio', 'default_style'];
 
 export default function AdminGeneratePage() {
     const [settings, setSettings] = useState<SettingItem[]>([]);
@@ -37,12 +63,11 @@ export default function AdminGeneratePage() {
                 adminApi.settings(),
                 adminApi.models(),
             ]);
-            // Chỉ lấy settings nhóm "generation"
             const genSettings = allSettings['generation'] ?? [];
             setSettings(genSettings);
             setModels(allModels);
             const initial: Record<string, string> = {};
-            genSettings.forEach((s) => { initial[s.key] = s.value ?? ''; });
+            genSettings.forEach((s: SettingItem) => { initial[s.key] = s.value ?? ''; });
             setEdits(initial);
         } catch {
             toast.error('Không thể tải dữ liệu');
@@ -89,6 +114,53 @@ export default function AdminGeneratePage() {
         );
     }
 
+    // Sắp xếp settings theo thứ tự cố định
+    const sortedSettings = [...settings].sort((a, b) => {
+        const ia = SETTING_ORDER.indexOf(a.key);
+        const ib = SETTING_ORDER.indexOf(b.key);
+        return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
+
+    const renderInput = (s: SettingItem) => {
+        const meta = settingMeta[s.key];
+        const value = edits[s.key] ?? '';
+
+        if (meta?.type === 'number') {
+            return (
+                <Input
+                    type="number"
+                    min={0}
+                    value={value}
+                    onChange={(e) => setEdits({ ...edits, [s.key]: e.target.value })}
+                    className="max-w-sm"
+                />
+            );
+        }
+
+        if (meta?.type === 'select' && meta.options) {
+            return (
+                <Select value={value} onValueChange={(v) => setEdits({ ...edits, [s.key]: v })}>
+                    <SelectTrigger className="max-w-sm">
+                        <SelectValue placeholder="Chọn..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {meta.options.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            );
+        }
+
+        return (
+            <Input
+                value={value}
+                onChange={(e) => setEdits({ ...edits, [s.key]: e.target.value })}
+                className="max-w-sm"
+            />
+        );
+    };
+
     return (
         <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-between">
@@ -107,22 +179,23 @@ export default function AdminGeneratePage() {
                         Cấu hình mặc định cho trang tạo ảnh /app/generate
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    {settings.map((s) => {
-                        const info = settingLabels[s.key];
+                <CardContent className="space-y-5">
+                    {sortedSettings.map((s) => {
+                        const meta = settingMeta[s.key];
                         return (
                             <div key={s.key} className="space-y-1.5">
-                                <Label className="text-sm font-medium">
-                                    {info?.label ?? s.key}
-                                </Label>
-                                {info?.description && (
-                                    <p className="text-xs text-muted-foreground">{info.description}</p>
+                                <div className="flex items-baseline justify-between gap-2">
+                                    <Label className="text-sm font-medium">
+                                        {meta?.label ?? s.key}
+                                    </Label>
+                                    <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">
+                                        {s.key}
+                                    </span>
+                                </div>
+                                {meta?.description && (
+                                    <p className="text-xs text-muted-foreground -mt-0.5">{meta.description}</p>
                                 )}
-                                <Input
-                                    value={edits[s.key] ?? ''}
-                                    onChange={(e) => setEdits({ ...edits, [s.key]: e.target.value })}
-                                    className="max-w-sm"
-                                />
+                                {renderInput(s)}
                             </div>
                         );
                     })}
@@ -134,7 +207,7 @@ export default function AdminGeneratePage() {
                 </CardContent>
             </Card>
 
-            {/* Models khả dụng trên trang tạo ảnh */}
+            {/* Models khả dụng */}
             <Card>
                 <CardHeader className="pb-3">
                     <CardTitle className="text-base">Models khả dụng</CardTitle>
@@ -152,7 +225,7 @@ export default function AdminGeneratePage() {
                                 </div>
                                 <div className="flex items-center gap-3 shrink-0">
                                     <Badge variant="secondary" className="text-xs tabular-nums">
-                                        {m.gems_cost} xu/ảnh
+                                        {m.gems_cost} gems/ảnh
                                     </Badge>
                                     <div className="flex items-center gap-2">
                                         <Switch

@@ -91,11 +91,30 @@ class AdminSeeder extends Seeder
     private function seedSettings(): void
     {
         $settings = [
+            // === General ===
             ['key' => 'site_name', 'value' => 'ZDream', 'group' => 'general'],
+            ['key' => 'site_description', 'value' => 'Nền tảng tạo ảnh AI hàng đầu Việt Nam', 'group' => 'general'],
+            ['key' => 'new_user_gems', 'value' => '50', 'group' => 'general'],
+            ['key' => 'maintenance_mode', 'value' => '0', 'group' => 'general'],
+
+            // === Generation ===
             ['key' => 'default_model', 'value' => 'google/gemini-2.5-flash-image', 'group' => 'generation'],
             ['key' => 'default_gems_per_image', 'value' => '1', 'group' => 'generation'],
             ['key' => 'max_images_per_request', 'value' => '4', 'group' => 'generation'],
-            ['key' => 'new_user_gems', 'value' => '50', 'group' => 'general'],
+            ['key' => 'default_aspect_ratio', 'value' => '1:1', 'group' => 'generation'],
+            ['key' => 'default_style', 'value' => 'photorealistic', 'group' => 'generation'],
+
+            // === Billing ===
+            ['key' => 'gem_price_vnd', 'value' => '500', 'group' => 'billing'],
+            ['key' => 'min_topup_gems', 'value' => '100', 'group' => 'billing'],
+            ['key' => 'bank_name', 'value' => '', 'group' => 'billing'],
+            ['key' => 'bank_account', 'value' => '', 'group' => 'billing'],
+            ['key' => 'bank_owner', 'value' => '', 'group' => 'billing'],
+
+            // === API ===
+            ['key' => 'openrouter_timeout', 'value' => '120', 'group' => 'api'],
+            ['key' => 'openrouter_base_url', 'value' => 'https://openrouter.ai/api/v1', 'group' => 'api'],
+            ['key' => 'max_upload_size_mb', 'value' => '5', 'group' => 'api'],
         ];
 
         foreach ($settings as $s) {

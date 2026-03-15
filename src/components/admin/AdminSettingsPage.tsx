@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Save, RefreshCw, Settings2, Image, CreditCard, Globe, SwatchBook } from 'lucide-react';
+import { Save, RefreshCw, Settings2, Image, CreditCard, Globe } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { adminApi } from '@/lib/api';
 import { toast } from 'sonner';
@@ -17,13 +19,73 @@ interface SettingItem {
     group: string;
 }
 
+// Metadata cho từng setting key: label thân thiện, mô tả, loại input
+const settingMeta: Record<string, { label: string; description: string; type: 'text' | 'number' | 'boolean' | 'select'; options?: { value: string; label: string }[] }> = {
+    // General
+    site_name: { label: 'Tên trang web', description: 'Tên hiển thị của nền tảng', type: 'text' },
+    site_description: { label: 'Mô tả trang web', description: 'Mô tả ngắn gọn về nền tảng', type: 'text' },
+    new_user_gems: { label: 'Gems tặng user mới', description: 'Số gems tặng khi đăng ký tài khoản', type: 'number' },
+    maintenance_mode: { label: 'Chế độ bảo trì', description: 'Bật để tạm ngưng truy cập cho user thường', type: 'boolean' },
+
+    // Generation
+    default_model: { label: 'Model mặc định', description: 'Model AI sử dụng khi user không chọn', type: 'text' },
+    default_gems_per_image: { label: 'Gems mỗi ảnh', description: 'Chi phí gems mặc định cho 1 ảnh (nếu model không có giá riêng)', type: 'number' },
+    max_images_per_request: { label: 'Tối đa ảnh/lần', description: 'Số ảnh tối đa user có thể tạo trong 1 request', type: 'number' },
+    default_aspect_ratio: {
+        label: 'Tỉ lệ mặc định', description: 'Tỉ lệ ảnh mặc định', type: 'select',
+        options: [
+            { value: '1:1', label: '1:1 (Vuông)' },
+            { value: '16:9', label: '16:9 (Ngang)' },
+            { value: '9:16', label: '9:16 (Dọc)' },
+            { value: '4:3', label: '4:3' },
+            { value: '3:4', label: '3:4' },
+            { value: '3:2', label: '3:2' },
+            { value: '2:3', label: '2:3' },
+        ],
+    },
+    default_style: {
+        label: 'Phong cách mặc định', description: 'Phong cách ảnh mặc định', type: 'select',
+        options: [
+            { value: 'photorealistic', label: 'Chân thực' },
+            { value: 'anime', label: 'Anime' },
+            { value: 'digital-art', label: 'Digital Art' },
+            { value: 'oil-painting', label: 'Sơn dầu' },
+            { value: 'watercolor', label: 'Màu nước' },
+            { value: '3d-render', label: '3D Render' },
+            { value: 'pixel-art', label: 'Pixel Art' },
+        ],
+    },
+
+    // Billing
+    gem_price_vnd: { label: 'Giá 1 gem (VNĐ)', description: 'Tỷ giá quy đổi VNĐ sang gems', type: 'number' },
+    min_topup_gems: { label: 'Nạp tối thiểu (gems)', description: 'Số gems tối thiểu cho 1 lần nạp', type: 'number' },
+    bank_name: { label: 'Tên ngân hàng', description: 'Ngân hàng nhận chuyển khoản', type: 'text' },
+    bank_account: { label: 'Số tài khoản', description: 'Số tài khoản ngân hàng', type: 'text' },
+    bank_owner: { label: 'Chủ tài khoản', description: 'Tên chủ tài khoản ngân hàng', type: 'text' },
+
+    // API
+    openrouter_timeout: { label: 'Timeout (giây)', description: 'Thời gian chờ tối đa khi gọi OpenRouter API', type: 'number' },
+    openrouter_base_url: { label: 'OpenRouter Base URL', description: 'URL gốc của OpenRouter API', type: 'text' },
+    max_upload_size_mb: { label: 'Upload tối đa (MB)', description: 'Dung lượng file upload tối đa', type: 'number' },
+};
+
 // Cấu hình hiển thị cho từng nhóm setting
 const groupConfig: Record<string, { label: string; icon: LucideIcon; description: string }> = {
     general: { label: 'Chung', icon: Settings2, description: 'Cài đặt chung của hệ thống' },
     generation: { label: 'Tạo ảnh', icon: Image, description: 'Cấu hình liên quan đến tạo ảnh AI' },
-    templates: { label: 'Kiểu mẫu', icon: SwatchBook, description: 'Cài đặt mặc định cho kiểu mẫu' },
-    billing: { label: 'Thanh toán', icon: CreditCard, description: 'Cài đặt xu và thanh toán' },
+    billing: { label: 'Thanh toán', icon: CreditCard, description: 'Cài đặt thanh toán và ngân hàng' },
     api: { label: 'API', icon: Globe, description: 'Cấu hình kết nối API bên ngoài' },
+};
+
+// Thứ tự hiển thị cố định cho các group
+const GROUP_ORDER = ['general', 'generation', 'billing', 'api'];
+
+// Thứ tự hiển thị cố định cho settings trong mỗi group
+const SETTING_ORDER: Record<string, string[]> = {
+    general: ['site_name', 'site_description', 'new_user_gems', 'maintenance_mode'],
+    generation: ['default_model', 'default_gems_per_image', 'max_images_per_request', 'default_aspect_ratio', 'default_style'],
+    billing: ['gem_price_vnd', 'min_topup_gems', 'bank_name', 'bank_account', 'bank_owner'],
+    api: ['openrouter_base_url', 'openrouter_timeout', 'max_upload_size_mb'],
 };
 
 export default function AdminSettingsPage() {
@@ -31,7 +93,7 @@ export default function AdminSettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [edits, setEdits] = useState<Record<string, string>>({});
-    const [activeGroup, setActiveGroup] = useState('');
+    const [activeGroup, setActiveGroup] = useState('general');
 
     const fetchSettings = async () => {
         setLoading(true);
@@ -43,11 +105,6 @@ export default function AdminSettingsPage() {
                 initial[s.key] = s.value ?? '';
             });
             setEdits(initial);
-            // Chọn nhóm đầu tiên nếu chưa chọn
-            const groups = Object.keys(data);
-            if (groups.length > 0 && !groups.includes(activeGroup)) {
-                setActiveGroup(groups[0]);
-            }
         } catch {
             toast.error('Không thể tải settings');
         } finally {
@@ -60,7 +117,6 @@ export default function AdminSettingsPage() {
     const handleSave = async () => {
         setSaving(true);
         try {
-            // Chỉ lưu nhóm đang chọn
             const items = (settings[activeGroup] ?? []).map((s: SettingItem) => ({
                 key: s.key,
                 value: edits[s.key] ?? s.value,
@@ -76,6 +132,10 @@ export default function AdminSettingsPage() {
         }
     };
 
+    const updateEdit = (key: string, value: string) => {
+        setEdits(prev => ({ ...prev, [key]: value }));
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -84,8 +144,25 @@ export default function AdminSettingsPage() {
         );
     }
 
-    const groups = Object.keys(settings);
-    const activeSettings = settings[activeGroup] ?? [];
+    // Sắp xếp groups theo thứ tự cố định
+    const groups = GROUP_ORDER.filter(g => settings[g]?.length > 0);
+    // Thêm bất kỳ group nào trong data nhưng không nằm trong ORDER
+    Object.keys(settings).forEach(g => {
+        if (!groups.includes(g) && settings[g]?.length > 0) groups.push(g);
+    });
+
+    // Sắp xếp settings trong group hiện tại theo thứ tự cố định
+    const sortSettings = (items: SettingItem[], group: string): SettingItem[] => {
+        const order = SETTING_ORDER[group];
+        if (!order) return items;
+        return [...items].sort((a, b) => {
+            const ia = order.indexOf(a.key);
+            const ib = order.indexOf(b.key);
+            return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        });
+    };
+
+    const activeSettings = sortSettings(settings[activeGroup] ?? [], activeGroup);
 
     if (groups.length === 0) {
         return (
@@ -100,6 +177,70 @@ export default function AdminSettingsPage() {
 
     const getGroupConfig = (group: string) =>
         groupConfig[group] ?? { label: group, icon: Settings2, description: '' };
+
+    // Render input phù hợp cho từng setting
+    const renderInput = (s: SettingItem) => {
+        const meta = settingMeta[s.key];
+        const value = edits[s.key] ?? '';
+
+        if (!meta || meta.type === 'text') {
+            return (
+                <Input
+                    value={value}
+                    onChange={(e) => updateEdit(s.key, e.target.value)}
+                    placeholder={meta?.label ?? s.key}
+                />
+            );
+        }
+
+        if (meta.type === 'number') {
+            return (
+                <Input
+                    type="number"
+                    min={0}
+                    value={value}
+                    onChange={(e) => updateEdit(s.key, e.target.value)}
+                    placeholder="0"
+                />
+            );
+        }
+
+        if (meta.type === 'boolean') {
+            return (
+                <div className="flex items-center gap-3 pt-1">
+                    <Switch
+                        checked={value === '1' || value === 'true'}
+                        onCheckedChange={(checked) => updateEdit(s.key, checked ? '1' : '0')}
+                    />
+                    <span className="text-sm text-muted-foreground">
+                        {value === '1' || value === 'true' ? 'Đang bật' : 'Đang tắt'}
+                    </span>
+                </div>
+            );
+        }
+
+        if (meta.type === 'select' && meta.options) {
+            return (
+                <Select value={value} onValueChange={(v) => updateEdit(s.key, v)}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Chọn..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {meta.options.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            );
+        }
+
+        return (
+            <Input
+                value={value}
+                onChange={(e) => updateEdit(s.key, e.target.value)}
+            />
+        );
+    };
 
     return (
         <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-4">
@@ -172,16 +313,28 @@ export default function AdminSettingsPage() {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            {activeSettings.map((s) => (
-                                <div key={s.key} className="space-y-1.5">
-                                    <Label className="text-xs font-mono text-muted-foreground">{s.key}</Label>
-                                    <Input
-                                        value={edits[s.key] ?? ''}
-                                        onChange={(e) => setEdits({ ...edits, [s.key]: e.target.value })}
-                                    />
-                                </div>
-                            ))}
+                        <CardContent className="space-y-5">
+                            {activeSettings.map((s) => {
+                                const meta = settingMeta[s.key];
+                                return (
+                                    <div key={s.key} className="space-y-1.5">
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <Label className="text-sm font-medium">
+                                                {meta?.label ?? s.key}
+                                            </Label>
+                                            <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">
+                                                {s.key}
+                                            </span>
+                                        </div>
+                                        {meta?.description && (
+                                            <p className="text-xs text-muted-foreground -mt-0.5">
+                                                {meta.description}
+                                            </p>
+                                        )}
+                                        {renderInput(s)}
+                                    </div>
+                                );
+                            })}
                             {activeSettings.length === 0 && (
                                 <p className="text-sm text-muted-foreground text-center py-4">
                                     Không có cài đặt nào trong nhóm này

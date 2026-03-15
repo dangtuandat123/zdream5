@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
@@ -38,7 +39,7 @@ class SocialAuthController extends Controller
                 'google_id'         => $googleUser->getId(),
                 'avatar'            => $googleUser->getAvatar(),
                 'password'          => bcrypt(\Illuminate\Support\Str::random(32)),
-                'gems'              => 50,
+                'gems'              => (int) Setting::get('new_user_gems', 50),
                 'email_verified_at' => now(),
             ]
         );
