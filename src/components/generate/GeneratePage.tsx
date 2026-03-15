@@ -2509,7 +2509,7 @@ export function GeneratePage() {
 
                         {/* Prompt History Dropdown */}
                         {showHistory && promptHistory.length > 0 && (
-                            <div ref={historyRef} className="absolute bottom-full mb-1 left-0 right-0 bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar z-50 animate-in slide-in-from-bottom-2 fade-in duration-200">
+                            <div ref={historyRef} className="absolute bottom-full mb-1 left-0 right-0 bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar z-50 animate-in slide-in-from-bottom-2 fade-in duration-200 overscroll-contain" onWheel={(e) => e.stopPropagation()}>
                                 <div className="p-1.5">
                                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2.5 py-1.5">Lịch sử prompt</div>
                                     {promptHistory.map((p, i) => (
@@ -2787,7 +2787,7 @@ export function GeneratePage() {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
                                             </Tooltip>
-                                            <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+                                            <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()} onWheel={(e) => e.stopPropagation()}>
                                                 <div className="p-4 border-b border-border/50">
                                                     <div className="flex items-center gap-2 font-medium text-sm">
                                                         <ImageIcon className="size-4 text-primary" />
@@ -2840,7 +2840,7 @@ export function GeneratePage() {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Cài đặt kiến tạo</TooltipContent>
                                             </Tooltip>
-                                            <PopoverContent side="top" align="start" className="w-[320px] p-0">
+                                            <PopoverContent side="top" align="start" className="w-[320px] p-0" onWheel={(e) => e.stopPropagation()}>
                                                 <div className="p-4 border-b border-border/50">
                                                     <div className="flex items-center gap-2 font-medium text-sm">
                                                         <Wand2 className="size-4 text-primary" />
