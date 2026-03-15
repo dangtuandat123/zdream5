@@ -646,11 +646,20 @@ export function TemplateDetailPage() {
                                         {generatedImages.map((img, idx) => (
                                             <Card
                                                 key={img.id}
-                                                className="overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                                                className="overflow-hidden cursor-pointer active:ring-2 active:ring-primary transition-all"
                                                 onClick={() => openGeneratedViewer(idx)}
                                             >
                                                 <div className="relative aspect-square">
                                                     <ImageWithSkeleton src={img.url} alt={`Kết quả ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+                                                    {/* Mobile: action bar luôn hiện */}
+                                                    <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
+                                                        <Badge variant="secondary" className="text-[10px] bg-black/40 text-white border-0">
+                                                            {new Date(img.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                                        </Badge>
+                                                        <Button size="icon" variant="ghost" className="size-7 text-white hover:bg-white/20" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
+                                                            <Download className="size-3.5" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             </Card>
                                         ))}
@@ -710,7 +719,7 @@ export function TemplateDetailPage() {
             {/* 2-column layout */}
             <div className="flex flex-1 min-h-0">
                 {/* LEFT: Controls */}
-                <div className="w-[30%] shrink-0 border-r flex flex-col overflow-hidden">
+                <div className="w-[380px] shrink-0 border-r flex flex-col overflow-hidden">
                     <ScrollArea className="flex-1">
                         <div className="p-4">
                             {ControlsBlock}
@@ -722,7 +731,7 @@ export function TemplateDetailPage() {
                 </div>
 
                 {/* RIGHT: Canvas */}
-                <div className="w-[70%] shrink-0 flex flex-col min-h-0">
+                <div className="flex-1 flex flex-col min-h-0">
                     {CanvasContent}
                 </div>
             </div>
