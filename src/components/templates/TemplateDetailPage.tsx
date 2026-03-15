@@ -559,27 +559,36 @@ export function TemplateDetailPage() {
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
                             {generatedImages.map((img, idx) => (
-                                <Card
+                                <div
                                     key={img.id}
-                                    className="group overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                                    className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ring-1 ring-border/20 hover:ring-primary/50"
                                     onClick={() => openGeneratedViewer(idx)}
                                 >
-                                    <div className="relative aspect-square">
+                                    <div className="relative aspect-square bg-muted/20">
                                         <ImageWithSkeleton
                                             src={img.url}
                                             alt={`Kết quả ${idx + 1}`}
-                                            className="absolute inset-0 w-full h-full object-cover"
+                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                         />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-between p-2 opacity-0 group-hover:opacity-100">
-                                            <Badge variant="secondary" className="text-[10px]">
+                                        {/* Gradient overlay — luôn nhẹ, đậm hơn khi hover */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                                        {/* Action bar */}
+                                        <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2.5 py-2 translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
+                                            <Badge variant="secondary" className="text-[10px] bg-black/40 backdrop-blur-sm text-white border-0 shadow-sm">
                                                 {new Date(img.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                             </Badge>
-                                            <Button size="icon" variant="secondary" className="size-7" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
-                                                <Download className="size-3" />
+                                            <Button size="icon" variant="ghost" className="size-7 text-white hover:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
+                                                <Download className="size-3.5" />
                                             </Button>
                                         </div>
+                                        {/* Zoom hint */}
+                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                            <div className="size-7 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
+                                                <ZoomIn className="size-3.5 text-white" />
+                                            </div>
+                                        </div>
                                     </div>
-                                </Card>
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -644,24 +653,26 @@ export function TemplateDetailPage() {
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         {generatedImages.map((img, idx) => (
-                                            <Card
+                                            <div
                                                 key={img.id}
-                                                className="overflow-hidden cursor-pointer active:ring-2 active:ring-primary transition-all"
+                                                className="relative rounded-xl overflow-hidden cursor-pointer shadow-sm active:scale-[0.97] transition-all duration-200 ring-1 ring-border/20"
                                                 onClick={() => openGeneratedViewer(idx)}
                                             >
-                                                <div className="relative aspect-square">
+                                                <div className="relative aspect-square bg-muted/20">
                                                     <ImageWithSkeleton src={img.url} alt={`Kết quả ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
-                                                    {/* Mobile: action bar luôn hiện */}
-                                                    <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2 py-1.5 bg-gradient-to-t from-black/60 to-transparent">
-                                                        <Badge variant="secondary" className="text-[10px] bg-black/40 text-white border-0">
+                                                    {/* Gradient overlay luôn hiện */}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                                                    {/* Action bar luôn hiện trên mobile */}
+                                                    <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2.5 py-2">
+                                                        <Badge variant="secondary" className="text-[10px] bg-black/40 backdrop-blur-sm text-white border-0 shadow-sm">
                                                             {new Date(img.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                         </Badge>
-                                                        <Button size="icon" variant="ghost" className="size-7 text-white hover:bg-white/20" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
-                                                            <Download className="size-3.5" />
+                                                        <Button size="icon" variant="ghost" className="size-8 text-white hover:bg-white/20" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
+                                                            <Download className="size-4" />
                                                         </Button>
                                                     </div>
                                                 </div>
-                                            </Card>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
