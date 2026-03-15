@@ -43,41 +43,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
-// === Dữ liệu mẫu ===
-const TEMPLATES: Record<string, {
-    name: string
-    category: string
-    description: string
-    prompt: string
-    sampleImages: string[]
-}> = {
-    "1": {
-        name: "Chân dung Cyberpunk",
-        category: "Chân dung",
-        description: "Biến đổi ảnh thành phong cách Cyberpunk với ánh neon rực rỡ",
-        prompt: "cyberpunk portrait, neon lights, cinematic",
-        sampleImages: [
-            "https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=600&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1535295972055-1c762f4483e5?q=80&w=600&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=600&auto=format&fit=crop",
-        ],
-    },
-    "2": {
-        name: "Phong cảnh Ghibli",
-        category: "Anime",
-        description: "Chuyển đổi ảnh phong cảnh thành phong cách Studio Ghibli",
-        prompt: "studio ghibli style landscape, watercolor",
-        sampleImages: [
-            "https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=600&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=600&auto=format&fit=crop",
-            "https://images.unsplash.com/photo-1506744626753-1fa44dfbb7c4?q=80&w=600&auto=format&fit=crop",
-        ],
-    },
-    "3": { name: "Render sản phẩm 3D", category: "3D", description: "Tạo ảnh render 3D siêu thực cho sản phẩm", prompt: "3D product render, studio lighting, white background", sampleImages: ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop"] },
-    "4": { name: "Logo Minimalist", category: "Logo", description: "Thiết kế lại logo theo phong cách tối giản", prompt: "minimalist logo, clean lines, vector", sampleImages: [] },
-    "5": { name: "Sơn dầu cổ điển", category: "Phong cảnh", description: "Mang vẻ đẹp cổ điển Baroque cho ảnh", prompt: "baroque oil painting, classical, dramatic", sampleImages: [] },
-    "6": { name: "Anime Waifu", category: "Anime", description: "Tạo nhân vật anime từ ảnh chân dung", prompt: "anime character, waifu, cute style", sampleImages: [] },
-}
+import { templateApi, type TemplateData } from "@/lib/api"
+
+type OptionItem = { value: string; label: string; prompt: string; image: string }
 
 // Tỷ lệ khung hình
 const SIZE_OPTIONS = [
@@ -90,24 +58,13 @@ const SIZE_OPTIONS = [
 // Số lượng ảnh
 const COUNT_OPTIONS = [1, 2, 3, 4]
 
-// Bối cảnh — mỗi option có ảnh preview + prompt snippet
-const CONTEXT_OPTIONS = [
+// Default options khi template không có custom options
+const DEFAULT_contextOptions: OptionItem[] = [
     { value: "default", label: "Mặc định", prompt: "", image: "" },
-    { value: "showcase", label: "Hộp Trưng Bày", prompt: "in a showcase display box", image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=300&auto=format&fit=crop" },
-    { value: "studio", label: "Studio", prompt: "professional studio lighting", image: "https://images.unsplash.com/photo-1604754742629-3e5728249d73?q=80&w=300&auto=format&fit=crop" },
-    { value: "outdoor", label: "Ngoài trời", prompt: "natural outdoor setting", image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?q=80&w=300&auto=format&fit=crop" },
-    { value: "abstract", label: "Trừu tượng", prompt: "abstract colorful background", image: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=300&auto=format&fit=crop" },
-    { value: "gradient", label: "Gradient", prompt: "smooth gradient background", image: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=300&auto=format&fit=crop" },
 ]
 
-// Chất liệu — mỗi option có ảnh preview + prompt snippet
-const MATERIAL_OPTIONS = [
+const DEFAULT_materialOptions: OptionItem[] = [
     { value: "default", label: "Mặc định", prompt: "", image: "" },
-    { value: "flocked", label: "Chất liệu Nhung", prompt: "flocked velvet texture", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=300&auto=format&fit=crop" },
-    { value: "translucent", label: "Nhựa Trong Suốt", prompt: "translucent plastic material", image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?q=80&w=300&auto=format&fit=crop" },
-    { value: "metallic", label: "Kim loại", prompt: "metallic chrome finish", image: "https://images.unsplash.com/photo-1589254065878-42c6bf5e6878?q=80&w=300&auto=format&fit=crop" },
-    { value: "wood", label: "Gỗ tự nhiên", prompt: "natural wood texture", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=300&auto=format&fit=crop" },
-    { value: "glass", label: "Thuỷ tinh", prompt: "transparent glass material", image: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?q=80&w=300&auto=format&fit=crop" },
 ]
 
 interface GeneratedImage {
@@ -173,9 +130,28 @@ function useDragScroll() {
 }
 
 export function TemplateDetailPage() {
-    const { id } = useParams<{ id: string }>()
-    const template = TEMPLATES[id || "1"] || TEMPLATES["1"]
+    const { slug } = useParams<{ slug: string }>()
     const isMobile = useIsMobile()
+    const [template, setTemplate] = useState<TemplateData | null>(null)
+    const [templateLoading, setTemplateLoading] = useState(true)
+
+    useEffect(() => {
+        if (!slug) return
+        setTemplateLoading(true)
+        templateApi.get(slug)
+            .then((data) => setTemplate(data))
+            .catch(() => toast.error("Không tìm thấy template"))
+            .finally(() => setTemplateLoading(false))
+    }, [slug])
+
+    // Derived options from template
+    const contextOptions: OptionItem[] = (template?.context_options && template.context_options.length > 0)
+        ? template.context_options
+        : DEFAULT_contextOptions
+    const materialOptions: OptionItem[] = (template?.material_options && template.material_options.length > 0)
+        ? template.material_options
+        : DEFAULT_materialOptions
+    const sampleImages: string[] = template?.sample_images ?? []
 
     // === State ===
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
@@ -267,11 +243,11 @@ export function TemplateDetailPage() {
             setGenerateProgress(100)
                 const newImages: GeneratedImage[] = Array.from({ length: imageCount }).map((_, i) => ({
                     id: Math.random().toString(),
-                    url: template.sampleImages[i % template.sampleImages.length],
+                    url: sampleImages[i % sampleImages.length],
                     timestamp: Date.now(),
                     aspectRatio: outputSize,
-                    context: CONTEXT_OPTIONS.find(o => o.value === context)?.label || "Mặc định",
-                    material: MATERIAL_OPTIONS.find(o => o.value === material)?.label || "Mặc định",
+                    context: contextOptions.find(o => o.value === context)?.label || "Mặc định",
+                    material: materialOptions.find(o => o.value === material)?.label || "Mặc định",
                     prompt: extraPrompt
                 }))
             setGeneratedImages(prev => [...newImages, ...prev])
@@ -279,15 +255,15 @@ export function TemplateDetailPage() {
             setGenerateProgress(0)
             toast.success("Tạo ảnh thành công!")
         }, 3000)
-    }, [uploadedImage, isGenerating, outputSize, imageCount, context, material, extraPrompt, template.sampleImages])
+    }, [uploadedImage, isGenerating, outputSize, imageCount, context, material, extraPrompt, sampleImages])
 
     const handleDownload = useCallback((url: string) => {
         const a = document.createElement("a")
         a.href = url
-        a.download = `zdream-${template.name.replace(/\s+/g, "-")}-${Date.now()}.png`
+        a.download = `zdream-${(template?.name ?? "template").replace(/\s+/g, "-")}-${Date.now()}.png`
         a.click()
         toast.success("Đang tải xuống")
-    }, [template.name])
+    }, [template?.name])
 
     // Viewer helpers — tách biệt sample vs generated
     const openSampleViewer = (index: number) => {
@@ -302,17 +278,17 @@ export function TemplateDetailPage() {
     }
     const currentViewerImages = viewerSource === "generated"
         ? generatedImages.map(img => img.url)
-        : template.sampleImages
+        : sampleImages
 
     // === Shared Controls Block (dùng cho cả desktop sidebar và mobile) ===
     const ControlsBlock = (
         <div className="space-y-4">
             {/* Ảnh mẫu — chỉ hiện 1 ảnh đại diện */}
-            {template.sampleImages.length > 0 && (
+            {sampleImages.length > 0 && (
                 <div className="space-y-2">
                     <Card className="relative overflow-hidden cursor-pointer group rounded-xl border-accent/50 bg-muted/20 shadow-sm" onClick={() => openSampleViewer(0)}>
                         <div className="relative aspect-[4/3] w-full">
-                            <ImageWithSkeleton src={template.sampleImages[0]} alt="Ảnh mẫu" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <ImageWithSkeleton src={sampleImages[0]} alt="Ảnh mẫu" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                             
                             {/* Gradient Overlay for contrast */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/20 opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
@@ -320,7 +296,7 @@ export function TemplateDetailPage() {
                             {/* Top Badge */}
                             <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 bg-black/40 backdrop-blur-md rounded-full border border-white/10 pointer-events-none">
                                 <Sparkles className="size-3 text-primary" />
-                                <span className="text-[10px] font-medium text-white shadow-sm">Ảnh mẫu ({template.name})</span>
+                                <span className="text-[10px] font-medium text-white shadow-sm">Ảnh mẫu ({template?.name})</span>
                             </div>
 
                             {/* Hover Zoom Icon */}
@@ -427,7 +403,7 @@ export function TemplateDetailPage() {
                     <div className="space-y-2 overflow-hidden">
                         <Label className="text-xs font-medium text-muted-foreground">Bối cảnh</Label>
                         <div ref={contextScroll.ref} onMouseDown={contextScroll.onMouseDown} onMouseUp={contextScroll.onMouseUp} onMouseLeave={contextScroll.onMouseLeave} onMouseMove={contextScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
-                            {CONTEXT_OPTIONS.map(opt => {
+                            {contextOptions.map(opt => {
                                 const isActive = context === opt.value
                                 return (
                                     <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setContext(opt.value)}>
@@ -460,7 +436,7 @@ export function TemplateDetailPage() {
                     <div className="space-y-2 overflow-hidden">
                         <Label className="text-xs font-medium text-muted-foreground">Chất liệu</Label>
                         <div ref={materialScroll.ref} onMouseDown={materialScroll.onMouseDown} onMouseUp={materialScroll.onMouseUp} onMouseLeave={materialScroll.onMouseLeave} onMouseMove={materialScroll.onMouseMove} className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
-                            {MATERIAL_OPTIONS.map(opt => {
+                            {materialOptions.map(opt => {
                                 const isActive = material === opt.value
                                 return (
                                     <div key={opt.value} className="flex flex-col items-center gap-1 cursor-pointer shrink-0 w-20 select-none" onClick={() => setMaterial(opt.value)}>
@@ -608,6 +584,23 @@ export function TemplateDetailPage() {
         </ScrollArea>
     )
 
+    // Loading / not found guard
+    if (templateLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+            </div>
+        )
+    }
+    if (!template) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+                <p className="text-muted-foreground">Không tìm thấy template</p>
+                <Link to="/app/templates" className="text-sm text-primary underline">← Quay lại</Link>
+            </div>
+        )
+    }
+
     // ============================
     // MOBILE LAYOUT — luồng đơn, scroll tự nhiên
     // ============================
@@ -620,10 +613,10 @@ export function TemplateDetailPage() {
                         <Link to="/app/templates"><ArrowLeft className="size-4" /></Link>
                     </Button>
                     <div className="min-w-0 flex-1">
-                        <h1 className="text-sm font-semibold truncate">{template.name}</h1>
-                        <p className="text-xs text-muted-foreground truncate">{template.description}</p>
+                        <h1 className="text-sm font-semibold truncate">{template?.name}</h1>
+                        <p className="text-xs text-muted-foreground truncate">{template?.description}</p>
                     </div>
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">{template.category}</Badge>
+                    <Badge variant="secondary" className="shrink-0 text-[10px]">{template?.category}</Badge>
                 </div>
 
                 {/* Scrollable content */}
@@ -719,10 +712,10 @@ export function TemplateDetailPage() {
                     <Link to="/app/templates"><ArrowLeft className="size-4" /></Link>
                 </Button>
                 <div className="min-w-0 flex-1">
-                    <h1 className="text-base font-semibold truncate">{template.name}</h1>
-                    <p className="text-xs text-muted-foreground truncate">{template.description}</p>
+                    <h1 className="text-base font-semibold truncate">{template?.name}</h1>
+                    <p className="text-xs text-muted-foreground truncate">{template?.description}</p>
                 </div>
-                <Badge variant="secondary" className="shrink-0">{template.category}</Badge>
+                <Badge variant="secondary" className="shrink-0">{template?.category}</Badge>
             </div>
 
             {/* 2-column layout */}

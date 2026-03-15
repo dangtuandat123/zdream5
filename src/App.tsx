@@ -48,7 +48,7 @@ function App() {
             <Route path="home" element={<Dashboard />} />
             <Route path="generate" element={<GeneratePage />} />
             <Route path="templates" element={<TemplatesPage />} />
-            <Route path="templates/:id" element={<TemplateDetailPage />} />
+            <Route path="templates/:slug" element={<TemplateDetailPage />} />
             <Route path="library" element={<LibraryPage />} />
             <Route path="topup" element={<TopUpPage />} />
 

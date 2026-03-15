@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { SearchIcon, SparklesIcon, ArrowRightIcon } from "lucide-react"
+import { SearchIcon, SparklesIcon, ArrowRightIcon, RefreshCw } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -14,40 +14,39 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
-
-const CATEGORIES = ["Tất cả", "Chân dung", "Phong cảnh", "Anime", "3D", "Logo", "Sản phẩm"]
-
-const TEMPLATES = [
-    { id: "1", name: "Chân dung Cyberpunk", category: "Chân dung", description: "Phong cách neon cyberpunk", thumbnail: "https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=400&auto=format&fit=crop" },
-    { id: "2", name: "Phong cảnh Ghibli", category: "Anime", description: "Anime phong cách Studio Ghibli", thumbnail: "https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=400&auto=format&fit=crop" },
-    { id: "3", name: "Render sản phẩm 3D", category: "3D", description: "Render sản phẩm siêu thực", thumbnail: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop" },
-    { id: "4", name: "Logo Minimalist", category: "Logo", description: "Logo tối giản hiện đại", thumbnail: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=400&auto=format&fit=crop" },
-    { id: "5", name: "Sơn dầu cổ điển", category: "Phong cảnh", description: "Phong cách sơn dầu Baroque", thumbnail: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400&auto=format&fit=crop" },
-    { id: "6", name: "Anime Waifu", category: "Anime", description: "Nhân vật anime phong cách Nhật Bản", thumbnail: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
-    { id: "7", name: "Ảnh thời trang", category: "Chân dung", description: "Ảnh chân dung thời trang cao cấp", thumbnail: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=400&auto=format&fit=crop" },
-    { id: "8", name: "Concept Art", category: "Phong cảnh", description: "Concept art game/phim", thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" },
-    { id: "9", name: "Mockup sản phẩm", category: "Sản phẩm", description: "Ảnh mockup sản phẩm chuyên nghiệp", thumbnail: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop" },
-    { id: "10", name: "Chibi Avatar", category: "Anime", description: "Avatar chibi dễ thương", thumbnail: "https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?q=80&w=400&auto=format&fit=crop" },
-    { id: "11", name: "Pixel Art", category: "3D", description: "Pixel art retro game", thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=400&auto=format&fit=crop" },
-    { id: "12", name: "Watercolor Portrait", category: "Chân dung", description: "Chân dung phong cách màu nước", thumbnail: "https://images.unsplash.com/photo-1579783901586-d88db74b4fe4?q=80&w=400&auto=format&fit=crop" },
-]
+import { templateApi, type TemplateData } from "@/lib/api"
 
 const PER_PAGE = 12
 
 export function TemplatesPage() {
+    const [templates, setTemplates] = useState<TemplateData[]>([])
+    const [loading, setLoading] = useState(true)
     const [search, setSearch] = useState("")
     const [category, setCategory] = useState("Tất cả")
     const [page, setPage] = useState(1)
 
+    useEffect(() => {
+        templateApi.list()
+            .then((res) => setTemplates(res.data))
+            .catch(() => {})
+            .finally(() => setLoading(false))
+    }, [])
+
+    // Lấy danh sách category động từ data
+    const categories = useMemo(() => {
+        const cats = new Set(templates.map((t) => t.category).filter(Boolean))
+        return ["Tất cả", ...Array.from(cats)]
+    }, [templates])
+
     // Lọc theo search + category
     const filteredTemplates = useMemo(() => {
-        return TEMPLATES.filter((t) => {
+        return templates.filter((t) => {
             const matchesSearch = t.name.toLowerCase().includes(search.toLowerCase()) ||
-                t.description.toLowerCase().includes(search.toLowerCase())
+                (t.description ?? "").toLowerCase().includes(search.toLowerCase())
             const matchesCategory = category === "Tất cả" || t.category === category
             return matchesSearch && matchesCategory
         })
-    }, [search, category])
+    }, [templates, search, category])
 
     // Phân trang client-side
     const totalPages = Math.ceil(filteredTemplates.length / PER_PAGE)
@@ -56,7 +55,6 @@ export function TemplatesPage() {
         return filteredTemplates.slice(start, start + PER_PAGE)
     }, [filteredTemplates, page])
 
-    // Reset về trang 1 khi thay đổi bộ lọc
     const handleSearchChange = (value: string) => {
         setSearch(value)
         setPage(1)
@@ -72,6 +70,14 @@ export function TemplatesPage() {
         if (p < 1 || p > totalPages || p === page) return
         setPage(p)
         window.scrollTo({ top: 0, behavior: "smooth" })
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <RefreshCw className="size-6 animate-spin text-muted-foreground" />
+            </div>
+        )
     }
 
     return (
@@ -102,7 +108,7 @@ export function TemplatesPage() {
                 onValueChange={handleCategoryChange}
                 className="flex flex-wrap justify-start gap-1"
             >
-                {CATEGORIES.map((cat) => (
+                {categories.map((cat) => (
                     <ToggleGroupItem
                         key={cat}
                         value={cat}
@@ -118,36 +124,32 @@ export function TemplatesPage() {
                 {filteredTemplates.length} mẫu
             </p>
 
-            {/* Template Grid — card nghệ thuật, overlay text trên ảnh */}
+            {/* Template Grid */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {paginatedTemplates.map((template) => (
                     <Link
                         key={template.id}
-                        to={`/app/templates/${template.id}`}
+                        to={`/app/templates/${template.slug}`}
                         className="group relative block overflow-hidden rounded-2xl bg-muted aspect-[3/4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                        {/* Ảnh nền */}
-                        <img
-                            src={template.thumbnail}
-                            alt={template.name}
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                            loading="lazy"
-                        />
+                        {template.thumbnail && (
+                            <img
+                                src={template.thumbnail}
+                                alt={template.name}
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                                loading="lazy"
+                            />
+                        )}
 
-                        {/* Category badge — góc trên trái, backdrop-blur */}
                         <div className="absolute top-2.5 left-2.5 z-10">
                             <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/40 text-white backdrop-blur-md">
                                 {template.category}
                             </span>
                         </div>
 
-                        {/* Gradient overlay dưới — luôn hiển thị để text đọc được */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-
-                        {/* Hover overlay — hiệu ứng khi rê chuột/chạm */}
                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                        {/* CTA button — hiện khi hover (desktop), luôn hiện nhẹ trên mobile */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
                             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-xs font-semibold shadow-lg backdrop-blur-sm">
                                 <SparklesIcon className="size-3.5" />
@@ -155,7 +157,6 @@ export function TemplatesPage() {
                             </span>
                         </div>
 
-                        {/* Text info — góc dưới trái, trên gradient */}
                         <div className="absolute bottom-0 left-0 right-0 z-10 p-3 space-y-0.5">
                             <h3 className="text-sm font-semibold text-white truncate drop-shadow-md">
                                 {template.name}
@@ -163,7 +164,6 @@ export function TemplatesPage() {
                             <p className="text-[11px] text-white/70 truncate drop-shadow-sm">
                                 {template.description}
                             </p>
-                            {/* Arrow hint — subtle trên mobile */}
                             <div className="flex items-center gap-1 pt-1 text-white/50 group-hover:text-white/80 transition-colors">
                                 <span className="text-[10px] font-medium">Xem chi tiết</span>
                                 <ArrowRightIcon className="size-3 transition-transform duration-300 group-hover:translate-x-0.5" />
