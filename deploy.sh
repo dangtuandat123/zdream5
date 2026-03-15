@@ -25,12 +25,12 @@ php artisan event:cache
 
 echo "==> Syncing React build to web root..."
 cd "$REPO_DIR"
-# Xóa bundle JS/CSS cũ
-rm -f "$WEB_ROOT/assets/index-"*.js "$WEB_ROOT/assets/index-"*.css
+# Xóa toàn bộ assets cũ (JS/CSS chunks) để tránh file thừa
+rm -rf "$WEB_ROOT/assets"
+mkdir -p "$WEB_ROOT/assets"
 
-# Copy bundle mới từ backend/public/assets
-cp "$BUILD_DIR/assets/index-"*.js "$WEB_ROOT/assets/"
-cp "$BUILD_DIR/assets/index-"*.css "$WEB_ROOT/assets/"
+# Copy toàn bộ assets mới (bao gồm cả lazy-loaded chunks)
+cp "$BUILD_DIR/assets/"* "$WEB_ROOT/assets/"
 
 # Copy index.html và .htaccess mới (KHÔNG copy index.php — hosting cần path riêng)
 cp "$BUILD_DIR/index.html" "$WEB_ROOT/index.html"
