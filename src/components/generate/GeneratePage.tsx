@@ -1492,12 +1492,13 @@ export function GeneratePage() {
     const [libraryRefLoading, setLibraryRefLoading] = useState(false)
     const [libraryRefPage, setLibraryRefPage] = useState(1)
     const [libraryRefHasMore, setLibraryRefHasMore] = useState(true)
+    const [libraryRefType, setLibraryRefType] = useState<string | null>(null)
 
-    // Fetch ảnh thư viện khi mở tab
-    const fetchLibraryRefImages = useCallback(async (page = 1, append = false) => {
+    // Fetch ảnh thư viện khi mở tab hoặc đổi filter
+    const fetchLibraryRefImages = useCallback(async (page = 1, append = false, type: string | null = null) => {
         setLibraryRefLoading(true)
         try {
-            const res = await imageApi.list(page, 20)
+            const res = await imageApi.list(page, 20, null, type)
             if (append) {
                 setLibraryRefImages(prev => [...prev, ...res.data])
             } else {
@@ -1515,7 +1516,7 @@ export function GeneratePage() {
     const renderReferenceImageContent = () => (
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-4">
             <Tabs defaultValue="upload" className="w-full" onValueChange={(v) => {
-                if (v === 'library' && libraryRefImages.length === 0) fetchLibraryRefImages(1)
+                if (v === 'library' && libraryRefImages.length === 0) fetchLibraryRefImages(1, false, libraryRefType)
             }}>
                 <div className="px-4 pt-3 pb-2">
                     <TabsList className="grid w-full grid-cols-3">
@@ -1542,6 +1543,32 @@ export function GeneratePage() {
                     </label>
                 </TabsContent>
                 <TabsContent value="library" className="px-4 pt-0 m-0">
+                    {/* Bộ lọc loại ảnh */}
+                    <div className="flex gap-1.5 mb-3">
+                        {([
+                            { value: null, label: 'Tất cả' },
+                            { value: 'ai', label: 'AI' },
+                            { value: 'template', label: 'Template' },
+                            { value: 'upload', label: 'Upload' },
+                        ] as const).map(({ value, label }) => (
+                            <button
+                                key={label}
+                                type="button"
+                                className={cn(
+                                    'px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors',
+                                    libraryRefType === value
+                                        ? 'bg-primary text-primary-foreground'
+                                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                                )}
+                                onClick={() => {
+                                    setLibraryRefType(value)
+                                    fetchLibraryRefImages(1, false, value)
+                                }}
+                            >
+                                {label}
+                            </button>
+                        ))}
+                    </div>
                     {libraryRefLoading && libraryRefImages.length === 0 ? (
                         <div className="grid grid-cols-3 gap-2">
                             {Array.from({ length: 6 }).map((_, i) => (
@@ -1587,7 +1614,7 @@ export function GeneratePage() {
                                     size="sm"
                                     className="w-full mt-2 text-xs text-muted-foreground"
                                     disabled={libraryRefLoading}
-                                    onClick={() => fetchLibraryRefImages(libraryRefPage + 1, true)}
+                                    onClick={() => fetchLibraryRefImages(libraryRefPage + 1, true, libraryRefType)}
                                 >
                                     {libraryRefLoading ? <Loader2 className="size-3 animate-spin mr-1.5" /> : null}
                                     Tải thêm
