@@ -370,7 +370,7 @@ export const adminApi = {
     },
     getUser: (id: number) => request<{ user: AdminUserData; recent_images: GeneratedImageData[]; transactions: TransactionData[] }>(`/admin/users/${id}`),
     updateUserLevel: (id: number, level: number) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/level`, { method: 'PATCH', body: JSON.stringify({ level }) }),
-    adjustGems: (id: number, data: { type: string; amount: number; description: string }) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/gems`, { method: 'POST', body: JSON.stringify(data) }),
+    adjustGems: (id: number, data: { amount: number; reason: string }) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/gems`, { method: 'POST', body: JSON.stringify(data) }),
 
     // Templates
     templates: (params?: { search?: string; category?: string }) => {

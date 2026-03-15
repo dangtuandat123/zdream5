@@ -42,6 +42,7 @@ export default function AdminUsersPage() {
     const [gemsDialog, setGemsDialog] = useState<UserItem | null>(null);
     const [gemsAmount, setGemsAmount] = useState('');
     const [gemsType, setGemsType] = useState<'credit' | 'deduct'>('credit');
+    const [gemsReason, setGemsReason] = useState('');
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -77,12 +78,16 @@ export default function AdminUsersPage() {
     };
 
     const handleAdjustGems = async () => {
-        if (!gemsDialog || !gemsAmount) return;
+        if (!gemsDialog || !gemsAmount || !gemsReason.trim()) return;
         try {
-            await adminApi.adjustGems(gemsDialog.id, { type: gemsType, amount: parseInt(gemsAmount), description: `Admin ${gemsType === 'credit' ? 'cộng' : 'trừ'} xu` });
+            // Backend nhận amount (âm = trừ, dương = cộng) + reason
+            const rawAmount = parseInt(gemsAmount);
+            const signedAmount = gemsType === 'deduct' ? -rawAmount : rawAmount;
+            await adminApi.adjustGems(gemsDialog.id, { amount: signedAmount, reason: gemsReason.trim() });
             toast.success(`Đã ${gemsType === 'credit' ? 'cộng' : 'trừ'} ${gemsAmount} xu`);
             setGemsDialog(null);
             setGemsAmount('');
+            setGemsReason('');
             fetchUsers();
         } catch {
             toast.error('Không thể điều chỉnh xu');
@@ -151,7 +156,7 @@ export default function AdminUsersPage() {
                                                 <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setLevelDialog(u); setNewLevel(String(u.level)); }}>
                                                     <Shield className="size-3 mr-1" />Cấp bậc
                                                 </Button>
-                                                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setGemsDialog(u); setGemsAmount(''); setGemsType('credit'); }}>
+                                                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setGemsDialog(u); setGemsAmount(''); setGemsType('credit'); setGemsReason(''); }}>
                                                     <Gem className="size-3 mr-1" />Xu
                                                 </Button>
                                             </div>
@@ -219,10 +224,12 @@ export default function AdminUsersPage() {
                         </Select>
                         <Label>Số lượng</Label>
                         <Input type="number" min="1" value={gemsAmount} onChange={(e) => setGemsAmount(e.target.value)} placeholder="Nhập số xu..." />
+                        <Label>Lý do *</Label>
+                        <Input value={gemsReason} onChange={(e) => setGemsReason(e.target.value)} placeholder="Nhập lý do điều chỉnh..." />
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setGemsDialog(null)}>Hủy</Button>
-                        <Button onClick={handleAdjustGems} disabled={!gemsAmount || parseInt(gemsAmount) <= 0}>Xác nhận</Button>
+                        <Button onClick={handleAdjustGems} disabled={!gemsAmount || parseInt(gemsAmount) <= 0 || !gemsReason.trim()}>Xác nhận</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

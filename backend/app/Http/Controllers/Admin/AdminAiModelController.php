@@ -6,9 +6,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAiModelRequest;
+use App\Http\Requests\Admin\UpdateAiModelRequest;
 use App\Models\AiModel;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class AdminAiModelController extends Controller
 {
@@ -38,21 +38,10 @@ class AdminAiModelController extends Controller
     /**
      * Cập nhật AI model.
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateAiModelRequest $request, int $id): JsonResponse
     {
         $model = AiModel::findOrFail($id);
-
-        $data = $request->validate([
-            'name' => ['sometimes', 'string', 'max:255'],
-            'model_id' => ['sometimes', 'string', 'max:255', "unique:ai_models,model_id,{$id}"],
-            'provider' => ['nullable', 'string', 'max:50'],
-            'gems_cost' => ['sometimes', 'integer', 'min:0'],
-            'is_active' => ['nullable', 'boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
-            'config' => ['nullable', 'array'],
-        ]);
-
-        $model->update($data);
+        $model->update($request->validated());
 
         return response()->json([
             'message' => 'Cập nhật model thành công.',

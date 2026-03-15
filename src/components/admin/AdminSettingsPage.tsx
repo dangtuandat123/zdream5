@@ -102,7 +102,14 @@ export default function AdminSettingsPage() {
             }));
             await adminApi.updateSettings(items);
             toast.success('Đã lưu cài đặt');
-            fetchData();
+            // Cập nhật state local cho group vừa save (không gọi fetchData để giữ edits ở groups khác)
+            setSettings(prev => ({
+                ...prev,
+                [activeGroup]: (prev[activeGroup] ?? []).map((s) => ({
+                    ...s,
+                    value: edits[s.key] ?? s.value,
+                })),
+            }));
         } catch {
             toast.error('Không thể lưu');
         } finally {
