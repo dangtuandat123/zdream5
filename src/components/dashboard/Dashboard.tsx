@@ -63,13 +63,8 @@ export function Dashboard() {
         <div className="flex flex-1 flex-col gap-5 p-4 lg:p-6 pb-8">
 
             {/* ===== HERO BANNER ===== */}
-            <div className="relative overflow-hidden rounded-3xl">
-                <img
-                    src="/images/gradient-purple.png"
-                    alt=""
-                    className="absolute inset-0 w-full h-full object-cover scale-110"
-                />
-                <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
+            <div className="relative overflow-hidden rounded-3xl" style={{ backgroundImage: "url(/images/gradient-purple.png)", backgroundSize: "cover", backgroundPosition: "center" }}>
+                <div className="absolute inset-0 bg-black/30" />
 
                 <div className="relative z-10 p-5 sm:p-8 lg:p-10">
                     {/* Top row: badge + gems */}
@@ -139,12 +134,7 @@ export function Dashboard() {
                     { to: "/app/library", label: "Thư Viện", icon: Library, bg: "/images/gradient-purple.png" },
                 ].map((item) => (
                     <Link key={item.to} to={item.to} className="group">
-                        <div className="relative overflow-hidden rounded-2xl aspect-[2/1] sm:aspect-[2.5/1]">
-                            <img
-                                src={item.bg}
-                                alt=""
-                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
+                        <div className="relative overflow-hidden rounded-2xl aspect-[2/1] sm:aspect-[2.5/1]" style={{ backgroundImage: `url(${item.bg})`, backgroundSize: "cover", backgroundPosition: "center" }}>
                             <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
                             <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1.5">
                                 <div className="flex items-center justify-center size-10 sm:size-11 rounded-xl bg-white/15 backdrop-blur-sm text-white group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300 shadow-lg">
@@ -175,9 +165,8 @@ export function Dashboard() {
                         ))}
                     </div>
                 ) : recentImages.length === 0 ? (
-                    <div className="relative overflow-hidden rounded-2xl">
-                        <img src="/images/gradient-pink.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
-                        <div className="absolute inset-0 bg-background/60" />
+                    <div className="relative overflow-hidden rounded-2xl" style={{ backgroundImage: "url(/images/gradient-pink.png)", backgroundSize: "cover", backgroundPosition: "center" }}>
+                        <div className="absolute inset-0 bg-background/80" />
                         <div className="relative flex flex-col items-center justify-center gap-4 py-14 text-center px-4">
                             <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/80 ring-1 ring-border/50">
                                 <Images className="size-6 text-muted-foreground" />
@@ -231,9 +220,8 @@ export function Dashboard() {
                         ))}
                     </div>
                 ) : templates.length === 0 ? (
-                    <div className="relative overflow-hidden rounded-2xl">
-                        <img src="/images/gradient-blue.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
-                        <div className="absolute inset-0 bg-background/60" />
+                    <div className="relative overflow-hidden rounded-2xl" style={{ backgroundImage: "url(/images/gradient-blue.png)", backgroundSize: "cover", backgroundPosition: "center" }}>
+                        <div className="absolute inset-0 bg-background/80" />
                         <div className="relative flex flex-col items-center justify-center gap-2 py-10 text-center">
                             <SwatchBook className="size-6 text-muted-foreground" />
                             <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
