@@ -5,12 +5,10 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
     ArrowUpRight,
-    Sparkles,
     WandSparkles,
     SwatchBook,
     Images,
     Gem,
-    Zap,
     Star,
     CheckCircle2,
     Layers,
@@ -100,14 +98,6 @@ function useAnimatedCounter(end: number, duration = 2000, start = false) {
 }
 
 export default function LandingPage() {
-    const [scrolled, setScrolled] = useState(false)
-
-    useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > 50)
-        window.addEventListener('scroll', onScroll, { passive: true })
-        return () => window.removeEventListener('scroll', onScroll)
-    }, [])
-
     // Scroll reveal refs
     const heroContent = useScrollReveal(0.1)
     const statsSection = useScrollReveal(0.2)
@@ -178,12 +168,12 @@ export default function LandingPage() {
             {/* ======================
                 HERO — Video Background
             ========================= */}
-            <section id="hero" className="relative min-h-[100svh] w-full flex flex-col items-center justify-center overflow-hidden">
-                {/* Video BG — không parallax trên mobile để tránh jank */}
+            <section id="hero" className="relative h-[100svh] min-h-[900px] w-full flex flex-col items-center justify-center overflow-hidden">
+                {/* Video BG — no color overlays as specified */}
                 <video
                     autoPlay loop muted playsInline
                     className="absolute inset-0 w-full h-full object-cover z-0"
-                    poster="/images/gradient-purple.png?v=1"
+                    poster="/images/gradient-purple.png?v=1" // Keep fallback poster just in case
                 >
                     <source
                         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
@@ -191,45 +181,23 @@ export default function LandingPage() {
                     />
                 </video>
 
-                {/* Overlay tối — gradient mượt từ trên xuống */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black z-[1]" />
-
-                {/* 2 ambient glow nhẹ — chỉ dùng opacity animation, blur cố định */}
-                <div
-                    className="absolute z-[2] rounded-full pointer-events-none will-change-[opacity]"
-                    style={{
-                        width: 300, height: 300,
-                        top: '15%', left: '10%',
-                        background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)',
-                        animation: 'subtle-pulse 6s ease-in-out infinite',
-                    }}
-                />
-                <div
-                    className="absolute z-[2] rounded-full pointer-events-none will-change-[opacity] hidden sm:block"
-                    style={{
-                        width: 250, height: 250,
-                        bottom: '20%', right: '10%',
-                        background: 'radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%)',
-                        animation: 'subtle-pulse 8s ease-in-out infinite 3s',
-                    }}
-                />
-
-                {/* Navbar tích hợp */}
-                <nav className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] max-w-5xl transition-all duration-500 ${scrolled ? 'top-2' : 'top-3 sm:top-4'}`}>
-                    <div className={`flex items-center justify-between backdrop-blur-xl rounded-2xl px-4 sm:px-5 shadow-[0_4px_30px_rgba(0,0,0,0.08)] transition-all duration-500 ${scrolled ? 'bg-white/[0.98] py-2 shadow-[0_8px_40px_rgba(0,0,0,0.12)]' : 'bg-white/[0.85] py-2.5'}`}>
-                        <Link to="/" className="flex items-center gap-2 shrink-0">
-                            <div className="size-8 rounded-lg bg-black flex items-center justify-center">
-                                <Sparkles className="size-4 text-white" />
-                            </div>
+                {/* Navbar tích hợp — Floating white navbar */}
+                <nav className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] md:w-fit min-w-[320px] md:min-w-[600px] transition-all duration-500 top-4 sm:top-6`}>
+                    <div className="flex items-center justify-between bg-white rounded-[16px] px-2 py-2 sm:px-3 shadow-[0_4px_30px_rgba(0,0,0,0.08)]">
+                        {/* Left: Logo */}
+                        <Link to="/" className="flex items-center ml-2 sm:ml-3 shrink-0">
                             <span className="text-[17px] font-bold tracking-tight text-[#111]" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                ZDream
+                                Logoisum
                             </span>
                         </Link>
-                        <div className="hidden md:flex items-center gap-7">
+                        
+                        {/* Center: Links */}
+                        <div className="hidden md:flex items-center gap-8 mx-8">
                             {[
-                                { label: "Tính năng", href: "#features" },
-                                { label: "Kiểu mẫu", href: "#templates" },
-                                { label: "Bảng giá", href: "#pricing" },
+                                { label: "About", href: "#" },
+                                { label: "Works", href: "#" },
+                                { label: "Services", href: "#" },
+                                { label: "Testimonial", href: "#" },
                             ].map((item) => (
                                 <a key={item.label} href={item.href}
                                     className="text-[14px] font-medium text-[#555] hover:text-[#111] transition-colors"
@@ -239,15 +207,17 @@ export default function LandingPage() {
                                 </a>
                             ))}
                         </div>
-                        <Link to="/login">
+                        
+                        {/* Right: CTA Button */}
+                        <Link to="/contact">
                             <Button
-                                className="bg-[#222] hover:bg-[#111] text-white rounded-full px-4 sm:px-5 h-9 text-[13px] font-semibold gap-2 shadow-sm"
+                                className="bg-[#222] hover:bg-[#111] text-white rounded-[12px] h-10 px-4 text-[13px] font-semibold gap-2 shadow-sm transition-all"
                                 style={{ fontFamily: "'Barlow', sans-serif" }}
                             >
-                                <span className="hidden sm:inline">Bắt Đầu Miễn Phí</span>
-                                <span className="sm:hidden">Bắt Đầu</span>
-                                <span className="inline-flex items-center justify-center size-5 rounded-full bg-white/20">
-                                    <ArrowUpRight className="size-3" />
+                                <span className="hidden sm:inline">Book A Free Meeting</span>
+                                <span className="sm:hidden">Book</span>
+                                <span className="inline-flex items-center justify-center size-6 rounded-full bg-white/20 ml-1">
+                                    <ArrowUpRight className="size-3.5 rotate-45" />
                                 </span>
                             </Button>
                         </Link>
@@ -255,63 +225,45 @@ export default function LandingPage() {
                 </nav>
 
                 {/* Hero Content */}
-                <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-5 max-w-4xl mx-auto">
-                    <Badge variant="outline" className="mb-6 sm:mb-8 bg-white/10 text-white/90 border-violet-400/30 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-medium tracking-wide" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s both' }}>
-                        <Zap className="size-3 mr-1.5 text-yellow-400 fill-yellow-400" /> AI-Powered Creative Platform
-                    </Badge>
-
-                    <h1 className="mb-5 sm:mb-6" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
+                <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-4 max-w-[1000px] w-full pt-16">
+                    {/* Primary Headline */}
+                    <h1 className="mb-6 flex flex-col items-center justify-center w-full" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
                         <span
-                            className="block text-[clamp(28px,5.5vw,72px)] font-semibold text-white leading-[1.1]"
-                            style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-2px" }}
+                            className="block text-[clamp(28px,4vw,42px)] font-bold text-white leading-[1.1]"
+                            style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-4px" }}
                         >
-                            Nền tảng giúp bạn tạo
+                            Agency that makes your
                         </span>
                         <span
-                            className="block text-[clamp(36px,7vw,84px)] leading-[1.15] mt-1.5 font-bold hero-glow-text"
-                            style={{ fontFamily: "'Dancing Script', cursive", letterSpacing: "-1px" }}
+                            className="block text-[clamp(42px,8vw,84px)] leading-[1.1] mt-1 text-white italic"
+                            style={{ fontFamily: "'Instrument Serif', serif" }}
                         >
-                            ảnh AI chất lượng cao
+                            videos & reels viral
                         </span>
                     </h1>
 
+                    {/* Subtext */}
                     <p
-                        className="text-white/65 text-[clamp(13px,1.2vw,18px)] max-w-md sm:max-w-lg mb-8 sm:mb-10 font-medium leading-relaxed"
+                        className="text-white text-[16px] sm:text-[18px] max-w-xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md"
                         style={{ fontFamily: "'Barlow', sans-serif", animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.7s both' }}
                     >
-                        Tạo ảnh từ văn bản, áp dụng kiểu mẫu có sẵn, quản lý thư viện cá nhân.
-                        Dành cho Nhà Sáng Tạo, Designer và Thương Hiệu.
+                        Short-form video editing for Influencers, Creators and Brands
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s both' }}>
-                        <Link to="/app/generate">
-                            <Button
-                                size="lg"
-                                className="bg-white hover:bg-white/90 text-[#111] rounded-full h-12 sm:h-14 px-7 sm:px-8 text-sm sm:text-[15px] font-bold gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] hover:scale-[1.03]"
-                                style={{ fontFamily: "'Barlow', sans-serif" }}
-                            >
-                                <span className="flex items-center justify-center size-7 sm:size-8 rounded-full bg-[#111] text-white">
-                                    <Play className="size-3 sm:size-3.5 fill-white ml-0.5" />
-                                </span>
-                                Tạo Ảnh Ngay
-                            </Button>
-                        </Link>
-                        <Link to="/app/templates">
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="rounded-full h-12 sm:h-14 px-7 sm:px-8 text-sm sm:text-[15px] font-bold border-white/20 text-white hover:bg-white/10 transition-all backdrop-blur-md"
-                                style={{ fontFamily: "'Barlow', sans-serif" }}
-                            >
-                                <SwatchBook className="size-4 mr-2" />
-                                Xem Kiểu Mẫu
-                            </Button>
-                        </Link>
+                    {/* Secondary CTA */}
+                    <div className="flex justify-center" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s both' }}>
+                        <Button
+                            size="lg"
+                            className="bg-white hover:bg-white/90 text-[#111] rounded-full h-14 sm:h-16 px-6 sm:px-8 text-[15px] sm:text-[16px] font-bold gap-3 transition-transform hover:scale-[1.03] shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
+                            style={{ fontFamily: "'Barlow', sans-serif" }}
+                        >
+                            <span className="flex items-center justify-center size-8 sm:size-10 rounded-full bg-[#111] text-white shrink-0">
+                                <Play className="size-3.5 sm:size-4 fill-white ml-0.5" />
+                            </span>
+                            See Our Workreel
+                        </Button>
                     </div>
                 </div>
-
-                {/* Gradient fade to black */}
-                <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-black to-transparent z-[2] pointer-events-none" />
             </section>
 
             {/* ======================
