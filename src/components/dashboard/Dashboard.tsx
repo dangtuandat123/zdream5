@@ -62,14 +62,11 @@ export function Dashboard() {
     return (
         <div className="relative flex flex-1 flex-col gap-6 p-4 lg:p-6 pb-8 overflow-hidden">
 
-            {/* ===== HERO BANNER với gradient background ===== */}
+            {/* ===== HERO BANNER với ảnh gradient thật ===== */}
             <div className="relative overflow-hidden rounded-2xl min-h-[200px] sm:min-h-[240px]">
-                {/* Gradient orbs — lấy cảm hứng từ gradient references */}
-                <div className="absolute inset-0 bg-[#0d0118]">
-                    <div className="absolute -top-[30%] -left-[20%] w-[70%] h-[140%] rounded-full bg-gradient-to-br from-violet-600/60 via-purple-500/40 to-transparent blur-[80px] animate-pulse" style={{ animationDuration: "6s" }} />
-                    <div className="absolute -bottom-[40%] -right-[10%] w-[60%] h-[120%] rounded-full bg-gradient-to-tl from-fuchsia-500/40 via-pink-500/30 to-transparent blur-[90px] animate-pulse" style={{ animationDuration: "8s" }} />
-                    <div className="absolute top-[20%] right-[20%] w-[40%] h-[60%] rounded-full bg-gradient-to-b from-blue-500/20 to-cyan-400/10 blur-[70px] animate-pulse" style={{ animationDuration: "10s" }} />
-                </div>
+                {/* Ảnh gradient background */}
+                <img src="/images/gradient-purple.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40" />
 
                 {/* Content overlay */}
                 <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 p-6 sm:p-8 h-full">
@@ -102,58 +99,30 @@ export function Dashboard() {
                 </div>
             </div>
 
-            {/* ===== QUICK ACTIONS — 3 cards nổi bật ===== */}
+            {/* ===== QUICK ACTIONS — 3 cards với gradient images ===== */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Tạo Ảnh AI */}
-                <Link to="/app/generate" className="group">
-                    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-violet-600/20 via-purple-600/10 to-fuchsia-600/5 hover:from-violet-600/30 hover:via-purple-600/20 hover:to-fuchsia-600/10 transition-all duration-500 ring-1 ring-inset ring-white/[0.06]">
-                        <div className="absolute -top-8 -right-8 size-24 rounded-full bg-violet-500/15 blur-2xl group-hover:bg-violet-500/25 transition-colors duration-500" />
-                        <CardContent className="relative flex items-center gap-3.5 p-4 sm:p-5">
-                            <div className="flex items-center justify-center size-11 rounded-xl bg-gradient-to-br from-violet-500/30 to-fuchsia-500/20 text-violet-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all duration-300">
-                                <Sparkles className="size-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-white text-sm">Tạo Ảnh AI</p>
-                                <p className="text-[11px] text-white/40 mt-0.5 hidden sm:block">Mô tả ý tưởng, AI tạo cho bạn</p>
-                            </div>
-                            <ArrowRight className="size-4 text-white/20 group-hover:text-violet-300 group-hover:translate-x-0.5 transition-all" />
-                        </CardContent>
-                    </Card>
-                </Link>
-
-                {/* Dùng Kiểu Mẫu */}
-                <Link to="/app/templates" className="group">
-                    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-sky-600/20 via-cyan-600/10 to-blue-600/5 hover:from-sky-600/30 hover:via-cyan-600/20 hover:to-blue-600/10 transition-all duration-500 ring-1 ring-inset ring-white/[0.06]">
-                        <div className="absolute -top-8 -right-8 size-24 rounded-full bg-sky-500/15 blur-2xl group-hover:bg-sky-500/25 transition-colors duration-500" />
-                        <CardContent className="relative flex items-center gap-3.5 p-4 sm:p-5">
-                            <div className="flex items-center justify-center size-11 rounded-xl bg-gradient-to-br from-sky-500/30 to-cyan-500/20 text-sky-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.3)] transition-all duration-300">
-                                <SwatchBook className="size-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-white text-sm">Dùng Kiểu Mẫu</p>
-                                <p className="text-[11px] text-white/40 mt-0.5 hidden sm:block">Template có sẵn, tạo ảnh nhanh</p>
-                            </div>
-                            <ArrowRight className="size-4 text-white/20 group-hover:text-sky-300 group-hover:translate-x-0.5 transition-all" />
-                        </CardContent>
-                    </Card>
-                </Link>
-
-                {/* Thư Viện */}
-                <Link to="/app/library" className="group">
-                    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-amber-600/20 via-orange-600/10 to-yellow-600/5 hover:from-amber-600/30 hover:via-orange-600/20 hover:to-yellow-600/10 transition-all duration-500 ring-1 ring-inset ring-white/[0.06]">
-                        <div className="absolute -top-8 -right-8 size-24 rounded-full bg-amber-500/15 blur-2xl group-hover:bg-amber-500/25 transition-colors duration-500" />
-                        <CardContent className="relative flex items-center gap-3.5 p-4 sm:p-5">
-                            <div className="flex items-center justify-center size-11 rounded-xl bg-gradient-to-br from-amber-500/30 to-orange-500/20 text-amber-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.3)] transition-all duration-300">
-                                <Library className="size-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-white text-sm">Thư Viện Ảnh</p>
-                                <p className="text-[11px] text-white/40 mt-0.5 hidden sm:block">Xem lại tác phẩm của bạn</p>
-                            </div>
-                            <ArrowRight className="size-4 text-white/20 group-hover:text-amber-300 group-hover:translate-x-0.5 transition-all" />
-                        </CardContent>
-                    </Card>
-                </Link>
+                {[
+                    { to: "/app/generate", label: "Tạo Ảnh AI", desc: "Mô tả ý tưởng, AI tạo cho bạn", icon: Sparkles, bg: "/images/gradient-pink.png" },
+                    { to: "/app/templates", label: "Dùng Kiểu Mẫu", desc: "Template có sẵn, tạo ảnh nhanh", icon: SwatchBook, bg: "/images/gradient-blue.png" },
+                    { to: "/app/library", label: "Thư Viện Ảnh", desc: "Xem lại tác phẩm của bạn", icon: Library, bg: "/images/gradient-purple.png" },
+                ].map((item) => (
+                    <Link key={item.to} to={item.to} className="group">
+                        <Card className="relative overflow-hidden border-0 ring-1 ring-inset ring-white/[0.08] hover:ring-white/15 transition-all duration-300">
+                            <img src={item.bg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-45 group-hover:scale-105 transition-all duration-500" />
+                            <div className="absolute inset-0 bg-black/30" />
+                            <CardContent className="relative flex items-center gap-3.5 p-4 sm:p-5">
+                                <div className="flex items-center justify-center size-11 rounded-xl bg-white/10 backdrop-blur-sm text-white group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
+                                    <item.icon className="size-5" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-white text-sm">{item.label}</p>
+                                    <p className="text-[11px] text-white/50 mt-0.5 hidden sm:block">{item.desc}</p>
+                                </div>
+                                <ArrowRight className="size-4 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all" />
+                            </CardContent>
+                        </Card>
+                    </Link>
+                ))}
             </div>
 
             {/* ===== STATS ROW ===== */}
@@ -198,9 +167,8 @@ export function Dashboard() {
                     </div>
                 ) : recentImages.length === 0 ? (
                     <div className="relative overflow-hidden rounded-2xl">
-                        {/* Gradient background cho empty state */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-violet-950/50 via-fuchsia-950/30 to-transparent" />
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-fuchsia-500/10 blur-[80px] rounded-full" />
+                        <img src="/images/gradient-pink.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+                        <div className="absolute inset-0 bg-black/50" />
                         <div className="relative flex flex-col items-center justify-center gap-4 py-16 text-center px-4">
                             <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-white/10">
                                 <Images className="size-7 text-violet-300" />
@@ -263,7 +231,8 @@ export function Dashboard() {
                     </div>
                 ) : templates.length === 0 ? (
                     <div className="relative overflow-hidden rounded-2xl">
-                        <div className="absolute inset-0 bg-gradient-to-br from-sky-950/50 via-blue-950/30 to-transparent" />
+                        <img src="/images/gradient-blue.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+                        <div className="absolute inset-0 bg-black/50" />
                         <div className="relative flex flex-col items-center justify-center gap-2 py-12 text-center">
                             <SwatchBook className="size-6 text-sky-400/50" />
                             <p className="text-sm text-white/40">Chưa có kiểu mẫu nào</p>
