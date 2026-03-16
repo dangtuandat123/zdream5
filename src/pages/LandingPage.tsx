@@ -14,6 +14,8 @@ import {
     Layers,
     Download,
     Play,
+    Menu,
+    X,
 } from "lucide-react"
 
 // ============================================================
@@ -98,6 +100,9 @@ function useAnimatedCounter(end: number, duration = 2000, start = false) {
 }
 
 export default function LandingPage() {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
+    
     // Scroll reveal refs
     const heroContent = useScrollReveal(0.1)
     const statsSection = useScrollReveal(0.2)
@@ -180,18 +185,20 @@ export default function LandingPage() {
                         type="video/mp4"
                     />
                 </video>
+                {/* Protective Gradient Overlay */}
+                <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none" />
 
                 {/* Navbar tích hợp — Floating white navbar */}
                 <nav className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] md:w-fit min-w-[320px] md:min-w-[600px] transition-all duration-500 top-4 sm:top-6`}>
-                    <div className="flex items-center justify-between bg-white rounded-[16px] px-2 py-2 sm:px-3 shadow-[0_4px_30px_rgba(0,0,0,0.08)]">
+                    <div className="flex items-center justify-between bg-white/95 backdrop-blur-md rounded-[16px] px-2 py-2 sm:px-3 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-white/20">
                         {/* Left: Logo */}
-                        <Link to="/" className="flex items-center ml-2 sm:ml-3 shrink-0">
-                            <span className="text-[17px] font-bold tracking-tight text-[#111]" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                        <Link to="/" className="flex items-center ml-3 sm:ml-4 shrink-0 hover:opacity-80 transition-opacity">
+                            <span className="text-[17px] sm:text-[19px] font-black tracking-tight text-[#111]" style={{ fontFamily: "'Barlow', sans-serif" }}>
                                 Logoisum
                             </span>
                         </Link>
                         
-                        {/* Center: Links */}
+                        {/* Center: Links (Desktop) */}
                         <div className="hidden md:flex items-center gap-8 mx-8">
                             {[
                                 { label: "About", href: "#" },
@@ -200,42 +207,78 @@ export default function LandingPage() {
                                 { label: "Testimonial", href: "#" },
                             ].map((item) => (
                                 <a key={item.label} href={item.href}
-                                    className="text-[14px] font-medium text-[#555] hover:text-[#111] transition-colors"
+                                    className="relative text-[14px] font-bold text-[#555] hover:text-[#111] transition-colors group"
                                     style={{ fontFamily: "'Barlow', sans-serif" }}
                                 >
                                     {item.label}
+                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#111] transition-all duration-300 group-hover:w-full"></span>
                                 </a>
                             ))}
                         </div>
                         
-                        {/* Right: CTA Button */}
-                        <Link to="/contact">
-                            <Button
-                                className="bg-[#222] hover:bg-[#111] text-white rounded-[12px] h-10 px-4 text-[13px] font-semibold gap-2 shadow-sm transition-all"
-                                style={{ fontFamily: "'Barlow', sans-serif" }}
+                        {/* Right: CTA Button & Mobile Toggle */}
+                        <div className="flex items-center gap-2">
+                            <Link to="/contact">
+                                <Button
+                                    className="bg-[#222] hover:bg-black text-white rounded-[12px] h-10 sm:h-11 px-4 sm:px-5 text-[13px] sm:text-[14px] font-bold gap-2 shadow-sm transition-all hover:scale-105 group"
+                                    style={{ fontFamily: "'Barlow', sans-serif" }}
+                                >
+                                    <span className="hidden sm:inline">Book A Free Meeting</span>
+                                    <span className="sm:hidden">Book</span>
+                                    <span className="inline-flex items-center justify-center size-6 sm:size-7 rounded-full bg-white/20 ml-1 group-hover:bg-white/30 transition-colors">
+                                        <ArrowUpRight className="size-3.5 sm:size-4 rotate-45 group-hover:rotate-0 transition-transform duration-300" />
+                                    </span>
+                                </Button>
+                            </Link>
+                            
+                            {/* Hamburger Menu Toggle */}
+                            <button 
+                                className="md:hidden p-2 text-[#222] hover:bg-black/5 rounded-full transition-colors"
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                             >
-                                <span className="hidden sm:inline">Book A Free Meeting</span>
-                                <span className="sm:hidden">Book</span>
-                                <span className="inline-flex items-center justify-center size-6 rounded-full bg-white/20 ml-1">
-                                    <ArrowUpRight className="size-3.5 rotate-45" />
-                                </span>
-                            </Button>
-                        </Link>
+                                {isMobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+                            </button>
+                        </div>
                     </div>
                 </nav>
 
+                {/* Mobile Menu Drawer */}
+                <div className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                >
+                    <div 
+                        className={`absolute top-0 right-0 bottom-0 w-[280px] bg-white shadow-2xl transition-transform duration-300 ease-out transform flex flex-col pt-24 px-6 gap-6 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        {[
+                            { label: "About", href: "#" },
+                            { label: "Works", href: "#" },
+                            { label: "Services", href: "#" },
+                            { label: "Testimonial", href: "#" },
+                        ].map((item, i) => (
+                            <a key={item.label} href={item.href}
+                                className="text-[22px] font-black text-[#111] hover:text-violet-600 transition-colors border-b border-black/5 pb-4"
+                                style={{ fontFamily: "'Barlow', sans-serif", transitionDelay: `${i * 50}ms`, transform: isMobileMenuOpen ? 'translateX(0)' : 'translateX(20px)', opacity: isMobileMenuOpen ? 1 : 0, transition: 'all 0.4s ease-out' }}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                {item.label}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Hero Content */}
-                <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-4 max-w-[1000px] w-full pt-16">
+                <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-4 max-w-[1000px] w-full pt-20">
                     {/* Primary Headline */}
-                    <h1 className="mb-6 flex flex-col items-center justify-center w-full" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
+                    <h1 className="mb-4 sm:mb-6 flex flex-col items-center justify-center w-full" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
                         <span
-                            className="block text-[clamp(28px,4vw,42px)] font-bold text-white leading-[1.1]"
-                            style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-4px" }}
+                            className="block text-[clamp(26px,4vw,42px)] font-black text-white leading-[1.1] drop-shadow-lg"
+                            style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-0.02em" }}
                         >
                             Agency that makes your
                         </span>
                         <span
-                            className="block text-[clamp(42px,8vw,84px)] leading-[1.1] mt-1 text-white italic"
+                            className="block text-[clamp(46px,8vw,90px)] leading-[1.05] mt-2 text-white italic drop-shadow-2xl"
                             style={{ fontFamily: "'Instrument Serif', serif" }}
                         >
                             videos & reels viral
@@ -244,7 +287,7 @@ export default function LandingPage() {
 
                     {/* Subtext */}
                     <p
-                        className="text-white text-[16px] sm:text-[18px] max-w-xl mx-auto mb-10 font-medium leading-relaxed drop-shadow-md"
+                        className="text-white/90 text-[15px] sm:text-[18px] max-w-xl mx-auto mb-8 sm:mb-12 font-medium leading-relaxed drop-shadow-md px-4"
                         style={{ fontFamily: "'Barlow', sans-serif", animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.7s both' }}
                     >
                         Short-form video editing for Influencers, Creators and Brands
@@ -254,16 +297,46 @@ export default function LandingPage() {
                     <div className="flex justify-center" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s both' }}>
                         <Button
                             size="lg"
-                            className="bg-white hover:bg-white/90 text-[#111] rounded-full h-14 sm:h-16 px-6 sm:px-8 text-[15px] sm:text-[16px] font-bold gap-3 transition-transform hover:scale-[1.03] shadow-[0_8px_30px_rgba(0,0,0,0.15)]"
+                            className="bg-white hover:bg-white text-[#111] rounded-full h-14 sm:h-16 px-6 sm:px-8 text-[15px] sm:text-[17px] font-black gap-3 transition-transform duration-300 hover:scale-[1.05] shadow-[0_8px_30px_rgba(0,0,0,0.2)] group"
                             style={{ fontFamily: "'Barlow', sans-serif" }}
+                            onClick={() => setIsVideoModalOpen(true)}
                         >
-                            <span className="flex items-center justify-center size-8 sm:size-10 rounded-full bg-[#111] text-white shrink-0">
+                            <span className="flex items-center justify-center size-8 sm:size-10 rounded-full bg-[#111] text-white shrink-0 group-hover:scale-110 group-hover:bg-violet-600 transition-all duration-300">
                                 <Play className="size-3.5 sm:size-4 fill-white ml-0.5" />
                             </span>
                             See Our Workreel
                         </Button>
                     </div>
                 </div>
+
+                {/* Video Lightbox Modal */}
+                {isVideoModalOpen && (
+                    <div 
+                        className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4"
+                        onClick={() => setIsVideoModalOpen(false)}
+                    >
+                        <div 
+                            className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl md:rounded-[24px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] ring-1 ring-white/10"
+                            onClick={e => e.stopPropagation()}
+                        >
+                            <button 
+                                className="absolute top-4 right-4 z-10 size-10 rounded-full bg-black/50 hover:bg-white text-white hover:text-black flex items-center justify-center transition-colors backdrop-blur-md"
+                                onClick={() => setIsVideoModalOpen(false)}
+                            >
+                                <X className="size-5" />
+                            </button>
+                            <video
+                                autoPlay controls playsInline
+                                className="w-full h-full object-cover"
+                            >
+                                <source
+                                    src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
+                                    type="video/mp4"
+                                />
+                            </video>
+                        </div>
+                    </div>
+                )}
             </section>
 
             {/* ======================
