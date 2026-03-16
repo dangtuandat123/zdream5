@@ -1,43 +1,21 @@
-import { useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu"
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet"
-import {
-    Dialog,
-    DialogContent,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden"
-import {
     ArrowUpRight,
+    Sparkles,
     WandSparkles,
     SwatchBook,
     Images,
     Gem,
+    Zap,
     Star,
     CheckCircle2,
     Layers,
     Download,
     Play,
-    Menu,
-    X,
 } from "lucide-react"
 
 // ============================================================
@@ -86,24 +64,90 @@ const TEMPLATES = [
     { name: "Concept Art", cat: "Phong cảnh", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop", color: "from-cyan-500/60 to-sky-500/60" },
 ]
 
-// Fade up animation variants
-const fadeUpVariants: any = {
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+// Scroll-reveal với Intersection Observer (chỉ trigger 1 lần)
+function useScrollReveal(threshold = 0.15) {
+    const ref = useRef<HTMLDivElement>(null)
+    const [isVisible, setIsVisible] = useState(false)
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+        const obs = new IntersectionObserver(
+            ([e]) => { if (e.isIntersecting) { setIsVisible(true); obs.unobserve(el) } },
+            { threshold }
+        )
+        obs.observe(el)
+        return () => obs.disconnect()
+    }, [threshold])
+    return { ref, isVisible }
 }
 
-const staggerContainer: any = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+// Animated counter (easeOutCubic)
+function useAnimatedCounter(end: number, duration = 2000, start = false) {
+    const [count, setCount] = useState(0)
+    useEffect(() => {
+        if (!start) return
+        let startTime: number | null = null
+        const step = (ts: number) => {
+            if (!startTime) startTime = ts
+            const progress = Math.min((ts - startTime) / duration, 1)
+            const eased = 1 - Math.pow(1 - progress, 3)
+            setCount(Math.floor(eased * end))
+            if (progress < 1) requestAnimationFrame(step)
+        }
+        requestAnimationFrame(step)
+    }, [end, duration, start])
+    return count
 }
 
 export default function LandingPage() {
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false)
+    const [scrolled, setScrolled] = useState(false)
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 50)
+        window.addEventListener('scroll', onScroll, { passive: true })
+        return () => window.removeEventListener('scroll', onScroll)
+    }, [])
+
+    // Scroll reveal refs
+    const heroContent = useScrollReveal(0.1)
+    const statsSection = useScrollReveal(0.2)
+    const featuresSection = useScrollReveal(0.1)
+    const howItWorks = useScrollReveal(0.15)
+    const templatesSection = useScrollReveal(0.1)
+    const pricingSection = useScrollReveal(0.1)
+    const ctaSection = useScrollReveal(0.15)
+
+    // Animated counters
+    const count1 = useAnimatedCounter(1200000, 2000, statsSection.isVisible)
+    const count2 = useAnimatedCounter(50000, 1800, statsSection.isVisible)
+    const count3 = useAnimatedCounter(12, 1000, statsSection.isVisible)
 
     return (
         <div className="relative w-full">
+            {/* CSS tối ưu — chỉ dùng transform/opacity animations (GPU-friendly) */}
             <style>{`
+                @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                @keyframes fade-up {
+                    from { opacity: 0; transform: translateY(40px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes gentle-float {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-12px); }
+                }
+                @keyframes subtle-pulse {
+                    0%, 100% { opacity: 0.4; }
+                    50% { opacity: 0.7; }
+                }
+                .marquee-track {
+                    display: flex;
+                    width: max-content;
+                    animation: marquee 30s linear infinite;
+                }
+                .marquee-track:hover { animation-play-state: paused; }
                 .gradient-text {
                     background: linear-gradient(135deg, #a78bfa, #f472b6, #60a5fa);
                     -webkit-background-clip: text;
@@ -124,187 +168,150 @@ export default function LandingPage() {
                     background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 50%);
                     pointer-events: none;
                 }
+                .reveal {
+                    opacity: 0; transform: translateY(40px);
+                    transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1);
+                }
+                .reveal.visible { opacity: 1; transform: translateY(0); }
             `}</style>
 
             {/* ======================
                 HERO — Video Background
             ========================= */}
-            <section id="hero" className="relative h-[100svh] min-h-[900px] w-full flex flex-col items-center justify-center overflow-hidden">
-                {/* Video BG — no color overlays as specified */}
+            <section id="hero" className="relative min-h-[100svh] w-full flex flex-col items-center justify-center overflow-hidden">
+                {/* Video BG — không parallax trên mobile để tránh jank */}
                 <video
                     autoPlay loop muted playsInline
                     className="absolute inset-0 w-full h-full object-cover z-0"
-                    poster="/images/gradient-purple.png?v=1" // Keep fallback poster just in case
+                    poster="/images/gradient-purple.png?v=1"
                 >
                     <source
                         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
                         type="video/mp4"
                     />
                 </video>
-                {/* Protective Gradient Overlay */}
-                <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-transparent to-black/80 pointer-events-none" />
 
-                {/* Navbar tích hợp — Floating white navbar */}
-                <nav className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] md:w-fit min-w-[320px] md:min-w-[600px] transition-all duration-500 top-4 sm:top-6`}>
-                    <div className="flex items-center justify-between bg-white/95 backdrop-blur-md rounded-[16px] px-2 py-2 sm:px-3 shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-white/20">
-                        {/* Left: Logo */}
-                        <Link to="/" className="flex items-center ml-3 sm:ml-4 shrink-0 hover:opacity-80 transition-opacity">
-                            <span className="text-[17px] sm:text-[19px] font-black tracking-tight text-[#111]" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                Logoisum
+                {/* Overlay tối — gradient mượt từ trên xuống */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black z-[1]" />
+
+                {/* 2 ambient glow nhẹ — chỉ dùng opacity animation, blur cố định */}
+                <div
+                    className="absolute z-[2] rounded-full pointer-events-none will-change-[opacity]"
+                    style={{
+                        width: 300, height: 300,
+                        top: '15%', left: '10%',
+                        background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)',
+                        animation: 'subtle-pulse 6s ease-in-out infinite',
+                    }}
+                />
+                <div
+                    className="absolute z-[2] rounded-full pointer-events-none will-change-[opacity] hidden sm:block"
+                    style={{
+                        width: 250, height: 250,
+                        bottom: '20%', right: '10%',
+                        background: 'radial-gradient(circle, rgba(236,72,153,0.2) 0%, transparent 70%)',
+                        animation: 'subtle-pulse 8s ease-in-out infinite 3s',
+                    }}
+                />
+
+                {/* Navbar tích hợp */}
+                <nav className={`fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] sm:w-[calc(100%-2rem)] max-w-5xl transition-all duration-500 ${scrolled ? 'top-2' : 'top-3 sm:top-4'}`}>
+                    <div className={`flex items-center justify-between backdrop-blur-xl rounded-2xl px-4 sm:px-5 shadow-[0_4px_30px_rgba(0,0,0,0.08)] transition-all duration-500 ${scrolled ? 'bg-white/[0.98] py-2 shadow-[0_8px_40px_rgba(0,0,0,0.12)]' : 'bg-white/[0.85] py-2.5'}`}>
+                        <Link to="/" className="flex items-center gap-2 shrink-0">
+                            <div className="size-8 rounded-lg bg-black flex items-center justify-center">
+                                <Sparkles className="size-4 text-white" />
+                            </div>
+                            <span className="text-[17px] font-bold tracking-tight text-[#111]" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                ZDream
                             </span>
                         </Link>
-                        
-                        {/* Center: Links (Desktop) */}
-                        <div className="hidden md:flex items-center mx-8">
-                            <NavigationMenu>
-                                <NavigationMenuList className="gap-2">
-                                    {[
-                                        { label: "About", href: "#" },
-                                        { label: "Works", href: "#" },
-                                        { label: "Services", href: "#" },
-                                        { label: "Testimonial", href: "#" },
-                                    ].map((item) => (
-                                        <NavigationMenuItem key={item.label}>
-                                            <NavigationMenuLink 
-                                                href={item.href}
-                                                className={`${navigationMenuTriggerStyle()} bg-transparent hover:bg-black/5 text-[14px] font-bold text-[#555] hover:text-[#111] transition-colors`}
-                                                style={{ fontFamily: "'Barlow', sans-serif" }}
-                                            >
-                                                {item.label}
-                                            </NavigationMenuLink>
-                                        </NavigationMenuItem>
-                                    ))}
-                                </NavigationMenuList>
-                            </NavigationMenu>
-                        </div>
-                        
-                        {/* Right: CTA Button & Mobile Toggle */}
-                        <div className="flex items-center gap-2">
-                            <Link to="/contact" className="hidden sm:block">
-                                <Button
-                                    className="bg-[#222] hover:bg-black text-white rounded-[12px] h-10 sm:h-11 px-4 sm:px-5 text-[13px] sm:text-[14px] font-bold gap-2 shadow-sm transition-all hover:scale-105 group"
+                        <div className="hidden md:flex items-center gap-7">
+                            {[
+                                { label: "Tính năng", href: "#features" },
+                                { label: "Kiểu mẫu", href: "#templates" },
+                                { label: "Bảng giá", href: "#pricing" },
+                            ].map((item) => (
+                                <a key={item.label} href={item.href}
+                                    className="text-[14px] font-medium text-[#555] hover:text-[#111] transition-colors"
                                     style={{ fontFamily: "'Barlow', sans-serif" }}
                                 >
-                                    <span>Book A Free Meeting</span>
-                                    <span className="inline-flex items-center justify-center size-6 sm:size-7 rounded-full bg-white/20 ml-1 group-hover:bg-white/30 transition-colors">
-                                        <ArrowUpRight className="size-3.5 sm:size-4 rotate-45 group-hover:rotate-0 transition-transform duration-300" />
-                                    </span>
-                                </Button>
-                            </Link>
-                            
-                            {/* Hamburger Menu Toggle using Sheet */}
-                            <div className="md:hidden">
-                                <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                                    <SheetTrigger asChild>
-                                        <button className="p-2 text-[#222] hover:bg-black/5 rounded-full transition-colors mr-1">
-                                            <Menu className="size-5" />
-                                        </button>
-                                    </SheetTrigger>
-                                    <SheetContent side="right" className="w-[300px] sm:w-[400px] pt-16 border-l-0 shadow-2xl">
-                                        <SheetHeader className="text-left mb-8 hidden">
-                                            <SheetTitle>Menu</SheetTitle>
-                                        </SheetHeader>
-                                        <div className="flex flex-col gap-6 px-2">
-                                            {[
-                                                { label: "About", href: "#" },
-                                                { label: "Works", href: "#" },
-                                                { label: "Services", href: "#" },
-                                                { label: "Testimonial", href: "#" },
-                                            ].map((item) => (
-                                                <a key={item.label} href={item.href}
-                                                    className="text-[24px] font-black text-[#111] hover:text-violet-600 transition-colors border-b border-black/5 pb-4"
-                                                    style={{ fontFamily: "'Barlow', sans-serif" }}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    {item.label}
-                                                </a>
-                                            ))}
-                                            <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)} className="mt-4">
-                                                <Button
-                                                    className="w-full bg-[#222] hover:bg-black text-white rounded-[12px] h-14 text-[16px] font-bold gap-2"
-                                                    style={{ fontFamily: "'Barlow', sans-serif" }}
-                                                >
-                                                    Book A Meeting
-                                                    <ArrowUpRight className="size-4" />
-                                                </Button>
-                                            </Link>
-                                        </div>
-                                    </SheetContent>
-                                </Sheet>
-                            </div>
+                                    {item.label}
+                                </a>
+                            ))}
                         </div>
+                        <Link to="/login">
+                            <Button
+                                className="bg-[#222] hover:bg-[#111] text-white rounded-full px-4 sm:px-5 h-9 text-[13px] font-semibold gap-2 shadow-sm"
+                                style={{ fontFamily: "'Barlow', sans-serif" }}
+                            >
+                                <span className="hidden sm:inline">Bắt Đầu Miễn Phí</span>
+                                <span className="sm:hidden">Bắt Đầu</span>
+                                <span className="inline-flex items-center justify-center size-5 rounded-full bg-white/20">
+                                    <ArrowUpRight className="size-3" />
+                                </span>
+                            </Button>
+                        </Link>
                     </div>
                 </nav>
 
                 {/* Hero Content */}
-                <motion.div 
-                    initial="hidden" animate="visible" variants={staggerContainer}
-                    className="relative z-10 flex flex-col items-center text-center px-4 max-w-[1000px] w-full pt-20"
-                >
-                    {/* Primary Headline */}
-                    <motion.h1 variants={fadeUpVariants} className="mb-4 sm:mb-6 flex flex-col items-center justify-center w-full">
-                        <span
-                            className="block text-[clamp(26px,4vw,42px)] font-black text-white leading-[1.1] drop-shadow-lg"
-                            style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-0.02em" }}
-                        >
-                            Agency that makes your
-                        </span>
-                        <span
-                            className="block text-[clamp(46px,8vw,90px)] leading-[1.05] mt-2 text-white italic drop-shadow-2xl"
-                            style={{ fontFamily: "'Instrument Serif', serif" }}
-                        >
-                            videos & reels viral
-                        </span>
-                    </motion.h1>
+                <div ref={heroContent.ref} className="relative z-10 flex flex-col items-center text-center px-5 max-w-4xl mx-auto">
+                    <Badge variant="outline" className="mb-6 sm:mb-8 bg-white/10 text-white/90 border-violet-400/30 backdrop-blur-md rounded-full px-4 py-1.5 text-xs font-medium tracking-wide" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s both' }}>
+                        <Zap className="size-3 mr-1.5 text-yellow-400 fill-yellow-400" /> AI-Powered Creative Platform
+                    </Badge>
 
-                    {/* Subtext */}
-                    <motion.p variants={fadeUpVariants}
-                        className="text-white/90 text-[15px] sm:text-[18px] max-w-xl mx-auto mb-8 sm:mb-12 font-medium leading-relaxed drop-shadow-md px-4"
-                        style={{ fontFamily: "'Barlow', sans-serif" }}
+                    <h1 className="mb-5 sm:mb-6" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both' }}>
+                        <span
+                            className="block text-[clamp(28px,5.5vw,72px)] font-semibold text-white leading-[1.1]"
+                            style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-2px" }}
+                        >
+                            Nền tảng giúp bạn tạo
+                        </span>
+                        <span
+                            className="block text-[clamp(36px,7vw,84px)] leading-[1.15] mt-1.5 font-bold hero-glow-text"
+                            style={{ fontFamily: "'Dancing Script', cursive", letterSpacing: "-1px" }}
+                        >
+                            ảnh AI chất lượng cao
+                        </span>
+                    </h1>
+
+                    <p
+                        className="text-white/65 text-[clamp(13px,1.2vw,18px)] max-w-md sm:max-w-lg mb-8 sm:mb-10 font-medium leading-relaxed"
+                        style={{ fontFamily: "'Barlow', sans-serif", animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.7s both' }}
                     >
-                        Short-form video editing for Influencers, Creators and Brands
-                    </motion.p>
+                        Tạo ảnh từ văn bản, áp dụng kiểu mẫu có sẵn, quản lý thư viện cá nhân.
+                        Dành cho Nhà Sáng Tạo, Designer và Thương Hiệu.
+                    </p>
 
-                    {/* Secondary CTA */}
-                    <motion.div variants={fadeUpVariants} className="flex justify-center">
-                        <Dialog open={isVideoModalOpen} onOpenChange={setIsVideoModalOpen}>
-                            <DialogTrigger asChild>
-                                <Button
-                                    size="lg"
-                                    className="bg-white hover:bg-white text-[#111] rounded-full h-14 sm:h-16 px-6 sm:px-8 text-[15px] sm:text-[17px] font-black gap-3 transition-transform duration-300 hover:scale-[1.05] shadow-[0_8px_30px_rgba(0,0,0,0.2)] group"
-                                    style={{ fontFamily: "'Barlow', sans-serif" }}
-                                >
-                                    <span className="flex items-center justify-center size-8 sm:size-10 rounded-full bg-[#111] text-white shrink-0 group-hover:scale-110 group-hover:bg-violet-600 transition-all duration-300">
-                                        <Play className="size-3.5 sm:size-4 fill-white ml-0.5" />
-                                    </span>
-                                    See Our Workreel
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-5xl p-0 bg-black border-white/10 overflow-hidden">
-                                <VisuallyHidden>
-                                    <DialogTitle>Logoisum Workreel</DialogTitle>
-                                </VisuallyHidden>
-                                <div className="relative w-full aspect-video bg-black">
-                                    <button 
-                                        className="absolute top-4 right-4 z-10 size-10 rounded-full bg-black/50 hover:bg-white text-white hover:text-black flex items-center justify-center transition-colors backdrop-blur-md"
-                                        onClick={() => setIsVideoModalOpen(false)}
-                                    >
-                                        <X className="size-5" />
-                                    </button>
-                                    <video
-                                        autoPlay controls playsInline
-                                        className="w-full h-full object-cover"
-                                    >
-                                        <source
-                                            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
-                                            type="video/mp4"
-                                        />
-                                    </video>
-                                </div>
-                            </DialogContent>
-                        </Dialog>
-                    </motion.div>
-                </motion.div>
+                    <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4" style={{ animation: 'fade-up 0.8s cubic-bezier(0.16,1,0.3,1) 0.9s both' }}>
+                        <Link to="/app/generate">
+                            <Button
+                                size="lg"
+                                className="bg-white hover:bg-white/90 text-[#111] rounded-full h-12 sm:h-14 px-7 sm:px-8 text-sm sm:text-[15px] font-bold gap-3 shadow-[0_8px_30px_rgba(0,0,0,0.15)] transition-all hover:shadow-[0_12px_40px_rgba(0,0,0,0.2)] hover:scale-[1.03]"
+                                style={{ fontFamily: "'Barlow', sans-serif" }}
+                            >
+                                <span className="flex items-center justify-center size-7 sm:size-8 rounded-full bg-[#111] text-white">
+                                    <Play className="size-3 sm:size-3.5 fill-white ml-0.5" />
+                                </span>
+                                Tạo Ảnh Ngay
+                            </Button>
+                        </Link>
+                        <Link to="/app/templates">
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                className="rounded-full h-12 sm:h-14 px-7 sm:px-8 text-sm sm:text-[15px] font-bold border-white/20 text-white hover:bg-white/10 transition-all backdrop-blur-md"
+                                style={{ fontFamily: "'Barlow', sans-serif" }}
+                            >
+                                <SwatchBook className="size-4 mr-2" />
+                                Xem Kiểu Mẫu
+                            </Button>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Gradient fade to black */}
+                <div className="absolute bottom-0 left-0 right-0 h-24 sm:h-32 bg-gradient-to-t from-black to-transparent z-[2] pointer-events-none" />
             </section>
 
             {/* ======================
@@ -313,22 +320,19 @@ export default function LandingPage() {
             <section className="relative z-10 bg-black py-14 sm:py-20">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                <motion.div 
-                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={staggerContainer}
-                    className="max-w-5xl mx-auto px-4 text-center"
-                >
-                    <motion.p variants={fadeUpVariants} className="text-white/30 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] mb-10 sm:mb-12" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                <div ref={statsSection.ref} className={`max-w-5xl mx-auto px-4 text-center reveal ${statsSection.isVisible ? 'visible' : ''}`}>
+                    <p className="text-white/30 text-[10px] sm:text-xs font-semibold uppercase tracking-[0.25em] mb-10 sm:mb-12" style={{ fontFamily: "'Barlow', sans-serif" }}>
                         Được tin dùng bởi cộng đồng sáng tạo
-                    </motion.p>
+                    </p>
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-0 sm:divide-x sm:divide-white/[0.06]">
                         {[
-                            { label: "Ảnh đã tạo", value: `1.2M+`, icon: WandSparkles, color: "text-violet-400", bg: "bg-violet-500/10" },
-                            { label: "Người dùng", value: `50K+`, icon: Star, color: "text-amber-400", bg: "bg-amber-500/10" },
-                            { label: "Kiểu mẫu", value: `12+`, icon: SwatchBook, color: "text-sky-400", bg: "bg-sky-500/10" },
+                            { label: "Ảnh đã tạo", value: statsSection.isVisible ? `${(count1/1000000).toFixed(1)}M+` : '0', icon: WandSparkles, color: "text-violet-400", bg: "bg-violet-500/10" },
+                            { label: "Người dùng", value: statsSection.isVisible ? `${Math.floor(count2/1000)}K+` : '0', icon: Star, color: "text-amber-400", bg: "bg-amber-500/10" },
+                            { label: "Kiểu mẫu", value: statsSection.isVisible ? `${count3}+` : '0', icon: SwatchBook, color: "text-sky-400", bg: "bg-sky-500/10" },
                             { label: "Đánh giá", value: "4.9★", icon: Gem, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-                        ].map((stat) => (
-                            <motion.div variants={fadeUpVariants} key={stat.label} className="flex flex-col items-center gap-2.5 sm:gap-3 px-4 sm:px-8 py-2">
+                        ].map((stat, i) => (
+                            <div key={stat.label} className="flex flex-col items-center gap-2.5 sm:gap-3 px-4 sm:px-8 py-2" style={{ transitionDelay: `${i * 150}ms` }}>
                                 <div className={`size-9 sm:size-10 rounded-xl ${stat.bg} flex items-center justify-center`}>
                                     <stat.icon className={`size-4 sm:size-5 ${stat.color}`} />
                                 </div>
@@ -338,10 +342,10 @@ export default function LandingPage() {
                                 <span className="text-white/40 text-[11px] sm:text-xs font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
                                     {stat.label}
                                 </span>
-                            </motion.div>
+                            </div>
                         ))}
                     </div>
-                </motion.div>
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             </section>
@@ -350,11 +354,8 @@ export default function LandingPage() {
                 FEATURES — Bento Grid
             ========================= */}
             <section id="features" className="relative z-10 bg-black py-16 sm:py-28">
-                <motion.div 
-                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={staggerContainer}
-                    className="max-w-6xl mx-auto px-4"
-                >
-                    <motion.div variants={fadeUpVariants} className="text-center mb-12 sm:mb-16">
+                <div ref={featuresSection.ref} className={`max-w-6xl mx-auto px-4 reveal ${featuresSection.isVisible ? 'visible' : ''}`}>
+                    <div className="text-center mb-12 sm:mb-16">
                         <Badge variant="outline" className="mb-4 bg-white/5 text-white/60 border-white/10 rounded-full px-4 py-1 text-xs tracking-wide">
                             Tính năng nổi bật
                         </Badge>
@@ -365,13 +366,13 @@ export default function LandingPage() {
                         <p className="text-white/40 text-sm sm:text-base mt-3 sm:mt-4 max-w-lg mx-auto" style={{ fontFamily: "'Barlow', sans-serif" }}>
                             Từ ý tưởng đến tác phẩm chỉ trong vài cú nhấp chuột.
                         </p>
-                    </motion.div>
+                    </div>
 
                     {/* Bento Grid — 2 cột mobile, 12 cột desktop */}
-                    <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-5">
 
                         {/* Card 1: Tạo Ảnh AI */}
-                        <motion.div variants={fadeUpVariants} className="md:col-span-7 block group">
+                        <Link to="/app/generate" className="md:col-span-7 block group">
                             <Card className="card-shine relative overflow-hidden rounded-2xl sm:rounded-[24px] bg-gradient-to-br from-violet-950/80 via-[#1a0b2e] to-black border border-violet-500/10 h-full min-h-[280px] sm:min-h-[400px] cursor-pointer transition-all duration-500 hover:border-violet-500/30 hover:shadow-[0_0_60px_rgba(139,92,246,0.15)]">
                                 <div className="absolute top-[-20%] right-[-10%] w-[250px] sm:w-[320px] h-[250px] sm:h-[320px] bg-violet-500/15 rounded-full blur-[80px] pointer-events-none" />
                                 <CardContent className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-10">
@@ -391,10 +392,10 @@ export default function LandingPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </motion.div>
+                        </Link>
 
                         {/* Card 2: Kho Kiểu Mẫu */}
-                        <motion.div variants={fadeUpVariants} className="md:col-span-5 block group">
+                        <Link to="/app/templates" className="md:col-span-5 block group">
                             <Card className="card-shine relative overflow-hidden rounded-2xl sm:rounded-[24px] bg-gradient-to-b from-sky-950/60 to-black border border-sky-500/10 h-full min-h-[280px] sm:min-h-[400px] cursor-pointer transition-all duration-500 hover:border-sky-500/25 hover:shadow-[0_0_60px_rgba(14,165,233,0.1)]">
                                 <div className="absolute top-[-10%] left-[-10%] w-[200px] sm:w-[260px] h-[200px] sm:h-[260px] bg-sky-500/12 rounded-full blur-[80px] pointer-events-none" />
                                 <CardContent className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-10">
@@ -414,10 +415,10 @@ export default function LandingPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </motion.div>
+                        </Link>
 
                         {/* Card 3: Thư Viện */}
-                        <motion.div variants={fadeUpVariants} className="md:col-span-5 block group">
+                        <Link to="/app/library" className="md:col-span-5 block group">
                             <Card className="card-shine relative overflow-hidden rounded-2xl sm:rounded-[24px] bg-gradient-to-b from-amber-950/50 to-black border border-amber-500/10 h-full min-h-[240px] sm:min-h-[340px] cursor-pointer transition-all duration-500 hover:border-amber-500/25 hover:shadow-[0_0_60px_rgba(245,158,11,0.1)]">
                                 <div className="absolute bottom-[-15%] right-[-10%] w-[180px] sm:w-[220px] h-[180px] sm:h-[220px] bg-amber-500/10 rounded-full blur-[70px] pointer-events-none" />
                                 <CardContent className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-10">
@@ -437,10 +438,10 @@ export default function LandingPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </motion.div>
+                        </Link>
 
                         {/* Card 4: Hệ thống Kim Cương */}
-                        <motion.div variants={fadeUpVariants} className="md:col-span-7 block group">
+                        <Link to="/login" className="md:col-span-7 block group">
                             <Card className="card-shine relative overflow-hidden rounded-2xl sm:rounded-[24px] bg-gradient-to-br from-cyan-950/50 via-black to-violet-950/30 border border-cyan-500/10 h-full min-h-[240px] sm:min-h-[340px] cursor-pointer transition-all duration-500 hover:border-cyan-400/25 hover:shadow-[0_0_60px_rgba(6,182,212,0.1)]">
                                 <div className="absolute top-[-10%] right-[10%] w-[160px] sm:w-[200px] h-[160px] sm:h-[200px] bg-cyan-500/10 rounded-full blur-[70px] pointer-events-none" />
                                 <CardContent className="relative z-10 h-full flex flex-col justify-end p-6 sm:p-10">
@@ -460,9 +461,9 @@ export default function LandingPage() {
                                     </div>
                                 </CardContent>
                             </Card>
-                        </motion.div>
-                    </motion.div>
-                </motion.div>
+                        </Link>
+                    </div>
+                </div>
             </section>
 
             {/* ======================
@@ -472,11 +473,8 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-black via-violet-950/5 to-black pointer-events-none" />
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                <motion.div 
-                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={staggerContainer}
-                    className="max-w-5xl mx-auto px-4"
-                >
-                    <motion.div variants={fadeUpVariants} className="text-center mb-12 sm:mb-16">
+                <div ref={howItWorks.ref} className={`max-w-5xl mx-auto px-4 reveal ${howItWorks.isVisible ? 'visible' : ''}`}>
+                    <div className="text-center mb-12 sm:mb-16">
                         <Badge variant="outline" className="mb-4 bg-white/5 text-white/60 border-white/10 rounded-full px-4 py-1 text-xs tracking-wide">
                             Cách hoạt động
                         </Badge>
@@ -486,7 +484,7 @@ export default function LandingPage() {
                         <p className="text-white/40 text-sm sm:text-base mt-3 sm:mt-4 max-w-md mx-auto" style={{ fontFamily: "'Barlow', sans-serif" }}>
                             Từ ý tưởng đến tác phẩm hoàn chỉnh trong vài giây.
                         </p>
-                    </motion.div>
+                    </div>
 
                     <div className="grid grid-cols-3 gap-4 sm:gap-8 relative">
                         {/* Dashed line connector desktop */}
@@ -497,7 +495,7 @@ export default function LandingPage() {
                             { step: "02", icon: Layers, title: "Chọn cài đặt", desc: "Tùy chỉnh style hoặc chọn template có sẵn.", color: "from-sky-500 to-cyan-400", glow: "rgba(14,165,233,0.3)" },
                             { step: "03", icon: Download, title: "Tải xuống", desc: "Nhận ảnh 4K trong vài giây, lưu hoặc tải ngay.", color: "from-emerald-500 to-teal-400", glow: "rgba(16,185,129,0.3)" },
                         ].map((s) => (
-                            <motion.div variants={fadeUpVariants} key={s.step} className="flex flex-col items-center text-center group">
+                            <div key={s.step} className="flex flex-col items-center text-center group">
                                 <div className="relative mb-4 sm:mb-6">
                                     <div
                                         className={`size-12 sm:size-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center transition-transform duration-500 group-hover:scale-110`}
@@ -515,10 +513,10 @@ export default function LandingPage() {
                                 <p className="text-white/40 text-[11px] sm:text-sm leading-relaxed max-w-[200px] sm:max-w-[240px]" style={{ fontFamily: "'Barlow', sans-serif" }}>
                                     {s.desc}
                                 </p>
-                            </motion.div>
+                            </div>
                         ))}
                     </div>
-                </motion.div>
+                </div>
 
                 <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             </section>
@@ -527,11 +525,8 @@ export default function LandingPage() {
                 TEMPLATES — Preview
             ========================= */}
             <section id="templates" className="relative z-10 bg-black py-16 sm:py-28 overflow-hidden">
-                <motion.div 
-                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={staggerContainer}
-                    className="max-w-6xl mx-auto px-4"
-                >
-                    <motion.div variants={fadeUpVariants} className="text-center mb-10 sm:mb-16">
+                <div ref={templatesSection.ref} className={`max-w-6xl mx-auto px-4 reveal ${templatesSection.isVisible ? 'visible' : ''}`}>
+                    <div className="text-center mb-10 sm:mb-16">
                         <Badge variant="outline" className="mb-4 bg-white/5 text-white/60 border-white/10 rounded-full px-4 py-1 text-xs tracking-wide">
                             Kiểu mẫu có sẵn
                         </Badge>
@@ -541,22 +536,27 @@ export default function LandingPage() {
                         <p className="text-white/40 text-sm sm:text-base mt-3 sm:mt-4 max-w-lg mx-auto" style={{ fontFamily: "'Barlow', sans-serif" }}>
                             Chọn mẫu, tải ảnh lên, nhận ảnh mới theo phong cách mẫu.
                         </p>
-                    </motion.div>
+                    </div>
 
                     {/* Grid 2x4 mobile, 4x2 desktop */}
-                    <motion.div variants={staggerContainer} className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
                         {TEMPLATES.map((tpl) => (
-                            <motion.div variants={fadeUpVariants} key={tpl.name} className="group relative overflow-hidden rounded-xl sm:rounded-2xl aspect-[3/4] cursor-pointer">
-                                <img src={tpl.img} alt={tpl.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                            <div key={tpl.name} className="group relative aspect-[3/4] rounded-xl sm:rounded-[16px] overflow-hidden cursor-pointer ring-1 ring-white/5 hover:ring-white/20 transition-all duration-300">
+                                <img
+                                    src={tpl.img}
+                                    alt={tpl.name}
+                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                    loading="lazy"
+                                />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                                <div className={`absolute inset-0 bg-gradient-to-t ${tpl.color} mix-blend-multiply opacity-60 group-hover:opacity-80 transition-opacity duration-500`} />
-                                <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5 flex flex-col justify-end translate-y-2 sm:translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                                    <p className="text-white/80 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-0.5 sm:mb-1" style={{ fontFamily: "'Barlow', sans-serif" }}>{tpl.cat}</p>
-                                    <h4 className="text-white text-sm sm:text-lg font-black tracking-tight" style={{ fontFamily: "'Barlow', sans-serif" }}>{tpl.name}</h4>
+                                <div className={`absolute inset-0 bg-gradient-to-t ${tpl.color} opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
+                                <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3">
+                                    <Badge className="bg-white/10 text-white/70 text-[9px] sm:text-[10px] backdrop-blur-md border-none mb-1 px-2 py-0.5">{tpl.cat}</Badge>
+                                    <p className="text-white text-xs sm:text-sm font-bold" style={{ fontFamily: "'Barlow', sans-serif" }}>{tpl.name}</p>
                                 </div>
-                            </motion.div>
+                            </div>
                         ))}
-                    </motion.div>
+                    </div>
 
                     {/* Marquee strip */}
                     <div className="overflow-hidden rounded-xl sm:rounded-2xl mb-8 sm:mb-10">
@@ -579,7 +579,7 @@ export default function LandingPage() {
                             </Button>
                         </Link>
                     </div>
-                </motion.div>
+                </div>
             </section>
 
             {/* ======================
@@ -588,11 +588,8 @@ export default function LandingPage() {
             <section id="pricing" className="relative z-10 bg-black py-16 sm:py-28">
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                <motion.div 
-                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={staggerContainer}
-                    className="max-w-5xl mx-auto px-4"
-                >
-                    <motion.div variants={fadeUpVariants} className="text-center mb-10 sm:mb-16">
+                <div ref={pricingSection.ref} className={`max-w-5xl mx-auto px-4 reveal ${pricingSection.isVisible ? 'visible' : ''}`}>
+                    <div className="text-center mb-10 sm:mb-16">
                         <Badge variant="outline" className="mb-4 bg-white/5 text-white/60 border-white/10 rounded-full px-4 py-1 text-xs tracking-wide">
                             <Gem className="size-3 mr-1.5 text-cyan-400" /> Hệ thống Kim Cương
                         </Badge>
@@ -602,67 +599,66 @@ export default function LandingPage() {
                         <p className="text-white/40 text-sm sm:text-base mt-3 sm:mt-4 max-w-md mx-auto" style={{ fontFamily: "'Barlow', sans-serif" }}>
                             Mỗi lần tạo ảnh tiêu hao Kim Cương. Nạp thêm hoặc chọn gói Pro.
                         </p>
-                    </motion.div>
+                    </div>
 
-                    <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-5 items-center">
                         {PLANS.map((plan) => (
-                            <motion.div variants={fadeUpVariants} key={plan.name}>
-                                <Card
-                                    className={`relative overflow-hidden rounded-2xl sm:rounded-[20px] border transition-all duration-300 ${plan.popular
-                                        ? "border-violet-500/40 bg-gradient-to-b from-violet-950/40 to-black shadow-[0_0_40px_rgba(139,92,246,0.15)] md:scale-[1.03]"
-                                        : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
-                                    }`}
-                                >
-                                    {plan.popular && (
-                                        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-violet-500 via-fuchsia-400 to-violet-500" />
-                                    )}
-                                    {plan.popular && (
-                                        <div className="absolute top-4 right-4">
-                                            <Badge className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-none text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                                                Phổ biến
-                                            </Badge>
-                                        </div>
-                                    )}
+                            <Card
+                                key={plan.name}
+                                className={`relative overflow-hidden rounded-2xl sm:rounded-[20px] border transition-all duration-300 ${plan.popular
+                                    ? "border-violet-500/40 bg-gradient-to-b from-violet-950/40 to-black shadow-[0_0_40px_rgba(139,92,246,0.15)] md:scale-[1.03]"
+                                    : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10"
+                                }`}
+                            >
+                                {plan.popular && (
+                                    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-violet-500 via-fuchsia-400 to-violet-500" />
+                                )}
+                                {plan.popular && (
+                                    <div className="absolute top-4 right-4">
+                                        <Badge className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-none text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                                            Phổ biến
+                                        </Badge>
+                                    </div>
+                                )}
 
-                                    <CardContent className={`p-6 sm:p-8 ${plan.popular ? "pt-7 sm:pt-8" : ""}`}>
-                                        <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3 sm:mb-4" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                            {plan.name}
-                                        </p>
-                                        <div className="flex items-baseline gap-1 mb-2">
-                                            <span className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                                {plan.price}
-                                            </span>
-                                            <span className="text-white/30 text-sm font-medium">{plan.period}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 mb-6 sm:mb-8 py-1.5 sm:py-2 px-3 rounded-full bg-white/5 border border-white/5 w-fit">
-                                            <Gem className="size-3.5 text-cyan-400" />
-                                            <span className="text-cyan-400 text-xs font-bold">{plan.gems} Kim Cương/tháng</span>
-                                        </div>
-                                        <ul className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
-                                            {plan.features.map((f) => (
-                                                <li key={f} className="flex items-center gap-2.5 text-xs sm:text-sm text-white/55 font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
-                                                    <CheckCircle2 className={`size-4 shrink-0 ${plan.popular ? "text-violet-400" : "text-emerald-500/70"}`} />
-                                                    {f}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <Link to="/login">
-                                            <Button
-                                                className={`w-full rounded-full h-10 sm:h-11 font-bold text-sm transition-all ${plan.popular
-                                                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white shadow-[0_4px_20px_rgba(139,92,246,0.3)]"
-                                                    : "bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20"
-                                                }`}
-                                                style={{ fontFamily: "'Barlow', sans-serif" }}
-                                            >
-                                                {plan.cta}
-                                            </Button>
-                                        </Link>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
+                                <CardContent className={`p-6 sm:p-8 ${plan.popular ? "pt-7 sm:pt-8" : ""}`}>
+                                    <p className="text-white/40 text-xs font-semibold uppercase tracking-widest mb-3 sm:mb-4" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                        {plan.name}
+                                    </p>
+                                    <div className="flex items-baseline gap-1 mb-2">
+                                        <span className="text-3xl sm:text-4xl font-black text-white" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                            {plan.price}
+                                        </span>
+                                        <span className="text-white/30 text-sm font-medium">{plan.period}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 mb-6 sm:mb-8 py-1.5 sm:py-2 px-3 rounded-full bg-white/5 border border-white/5 w-fit">
+                                        <Gem className="size-3.5 text-cyan-400" />
+                                        <span className="text-cyan-400 text-xs font-bold">{plan.gems} Kim Cương/tháng</span>
+                                    </div>
+                                    <ul className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
+                                        {plan.features.map((f) => (
+                                            <li key={f} className="flex items-center gap-2.5 text-xs sm:text-sm text-white/55 font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                                                <CheckCircle2 className={`size-4 shrink-0 ${plan.popular ? "text-violet-400" : "text-emerald-500/70"}`} />
+                                                {f}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <Link to="/login">
+                                        <Button
+                                            className={`w-full rounded-full h-10 sm:h-11 font-bold text-sm transition-all ${plan.popular
+                                                ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-400 hover:to-fuchsia-400 text-white shadow-[0_4px_20px_rgba(139,92,246,0.3)]"
+                                                : "bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20"
+                                            }`}
+                                            style={{ fontFamily: "'Barlow', sans-serif" }}
+                                        >
+                                            {plan.cta}
+                                        </Button>
+                                    </Link>
+                                </CardContent>
+                            </Card>
                         ))}
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
             </section>
 
             {/* ======================
@@ -682,12 +678,9 @@ export default function LandingPage() {
 
                 <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                <motion.div 
-                    initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} variants={staggerContainer}
-                    className="max-w-3xl mx-auto px-5 text-center relative"
-                >
+                <div ref={ctaSection.ref} className={`max-w-3xl mx-auto px-5 text-center relative reveal ${ctaSection.isVisible ? 'visible' : ''}`}>
                     {/* Social proof */}
-                    <motion.div variants={fadeUpVariants} className="flex flex-col items-center gap-3 mb-8 sm:mb-10">
+                    <div className="flex flex-col items-center gap-3 mb-8 sm:mb-10">
                         <div className="flex items-center gap-1">
                             {[...Array(5)].map((_, i) => (
                                 <Star key={i} className="size-3.5 sm:size-4 text-amber-400 fill-amber-400" />
@@ -710,17 +703,17 @@ export default function LandingPage() {
                                 50,000+ nhà sáng tạo
                             </span>
                         </div>
-                    </motion.div>
+                    </div>
 
-                    <motion.h2 variants={fadeUpVariants} className="text-3xl sm:text-6xl font-bold text-white tracking-tight mb-4 sm:mb-6" style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-2px" }}>
+                    <h2 className="text-3xl sm:text-6xl font-bold text-white tracking-tight mb-4 sm:mb-6" style={{ fontFamily: "'Barlow', sans-serif", letterSpacing: "-2px" }}>
                         Sẵn sàng{" "}
                         <span className="gradient-text">sáng tạo?</span>
-                    </motion.h2>
-                    <motion.p variants={fadeUpVariants} className="text-white/50 text-sm sm:text-lg mb-8 sm:mb-10 max-w-md mx-auto font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
+                    </h2>
+                    <p className="text-white/50 text-sm sm:text-lg mb-8 sm:mb-10 max-w-md mx-auto font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
                         Đăng ký miễn phí. Nhận 50 Kim Cương ngay lập tức. Không cần thẻ tín dụng.
-                    </motion.p>
+                    </p>
 
-                    <motion.div variants={fadeUpVariants} className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
                         <Link to="/login">
                             <Button
                                 size="lg"
@@ -731,15 +724,15 @@ export default function LandingPage() {
                                 <ArrowUpRight className="size-4 ml-2" />
                             </Button>
                         </Link>
-                    </motion.div>
+                    </div>
 
-                    <motion.div variants={fadeUpVariants} className="flex items-center justify-center gap-2 mt-6 sm:mt-8">
+                    <div className="flex items-center justify-center gap-2 mt-6 sm:mt-8">
                         <Gem className="size-3.5 sm:size-4 text-cyan-400" />
                         <span className="text-white/30 text-[11px] sm:text-xs font-medium" style={{ fontFamily: "'Barlow', sans-serif" }}>
                             50 Kim Cương miễn phí khi đăng ký — không giới hạn thời gian
                         </span>
-                    </motion.div>
-                </motion.div>
+                    </div>
+                </div>
             </section>
         </div>
     )
