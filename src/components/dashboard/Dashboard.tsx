@@ -77,9 +77,10 @@ export function Dashboard() {
                     </div>
 
                     {/* Model highlight */}
-                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-2">
-                        Gemini 2.5 Flash
+                    <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-1">
+                        Nano Banana 2
                     </h1>
+                    <p className="text-xs text-white/40 font-medium mb-3">Gemini 3.1 Flash Image Preview</p>
                     <p className="text-xs sm:text-sm text-white/60 mb-5 sm:mb-6 max-w-lg leading-relaxed">
                         Mô hình tạo ảnh AI mới nhất từ Google — chất lượng hình ảnh cấp Pro với tốc độ Flash. Hỗ trợ tạo ảnh từ prompt và chỉnh sửa ảnh nâng cao.
                     </p>
@@ -175,7 +176,7 @@ export function Dashboard() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5">
                         {recentImages.map((img) => (
                             <Link key={img.id} to="/app/library" className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
                                 <img
@@ -223,7 +224,7 @@ export function Dashboard() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5">
                         {templates.map((tpl) => (
                             <Link key={tpl.id} to={`/app/templates/${tpl.slug}`} className="group">
                                 <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
