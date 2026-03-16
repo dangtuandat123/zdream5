@@ -6,16 +6,16 @@ import {
     Images,
     ImageIcon,
     Gem,
-    Wallet,
     ArrowRight,
     Plus,
     Library,
+    Zap,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/AuthContext"
 import { imageApi, templateApi, walletApi } from "@/lib/api"
 import type { GeneratedImageData, TemplateData } from "@/lib/api"
@@ -60,98 +60,107 @@ export function Dashboard() {
     }, [])
 
     return (
-        <div className="relative flex flex-1 flex-col gap-6 p-4 lg:p-6 pb-8 overflow-hidden">
+        <div className="flex flex-1 flex-col gap-5 p-4 lg:p-6 pb-8">
 
-            {/* ===== HERO BANNER với ảnh gradient thật ===== */}
-            <div className="relative overflow-hidden rounded-2xl min-h-[200px] sm:min-h-[240px]">
-                {/* Ảnh gradient background */}
-                <img src="/images/gradient-purple.png" alt="" className="absolute inset-0 w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40" />
+            {/* ===== HERO BANNER ===== */}
+            <div className="relative overflow-hidden rounded-3xl">
+                <img
+                    src="/images/gradient-purple.png"
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover scale-110"
+                />
+                <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" />
 
-                {/* Content overlay */}
-                <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 p-6 sm:p-8 h-full">
-                    <div className="space-y-2">
-                        <Badge variant="outline" className="bg-white/5 text-white/80 border-white/10 backdrop-blur-md px-2.5 py-1 text-[11px] font-medium">
-                            <Sparkles className="size-3 mr-1.5 text-violet-300" /> ZDream Studio
+                <div className="relative z-10 p-5 sm:p-8 lg:p-10">
+                    {/* Top row: badge + gems */}
+                    <div className="flex items-start justify-between mb-6 sm:mb-8">
+                        <Badge variant="outline" className="bg-white/10 text-white/90 border-white/20 backdrop-blur-md px-3 py-1.5 text-xs font-medium shadow-lg">
+                            <Sparkles className="size-3.5 mr-1.5" /> ZDream Studio
                         </Badge>
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
-                            {getGreeting()},<br />
-                            <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 bg-clip-text text-transparent">
-                                {user?.name?.split(" ").pop() ?? "bạn"}
-                            </span>!
-                        </h1>
-                        <p className="text-sm text-white/50 max-w-[300px]">
-                            Hôm nay bạn muốn sáng tạo gì?
-                        </p>
+                        <Link to="/app/topup">
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/10 border border-white/15 backdrop-blur-md hover:bg-white/20 transition-all shadow-lg">
+                                <Gem className="size-4 text-violet-200" />
+                                <span className="text-sm font-bold text-white tabular-nums">{gems.toLocaleString()}</span>
+                                <span className="text-[10px] text-white/50 hidden sm:inline">gems</span>
+                            </div>
+                        </Link>
                     </div>
 
-                    <Link to="/app/topup" className="shrink-0">
-                        <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md hover:bg-white/10 transition-colors">
-                            <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30">
-                                <Gem className="size-4 text-violet-300" />
+                    {/* Greeting */}
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight mb-2">
+                        {getGreeting()},{" "}
+                        <span className="bg-gradient-to-r from-white via-violet-200 to-fuchsia-200 bg-clip-text text-transparent">
+                            {user?.name?.split(" ").pop() ?? "bạn"}
+                        </span>
+                    </h1>
+                    <p className="text-sm sm:text-base text-white/60 mb-6 sm:mb-8 max-w-md">
+                        Biến ý tưởng thành tác phẩm nghệ thuật với AI
+                    </p>
+
+                    {/* CTA buttons */}
+                    <div className="flex flex-wrap gap-3">
+                        <Link to="/app/generate">
+                            <Button className="bg-white text-black hover:bg-white/90 font-semibold rounded-full px-5 h-10 shadow-lg shadow-white/10 gap-2">
+                                <Sparkles className="size-4" /> Tạo ảnh ngay
+                            </Button>
+                        </Link>
+                        <Link to="/app/templates">
+                            <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-full px-5 h-10 backdrop-blur-sm gap-2">
+                                <SwatchBook className="size-4" /> Kiểu mẫu
+                            </Button>
+                        </Link>
+                    </div>
+
+                    {/* Mini stats inside hero */}
+                    <div className="flex items-center gap-4 sm:gap-6 mt-6 sm:mt-8 pt-5 border-t border-white/10">
+                        {[
+                            { label: "Ảnh đã tạo", value: totalImages, icon: ImageIcon },
+                            { label: "Gems đã dùng", value: totalSpent, icon: Zap },
+                        ].map((s) => (
+                            <div key={s.label} className="flex items-center gap-2">
+                                <s.icon className="size-4 text-white/40" />
+                                {loading ? (
+                                    <Skeleton className="h-5 w-10 bg-white/10" />
+                                ) : (
+                                    <span className="text-sm font-bold text-white tabular-nums">{s.value.toLocaleString()}</span>
+                                )}
+                                <span className="text-[11px] text-white/40 hidden sm:inline">{s.label}</span>
                             </div>
-                            <div>
-                                <p className="text-lg font-bold text-white tabular-nums leading-none">{gems.toLocaleString()}</p>
-                                <p className="text-[10px] text-white/40 mt-0.5">gems khả dụng</p>
-                            </div>
-                        </div>
-                    </Link>
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* ===== QUICK ACTIONS — 3 cards với gradient images ===== */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* ===== QUICK ACTIONS ===== */}
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                 {[
-                    { to: "/app/generate", label: "Tạo Ảnh AI", desc: "Mô tả ý tưởng, AI tạo cho bạn", icon: Sparkles, bg: "/images/gradient-pink.png" },
-                    { to: "/app/templates", label: "Dùng Kiểu Mẫu", desc: "Template có sẵn, tạo ảnh nhanh", icon: SwatchBook, bg: "/images/gradient-blue.png" },
-                    { to: "/app/library", label: "Thư Viện Ảnh", desc: "Xem lại tác phẩm của bạn", icon: Library, bg: "/images/gradient-purple.png" },
+                    { to: "/app/generate", label: "Tạo Ảnh", icon: Sparkles, bg: "/images/gradient-pink.png" },
+                    { to: "/app/templates", label: "Kiểu Mẫu", icon: SwatchBook, bg: "/images/gradient-blue.png" },
+                    { to: "/app/library", label: "Thư Viện", icon: Library, bg: "/images/gradient-purple.png" },
                 ].map((item) => (
                     <Link key={item.to} to={item.to} className="group">
-                        <Card className="relative overflow-hidden border-0 ring-1 ring-inset ring-white/[0.08] hover:ring-white/15 transition-all duration-300">
-                            <img src={item.bg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-45 group-hover:scale-105 transition-all duration-500" />
-                            <div className="absolute inset-0 bg-black/30" />
-                            <CardContent className="relative flex items-center gap-3.5 p-4 sm:p-5">
-                                <div className="flex items-center justify-center size-11 rounded-xl bg-white/10 backdrop-blur-sm text-white group-hover:scale-110 group-hover:bg-white/20 transition-all duration-300">
+                        <div className="relative overflow-hidden rounded-2xl aspect-[2/1] sm:aspect-[2.5/1]">
+                            <img
+                                src={item.bg}
+                                alt=""
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            />
+                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
+                            <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1.5">
+                                <div className="flex items-center justify-center size-10 sm:size-11 rounded-xl bg-white/15 backdrop-blur-sm text-white group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300 shadow-lg">
                                     <item.icon className="size-5" />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="font-semibold text-white text-sm">{item.label}</p>
-                                    <p className="text-[11px] text-white/50 mt-0.5 hidden sm:block">{item.desc}</p>
-                                </div>
-                                <ArrowRight className="size-4 text-white/20 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all" />
-                            </CardContent>
-                        </Card>
+                                <span className="text-xs sm:text-sm font-semibold text-white drop-shadow-md">{item.label}</span>
+                            </div>
+                        </div>
                     </Link>
                 ))}
             </div>
 
-            {/* ===== STATS ROW ===== */}
-            <div className="grid grid-cols-3 gap-3">
-                {[
-                    { label: "Ảnh đã tạo", value: totalImages, icon: ImageIcon, gradient: "from-emerald-500/20 to-teal-500/10", iconColor: "text-emerald-400" },
-                    { label: "Gems đã dùng", value: totalSpent, icon: Gem, gradient: "from-rose-500/20 to-pink-500/10", iconColor: "text-rose-400" },
-                    { label: "Gems hiện tại", value: gems, icon: Wallet, gradient: "from-violet-500/20 to-purple-500/10", iconColor: "text-violet-400" },
-                ].map((stat) => (
-                    <Card key={stat.label} className="border-0 ring-1 ring-inset ring-white/[0.06] bg-white/[0.02]">
-                        <CardContent className="flex items-center gap-3 p-3 sm:p-4">
-                            <div className={`flex items-center justify-center size-9 sm:size-10 rounded-xl bg-gradient-to-br ${stat.gradient}`}>
-                                <stat.icon className={`size-4 sm:size-5 ${stat.iconColor}`} />
-                            </div>
-                            <div className="min-w-0">
-                                {loading ? (
-                                    <Skeleton className="h-6 w-14" />
-                                ) : (
-                                    <p className="text-lg sm:text-xl font-bold tabular-nums truncate">{stat.value.toLocaleString()}</p>
-                                )}
-                                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{stat.label}</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
+            <Separator className="opacity-50" />
 
             {/* ===== TÁC PHẨM GẦN ĐÂY ===== */}
-            <section className="space-y-4">
+            <section className="space-y-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-semibold tracking-tight">Tác phẩm gần đây</h2>
                     <Link to="/app/library" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
@@ -160,50 +169,45 @@ export function Dashboard() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
                         ))}
                     </div>
                 ) : recentImages.length === 0 ? (
                     <div className="relative overflow-hidden rounded-2xl">
-                        <img src="/images/gradient-pink.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
-                        <div className="absolute inset-0 bg-black/50" />
-                        <div className="relative flex flex-col items-center justify-center gap-4 py-16 text-center px-4">
-                            <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-white/10">
-                                <Images className="size-7 text-violet-300" />
+                        <img src="/images/gradient-pink.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
+                        <div className="absolute inset-0 bg-background/60" />
+                        <div className="relative flex flex-col items-center justify-center gap-4 py-14 text-center px-4">
+                            <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/80 ring-1 ring-border/50">
+                                <Images className="size-6 text-muted-foreground" />
                             </div>
                             <div className="space-y-1">
-                                <p className="text-sm font-medium text-white">Chưa có tác phẩm nào</p>
-                                <p className="text-xs text-white/40 max-w-[240px]">Bắt đầu hành trình sáng tạo với AI — tạo tác phẩm đầu tiên ngay!</p>
+                                <p className="text-sm font-medium">Chưa có tác phẩm nào</p>
+                                <p className="text-xs text-muted-foreground max-w-[220px]">Bắt đầu tạo tác phẩm đầu tiên của bạn!</p>
                             </div>
                             <Link to="/app/generate">
-                                <Button size="sm" className="mt-1 gap-1.5 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 border-0 shadow-lg shadow-violet-500/20">
+                                <Button size="sm" className="gap-1.5 rounded-full">
                                     <Plus className="size-3.5" /> Tạo ảnh ngay
                                 </Button>
                             </Link>
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
                         {recentImages.map((img) => (
-                            <Link key={img.id} to="/app/library" className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted ring-1 ring-inset ring-white/[0.06]">
+                            <Link key={img.id} to="/app/library" className="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
                                 <img
                                     src={img.file_url}
                                     alt={img.prompt ?? "AI Generated"}
                                     className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     loading="lazy"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
-                                    <p className="text-[11px] text-white/90 font-medium line-clamp-2 leading-tight drop-shadow-md">
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute bottom-0 left-0 right-0 p-2.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                                    <p className="text-[11px] text-white font-medium line-clamp-2 leading-tight drop-shadow-md">
                                         {img.prompt}
                                     </p>
-                                    {img.model && (
-                                        <Badge variant="secondary" className="mt-1.5 bg-white/10 text-white/70 border-0 text-[9px] backdrop-blur-sm">
-                                            {img.model.split("/").pop()}
-                                        </Badge>
-                                    )}
                                 </div>
                             </Link>
                         ))}
@@ -212,7 +216,7 @@ export function Dashboard() {
             </section>
 
             {/* ===== KIỂU MẪU NỔI BẬT ===== */}
-            <section className="space-y-4">
+            <section className="space-y-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-semibold tracking-tight">Kiểu mẫu nổi bật</h2>
                     <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
@@ -221,28 +225,25 @@ export function Dashboard() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
                         {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="space-y-2">
-                                <Skeleton className="aspect-[3/4] rounded-2xl" />
-                                <Skeleton className="h-4 w-2/3" />
-                            </div>
+                            <Skeleton key={i} className="aspect-[3/4] rounded-2xl" />
                         ))}
                     </div>
                 ) : templates.length === 0 ? (
                     <div className="relative overflow-hidden rounded-2xl">
-                        <img src="/images/gradient-blue.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
-                        <div className="absolute inset-0 bg-black/50" />
-                        <div className="relative flex flex-col items-center justify-center gap-2 py-12 text-center">
-                            <SwatchBook className="size-6 text-sky-400/50" />
-                            <p className="text-sm text-white/40">Chưa có kiểu mẫu nào</p>
+                        <img src="/images/gradient-blue.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
+                        <div className="absolute inset-0 bg-background/60" />
+                        <div className="relative flex flex-col items-center justify-center gap-2 py-10 text-center">
+                            <SwatchBook className="size-6 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
                         {templates.map((tpl) => (
-                            <Link key={tpl.id} to={`/app/templates/${tpl.slug}`} className="group space-y-2.5">
-                                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted ring-1 ring-inset ring-white/[0.06]">
+                            <Link key={tpl.id} to={`/app/templates/${tpl.slug}`} className="group">
+                                <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
                                     {tpl.thumbnail ? (
                                         <img
                                             src={tpl.thumbnail}
@@ -251,19 +252,18 @@ export function Dashboard() {
                                             loading="lazy"
                                         />
                                     ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-white/[0.03] to-transparent">
+                                        <div className="absolute inset-0 flex items-center justify-center">
                                             <SwatchBook className="size-10 text-muted-foreground/30" />
                                         </div>
                                     )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-                                    {/* Bottom info overlay */}
+                                    {/* Bottom info */}
                                     <div className="absolute bottom-0 left-0 right-0 p-3">
-                                        <Badge className="bg-white/10 text-white/80 border-0 text-[10px] backdrop-blur-md font-medium">{tpl.category}</Badge>
+                                        <p className="text-sm font-semibold text-white truncate drop-shadow-md mb-1">{tpl.name}</p>
+                                        <Badge className="bg-white/15 text-white/80 border-0 text-[10px] backdrop-blur-md">{tpl.category}</Badge>
                                     </div>
                                 </div>
-                                <p className="text-sm font-medium truncate px-0.5">{tpl.name}</p>
                             </Link>
                         ))}
                     </div>
