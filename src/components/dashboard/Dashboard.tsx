@@ -65,7 +65,7 @@ export function Dashboard() {
             {/* ===== HERO BANNER ===== */}
             <div className="relative overflow-hidden rounded-3xl">
                 <img
-                    src="/images/gradient-purple.png"
+                    src="images/gradient-purple.png"
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover scale-110"
                 />
@@ -134,9 +134,9 @@ export function Dashboard() {
             {/* ===== QUICK ACTIONS ===== */}
             <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                 {[
-                    { to: "/app/generate", label: "Tạo Ảnh", icon: Sparkles, bg: "/images/gradient-pink.png" },
-                    { to: "/app/templates", label: "Kiểu Mẫu", icon: SwatchBook, bg: "/images/gradient-blue.png" },
-                    { to: "/app/library", label: "Thư Viện", icon: Library, bg: "/images/gradient-purple.png" },
+                    { to: "/app/generate", label: "Tạo Ảnh", icon: Sparkles, bg: "images/gradient-pink.png" },
+                    { to: "/app/templates", label: "Kiểu Mẫu", icon: SwatchBook, bg: "images/gradient-blue.png" },
+                    { to: "/app/library", label: "Thư Viện", icon: Library, bg: "images/gradient-purple.png" },
                 ].map((item) => (
                     <Link key={item.to} to={item.to} className="group">
                         <div className="relative overflow-hidden rounded-2xl aspect-[2/1] sm:aspect-[2.5/1]">
@@ -176,7 +176,7 @@ export function Dashboard() {
                     </div>
                 ) : recentImages.length === 0 ? (
                     <div className="relative overflow-hidden rounded-2xl">
-                        <img src="/images/gradient-pink.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
+                        <img src="images/gradient-pink.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
                         <div className="absolute inset-0 bg-background/60" />
                         <div className="relative flex flex-col items-center justify-center gap-4 py-14 text-center px-4">
                             <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/80 ring-1 ring-border/50">
@@ -232,7 +232,7 @@ export function Dashboard() {
                     </div>
                 ) : templates.length === 0 ? (
                     <div className="relative overflow-hidden rounded-2xl">
-                        <img src="/images/gradient-blue.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
+                        <img src="images/gradient-blue.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-15" />
                         <div className="absolute inset-0 bg-background/60" />
                         <div className="relative flex flex-col items-center justify-center gap-2 py-10 text-center">
                             <SwatchBook className="size-6 text-muted-foreground" />
