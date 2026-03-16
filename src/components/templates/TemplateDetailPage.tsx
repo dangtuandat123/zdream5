@@ -70,6 +70,59 @@ const RESOLUTION_OPTIONS = [
     { value: "4K", label: "4K", desc: "Siêu nét" },
 ]
 
+// Hook cho drag-to-scroll ngang (giống app chỉnh ảnh)
+function useDragScroll() {
+    const ref = useRef<HTMLDivElement>(null)
+    const state = useRef({ isDown: false, startX: 0, scrollLeft: 0, moved: false })
+
+    useEffect(() => {
+        const el = ref.current
+        if (!el) return
+
+        const onDown = (e: MouseEvent) => {
+            state.current = { isDown: true, startX: e.pageX - el.offsetLeft, scrollLeft: el.scrollLeft, moved: false }
+            el.style.cursor = 'grabbing'
+        }
+        const onLeave = () => { state.current.isDown = false; el.style.cursor = 'grab' }
+        const onUp = () => { state.current.isDown = false; el.style.cursor = 'grab' }
+        const onMove = (e: MouseEvent) => {
+            if (!state.current.isDown) return
+            e.preventDefault()
+            const x = e.pageX - el.offsetLeft
+            const walk = (x - state.current.startX) * 1.5
+            if (Math.abs(walk) > 3) state.current.moved = true
+            el.scrollLeft = state.current.scrollLeft - walk
+        }
+
+        el.addEventListener('mousedown', onDown)
+        el.addEventListener('mouseleave', onLeave)
+        el.addEventListener('mouseup', onUp)
+        el.addEventListener('mousemove', onMove)
+        return () => {
+            el.removeEventListener('mousedown', onDown)
+            el.removeEventListener('mouseleave', onLeave)
+            el.removeEventListener('mouseup', onUp)
+            el.removeEventListener('mousemove', onMove)
+        }
+    }, [])
+
+    return { ref, wasDragged: () => state.current.moved }
+}
+
+// Wrapper component cho mỗi effect group row
+function DragScrollRow({ children, className }: { children: React.ReactNode; className?: string }) {
+    const { ref, wasDragged } = useDragScroll()
+    return (
+        <div
+            ref={ref}
+            className={className}
+            onClickCapture={(e) => { if (wasDragged()) e.stopPropagation() }}
+        >
+            {children}
+        </div>
+    )
+}
+
 interface GeneratedImage {
     id: string | number
     url: string
@@ -474,7 +527,7 @@ export function TemplateDetailPage() {
                     {effectGroups.map((group, gi) => (
                         <div key={gi} className="space-y-2 overflow-hidden">
                             <Label className="text-xs font-medium text-muted-foreground">{group.name}</Label>
-                            <div className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll" style={{ cursor: 'grab' }}>
+                            <DragScrollRow className="flex gap-2 overflow-x-auto pb-1 w-0 min-w-full clean-horizontal-scroll cursor-grab">
                                 {group.options.map(opt => {
                                     const isActive = effectSelections[group.name] === opt.value
                                     return (
@@ -501,7 +554,7 @@ export function TemplateDetailPage() {
                                         </div>
                                     )
                                 })}
-                            </div>
+                            </DragScrollRow>
                         </div>
                     ))}
 
