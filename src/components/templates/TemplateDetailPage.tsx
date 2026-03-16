@@ -235,6 +235,18 @@ export function TemplateDetailPage() {
     const [effectSelections, setEffectSelections] = useState<Record<string, string>>({})
     const [extraPrompt, setExtraPrompt] = useState("")
 
+    // Mặc định chọn option đầu tiên của mỗi effect group
+    useEffect(() => {
+        if (effectGroups.length === 0) return
+        const defaults: Record<string, string> = {}
+        for (const group of effectGroups) {
+            if (group.options.length > 0) {
+                defaults[group.name] = group.options[0].value
+            }
+        }
+        setEffectSelections(defaults)
+    }, [template])
+
     // Viewer state — tách biệt source (sample vs generated)
     const [viewerOpen, setViewerOpen] = useState(false)
     const [viewerSource, setViewerSource] = useState<"sample" | "generated">("sample")
