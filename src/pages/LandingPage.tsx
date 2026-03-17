@@ -22,7 +22,7 @@ import {
 } from "lucide-react"
 
 // ============================================================
-// LandingPage - Strict shadcn/ui rewrite
+// LandingPage - Full-screen layout & alignment rewrite
 // ============================================================
 
 const PLANS = [
@@ -101,6 +101,7 @@ export default function LandingPage() {
                 NAVBAR
             ========================= */}
             <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 border-b ${scrolled ? 'bg-background/95 backdrop-blur-sm shadow-sm' : 'bg-background border-transparent'}`}>
+                {/* Standardized Header Container */}
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl h-16 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-2 group">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground group-hover:opacity-90 transition-opacity">
@@ -137,8 +138,8 @@ export default function LandingPage() {
             {/* ======================
                 HERO SECTION
             ========================= */}
-            <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 flex flex-col items-center justify-center bg-background">
-                <div className="container px-4 md:px-8 text-center max-w-5xl mx-auto flex flex-col items-center">
+            <section className="relative w-full min-h-screen pt-16 flex flex-col items-center justify-center bg-background">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
                     <Badge variant="secondary" className="mb-8 py-1.5 px-4 text-sm">
                         <Zap className="mr-2 h-4 w-4 text-primary" /> Tiêu chuẩn hóa với shadcn UI
                     </Badge>
@@ -150,7 +151,7 @@ export default function LandingPage() {
                         </span>
                     </h1>
 
-                    <p className="max-w-[42rem] mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
+                    <p className="max-w-3xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
                         Công cụ AI mạnh mẽ để tạo ảnh từ văn bản, áp dụng hơn 12 kiểu mẫu có sẵn, và quản lý thư viện đám mây cá nhân.
                     </p>
 
@@ -170,10 +171,10 @@ export default function LandingPage() {
             </section>
 
              {/* ======================
-                STATS SECTION
+                STATS SECTION (This one doesn't strictly need min-h-screen, but we keep it full width consistent)
             ========================= */}
-            <section className="border-y bg-muted/50">
-                <div className="container px-4 md:px-8 py-12 md:py-16">
+            <section className="w-full border-y bg-muted/50 flex flex-col items-center justify-center py-16">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center divide-x divide-border">
                          {[
                             { label: "Ảnh đã tạo", value: "1.2M+", icon: WandSparkles },
@@ -194,69 +195,71 @@ export default function LandingPage() {
             {/* ======================
                 FEATURES GRID
             ========================= */}
-            <section id="features" className="container px-4 md:px-8 py-24 md:py-32">
-                <div className="flex flex-col items-center text-center mb-16">
-                     <Badge variant="outline" className="mb-6">Tính năng nổi bật</Badge>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy trình làm việc tối ưu</h2>
-                    <p className="mt-4 max-w-[42rem] text-muted-foreground text-lg text-balance">Mọi thao tác phức tạp đều được tự động hóa. Bạn chỉ cần tập trung vào ý tưởng.</p>
-                </div>
+            <section id="features" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center text-center">
+                    <div className="mb-16">
+                         <Badge variant="outline" className="mb-6">Tính năng nổi bật</Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy trình làm việc tối ưu</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mọi thao tác phức tạp đều được tự động hóa. Bạn chỉ cần tập trung vào ý tưởng.</p>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {/* Feature 1 */}
-                    <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
-                        <CardContent className="p-8 flex flex-col h-full">
-                            <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
-                                <ZapIcon className="h-6 w-6 text-primary" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-4">Tạo Ảnh Siêu Tốc</h3>
-                            <p className="text-muted-foreground flex-1 mb-8">Sử dụng các mô hình AI sinh ảnh mới nhất. Đưa ra lệnh văn bản và nhận kết quả sắc nét lên đến 4K chỉ trong vài giây.</p>
-                            <div className="flex gap-2 flex-wrap">
-                                <Badge variant="secondary">Chất lượng 4K</Badge>
-                                <Badge variant="secondary">Prompt tối ưu</Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full text-left">
+                        {/* Feature 1 */}
+                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
+                            <CardContent className="p-8 flex flex-col h-full">
+                                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
+                                    <ZapIcon className="h-6 w-6 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">Tạo Ảnh Siêu Tốc</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Sử dụng các mô hình AI sinh ảnh mới nhất. Đưa ra lệnh văn bản và nhận kết quả sắc nét lên đến 4K chỉ trong vài giây.</p>
+                                <div className="flex gap-2 flex-wrap">
+                                    <Badge variant="secondary">Chất lượng 4K</Badge>
+                                    <Badge variant="secondary">Prompt tối ưu</Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                    {/* Feature 2 */}
-                    <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
-                        <CardContent className="p-8 flex flex-col h-full">
-                            <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
-                                <Palette className="h-6 w-6 text-primary" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-4">Thư Viện Kiểu Mẫu</h3>
-                            <p className="text-muted-foreground flex-1 mb-8">Hơn 12 presets trải dài từ Cyberpunk, Anime, đến Logo và 3D. Tự động áp dụng bộ lọc tham số mà không cần rành code.</p>
-                            <div className="flex gap-2 flex-wrap">
-                                <Badge variant="secondary">12+ Phong cách</Badge>
-                                <Badge variant="secondary">Dễ sử dụng</Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
+                        {/* Feature 2 */}
+                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
+                            <CardContent className="p-8 flex flex-col h-full">
+                                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
+                                    <Palette className="h-6 w-6 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">Thư Viện Kiểu Mẫu</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Hơn 12 presets trải dài từ Cyberpunk, Anime, đến Logo và 3D. Tự động áp dụng bộ lọc tham số mà không cần rành code.</p>
+                                <div className="flex gap-2 flex-wrap">
+                                    <Badge variant="secondary">12+ Phong cách</Badge>
+                                    <Badge variant="secondary">Dễ sử dụng</Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                     {/* Feature 3 */}
-                     <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
-                        <CardContent className="p-8 flex flex-col h-full">
-                            <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
-                                <ShieldCheck className="h-6 w-6 text-primary" />
-                            </div>
-                            <h3 className="text-xl font-bold mb-4">Bản Quyền 100%</h3>
-                            <p className="text-muted-foreground flex-1 mb-8">Mọi hình ảnh bạn tạo ra kết hợp với hệ thống Kim Cương đều được phép sử dụng thương mại 100% không giới hạn.</p>
-                            <div className="flex gap-2 flex-wrap">
-                                <Badge variant="secondary">Dùng thương mại</Badge>
-                            </div>
-                        </CardContent>
-                    </Card>
+                         {/* Feature 3 */}
+                         <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
+                            <CardContent className="p-8 flex flex-col h-full">
+                                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
+                                    <ShieldCheck className="h-6 w-6 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-bold mb-4">Bản Quyền 100%</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Mọi hình ảnh bạn tạo ra kết hợp với hệ thống Kim Cương đều được phép sử dụng thương mại 100% không giới hạn.</p>
+                                <div className="flex gap-2 flex-wrap">
+                                    <Badge variant="secondary">Dùng thương mại</Badge>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </section>
 
              {/* ======================
                 TEMPLATES CAROUSEL
             ========================= */}
-            <section id="templates" className="bg-muted/30 py-24 md:py-32 border-y">
-                <div className="container px-4 md:px-8 max-w-7xl">
-                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
+            <section id="templates" className="w-full min-h-screen bg-muted/30 border-y py-24 flex flex-col items-center justify-center overflow-hidden">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left">
                          <div className="flex-1">
                              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải nghiệm phong cách đẳng cấp</h2>
-                             <p className="mt-4 text-muted-foreground text-lg max-w-2xl text-balance">Vuốt để xem các kiểu mẫu template nghệ thuật được sử dụng nhiều nhất trên hệ thống.</p>
+                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Vuốt để xem các kiểu mẫu template nghệ thuật được sử dụng nhiều nhất trên hệ thống.</p>
                          </div>
                          <div className="hidden md:flex shrink-0">
                              <Link to="/app/templates">
@@ -267,7 +270,7 @@ export default function LandingPage() {
                          </div>
                     </div>
 
-                    <div className="px-10">
+                    <div className="w-full px-12 md:px-16 mx-auto relative cursor-grab active:cursor-grabbing">
                         <Carousel
                             opts={{
                                 align: "start",
@@ -278,8 +281,8 @@ export default function LandingPage() {
                             <CarouselContent className="-ml-4 md:-ml-8">
                                 {TEMPLATES.map((tpl, index) => (
                                     <CarouselItem key={index} className="pl-4 md:pl-8 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                                        <Card className="overflow-hidden border-border bg-background">
-                                            <CardContent className="p-0 relative aspect-[3/4]">
+                                        <Card className="overflow-hidden border-border bg-background h-full">
+                                            <CardContent className="p-0 relative aspect-[3/4] h-full">
                                                 <img
                                                     src={tpl.img}
                                                     alt={tpl.name}
@@ -287,7 +290,7 @@ export default function LandingPage() {
                                                     loading="lazy"
                                                     draggable={false}
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 select-none pointer-events-none">
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-6 select-none pointer-events-none text-left">
                                                     <Badge variant="secondary" className="w-fit mb-3">{tpl.cat}</Badge>
                                                     <h3 className="text-white font-bold text-xl">{tpl.name}</h3>
                                                 </div>
@@ -296,12 +299,12 @@ export default function LandingPage() {
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
+                            <CarouselPrevious className="absolute -left-6 md:-left-12 h-12 w-12" />
+                            <CarouselNext className="absolute -right-6 md:-right-12 h-12 w-12" />
                         </Carousel>
                     </div>
 
-                    <div className="md:hidden mt-8 text-center flex justify-center">
+                    <div className="md:hidden mt-12 text-center flex justify-center w-full">
                          <Link to="/app/templates" className="w-full">
                              <Button variant="outline" className="w-full">
                                  Xem tất cả kiểu mẫu <ArrowUpRight className="ml-2 h-4 w-4" />
@@ -314,118 +317,124 @@ export default function LandingPage() {
              {/* ======================
                 PRICING
             ========================= */}
-            <section id="pricing" className="container px-4 md:px-8 py-24 md:py-32">
-                 <div className="flex flex-col items-center text-center mb-16">
-                     <Badge variant="outline" className="mb-6">
-                        Hệ thống Kim Cương
-                    </Badge>
-                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Gói dịch vụ linh hoạt</h2>
-                     <p className="mt-4 max-w-[42rem] text-muted-foreground text-lg text-balance">Mỗi tác phẩm AI sắc nét đều tiêu hao Kim Cương. Hãy chọn gói phù hợp nhất.</p>
-                 </div>
+            <section id="pricing" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
+                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
+                     <div className="flex flex-col items-center text-center mb-16">
+                         <Badge variant="outline" className="mb-6">
+                            Hệ thống Kim Cương
+                        </Badge>
+                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Gói dịch vụ linh hoạt</h2>
+                         <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mỗi tác phẩm AI sắc nét đều tiêu hao Kim Cương. Hãy chọn gói phù hợp nhất.</p>
+                     </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                      {PLANS.map((plan) => (
-                          <Card key={plan.name} className={`flex flex-col relative overflow-hidden bg-background ${plan.popular ? 'border-primary md:scale-105 z-10' : ''}`}>
-                             <CardContent className="p-8 flex-1 flex flex-col">
-                                 <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-xl font-bold">{plan.name}</h3>
-                                    {plan.popular && (
-                                        <Badge variant="default">Phổ Biến</Badge>
-                                    )}
-                                 </div>
-                                 <div className="flex items-baseline gap-1 mb-6">
-                                     <span className="text-4xl font-extrabold tracking-tight">{plan.price}</span>
-                                     <span className="text-muted-foreground font-medium">{plan.period}</span>
-                                 </div>
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full items-center">
+                          {PLANS.map((plan) => (
+                              <Card key={plan.name} className={`flex flex-col relative overflow-hidden bg-background text-left ${plan.popular ? 'border-primary shadow-lg sm:scale-105 z-10' : ''}`}>
+                                 <CardContent className="p-8 flex-1 flex flex-col">
+                                     <div className="flex items-center justify-between mb-4">
+                                        <h3 className="text-2xl font-bold">{plan.name}</h3>
+                                        {plan.popular && (
+                                            <Badge variant="default">Phổ Biến</Badge>
+                                        )}
+                                     </div>
+                                     <div className="flex items-baseline gap-1 mb-8">
+                                         <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
+                                         <span className="text-muted-foreground font-medium">{plan.period}</span>
+                                     </div>
 
-                                 <div className="bg-secondary rounded-md p-3 flex items-center gap-3 mb-8 w-fit text-sm font-medium">
-                                     <Gem className="h-4 w-4" />
-                                     <span>{plan.gems} Kim Cương/tháng</span>
-                                 </div>
+                                     <div className="bg-secondary rounded-md p-3 flex items-center gap-3 mb-10 w-fit text-sm font-medium">
+                                         <Gem className="h-5 w-5 text-primary" />
+                                         <span>{plan.gems} Kim Cương/tháng</span>
+                                     </div>
 
-                                 <ul className="space-y-4 flex-1 mb-8">
-                                      {plan.features.map((f) => (
-                                         <li key={f} className="flex items-center gap-3 text-muted-foreground text-sm">
-                                              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                                              {f}
-                                         </li>
-                                      ))}
-                                 </ul>
+                                     <ul className="space-y-4 flex-1 mb-10">
+                                          {plan.features.map((f) => (
+                                             <li key={f} className="flex items-center gap-3 text-muted-foreground text-base">
+                                                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                                                  {f}
+                                             </li>
+                                          ))}
+                                     </ul>
 
-                                 <Link to="/login" className="w-full mt-auto">
-                                     <Button className="w-full h-12" variant={plan.popular ? "default" : "outline"} size="lg">
-                                         {plan.cta}
-                                     </Button>
-                                 </Link>
-                             </CardContent>
-                          </Card>
-                      ))}
+                                     <Link to="/login" className="w-full mt-auto">
+                                         <Button className="w-full h-12 text-base" variant={plan.popular ? "default" : "outline"} size="lg">
+                                             {plan.cta}
+                                         </Button>
+                                     </Link>
+                                 </CardContent>
+                              </Card>
+                          ))}
+                     </div>
                  </div>
             </section>
 
              {/* ======================
                 FAQ - Accordion Section
             ========================= */}
-            <section id="faq" className="bg-muted/30 py-24 md:py-32 border-y">
-                <div className="container px-4 md:px-8 max-w-4xl mx-auto">
+            <section id="faq" className="w-full min-h-screen bg-muted/30 border-y py-24 flex flex-col items-center justify-center">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
                     <div className="flex flex-col items-center text-center mb-12">
                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Câu hỏi thường gặp</h2>
-                        <p className="mt-4 text-muted-foreground text-lg">Mọi thắc mắc của bạn về nền tảng ZDream AI.</p>
+                        <p className="mt-4 text-muted-foreground text-lg text-balance">Mọi thắc mắc của bạn về nền tảng ZDream AI.</p>
                     </div>
 
-                    <Card className="bg-background">
-                        <CardContent className="p-6 md:p-8">
-                            <Accordion type="single" collapsible className="w-full">
-                                {FAQS.map((faq, index) => (
-                                    <AccordionItem key={index} value={`item-${index}`} className="last:border-b-0">
-                                        <AccordionTrigger className="text-left font-medium text-base hover:no-underline">
-                                            {faq.question}
-                                        </AccordionTrigger>
-                                        <AccordionContent className="text-muted-foreground leading-relaxed">
-                                            {faq.answer}
-                                        </AccordionContent>
-                                    </AccordionItem>
-                                ))}
-                            </Accordion>
-                        </CardContent>
-                    </Card>
+                    <div className="w-full max-w-3xl mx-auto">
+                        <Card className="bg-background w-full">
+                            <CardContent className="p-6 md:p-8">
+                                <Accordion type="single" collapsible className="w-full text-left">
+                                    {FAQS.map((faq, index) => (
+                                        <AccordionItem key={index} value={`item-${index}`} className="last:border-b-0">
+                                            <AccordionTrigger className="text-left font-medium text-base hover:no-underline py-4">
+                                                {faq.question}
+                                            </AccordionTrigger>
+                                            <AccordionContent className="text-muted-foreground leading-relaxed text-base">
+                                                {faq.answer}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </section>
 
              {/* ======================
                 CTA WITH AVATARS
             ========================= */}
-            <section className="container px-4 md:px-8 py-24 md:py-32">
-                <div className="bg-muted/50 rounded-xl border p-8 md:p-16 flex flex-col items-center text-center max-w-5xl mx-auto">
-                    <div className="w-full max-w-2xl mx-auto">
-                        <div className="flex -space-x-3 justify-center mb-8">
-                            <Avatar className="h-12 w-12 border-2 border-background">
-                                <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
-                                <AvatarFallback>U1</AvatarFallback>
-                            </Avatar>
-                            <Avatar className="h-12 w-12 border-2 border-background">
-                                <AvatarImage src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
-                                <AvatarFallback>U2</AvatarFallback>
-                            </Avatar>
-                             <Avatar className="h-12 w-12 border-2 border-background">
-                                <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
-                                <AvatarFallback>U3</AvatarFallback>
-                            </Avatar>
-                             <Avatar className="h-12 w-12 border-2 border-background bg-secondary flex items-center justify-center font-medium text-sm">
-                                <AvatarFallback>+50K</AvatarFallback>
-                            </Avatar>
+            <section className="w-full min-h-[90vh] py-24 flex flex-col items-center justify-center">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
+                    <div className="bg-muted/50 rounded-xl border p-8 md:p-24 flex flex-col items-center text-center w-full max-w-5xl mx-auto">
+                        <div className="w-full max-w-2xl mx-auto flex flex-col items-center">
+                            <div className="flex -space-x-4 justify-center mb-8">
+                                <Avatar className="h-16 w-16 border-4 border-background">
+                                    <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
+                                    <AvatarFallback>U1</AvatarFallback>
+                                </Avatar>
+                                <Avatar className="h-16 w-16 border-4 border-background">
+                                    <AvatarImage src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
+                                    <AvatarFallback>U2</AvatarFallback>
+                                </Avatar>
+                                 <Avatar className="h-16 w-16 border-4 border-background">
+                                    <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
+                                    <AvatarFallback>U3</AvatarFallback>
+                                </Avatar>
+                                 <Avatar className="h-16 w-16 border-4 border-background bg-secondary flex items-center justify-center font-bold text-sm">
+                                    <AvatarFallback>+50K</AvatarFallback>
+                                </Avatar>
+                            </div>
+
+                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 text-balance">Tham gia cộng đồng sáng tạo đỉnh cao</h2>
+                            <p className="text-muted-foreground text-lg md:text-xl mb-10 text-balance">
+                               Tạo tài khoản hoàn toàn miễn phí, nhận ngay 50 Kim Cương và bắt đầu hành trình nghệ thuật của bạn ngay bây giờ không rủi ro.
+                            </p>
+
+                            <Link to="/login">
+                                <Button size="lg" className="h-14 px-10 text-lg">
+                                    Tạo Tài Khoản Miễn Phí <ArrowUpRight className="ml-2 h-5 w-5" />
+                                </Button>
+                            </Link>
                         </div>
-
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6">Tham gia cộng đồng sáng tạo đỉnh cao</h2>
-                        <p className="text-muted-foreground text-lg mb-10 text-balance">
-                           Tạo tài khoản hoàn toàn miễn phí, nhận 50 Kim Cương và bắt đầu hành trình nghệ thuật của bạn ngay bây giờ không rủi ro.
-                        </p>
-
-                        <Link to="/login">
-                            <Button size="lg" className="h-12 px-8">
-                                Tạo Tài Khoản Miễn Phí <ArrowUpRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
                     </div>
                 </div>
             </section>
