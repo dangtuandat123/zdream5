@@ -215,15 +215,18 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full text-left">
-                        {/* Feature 1 */}
-                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
-                            <CardContent className="p-8 flex flex-col h-full">
-                                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
-                                    <ZapIcon className="h-6 w-6 text-primary" />
+                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors overflow-hidden group border-border/40 flex flex-col">
+                            <div className="w-full aspect-video relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=600&auto=format&fit=crop" alt="Làm chủ khung hình" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
+                                <div className="absolute -bottom-6 left-6 h-12 w-12 rounded-xl bg-background border flex items-center justify-center shadow-lg z-10 transition-transform duration-300 group-hover:-translate-y-1">
+                                    <ZapIcon className="h-5 w-5 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Làm Chủ Mọi Khung Hình</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Lựa chọn 10 định dạng tỷ lệ khác nhau phục vụ từ thiết kế web, in ấn đến làm video dọc. Duy trì sự nhất quán của phong cách nhân vật và kiểm soát từng chi tiết xuất hiện trong ảnh.</p>
-                                <div className="flex gap-2 flex-wrap">
+                            </div>
+                            <CardContent className="px-6 pb-6 pt-10 flex flex-col flex-1">
+                                <h3 className="text-xl font-bold mb-3">Làm Chủ Mọi Khung Hình</h3>
+                                <p className="text-muted-foreground flex-1 mb-6 text-sm sm:text-base">Lựa chọn 10 định dạng tỷ lệ khác nhau phục vụ từ thiết kế web, in ấn đến làm video dọc. Duy trì sự nhất quán của phong cách nhân vật và kiểm soát từng chi tiết xuất hiện trong ảnh.</p>
+                                <div className="flex gap-2 flex-wrap mt-auto">
                                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Tuyệt đối chính xác</Badge>
                                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Chất lượng 4K</Badge>
                                 </div>
@@ -231,14 +234,18 @@ export default function LandingPage() {
                         </Card>
 
                         {/* Feature 2 */}
-                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
-                            <CardContent className="p-8 flex flex-col h-full">
-                                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
-                                    <Palette className="h-6 w-6 text-primary" />
+                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors overflow-hidden group border-border/40 flex flex-col">
+                            <div className="w-full aspect-video relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=600&auto=format&fit=crop" alt="Hệ thống phong cách" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
+                                <div className="absolute -bottom-6 left-6 h-12 w-12 rounded-xl bg-background border flex items-center justify-center shadow-lg z-10 transition-transform duration-300 group-hover:-translate-y-1">
+                                    <Palette className="h-5 w-5 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Hệ Thống Phong Cách Mở Rộng</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Bộ sưu tập kiểu mẫu (Templates) đa biên độ giúp bạn áp dụng các phong cách nghệ thuật phức tạp chỉ trong một cú nhấp chuột. Tiết kiệm hàng giờ nghiên cứu công thức.</p>
-                                <div className="flex gap-2 flex-wrap">
+                            </div>
+                            <CardContent className="px-6 pb-6 pt-10 flex flex-col flex-1">
+                                <h3 className="text-xl font-bold mb-3">Hệ Thống Phong Cách Mở Rộng</h3>
+                                <p className="text-muted-foreground flex-1 mb-6 text-sm sm:text-base">Bộ sưu tập kiểu mẫu (Templates) đa biên độ giúp bạn áp dụng các phong cách nghệ thuật phức tạp chỉ trong một cú nhấp chuột. Tiết kiệm hàng giờ nghiên cứu công thức.</p>
+                                <div className="flex gap-2 flex-wrap mt-auto">
                                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Hoàn toàn tự động</Badge>
                                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Chuẩn hóa thẩm mỹ</Badge>
                                 </div>
@@ -246,14 +253,18 @@ export default function LandingPage() {
                         </Card>
 
                          {/* Feature 3 */}
-                         <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
-                            <CardContent className="p-8 flex flex-col h-full">
-                                <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
-                                    <ShieldCheck className="h-6 w-6 text-primary" />
+                         <Card className="h-full bg-background hover:bg-muted/50 transition-colors overflow-hidden group border-border/40 flex flex-col">
+                            <div className="w-full aspect-video relative overflow-hidden">
+                                <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop" alt="Không gian làm việc" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent pointer-events-none" />
+                                <div className="absolute -bottom-6 left-6 h-12 w-12 rounded-xl bg-background border flex items-center justify-center shadow-lg z-10 transition-transform duration-300 group-hover:-translate-y-1">
+                                    <ShieldCheck className="h-5 w-5 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Không Gian Làm Việc Riêng Tư</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Mọi thành phẩm của bạn được sắp xếp cực kì khoa học thành từng dự án riêng biệt. Chúng tôi cam kết bảo vệ dữ liệu và trao toàn quyền thương mại cho chủ sở hữu tác phẩm.</p>
-                                <div className="flex gap-2 flex-wrap">
+                            </div>
+                            <CardContent className="px-6 pb-6 pt-10 flex flex-col flex-1">
+                                <h3 className="text-xl font-bold mb-3">Không Gian Làm Việc Riêng Tư</h3>
+                                <p className="text-muted-foreground flex-1 mb-6 text-sm sm:text-base">Mọi thành phẩm của bạn được sắp xếp cực kì khoa học thành từng dự án riêng biệt. Chúng tôi cam kết bảo vệ dữ liệu và trao toàn quyền thương mại cho chủ sở hữu tác phẩm.</p>
+                                <div className="flex gap-2 flex-wrap mt-auto">
                                     <Badge variant="secondary">Lưu trữ đám mây</Badge>
                                 </div>
                             </CardContent>
