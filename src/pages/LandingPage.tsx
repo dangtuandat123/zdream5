@@ -157,7 +157,7 @@ export default function LandingPage() {
 
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-8 text-balance">
                         Biến ý tưởng thành <br className="hidden sm:block" />
-                        <span className="text-primary">
+                        <span className="text-primary" style={{ fontFamily: "'Dancing Script', cursive", fontWeight: 700, fontSize: "1.1em" }}>
                             nghệ thuật thị giác
                         </span>
                     </h1>
