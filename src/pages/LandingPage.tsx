@@ -77,12 +77,12 @@ const FAQS = [
         answer: "Có! Tất cả hình ảnh tạo ra từ các gói trả phí (Pro, Unlimited) hoặc bằng Kim Cương nạp thêm đều đi kèm giấy phép sử dụng thương mại 100%. Bạn có thể dùng cho in ấn, quảng cáo, thiết kế UI/UX mà không sợ bản quyền."
     },
     {
-        question: "Tạo ảnh AI có khó không, tôi chưa có kinh nghiệm viết prompt?",
-        answer: "Hoàn toàn không! Với 'Kho Kiểu Mẫu' (Templates), bạn chỉ cần chọn phong cách và hệ thống sẽ tự động lo phần từ khóa phức tạp."
+        question: "Tôi dở công nghệ và văn vẻ thì có làm được không?",
+        answer: "Chắc chắn là được! ZDream cung cấp sẵn một 'Siêu thị phong cách'. Bạn thích tranh giống truyện tranh manga, hay ảnh giống người thật chụp, bạn chỉ cần bấm chọn. Còn lại mọi thứ ứng dụng sẽ tự động vẽ cho bạn."
     },
     {
-        question: "Có giới hạn số lượng ảnh lưu trong thư viện không?",
-        answer: "Không! Lịch sử tạo ảnh được lưu trữ an toàn trên Cloud."
+        question: "Hình tôi vẽ xong rồi lưu ở đâu?",
+        answer: "Hình của bạn luôn nằm trong tài khoản cá nhân, xem lại lúc nào cũng được dù đăng nhập bằng máy tính hay điện thoại."
     }
 ]
 
@@ -152,7 +152,7 @@ export default function LandingPage() {
 
                 <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
                     <Badge variant="secondary" className="mb-8 py-1.5 px-4 text-sm">
-                        <Zap className="mr-2 h-4 w-4 text-primary" /> Tạo ảnh AI cực nhanh
+                        <Zap className="mr-2 h-4 w-4 text-primary" /> Vẽ tranh trong nháy mắt
                     </Badge>
 
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-8 text-balance">
@@ -163,7 +163,7 @@ export default function LandingPage() {
                     </h1>
 
                     <p className="max-w-2xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
-                        Tạo tác phẩm nghệ thuật chỉ với vài từ khóa. Hỗ trợ 10 tỷ lệ ảnh, xuất sắc nét 4K và kho Kiểu mẫu (Templates) dựng sẵn siêu tiện lợi.
+                        Chỉ cần gõ vài chữ hoặc tải lên 1 bức ảnh, trí tuệ nhân tạo sẽ vẽ lại cho bạn những bức tranh tuyệt đẹp. Không cần học phần mềm, không cần tải ứng dụng rườm rà.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -209,9 +209,9 @@ export default function LandingPage() {
             <section id="features" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center text-center">
                     <div className="mb-16">
-                         <Badge variant="outline" className="mb-6">Sáng tạo không giới hạn</Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Mượt mà & Trực quan</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Từ ý tưởng đến hình ảnh chỉ trong vài cú click.</p>
+                         <Badge variant="outline" className="mb-6">Dễ như trở bàn tay</Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Ai cũng có thể làm họa sĩ</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mọi thao tác phức tạp đã được máy tính làm thay. Việc của bạn chỉ là tưởng tượng.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full text-left">
@@ -221,11 +221,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ZapIcon className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Tùy Biến Đa Dạng</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Kiểm soát chi tiết với 10 tỷ lệ khung hình, độ phân giải 4K, Image-to-Image và Seed tùy chọn.</p>
+                                <h3 className="text-xl font-bold mb-4">Vẽ Theo Ý Muốn</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Bạn có thể chọn ảnh dọc để làm hình nền điện thoại, ảnh ngang cho máy tính. Hình vẽ ra vô cùng sắc nét, phóng to không bị vỡ hạt.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">10 Tỷ lệ ảnh</Badge>
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">I2I & T2I</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Ảnh siêu nét</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Đủ mọi kích cỡ</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -236,11 +236,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <Palette className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Kho Kiểu Mẫu Dựng Sẵn</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Không cần biết viết prompt. Chọn mẫu có sẵn, thêm ảnh gốc và sáng tạo ngay lập tức.</p>
+                                <h3 className="text-xl font-bold mb-4">Sẵn Mọi Phong Cách</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Bạn thích tranh sơn dầu, truyện tranh Nhật Bản hay ảnh chụp 3D? Chỉ cần click bấm chọn mẫu có sẵn là xong ngay.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Dễ dùng</Badge>
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Auto-Prompt</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Dành cho người mới</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Không cần gõ chữ</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -251,10 +251,10 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ShieldCheck className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Bản Quyền 100%</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Sử dụng thương mại thoải mái cho hình ảnh được tạo ra từ kim cương trong tài khoản.</p>
+                                <h3 className="text-xl font-bold mb-4">Hoàn Toàn Hợp Pháp</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Đem những bức ảnh bạn vừa tạo đi in áo, bán hàng, chạy quảng cáo đăng facebook thoải mái mà không sợ ai đòi bản quyền.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary">In ấn & Quảng cáo</Badge>
+                                    <Badge variant="secondary">An tâm in ấn</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -269,8 +269,8 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
                     <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left">
                          <div className="flex-1">
-                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Kho Kiểu Mẫu (Templates) Đa Dạng</h2>
-                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Trải nghiệm những mẫu style được người dùng yêu thích nhất trên hệ thống.</p>
+                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Bộ Sưu Tập Phong Cách</h2>
+                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Trượt để ngắm những kiểu vẽ được mọi người yêu thích sử dụng nhiều nhất hôm nay.</p>
                          </div>
                          <div className="hidden md:flex shrink-0">
                              <Link to="/app/templates">
