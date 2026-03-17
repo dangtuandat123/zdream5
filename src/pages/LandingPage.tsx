@@ -77,12 +77,12 @@ const FAQS = [
         answer: "Có! Tất cả hình ảnh tạo ra từ các gói trả phí (Pro, Unlimited) hoặc bằng Kim Cương nạp thêm đều đi kèm giấy phép sử dụng thương mại 100%. Bạn có thể dùng cho in ấn, quảng cáo, thiết kế UI/UX mà không sợ bản quyền."
     },
     {
-        question: "Hệ thống tùy chỉnh Prompt chuyên sâu gồm những gì?",
-        answer: "Trên giao diện Tạo cấu hình (Generate), bạn có thể dễ dàng thiết lập Negative Prompt (loại trừ từ khóa), chọn chính xác 1 trong 10 tỷ lệ khung hình (Aspect Ratios) và tự do chỉ định Seed để nhất quán thiết kế, kết hợp cùng ảnh tham chiếu (Image-to-Image)."
+        question: "Làm sao để tôi điều khiển được chi tiết của bản vẽ?",
+        answer: "Hệ thống cung cấp một bảng điều khiển trực quan minh bạch. Bằng cách kết hợp mô tả văn bản với các tùy chọn loại trừ thông minh, hoặc cung cấp cho nền tảng một hình ảnh phác thảo làm tham chiếu, bạn sẽ có toàn quyền làm chủ bố cục và phong cách cuối cùng."
     },
     {
-        question: "Làm thế nào để phân loại hàng ngàn bức ảnh đã tạo?",
-        answer: "Mỗi hình ảnh sinh ra với phí Kim Cương tương ứng (tùy thuộc vào model và độ phân giải 1K, 2K, 4K) sẽ được lưu trực tiếp trên Cloud. ZDream tích hợp sẵn hệ thống Projects, hỗ trợ bạn gom nhóm tác phẩm thành các thư mục đồ án một cách ngăn nắp."
+        question: "Tôi có cần lưu hình ảnh vào máy tính thường xuyên không?",
+        answer: "Không cần thiết. Nền tảng tổ chức sẵn 'Không Gian Làm Việc' cho bạn trên đám mây. Bạn có thể phân loại ảnh theo từng tệp (thư mục) chiến dịch riêng biệt, và truy cập lại khối lượng công việc khổng lồ này một cách ngăn nắp mọi lúc, mọi nơi."
     }
 ]
 
@@ -152,7 +152,7 @@ export default function LandingPage() {
 
                 <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
                     <Badge variant="secondary" className="mb-8 py-1.5 px-4 text-sm">
-                        <Zap className="mr-2 h-4 w-4 text-primary" /> Tiêu chuẩn hóa với OpenRouter & ZDream AI
+                        <Zap className="mr-2 h-4 w-4 text-primary" /> Nền tảng sáng tạo nghệ thuật thế hệ mới
                     </Badge>
 
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-8 text-balance">
@@ -163,7 +163,7 @@ export default function LandingPage() {
                     </h1>
 
                     <p className="max-w-3xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
-                        Nền tảng sinh ảnh AI toàn diện tích hợp các công cụ chuyên sâu. Tùy chỉnh Negative Prompt, kiểm soát Seed, tham chiếu Image-to-Image và hỗ trợ xuất bản phẩm ở độ phân giải lên đến 4K.
+                        Nền tảng sinh ảnh chuyên nghiệp, biến mọi ý tưởng phức tạp thành tác phẩm đồ họa thực thụ. Cung cấp bộ công cụ điều khiển mạnh mẽ giúp bạn làm chủ hoàn toàn quá trình sáng tác.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -210,8 +210,8 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center text-center">
                     <div className="mb-16">
                          <Badge variant="outline" className="mb-6">Công cụ cho nhà sáng tạo</Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình Sáng Tạo Chuyên Sâu</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Cung cấp bộ công cụ điều khiển prompt toàn diện, kết hợp cùng hệ thống quản lý Dự Án (Projects) thông minh cho trải nghiệm liền mạch.</p>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình Sáng Tác Đỉnh Cao</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Tối ưu hóa mọi bước từ việc phác thảo bố cục, tinh chỉnh chi tiết đến khi xuất bản những thành phẩm chất lượng nhất.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full text-left">
@@ -221,11 +221,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ZapIcon className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Mở Rộng Không Gian Cấu Hình</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Trải nghiệm quyền kiểm soát tối đa với 10 tỷ lệ khung hình (1:1, 16:9, 21:9...), tham chiếu ảnh gốc (I2I), thiết lập Seed và Negative Prompt. Định dạng xuất xưởng chuẩn 1K, 2K hoặc 4K.</p>
+                                <h3 className="text-xl font-bold mb-4">Làm Chủ Mọi Khung Hình</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Lựa chọn 10 định dạng tỷ lệ khác nhau phục vụ từ thiết kế web, in ấn đến làm video dọc. Duy trì sự nhất quán của phong cách nhân vật và kiểm soát từng chi tiết xuất hiện trong ảnh.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">10 Tỷ lệ khung hình</Badge>
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Độ phân giải 4K</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Tuyệt đối chính xác</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Chất lượng 4K</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -236,11 +236,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <Palette className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Bộ Lọc Effect & Templates</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Kho Kiểu Mẫu (Templates) được đóng gói sẵn các nhóm bộ lọc (Effect Groups) và tiền tố lệnh tối ưu. Phù hợp cho cả chuyên gia lẫn người dùng mới tiếp cận Prompt Engineering.</p>
+                                <h3 className="text-xl font-bold mb-4">Hệ Thống Phong Cách Mở Rộng</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Bộ sưu tập kiểu mẫu (Templates) đa biên độ giúp bạn áp dụng các phong cách nghệ thuật phức tạp chỉ trong một cú nhấp chuột. Tiết kiệm hàng giờ nghiên cứu công thức.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Auto-Prompting</Badge>
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Effect Groups</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Hoàn toàn tự động</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Chuẩn hóa thẩm mỹ</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -251,10 +251,10 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ShieldCheck className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Thư Viện & Projects Đám Mây</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Phân loại dễ dàng với cấu trúc Projects (Thư mục). Quản lý chi trả Kim Cương thông minh cho từng độ phân giải (1K, 2K, 4K). Tác phẩm thuộc bản quyền của bạn.</p>
+                                <h3 className="text-xl font-bold mb-4">Không Gian Làm Việc Riêng Tư</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Mọi thành phẩm của bạn được sắp xếp cực kì khoa học thành từng dự án riêng biệt. Chúng tôi cam kết bảo vệ dữ liệu và trao toàn quyền thương mại cho chủ sở hữu tác phẩm.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary">Quản lý Projects</Badge>
+                                    <Badge variant="secondary">Lưu trữ đám mây</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -269,8 +269,8 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
                     <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left">
                          <div className="flex-1">
-                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải Nghiệm Các Preset Đỉnh Cao</h2>
-                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Tham khảo hệ thống Templates được sử dụng nhiều nhất, áp dụng thẳng tham số kỹ thuật (System Prompt, Base Image) vào thiết kế của riêng bạn.</p>
+                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải Nghiệm Đẳng Cấp Đồ Họa Mới</h2>
+                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Tham khảo những phong cách hình ảnh đang dẫn đầu xu hướng thị giác và ứng dụng ngay vào thiết kế của riêng bạn.</p>
                          </div>
                          <div className="hidden md:flex shrink-0">
                              <Link to="/app/templates">
