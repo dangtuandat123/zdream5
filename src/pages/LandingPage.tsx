@@ -138,8 +138,18 @@ export default function LandingPage() {
             {/* ======================
                 HERO SECTION
             ========================= */}
-            <section className="relative w-full min-h-screen pt-16 flex flex-col items-center justify-center bg-background">
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
+            <section className="relative w-full min-h-screen pt-16 flex flex-col items-center justify-center bg-background overflow-hidden">
+                <video
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
+                    src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
+                />
+                <div className="absolute inset-0 bg-background/80 z-0"></div>
+
+                <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
                     <Badge variant="secondary" className="mb-8 py-1.5 px-4 text-sm">
                         <Zap className="mr-2 h-4 w-4 text-primary" /> Tiêu chuẩn hóa với shadcn UI
                     </Badge>
