@@ -77,12 +77,12 @@ const FAQS = [
         answer: "Có! Tất cả hình ảnh tạo ra từ các gói trả phí (Pro, Unlimited) hoặc bằng Kim Cương nạp thêm đều đi kèm giấy phép sử dụng thương mại 100%. Bạn có thể dùng cho in ấn, quảng cáo, thiết kế UI/UX mà không sợ bản quyền."
     },
     {
-        question: "Tôi dở công nghệ và văn vẻ thì có làm được không?",
-        answer: "Chắc chắn là được! ZDream cung cấp sẵn một 'Siêu thị phong cách'. Bạn thích tranh giống truyện tranh manga, hay ảnh giống người thật chụp, bạn chỉ cần bấm chọn. Còn lại mọi thứ ứng dụng sẽ tự động vẽ cho bạn."
+        question: "Tôi không có kinh nghiệm thiết kế trên máy tính thì có sử dụng được không?",
+        answer: "Hoàn toàn được. Hệ thống 'Kiểu mẫu' (Templates) của chúng tôi được thiết kế để tự động hóa phần kỹ thuật thiết lập. Bạn chỉ việc chọn phong cách trực quan, phần tối ưu lệnh sinh ảnh (prompt) sẽ do AI đảm nhiệm để đảm bảo tác phẩm cuối cùng luôn đạt chuẩn."
     },
     {
-        question: "Hình tôi vẽ xong rồi lưu ở đâu?",
-        answer: "Hình của bạn luôn nằm trong tài khoản cá nhân, xem lại lúc nào cũng được dù đăng nhập bằng máy tính hay điện thoại."
+        question: "Tác phẩm của tôi được lưu trữ và quản lý thế nào?",
+        answer: "Toàn bộ lịch sử tạo ảnh của bạn được lưu trữ an toàn và bảo mật trên hệ thống đám mây (Cloud). Bạn có thể dễ dàng tải xuống hoặc lấy làm tham khảo từ bất kỳ thiết bị nào và bất kỳ lúc nào."
     }
 ]
 
@@ -152,7 +152,7 @@ export default function LandingPage() {
 
                 <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
                     <Badge variant="secondary" className="mb-8 py-1.5 px-4 text-sm">
-                        <Zap className="mr-2 h-4 w-4 text-primary" /> Vẽ tranh trong nháy mắt
+                        <Zap className="mr-2 h-4 w-4 text-primary" /> Sáng tạo nghệ thuật AI chuẩn Studio
                     </Badge>
 
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-8 text-balance">
@@ -162,8 +162,8 @@ export default function LandingPage() {
                         </span>
                     </h1>
 
-                    <p className="max-w-2xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
-                        Chỉ cần gõ vài chữ hoặc tải lên 1 bức ảnh, trí tuệ nhân tạo sẽ vẽ lại cho bạn những bức tranh tuyệt đẹp. Không cần học phần mềm, không cần tải ứng dụng rườm rà.
+                    <p className="max-w-3xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
+                        Nền tảng tạo ảnh AI chuyên nghiệp giúp bạn hiện thực hóa mọi ý tưởng chỉ bằng văn bản. Tích hợp đa dạng khuôn hình, độ phân giải cao và thư viện phong cách tối ưu sẵn.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -209,9 +209,9 @@ export default function LandingPage() {
             <section id="features" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center text-center">
                     <div className="mb-16">
-                         <Badge variant="outline" className="mb-6">Dễ như trở bàn tay</Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Ai cũng có thể làm họa sĩ</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mọi thao tác phức tạp đã được máy tính làm thay. Việc của bạn chỉ là tưởng tượng.</p>
+                         <Badge variant="outline" className="mb-6">Hiệu suất tối ưu</Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình Sáng Tạo Toàn Diện</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Công cụ mạnh mẽ kết hợp cùng không gian làm việc trực quan, đáp ứng mọi nhu cầu từ phác thảo ý tưởng đến thành phẩm chất lượng cao.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full text-left">
@@ -221,11 +221,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ZapIcon className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Vẽ Theo Ý Muốn</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Bạn có thể chọn ảnh dọc để làm hình nền điện thoại, ảnh ngang cho máy tính. Hình vẽ ra vô cùng sắc nét, phóng to không bị vỡ hạt.</p>
+                                <h3 className="text-xl font-bold mb-4">Kiểm Soát Kích Thước & Tỷ Lệ</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Hỗ trợ lên đến 10 tỷ lệ khung hình tiêu chuẩn cho mọi nền tảng thiết kế và truyền thông. Xuất ảnh độ phân giải cực cao, duy trì độ nét và chi tiết hoàn hảo.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Ảnh siêu nét</Badge>
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Đủ mọi kích cỡ</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Đa dạng tỷ lệ</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Độ phân giải siêu thực</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -236,11 +236,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <Palette className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Sẵn Mọi Phong Cách</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Bạn thích tranh sơn dầu, truyện tranh Nhật Bản hay ảnh chụp 3D? Chỉ cần click bấm chọn mẫu có sẵn là xong ngay.</p>
+                                <h3 className="text-xl font-bold mb-4">Hệ Thống Phong Cách (Templates)</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Tự động cấu hình các tham số tạo ảnh phức tạp chỉ bằng một cú click. Đạt được sắc thái hình ảnh mong muốn mà không cần kiến thức chuyên môn về Prompt Engineering.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Dành cho người mới</Badge>
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Không cần gõ chữ</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Giải pháp tinh gọn</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Tối ưu tự động</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -251,10 +251,10 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ShieldCheck className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Hoàn Toàn Hợp Pháp</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Đem những bức ảnh bạn vừa tạo đi in áo, bán hàng, chạy quảng cáo đăng facebook thoải mái mà không sợ ai đòi bản quyền.</p>
+                                <h3 className="text-xl font-bold mb-4">Bản Quyền Thương Mại Sinh Kèm</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">An tâm khai thác mọi tác phẩm tạo ra từ hệ thống cho việc kinh doanh, in ấn hoặc quảng bá thương hiệu mà không gặp hạn chế về bản quyền.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary">An tâm in ấn</Badge>
+                                    <Badge variant="secondary">An toàn pháp lý</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -269,8 +269,8 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
                     <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left">
                          <div className="flex-1">
-                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Bộ Sưu Tập Phong Cách</h2>
-                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Trượt để ngắm những kiểu vẽ được mọi người yêu thích sử dụng nhiều nhất hôm nay.</p>
+                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Khám Phá Các Phong Cách Nổi Bật</h2>
+                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Nguồn cảm hứng vô tận với các mẫu thiết kế nghệ thuật đang thịnh hành và được tinh chỉnh sẵn.</p>
                          </div>
                          <div className="hidden md:flex shrink-0">
                              <Link to="/app/templates">
