@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import Autoplay from "embla-carousel-autoplay"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
     ArrowUpRight,
@@ -147,7 +148,7 @@ export default function LandingPage() {
                     className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
                     src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
                 />
-                <div className="absolute inset-0 bg-background/80 z-0"></div>
+                <div className="absolute inset-0 bg-background/60 z-0"></div>
 
                 <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
                     <Badge variant="secondary" className="mb-8 py-1.5 px-4 text-sm">
@@ -282,6 +283,11 @@ export default function LandingPage() {
 
                     <div className="w-full px-12 md:px-16 mx-auto relative cursor-grab active:cursor-grabbing">
                         <Carousel
+                            plugins={[
+                                Autoplay({
+                                    delay: 3000,
+                                })
+                            ]}
                             opts={{
                                 align: "start",
                                 loop: true,
