@@ -78,7 +78,7 @@ const FAQS = [
     },
     {
         question: "Tạo ảnh AI có khó không, tôi chưa có kinh nghiệm viết prompt?",
-        answer: "Rất dễ dàng! Chúng tôi cung cấp mục 'Kho Kiểu Mẫu' (Templates). Bạn chỉ cần chọn phong cách bạn thích, nhập vài từ khóa tiếng Việt đơn giản (hoặc tải một ảnh gốc lên), ZDream AI sẽ tự động tối ưu prompt để cho ra kết quả đẹp nhất."
+        answer: "Hoàn toàn không! Tính năng 'Kho Kiểu Mẫu' (Templates) được thiết kế đặc biệt cho người mới. Bạn chỉ việc chọn phong cách, tải lên ảnh gốc hoặc nhập ý tưởng cơ bản. ZDream AI sẽ tự động nạp các bộ lọc (Effect Groups) và từ khóa chuyên sâu đã được tinh chỉnh sẵn để cho ra tác phẩm hoàn hảo."
     },
     {
         question: "Có giới hạn số lượng ảnh lưu trong thư viện không?",
@@ -163,7 +163,7 @@ export default function LandingPage() {
                     </h1>
 
                     <p className="max-w-3xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
-                        Công cụ AI mạnh mẽ để tạo ảnh từ văn bản, áp dụng hơn 12 kiểu mẫu có sẵn, và quản lý thư viện đám mây cá nhân.
+                        Tạo tác phẩm nghệ thuật chỉ bằng vài từ khóa. Hỗ trợ 10 tỷ lệ khung hình, ảnh sắc nét 4K, Image-to-Image và hệ thống Kiểu mẫu (Templates) thông minh giúp bạn dễ dàng có ngay ảnh đẹp mà không cần rành viết Prompt.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -209,9 +209,9 @@ export default function LandingPage() {
             <section id="features" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center text-center">
                     <div className="mb-16">
-                         <Badge variant="outline" className="mb-6">Tính năng nổi bật</Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy trình làm việc tối ưu</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mọi thao tác phức tạp đều được tự động hóa. Bạn chỉ cần tập trung vào ý tưởng.</p>
+                         <Badge variant="outline" className="mb-6">Sáng tạo không rào cản</Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy trình mượt mà, kết quả đỉnh cao</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Chạm tay đến khả năng biến ý tưởng hình ảnh đồ họa thành hiện thực với đầy đủ công cụ kiểm soát chuyên sâu cho dân chuyên, và Template tiện xài cho người mới.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full text-left">
@@ -221,11 +221,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ZapIcon className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Tạo Ảnh Siêu Tốc</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Sử dụng các mô hình AI sinh ảnh mới nhất. Đưa ra lệnh văn bản và nhận kết quả sắc nét lên đến 4K chỉ trong vài giây.</p>
+                                <h3 className="text-xl font-bold mb-4">Tùy Biến Chuyên Sâu</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Kiểm soát hoàn toàn bức ảnh với 10 tỷ lệ khung hình, xuất độ phân giải lên đến 4K. Tích hợp Image-to-Image (Tạo ảnh từ ảnh), Seed, và Loại trừ (Negative Prompt).</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary">Chất lượng 4K</Badge>
-                                    <Badge variant="secondary">Prompt tối ưu</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">10 Tỷ lệ khung hình</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">I2I & T2I</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -236,11 +236,11 @@ export default function LandingPage() {
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <Palette className="h-6 w-6 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4">Thư Viện Kiểu Mẫu</h3>
-                                <p className="text-muted-foreground flex-1 mb-8">Hơn 12 presets trải dài từ Cyberpunk, Anime, đến Logo và 3D. Tự động áp dụng bộ lọc tham số mà không cần rành code.</p>
+                                <h3 className="text-xl font-bold mb-4">Hệ Thống Kiểu Mẫu</h3>
+                                <p className="text-muted-foreground flex-1 mb-8">Không biết viết lệnh rườm rà? Hãy sử dụng kho Templates. Chọn mẫu, tinh chỉnh bằng menu Effect (bộ lọc màu, phong cách), thêm ảnh gốc và tạo tác phẩm hoàn chỉnh tức thì.</p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary">12+ Phong cách</Badge>
-                                    <Badge variant="secondary">Dễ sử dụng</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Thiết kế cho Newbie</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Auto-Prompting</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -269,8 +269,8 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
                     <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left">
                          <div className="flex-1">
-                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải nghiệm phong cách đẳng cấp</h2>
-                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Vuốt để xem các kiểu mẫu template nghệ thuật được sử dụng nhiều nhất trên hệ thống.</p>
+                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Kho Kiểu Mẫu (Templates) Đa Dạng</h2>
+                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Mỗi Template là một công thức đã được tinh chỉnh thông số kỹ thuật (System Prompt, Effect). Cực kỳ tiện lợi cho người dùng muốn tạo ảnh đẹp mà bỏ qua rào cản kỹ thuật.</p>
                          </div>
                          <div className="hidden md:flex shrink-0">
                              <Link to="/app/templates">
