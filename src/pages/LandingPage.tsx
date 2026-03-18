@@ -128,7 +128,7 @@ export default function LandingPage() {
 
     return (
         <div className="relative w-full min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground">
-            
+
             {/* ======================
                 NAVBAR
             ========================= */}
@@ -212,13 +212,13 @@ export default function LandingPage() {
                 </div>
             </section>
 
-             {/* ======================
+            {/* ======================
                 STATS SECTION (This one doesn't strictly need min-h-screen, but we keep it full width consistent)
             ========================= */}
             <section className="w-full border-y bg-muted/50 flex flex-col items-center justify-center py-16">
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center divide-x divide-border">
-                         {[
+                        {[
                             { label: "Ảnh đã tạo", value: "1.2M+", icon: WandSparkles },
                             { label: "Người dùng", value: "50K+", icon: Star },
                             { label: "Kiểu mẫu", value: "12+", icon: SwatchBook },
@@ -240,7 +240,7 @@ export default function LandingPage() {
             <section id="features" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center text-center">
                     <div className="mb-16">
-                         <Badge variant="outline" className="mb-6">Công cụ cho nhà sáng tạo</Badge>
+                        <Badge variant="outline" className="mb-6">Công cụ cho nhà sáng tạo</Badge>
                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình Sáng Tác Đỉnh Cao</h2>
                         <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Tối ưu hóa mọi bước từ việc phác thảo bố cục, tinh chỉnh chi tiết đến khi xuất bản những thành phẩm chất lượng nhất.</p>
                     </div>
@@ -276,8 +276,8 @@ export default function LandingPage() {
                             </CardContent>
                         </Card>
 
-                         {/* Feature 3 */}
-                         <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
+                        {/* Feature 3 */}
+                        <Card className="h-full bg-background hover:bg-muted/50 transition-colors">
                             <CardContent className="p-8 flex flex-col h-full">
                                 <div className="h-12 w-12 rounded-lg bg-secondary flex items-center justify-center mb-6">
                                     <ShieldCheck className="h-6 w-6 text-primary" />
@@ -293,23 +293,23 @@ export default function LandingPage() {
                 </div>
             </section>
 
-             {/* ======================
+            {/* ======================
                 TEMPLATES CAROUSEL
             ========================= */}
             <section id="templates" className="w-full min-h-screen bg-muted/30 border-y py-24 flex flex-col items-center justify-center overflow-hidden">
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
                     <div className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left">
-                         <div className="flex-1">
-                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải Nghiệm Đẳng Cấp Đồ Họa Mới</h2>
-                             <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Tham khảo những phong cách hình ảnh đang dẫn đầu xu hướng thị giác và ứng dụng ngay vào thiết kế của riêng bạn.</p>
-                         </div>
-                         <div className="hidden md:flex shrink-0">
-                             <Link to="/app/templates">
-                                 <Button variant="outline">
-                                     Xem tất cả <ArrowUpRight className="ml-2 h-4 w-4" />
-                                 </Button>
-                             </Link>
-                         </div>
+                        <div className="flex-1">
+                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải Nghiệm Đẳng Cấp Đồ Họa Mới</h2>
+                            <p className="mt-4 md:mt-2 text-muted-foreground text-lg max-w-2xl text-balance">Tham khảo những phong cách hình ảnh đang dẫn đầu xu hướng thị giác và ứng dụng ngay vào thiết kế của riêng bạn.</p>
+                        </div>
+                        <div className="hidden md:flex shrink-0">
+                            <Link to="/app/templates">
+                                <Button variant="outline">
+                                    Xem tất cả <ArrowUpRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
 
                     <div className="w-full px-12 md:px-16 mx-auto relative cursor-grab active:cursor-grabbing">
@@ -352,118 +352,118 @@ export default function LandingPage() {
                     </div>
 
                     <div className="md:hidden mt-12 text-center flex justify-center w-full">
-                         <Link to="/app/templates" className="w-full">
-                             <Button variant="outline" className="w-full">
-                                 Xem tất cả kiểu mẫu <ArrowUpRight className="ml-2 h-4 w-4" />
-                             </Button>
-                         </Link>
+                        <Link to="/app/templates" className="w-full">
+                            <Button variant="outline" className="w-full">
+                                Xem tất cả kiểu mẫu <ArrowUpRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </section>
 
-             {/* ======================
-                PRICING
+            {/* ====================== 
+                PRICING.
             ========================= */}
             <section id="pricing" className="w-full min-h-screen py-24 flex flex-col items-center justify-center">
-                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
-                     <div className="flex flex-col items-center text-center mb-16">
-                         <Badge variant="outline" className="mb-6">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
+                    <div className="flex flex-col items-center text-center mb-16">
+                        <Badge variant="outline" className="mb-6">
                             Hệ thống Kim Cương
                         </Badge>
-                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Gói dịch vụ linh hoạt</h2>
-                         <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mỗi tác phẩm AI sắc nét đều tiêu hao Kim Cương. Hãy chọn gói phù hợp nhất.</p>
-                     </div>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Gói dịch vụ linh hoạt</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Mỗi tác phẩm AI sắc nét đều tiêu hao Kim Cương. Hãy chọn gói phù hợp nhất.</p>
+                    </div>
 
-                     <Tabs defaultValue="monthly" className="w-full flex flex-col items-center">
-                         <TabsList className="mb-12">
-                             <TabsTrigger value="monthly" className="px-8 font-medium">Theo Tháng</TabsTrigger>
-                             <TabsTrigger value="yearly" className="px-8 font-medium">Theo Năm <Badge variant="secondary" className="ml-2 text-[10px] bg-primary/20 text-primary border-0">Tiết kiệm 20%</Badge></TabsTrigger>
-                         </TabsList>
-                         <TabsContent value="monthly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full items-center">
-                                  {MONTHLY_PLANS.map((plan) => (
-                                      <Card key={plan.name} className={`flex flex-col relative overflow-hidden bg-background text-left ${plan.popular ? 'border-primary shadow-lg sm:scale-105 z-10' : ''}`}>
-                                         <CardContent className="p-8 flex-1 flex flex-col">
-                                             <div className="flex items-center justify-between mb-4">
+                    <Tabs defaultValue="monthly" className="w-full flex flex-col items-center">
+                        <TabsList className="mb-12">
+                            <TabsTrigger value="monthly" className="px-8 font-medium">Theo Tháng</TabsTrigger>
+                            <TabsTrigger value="yearly" className="px-8 font-medium">Theo Năm <Badge variant="secondary" className="ml-2 text-[10px] bg-primary/20 text-primary border-0">Tiết kiệm 20%</Badge></TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="monthly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full items-center">
+                                {MONTHLY_PLANS.map((plan) => (
+                                    <Card key={plan.name} className={`flex flex-col relative overflow-hidden bg-background text-left ${plan.popular ? 'border-primary shadow-lg sm:scale-105 z-10' : ''}`}>
+                                        <CardContent className="p-8 flex-1 flex flex-col">
+                                            <div className="flex items-center justify-between mb-4">
                                                 <h3 className="text-2xl font-bold">{plan.name}</h3>
                                                 {plan.popular && (
                                                     <Badge variant="default">Phổ Biến</Badge>
                                                 )}
-                                             </div>
-                                             <div className="flex items-baseline gap-1 mb-8">
-                                                 <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
-                                                 <span className="text-muted-foreground font-medium">{plan.period}</span>
-                                             </div>
+                                            </div>
+                                            <div className="flex items-baseline gap-1 mb-8">
+                                                <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
+                                                <span className="text-muted-foreground font-medium">{plan.period}</span>
+                                            </div>
 
-                                             <div className="bg-secondary rounded-md p-3 flex items-center gap-3 mb-10 w-fit text-sm font-medium">
-                                                 <Gem className="h-5 w-5 text-primary" />
-                                                 <span>{plan.gems} Kim Cương/tháng</span>
-                                             </div>
+                                            <div className="bg-secondary rounded-md p-3 flex items-center gap-3 mb-10 w-fit text-sm font-medium">
+                                                <Gem className="h-5 w-5 text-primary" />
+                                                <span>{plan.gems} Kim Cương/tháng</span>
+                                            </div>
 
-                                             <ul className="space-y-4 flex-1 mb-10">
-                                                  {plan.features.map((f) => (
-                                                     <li key={f} className="flex items-center gap-3 text-muted-foreground text-base">
-                                                          <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                                                          {f}
-                                                     </li>
-                                                  ))}
-                                             </ul>
+                                            <ul className="space-y-4 flex-1 mb-10">
+                                                {plan.features.map((f) => (
+                                                    <li key={f} className="flex items-center gap-3 text-muted-foreground text-base">
+                                                        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                                                        {f}
+                                                    </li>
+                                                ))}
+                                            </ul>
 
-                                             <Link to="/login" className="w-full mt-auto">
-                                                 <Button className="w-full h-12 text-base" variant={plan.popular ? "default" : "outline"} size="lg">
-                                                     {plan.cta}
-                                                 </Button>
-                                             </Link>
-                                         </CardContent>
-                                      </Card>
-                                  ))}
-                             </div>
-                         </TabsContent>
-                         <TabsContent value="yearly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full items-center">
-                                  {YEARLY_PLANS.map((plan) => (
-                                      <Card key={plan.name} className={`flex flex-col relative overflow-hidden bg-background text-left ${plan.popular ? 'border-primary shadow-lg sm:scale-105 z-10' : ''}`}>
-                                         <CardContent className="p-8 flex-1 flex flex-col">
-                                             <div className="flex items-center justify-between mb-4">
+                                            <Link to="/login" className="w-full mt-auto">
+                                                <Button className="w-full h-12 text-base" variant={plan.popular ? "default" : "outline"} size="lg">
+                                                    {plan.cta}
+                                                </Button>
+                                            </Link>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="yearly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full items-center">
+                                {YEARLY_PLANS.map((plan) => (
+                                    <Card key={plan.name} className={`flex flex-col relative overflow-hidden bg-background text-left ${plan.popular ? 'border-primary shadow-lg sm:scale-105 z-10' : ''}`}>
+                                        <CardContent className="p-8 flex-1 flex flex-col">
+                                            <div className="flex items-center justify-between mb-4">
                                                 <h3 className="text-2xl font-bold">{plan.name}</h3>
                                                 {plan.popular && (
                                                     <Badge variant="default">Phổ Biến</Badge>
                                                 )}
-                                             </div>
-                                             <div className="flex items-baseline gap-1 mb-8">
-                                                 <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
-                                                 <span className="text-muted-foreground font-medium">{plan.period}</span>
-                                             </div>
+                                            </div>
+                                            <div className="flex items-baseline gap-1 mb-8">
+                                                <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
+                                                <span className="text-muted-foreground font-medium">{plan.period}</span>
+                                            </div>
 
-                                             <div className="bg-secondary rounded-md p-3 flex items-center gap-3 mb-10 w-fit text-sm font-medium">
-                                                 <Gem className="h-5 w-5 text-primary" />
-                                                 <span>{plan.gems} Kim Cương/năm</span>
-                                             </div>
+                                            <div className="bg-secondary rounded-md p-3 flex items-center gap-3 mb-10 w-fit text-sm font-medium">
+                                                <Gem className="h-5 w-5 text-primary" />
+                                                <span>{plan.gems} Kim Cương/năm</span>
+                                            </div>
 
-                                             <ul className="space-y-4 flex-1 mb-10">
-                                                  {plan.features.map((f) => (
-                                                     <li key={f} className="flex items-center gap-3 text-muted-foreground text-base">
-                                                          <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                                                          {f}
-                                                     </li>
-                                                  ))}
-                                             </ul>
+                                            <ul className="space-y-4 flex-1 mb-10">
+                                                {plan.features.map((f) => (
+                                                    <li key={f} className="flex items-center gap-3 text-muted-foreground text-base">
+                                                        <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                                                        {f}
+                                                    </li>
+                                                ))}
+                                            </ul>
 
-                                             <Link to="/login" className="w-full mt-auto">
-                                                 <Button className="w-full h-12 text-base" variant={plan.popular ? "default" : "outline"} size="lg">
-                                                     {plan.cta}
-                                                 </Button>
-                                             </Link>
-                                         </CardContent>
-                                      </Card>
-                                  ))}
-                             </div>
-                         </TabsContent>
-                     </Tabs>
-                 </div>
+                                            <Link to="/login" className="w-full mt-auto">
+                                                <Button className="w-full h-12 text-base" variant={plan.popular ? "default" : "outline"} size="lg">
+                                                    {plan.cta}
+                                                </Button>
+                                            </Link>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+                </div>
             </section>
 
-             {/* ======================
+            {/* ======================
                 FAQ - Accordion Section
             ========================= */}
             <section id="faq" className="w-full min-h-screen bg-muted/30 border-y py-24 flex flex-col items-center justify-center">
@@ -494,7 +494,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-             {/* ======================
+            {/* ======================
                 CTA WITH AVATARS
             ========================= */}
             <section className="w-full min-h-[90vh] py-24 flex flex-col items-center justify-center">
@@ -510,18 +510,18 @@ export default function LandingPage() {
                                     <AvatarImage src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
                                     <AvatarFallback>U2</AvatarFallback>
                                 </Avatar>
-                                 <Avatar className="h-16 w-16 border-4 border-background">
+                                <Avatar className="h-16 w-16 border-4 border-background">
                                     <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop&crop=face" alt="@user" />
                                     <AvatarFallback>U3</AvatarFallback>
                                 </Avatar>
-                                 <Avatar className="h-16 w-16 border-4 border-background bg-secondary flex items-center justify-center font-bold text-sm">
+                                <Avatar className="h-16 w-16 border-4 border-background bg-secondary flex items-center justify-center font-bold text-sm">
                                     <AvatarFallback>+50K</AvatarFallback>
                                 </Avatar>
                             </div>
 
                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 text-balance">Tham gia cộng đồng sáng tạo đỉnh cao</h2>
                             <p className="text-muted-foreground text-lg md:text-xl mb-10 text-balance">
-                               Tạo tài khoản hoàn toàn miễn phí, nhận ngay 50 Kim Cương và bắt đầu hành trình nghệ thuật của bạn ngay bây giờ không rủi ro.
+                                Tạo tài khoản hoàn toàn miễn phí, nhận ngay 50 Kim Cương và bắt đầu hành trình nghệ thuật của bạn ngay bây giờ không rủi ro.
                             </p>
 
                             <Link to="/login">
