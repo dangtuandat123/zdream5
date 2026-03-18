@@ -1,94 +1,25 @@
-import React, { useState } from "react"
+import React from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useAuth } from "@/contexts/AuthContext"
-import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
 
 const GOOGLE_REDIRECT = "/api/auth/google/redirect"
 
 export function LoginForm({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"form">) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
-  const { toast } = useToast()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    try {
-      await login(email, password)
-      toast({
-          title: "Đăng nhập thành công",
-          description: "Chào mừng bạn quay trở lại!",
-      })
-    } catch (error: any) {
-      toast({
-          title: "Lỗi đăng nhập",
-          description: error.response?.data?.message || "Tài khoản hoặc mật khẩu không chính xác.",
-          variant: "destructive"
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
+}: React.ComponentPropsWithoutRef<"div">) {
   return (
-    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSubmit} {...props}>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Đăng nhập tài khoản</h1>
+        <h1 className="text-2xl font-bold">Đăng nhập ZDream</h1>
         <p className="text-balance text-sm text-muted-foreground">
-          Nhập email của bạn bên dưới để đăng nhập vào tài khoản
+          Bắt đầu hành trình sáng tạo nội dung của bạn
         </p>
       </div>
       <div className="grid gap-6">
-        <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input 
-            id="email" 
-            type="email" 
-            placeholder="m@example.com" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required 
-          />
-        </div>
-        <div className="grid gap-2">
-          <div className="flex items-center">
-            <Label htmlFor="password">Mật khẩu</Label>
-            <a
-              href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Quên mật khẩu?
-            </a>
-          </div>
-          <Input 
-            id="password" 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required 
-          />
-        </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Đăng nhập
-        </Button>
-        <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-          <span className="relative z-10 bg-background px-2 text-muted-foreground">
-            Hoặc tiếp tục với
-          </span>
-        </div>
-        <Button variant="outline" className="w-full" asChild>
+        <Button variant="outline" className="w-full h-12 text-base" asChild>
           <a href={GOOGLE_REDIRECT}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="mr-2 h-5 w-5">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
@@ -98,13 +29,6 @@ export function LoginForm({
           </a>
         </Button>
       </div>
-      <div className="text-center text-sm">
-        Chưa có tài khoản?{" "}
-        <a href="#" className="underline underline-offset-4">
-          Đăng ký ngay
-        </a>
-      </div>
-    </form>
+    </div>
   )
 }
-
