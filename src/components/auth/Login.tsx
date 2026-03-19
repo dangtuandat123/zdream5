@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const GOOGLE_REDIRECT = "/api/auth/google/redirect"
 
-// Mảng ảnh showcase để hiển thị trên bên phải (gallery minh hoạ)
+// Ảnh showcase hiển thị phía bên phải (gallery nghệ thuật AI)
 const SHOWCASE_IMAGES = [
     "https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=400&auto=format&fit=crop",
     "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400&auto=format&fit=crop",
@@ -19,55 +19,57 @@ const SHOWCASE_IMAGES = [
 
 export function Login() {
     return (
-        <div className="relative min-h-svh w-full bg-background text-foreground overflow-hidden">
+        // Khóa cứng chiều cao = 100svh, overflow-hidden → không bao giờ scroll
+        <div className="relative h-svh w-full bg-background text-foreground overflow-hidden">
 
-            {/* ========== NỀN VIDEO TOÀN TRANG ========== */}
+            {/* ========== VIDEO NỀN TOÀN TRANG ========== */}
             <video
                 autoPlay loop muted playsInline
                 className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
                 src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
             />
-            {/* Overlay tối mịn để chữ dễ đọc */}
             <div className="absolute inset-0 bg-background/80 z-0" />
 
-            {/* ========== NỘI DUNG CHÍNH ========== */}
-            <div className="relative z-10 min-h-svh flex flex-col">
+            {/* ========== NỘI DUNG — flex-col h-full, không scroll ========== */}
+            <div className="relative z-10 h-full flex flex-col">
 
-                {/* Navbar nhỏ */}
-                <nav className="w-full px-6 md:px-10 py-5 flex items-center justify-between">
-                    <a href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight group">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground group-hover:opacity-90 transition-opacity">
+                {/* Navbar — compact */}
+                <nav className="shrink-0 w-full px-6 md:px-10 py-4 flex items-center justify-between">
+                    <a href="/" className="flex items-center gap-2 font-bold text-lg tracking-tight group">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground group-hover:opacity-90 transition-opacity">
                             <Sparkles className="h-4 w-4" />
                         </div>
                         ZDream
                     </a>
+                    <a href="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                        ← Trang chủ
+                    </a>
                 </nav>
 
-                {/* Vùng trung tâm */}
-                <div className="flex-1 flex items-center justify-center px-6 md:px-10 py-10">
-                    <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+                {/* Vùng chính — chiếm toàn bộ không gian còn lại */}
+                <div className="flex-1 min-h-0 flex items-center justify-center px-6 md:px-10">
+                    <div className="w-full max-w-6xl grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-                        {/* ============ CỘT TRÁI: Form đăng nhập ============ */}
+                        {/* ============ CỘT TRÁI: CTA Đăng nhập ============ */}
                         <div className="flex flex-col items-center lg:items-start text-center lg:text-left max-w-md mx-auto lg:mx-0">
-                            {/* Badge thể hiện thương hiệu */}
-                            <Badge variant="secondary" className="mb-6 py-1.5 px-4 text-sm">
-                                <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" /> Nền tảng sáng tạo AI
+                            <Badge variant="secondary" className="mb-5 py-1 px-3 text-xs">
+                                <Sparkles className="mr-1.5 h-3 w-3 text-primary" /> Nền tảng sáng tạo AI
                             </Badge>
 
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4 text-balance leading-tight">
+                            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3 text-balance leading-tight">
                                 Biến ý tưởng thành{" "}
                                 <span className="text-primary">tác phẩm</span>
                             </h1>
 
-                            <p className="text-muted-foreground text-base sm:text-lg mb-10 text-balance leading-relaxed max-w-sm">
-                                Đăng nhập để khám phá thế giới sáng tạo nghệ thuật AI không giới hạn cùng cộng đồng hơn 50 nghìn người dùng.
+                            <p className="text-muted-foreground text-sm sm:text-base mb-7 text-balance leading-relaxed max-w-sm">
+                                Đăng nhập để khám phá thế giới sáng tạo nghệ thuật AI không giới hạn cùng hơn 50 nghìn nhà sáng tạo.
                             </p>
 
-                            {/* Nút Google Login — nền trắng nổi bật */}
+                            {/* Nút Google — nền trắng nổi bật */}
                             <Button
                                 variant="outline"
                                 size="lg"
-                                className="w-full sm:w-auto h-14 px-10 text-base font-semibold bg-white text-black border-white/20 hover:bg-slate-50 hover:text-black shadow-lg shadow-white/5 transition-all duration-200"
+                                className="w-full sm:w-auto h-12 px-8 text-sm font-semibold bg-white text-black border-white/20 hover:bg-slate-50 hover:text-black shadow-lg shadow-white/5 transition-all duration-200"
                                 asChild
                             >
                                 <a href={GOOGLE_REDIRECT} className="flex items-center justify-center gap-3">
@@ -81,20 +83,20 @@ export function Login() {
                                 </a>
                             </Button>
 
-                            <Separator className="my-8 w-full max-w-xs bg-border/50" />
+                            <Separator className="my-6 w-full max-w-xs bg-border/50" />
 
-                            {/* Social proof nhỏ bên dưới */}
-                            <div className="flex items-center gap-4">
-                                <div className="flex -space-x-2.5">
-                                    <Avatar className="h-9 w-9 border-2 border-background">
+                            {/* Social proof */}
+                            <div className="flex items-center gap-3">
+                                <div className="flex -space-x-2">
+                                    <Avatar className="h-8 w-8 border-2 border-background">
                                         <AvatarImage src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop&crop=face" />
                                         <AvatarFallback>U1</AvatarFallback>
                                     </Avatar>
-                                    <Avatar className="h-9 w-9 border-2 border-background">
+                                    <Avatar className="h-8 w-8 border-2 border-background">
                                         <AvatarImage src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=100&auto=format&fit=crop&crop=face" />
                                         <AvatarFallback>U2</AvatarFallback>
                                     </Avatar>
-                                    <Avatar className="h-9 w-9 border-2 border-background">
+                                    <Avatar className="h-8 w-8 border-2 border-background">
                                         <AvatarImage src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop&crop=face" />
                                         <AvatarFallback>U3</AvatarFallback>
                                     </Avatar>
@@ -102,66 +104,66 @@ export function Login() {
                                 <div className="flex flex-col text-left">
                                     <div className="flex items-center gap-0.5">
                                         {[...Array(5)].map((_, i) => (
-                                            <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                                            <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                                         ))}
                                     </div>
-                                    <span className="text-xs text-muted-foreground mt-0.5">50K+ nhà sáng tạo yêu thích</span>
+                                    <span className="text-[11px] text-muted-foreground">50K+ nhà sáng tạo yêu thích</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* ============ CỘT PHẢI: Gallery nghệ thuật ============ */}
-                        <div className="hidden lg:block">
-                            {/* Lưới ảnh masonry-style */}
-                            <div className="grid grid-cols-3 gap-3">
+                        <div className="hidden lg:flex flex-col gap-3 min-h-0">
+                            {/* Lưới ảnh masonry — chiều cao tự co theo viewport */}
+                            <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0">
                                 {SHOWCASE_IMAGES.map((src, index) => (
                                     <Card
                                         key={index}
-                                        className={`overflow-hidden border-border/50 bg-background/50 backdrop-blur-sm transition-all duration-500 hover:scale-[1.03] hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 ${index % 3 === 1 ? 'translate-y-6' : ''}`}
+                                        className={`overflow-hidden border-border/50 bg-background/50 backdrop-blur-sm transition-all duration-500 hover:scale-[1.03] hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 ${index % 3 === 1 ? 'translate-y-4' : ''}`}
                                     >
-                                        <CardContent className="p-0">
-                                            <div className={`relative ${index % 2 === 0 ? 'aspect-[3/4]' : 'aspect-square'}`}>
+                                        <CardContent className="p-0 h-full">
+                                            <div className="relative h-full">
                                                 <img
                                                     src={src}
                                                     alt={`AI Art ${index + 1}`}
-                                                    className="absolute inset-0 w-full h-full object-cover"
+                                                    className="w-full h-full object-cover"
                                                     loading="lazy"
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
                                             </div>
                                         </CardContent>
                                     </Card>
                                 ))}
                             </div>
 
-                            {/* Card thống kê nổi phía dưới gallery */}
-                            <Card className="mt-4 glass-panel">
-                                <CardContent className="p-4 flex items-center justify-between gap-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                            <Wand2 className="h-5 w-5 text-primary" />
+                            {/* Card thống kê — glassmorphism, compact */}
+                            <Card className="shrink-0 glass-panel">
+                                <CardContent className="px-4 py-3 flex items-center justify-between gap-4">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+                                            <Wand2 className="h-4 w-4 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold">1.2M+ ảnh được tạo</p>
-                                            <p className="text-xs text-muted-foreground">Bởi cộng đồng ZDream</p>
+                                            <p className="text-xs font-semibold leading-tight">1.2M+ ảnh</p>
+                                            <p className="text-[10px] text-muted-foreground">Đã được tạo</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                            <Gem className="h-5 w-5 text-primary" />
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+                                            <Gem className="h-4 w-4 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold">50 Kim Cương</p>
-                                            <p className="text-xs text-muted-foreground">Miễn phí khi đăng ký</p>
+                                            <p className="text-xs font-semibold leading-tight">50 Kim Cương</p>
+                                            <p className="text-[10px] text-muted-foreground">Miễn phí</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                            <ImageIcon className="h-5 w-5 text-primary" />
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
+                                            <ImageIcon className="h-4 w-4 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-semibold">12+ kiểu mẫu</p>
-                                            <p className="text-xs text-muted-foreground">Phong cách đa dạng</p>
+                                            <p className="text-xs font-semibold leading-tight">12+ kiểu mẫu</p>
+                                            <p className="text-[10px] text-muted-foreground">Đa phong cách</p>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -171,10 +173,9 @@ export function Login() {
                     </div>
                 </div>
 
-                {/* Footer nhỏ */}
-                <footer className="w-full px-6 md:px-10 py-5 flex items-center justify-between text-xs text-muted-foreground">
-                    <span>© 2026 ZDream. All rights reserved.</span>
-                    <a href="/" className="hover:text-foreground transition-colors">Quay lại trang chủ</a>
+                {/* Footer compact */}
+                <footer className="shrink-0 w-full px-6 md:px-10 py-3 text-center text-[11px] text-muted-foreground">
+                    © 2026 ZDream · Nền tảng sáng tạo nghệ thuật AI
                 </footer>
 
             </div>
