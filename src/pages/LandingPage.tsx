@@ -104,6 +104,18 @@ const TEMPLATES = [
     { name: "Concept Art", cat: "Phong cảnh", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" },
 ]
 
+// Ảnh showcase nghệ thuật AI — dùng trang trí xuyên suốt trang
+const SHOWCASE_IMAGES = [
+    { src: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=600&auto=format&fit=crop", label: "Chân dung Cyberpunk" },
+    { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop", label: "Sơn dầu cổ điển" },
+    { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", label: "Trừu tượng gradient" },
+    { src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop", label: "Digital Art 3D" },
+    { src: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=600&auto=format&fit=crop", label: "Phong cảnh Fantasy" },
+    { src: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=600&auto=format&fit=crop", label: "Vũ trụ Sci-fi" },
+    { src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=600&auto=format&fit=crop", label: "Neon Art" },
+    { src: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=600&auto=format&fit=crop", label: "Abstract Fluid" },
+]
+
 const TESTIMONIALS = [
     {
         name: "Minh Ngọc",
@@ -328,6 +340,24 @@ export default function LandingPage() {
                             <span className="text-xs text-muted-foreground">Được 50K+ nhà sáng tạo tin dùng</span>
                         </div>
                     </div>
+                    {/* Floating AI Art Preview — 4 ảnh nổi dưới social proof */}
+                    <div className="hidden md:grid grid-cols-4 gap-4 mt-16 w-full max-w-4xl">
+                        {SHOWCASE_IMAGES.slice(0, 4).map((img, i) => (
+                            <Card key={i} className={`overflow-hidden border-border/20 bg-background/30 backdrop-blur-sm group hover:border-primary/30 transition-all duration-500 ${i % 2 === 1 ? 'translate-y-4' : ''}`}>
+                                <CardContent className="p-0 relative aspect-[3/4]">
+                                    <img
+                                        src={img.src}
+                                        alt={img.label}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        loading="lazy"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                                        <span className="text-white text-xs font-medium">{img.label}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Scroll indicator — căn giữa ngang tuyệt đối */}
@@ -393,15 +423,22 @@ export default function LandingPage() {
                         <Card className="lg:row-span-2 h-full bg-background/50 border-border/30 hover:border-primary/30 transition-all duration-500 group overflow-hidden relative">
                             <div className="absolute top-0 right-0 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none group-hover:bg-primary/10 transition-colors" />
                             <CardContent className="p-8 flex flex-col h-full relative">
-                                <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                                <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                                     <ZapIcon className="h-7 w-7 text-primary" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4">Làm Chủ Mọi Khung Hình</h3>
-                                <p className="text-muted-foreground flex-1 mb-8 leading-relaxed">
-                                    Lựa chọn 10 định dạng tỷ lệ khác nhau phục vụ từ thiết kế web, in ấn đến làm video dọc. Duy trì sự nhất quán của phong cách nhân vật và kiểm soát từng chi tiết xuất hiện trong ảnh.
+                                <h3 className="text-2xl font-bold mb-3">Làm Chủ Mọi Khung Hình</h3>
+                                <p className="text-muted-foreground mb-6 leading-relaxed text-sm">
+                                    Lựa chọn 10 định dạng tỷ lệ khác nhau phục vụ từ thiết kế web, in ấn đến video dọc.
                                 </p>
+                                {/* Mini preview grid minh họa */}
+                                <div className="grid grid-cols-2 gap-2 mb-6 flex-1">
+                                    {SHOWCASE_IMAGES.slice(4, 8).map((img, i) => (
+                                        <div key={i} className="rounded-lg overflow-hidden border border-border/20">
+                                            <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
+                                        </div>
+                                    ))}
+                                </div>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Tuyệt đối chính xác</Badge>
                                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Chất lượng 4K</Badge>
                                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">10 tỷ lệ khung</Badge>
                                 </div>
@@ -470,6 +507,74 @@ export default function LandingPage() {
                                 </div>
                             </CardContent>
                         </Card>
+                    </div>
+                </div>
+            </section>
+
+            {/* ==========================================================================
+                AI ART SHOWCASE — Bento gallery giữa Features và Templates
+            ============================================================================ */}
+            <section className="w-full py-24 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                {/* Ambient glow */}
+                <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="absolute bottom-1/3 right-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
+
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+                    <div className="text-center mb-16">
+                        <Badge variant="outline" className="mb-6 border-border/50">
+                            <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" /> Tác phẩm nổi bật
+                        </Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Được Tạo Ra Bởi Cộng Đồng ZDream</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
+                            Khám phá những tác phẩm nghệ thuật AI ấn tượng nhất từ các nhà sáng tạo trên nền tảng.
+                        </p>
+                    </div>
+
+                    {/* Bento masonry grid — đa dạng kích thước */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]">
+                        {SHOWCASE_IMAGES.map((img, i) => {
+                            // Phân bổ kích thước đa dạng cho masonry layout
+                            const spans = [
+                                'md:col-span-2 md:row-span-2',   // 0: ảnh lớn
+                                'row-span-1',                      // 1: nhỏ
+                                'row-span-2',                      // 2: dọc cao
+                                'row-span-1',                      // 3: nhỏ
+                                'row-span-1',                      // 4: nhỏ
+                                'md:col-span-2 row-span-1',       // 5: ngang rộng
+                                'row-span-2',                      // 6: dọc cao
+                                'row-span-1',                      // 7: nhỏ
+                            ]
+                            return (
+                                <Card
+                                    key={i}
+                                    className={`overflow-hidden border-border/20 bg-background/30 group hover:border-primary/30 transition-all duration-500 ${spans[i]}`}
+                                >
+                                    <CardContent className="p-0 relative w-full h-full">
+                                        <img
+                                            src={img.src}
+                                            alt={img.label}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                            loading="lazy"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                                            <div className="flex items-center gap-2">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                                                <span className="text-white text-sm font-medium">{img.label}</span>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )
+                        })}
+                    </div>
+
+                    <div className="text-center mt-12">
+                        <Link to="/app/generate">
+                            <Button variant="outline" size="lg" className="backdrop-blur-sm">
+                                <Sparkles className="mr-2 h-4 w-4" /> Tạo Tác Phẩm Của Bạn
+                            </Button>
+                        </Link>
                     </div>
                 </div>
             </section>
