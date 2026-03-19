@@ -102,18 +102,26 @@ const TEMPLATES = [
     { name: "Anime Waifu", cat: "Anime", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
     { name: "Thời trang", cat: "Chân dung", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=400&auto=format&fit=crop" },
     { name: "Concept Art", cat: "Phong cảnh", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" },
+    { name: "Neon Art", cat: "Trừu tượng", img: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=400&auto=format&fit=crop" },
+    { name: "Abstract", cat: "Nghệ thuật", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" },
+    { name: "Sci-fi", cat: "Vũ trụ", img: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop" },
+    { name: "Fantasy", cat: "Phong cảnh", img: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=400&auto=format&fit=crop" },
 ]
 
-// Ảnh showcase nghệ thuật AI — dùng trang trí xuyên suốt trang
-const SHOWCASE_IMAGES = [
+// Ảnh trang trí Hero section
+const HERO_IMAGES = [
     { src: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=600&auto=format&fit=crop", label: "Chân dung Cyberpunk" },
-    { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop", label: "Sơn dầu cổ điển" },
-    { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", label: "Trừu tượng gradient" },
     { src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop", label: "Digital Art 3D" },
-    { src: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=600&auto=format&fit=crop", label: "Phong cảnh Fantasy" },
-    { src: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=600&auto=format&fit=crop", label: "Vũ trụ Sci-fi" },
-    { src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=600&auto=format&fit=crop", label: "Neon Art" },
     { src: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=600&auto=format&fit=crop", label: "Abstract Fluid" },
+    { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop", label: "Sơn dầu cổ điển" },
+]
+
+// Ảnh minh họa cho Feature card
+const FEATURE_IMAGES = [
+    { src: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=400&auto=format&fit=crop", label: "Fantasy" },
+    { src: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop", label: "Sci-fi" },
+    { src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=400&auto=format&fit=crop", label: "Neon" },
+    { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop", label: "Abstract" },
 ]
 
 const TESTIMONIALS = [
@@ -244,7 +252,7 @@ export default function LandingPage() {
                         ))}
                     </div>
                     <div className="flex items-center gap-3">
-                        <Link to="/login" className="hidden sm:block">
+                        <Link to="/login" className="hidden md:block">
                             <Button size="sm" className="shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-shadow">
                                 Bắt Đầu <ArrowUpRight className="ml-2 h-4 w-4" />
                             </Button>
@@ -341,8 +349,8 @@ export default function LandingPage() {
                         </div>
                     </div>
                     {/* Floating AI Art Preview — 4 ảnh nổi dưới social proof */}
-                    <div className="hidden md:grid grid-cols-4 gap-4 mt-16 w-full max-w-4xl">
-                        {SHOWCASE_IMAGES.slice(0, 4).map((img, i) => (
+                    <div className="hidden md:grid grid-cols-4 gap-4 mt-12 w-full max-w-4xl">
+                        {HERO_IMAGES.map((img, i) => (
                             <Card key={i} className={`overflow-hidden border-border/20 bg-background/30 backdrop-blur-sm group hover:border-primary/30 transition-all duration-500 ${i % 2 === 1 ? 'translate-y-4' : ''}`}>
                                 <CardContent className="p-0 relative aspect-[3/4]">
                                     <img
@@ -432,8 +440,8 @@ export default function LandingPage() {
                                 </p>
                                 {/* Mini preview grid minh họa */}
                                 <div className="grid grid-cols-2 gap-2 mb-6 flex-1">
-                                    {SHOWCASE_IMAGES.slice(4, 8).map((img, i) => (
-                                        <div key={i} className="rounded-lg overflow-hidden border border-border/20">
+                                    {FEATURE_IMAGES.map((img, i) => (
+                                        <div key={i} className="rounded-lg overflow-hidden border border-border/20 aspect-square">
                                             <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
                                         </div>
                                     ))}
@@ -512,74 +520,6 @@ export default function LandingPage() {
             </section>
 
             {/* ==========================================================================
-                AI ART SHOWCASE — Bento gallery giữa Features và Templates
-            ============================================================================ */}
-            <section className="w-full py-24 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                {/* Ambient glow */}
-                <div className="absolute top-1/3 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-                <div className="absolute bottom-1/3 right-0 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px] pointer-events-none" />
-
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
-                    <div className="text-center mb-16">
-                        <Badge variant="outline" className="mb-6 border-border/50">
-                            <Sparkles className="mr-2 h-3.5 w-3.5 text-primary" /> Tác phẩm nổi bật
-                        </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Được Tạo Ra Bởi Cộng Đồng ZDream</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
-                            Khám phá những tác phẩm nghệ thuật AI ấn tượng nhất từ các nhà sáng tạo trên nền tảng.
-                        </p>
-                    </div>
-
-                    {/* Bento masonry grid — đa dạng kích thước */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]">
-                        {SHOWCASE_IMAGES.map((img, i) => {
-                            // Phân bổ kích thước đa dạng cho masonry layout
-                            const spans = [
-                                'md:col-span-2 md:row-span-2',   // 0: ảnh lớn
-                                'row-span-1',                      // 1: nhỏ
-                                'row-span-2',                      // 2: dọc cao
-                                'row-span-1',                      // 3: nhỏ
-                                'row-span-1',                      // 4: nhỏ
-                                'md:col-span-2 row-span-1',       // 5: ngang rộng
-                                'row-span-2',                      // 6: dọc cao
-                                'row-span-1',                      // 7: nhỏ
-                            ]
-                            return (
-                                <Card
-                                    key={i}
-                                    className={`overflow-hidden border-border/20 bg-background/30 group hover:border-primary/30 transition-all duration-500 ${spans[i]}`}
-                                >
-                                    <CardContent className="p-0 relative w-full h-full">
-                                        <img
-                                            src={img.src}
-                                            alt={img.label}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                                <span className="text-white text-sm font-medium">{img.label}</span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )
-                        })}
-                    </div>
-
-                    <div className="text-center mt-12">
-                        <Link to="/app/generate">
-                            <Button variant="outline" size="lg" className="backdrop-blur-sm">
-                                <Sparkles className="mr-2 h-4 w-4" /> Tạo Tác Phẩm Của Bạn
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-            </section>
-
-            {/* ==========================================================================
                 TEMPLATES CAROUSEL
             ============================================================================ */}
             <section id="templates" className="w-full py-24 overflow-hidden relative">
@@ -592,9 +532,9 @@ export default function LandingPage() {
                             <Badge variant="outline" className="mb-6 border-border/50">
                                 <SwatchBook className="mr-2 h-3.5 w-3.5 text-primary" /> Thư viện phong cách
                             </Badge>
-                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Trải Nghiệm Đẳng Cấp Đồ Họa Mới</h2>
+                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Kiểu Mẫu Sẵn Sàng Sử Dụng</h2>
                             <p className="mt-3 text-muted-foreground text-lg max-w-2xl text-balance">
-                                Tham khảo những phong cách hình ảnh đang dẫn đầu xu hướng và ứng dụng ngay vào thiết kế của bạn.
+                                Chọn một phong cách, nhập mô tả, và nhận tác phẩm ngay lập tức — không cần tinh chỉnh phức tạp.
                             </p>
                         </div>
                         <div className="hidden md:flex shrink-0">
@@ -753,14 +693,21 @@ export default function LandingPage() {
                                 Mọi thắc mắc của bạn về nền tảng ZDream AI.
                             </p>
                             <Card className="glass-panel">
-                                <CardContent className="p-6 flex items-center gap-4">
-                                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                                        <Sparkles className="h-6 w-6 text-primary" />
+                                <CardContent className="p-6 flex flex-col gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                            <Sparkles className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-sm mb-1">Vẫn còn thắc mắc?</p>
+                                            <p className="text-xs text-muted-foreground">Liên hệ đội ngũ hỗ trợ ZDream để được giải đáp nhanh nhất.</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-sm mb-1">Vẫn còn thắc mắc?</p>
-                                        <p className="text-xs text-muted-foreground">Liên hệ đội ngũ hỗ trợ ZDream để được giải đáp nhanh nhất.</p>
-                                    </div>
+                                    <a href="mailto:support@zdream.vn">
+                                        <Button variant="outline" size="sm" className="w-full">
+                                            Gửi Email Hỗ Trợ <ArrowUpRight className="ml-2 h-3.5 w-3.5" />
+                                        </Button>
+                                    </a>
                                 </CardContent>
                             </Card>
                         </div>
@@ -792,6 +739,7 @@ export default function LandingPage() {
                 CTA FINAL — Full-width gradient card
             ============================================================================ */}
             <section className="w-full py-24 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
                     <Card className="w-full max-w-5xl mx-auto overflow-hidden relative border-border/30">
                         {/* Ambient glows */}
