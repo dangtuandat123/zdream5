@@ -235,7 +235,7 @@ export default function LandingPage() {
                     <div className="flex items-center gap-3">
                         <Link to="/login" className="hidden sm:block">
                             <Button size="sm" className="shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-shadow">
-                                Đăng Nhập <ArrowUpRight className="ml-2 h-4 w-4" />
+                                Bắt Đầu <ArrowUpRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
                         {/* Mobile hamburger menu */}
@@ -262,7 +262,7 @@ export default function LandingPage() {
                                     <Separator className="bg-border/30" />
                                     <Link to="/login">
                                         <Button className="w-full">
-                                            Đăng Nhập <ArrowUpRight className="ml-2 h-4 w-4" />
+                                            Bắt Đầu <ArrowUpRight className="ml-2 h-4 w-4" />
                                         </Button>
                                     </Link>
                                 </nav>
@@ -720,7 +720,7 @@ export default function LandingPage() {
 
                             <Link to="/login">
                                 <Button size="lg" className="h-14 px-10 text-lg shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
-                                    Tạo Tài Khoản Miễn Phí <ArrowUpRight className="ml-2 h-5 w-5" />
+                                    Bắt Đầu Miễn Phí <ArrowUpRight className="ml-2 h-5 w-5" />
                                 </Button>
                             </Link>
                         </CardContent>
