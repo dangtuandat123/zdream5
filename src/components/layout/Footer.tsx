@@ -6,7 +6,7 @@ export function Footer() {
                     {/* Brand Column */}
                     <div className="col-span-2 md:col-span-1">
                         <h3 className="font-heading font-bold text-xl mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
-                            Nexus Art
+                            ZDream
                         </h3>
                         <p className="text-sm text-white/50 font-light mb-4 max-w-xs">
                             Tiếp sức cho các nhà sáng tạo với công nghệ AI không giới hạn. Xây dựng những thực tại tuyệt mỹ với tốc độ của tư duy.
@@ -48,7 +48,7 @@ export function Footer() {
 
                 <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs text-white/40">
-                        © 2026 Nexus AI Art Studio. Đã đăng ký Bản quyền.
+                        © 2026 ZDream. Đã đăng ký Bản quyền.
                     </p>
                     <div className="flex gap-4">
                         {/* Social mockups */}
