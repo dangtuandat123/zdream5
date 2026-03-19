@@ -268,12 +268,12 @@ export default function LandingPage() {
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <Link to="/app/generate" className="w-full sm:w-auto">
-                            <Button size="lg" className="w-full h-13 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+                            <Button size="lg" className="w-full h-14 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
                                 <Play className="mr-2 h-4 w-4" /> Bắt Đầu Sáng Tạo
                             </Button>
                         </Link>
                         <Link to="/app/templates" className="w-full sm:w-auto">
-                            <Button size="lg" variant="outline" className="w-full h-13 px-10 text-base backdrop-blur-sm bg-background/30 border-border/50 hover:bg-background/50 transition-all">
+                            <Button size="lg" variant="outline" className="w-full h-14 px-10 text-base backdrop-blur-sm bg-background/30 border-border/50 hover:bg-background/50 transition-all">
                                 <SwatchBook className="mr-2 h-4 w-4" /> Trải Nghiệm Mẫu
                             </Button>
                         </Link>
