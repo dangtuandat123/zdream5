@@ -7,6 +7,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import Autoplay from "embla-carousel-autoplay"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -24,7 +25,9 @@ import {
     ShieldCheck,
     Quote,
     Layers,
-    MousePointerClick
+    ChevronDown,
+    Menu,
+    Trophy
 } from "lucide-react"
 
 // ============================================================
@@ -146,7 +149,7 @@ const FAQS = [
 function PricingCard({ plan, periodLabel }: { plan: typeof MONTHLY_PLANS[0]; periodLabel: string }) {
     return (
         <Card className={`flex flex-col relative overflow-hidden text-left transition-all duration-300 ${plan.popular
-            ? 'border-primary/50 shadow-lg shadow-primary/5 sm:scale-105 z-10 bg-background'
+            ? 'border-primary/50 shadow-lg shadow-primary/5 md:scale-105 z-10 bg-background'
             : 'bg-background/50 hover:bg-background hover:border-border/80'}`}
         >
             {/* Glow cho gói phổ biến */}
@@ -229,11 +232,43 @@ export default function LandingPage() {
                             </a>
                         ))}
                     </div>
-                    <Link to="/login">
-                        <Button size="sm" className="shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-shadow">
-                            Đăng Nhập <ArrowUpRight className="ml-2 h-4 w-4" />
-                        </Button>
-                    </Link>
+                    <div className="flex items-center gap-3">
+                        <Link to="/login" className="hidden sm:block">
+                            <Button size="sm" className="shadow-md shadow-primary/10 hover:shadow-lg hover:shadow-primary/20 transition-shadow">
+                                Đăng Nhập <ArrowUpRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
+                        {/* Mobile hamburger menu */}
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="ghost" size="icon" className="md:hidden">
+                                    <Menu className="h-5 w-5" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="w-72 bg-background border-border/50">
+                                <nav className="flex flex-col gap-6 mt-8">
+                                    {[
+                                        { label: "Tính năng", href: "#features" },
+                                        { label: "Kiểu mẫu", href: "#templates" },
+                                        { label: "Bảng giá", href: "#pricing" },
+                                        { label: "Hỏi đáp", href: "#faq" },
+                                    ].map((item) => (
+                                        <a key={item.label} href={item.href}
+                                            className="text-base font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                        >
+                                            {item.label}
+                                        </a>
+                                    ))}
+                                    <Separator className="bg-border/30" />
+                                    <Link to="/login">
+                                        <Button className="w-full">
+                                            Đăng Nhập <ArrowUpRight className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    </Link>
+                                </nav>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
                 </div>
             </nav>
 
@@ -257,13 +292,13 @@ export default function LandingPage() {
 
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-6 text-balance leading-[1.1]">
                         Biến ý tưởng thành <br className="hidden sm:block" />
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-primary">
                             nghệ thuật thị giác
                         </span>
                     </h1>
 
                     <p className="max-w-2xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
-                        Nền tảng sinh ảnh chuyên nghiệp, cung cấp bộ công cụ điều khiển mạnh mẽ giúp bạn làm chủ hoàn toàn quá trình sáng tác.
+                        Chỉ cần mô tả, AI sẽ vẽ. Từ concept art đến logo thương hiệu — tất cả chỉ trong vài giây với chất lượng studio chuyên nghiệp.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -300,9 +335,9 @@ export default function LandingPage() {
                     </div>
                 </div>
 
-                {/* Scroll indicator */}
-                <div className="absolute bottom-8 z-10 flex flex-col items-center gap-2 animate-bounce">
-                    <MousePointerClick className="h-5 w-5 text-muted-foreground" />
+                {/* Scroll indicator — căn giữa ngang tuyệt đối */}
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-bounce">
+                    <ChevronDown className="h-6 w-6 text-muted-foreground" />
                 </div>
             </section>
 
@@ -310,7 +345,13 @@ export default function LandingPage() {
                 STATS — Floating glassmorphism cards
             ============================================================================ */}
             <section className="w-full py-20 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+                    <div className="text-center mb-12">
+                        <Badge variant="outline" className="border-border/50">
+                            <Trophy className="mr-2 h-3.5 w-3.5 text-primary" /> Thành tựu cộng đồng
+                        </Badge>
+                    </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                         {[
                             { label: "Ảnh đã tạo", value: "1.2M+", icon: WandSparkles },
@@ -336,6 +377,7 @@ export default function LandingPage() {
                 FEATURES — Bento grid layout
             ============================================================================ */}
             <section id="features" className="w-full py-24 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 {/* Subtle ambient glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
 
@@ -399,8 +441,8 @@ export default function LandingPage() {
                                     Mọi thành phẩm được sắp xếp khoa học thành từng dự án riêng biệt. Cam kết bảo vệ dữ liệu và trao toàn quyền thương mại.
                                 </p>
                                 <div className="flex gap-2 flex-wrap">
-                                    <Badge variant="secondary">Lưu trữ đám mây</Badge>
-                                    <Badge variant="secondary">Quyền thương mại</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Lưu trữ đám mây</Badge>
+                                    <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Quyền thương mại</Badge>
                                 </div>
                             </CardContent>
                         </Card>
@@ -510,12 +552,14 @@ export default function LandingPage() {
                 TESTIMONIALS — Social proof section
             ============================================================================ */}
             <section className="w-full py-24 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <div className="text-center mb-16">
                         <Badge variant="outline" className="mb-6 border-border/50">
                             <Star className="mr-2 h-3.5 w-3.5 text-primary" /> Nhận xét từ cộng đồng
                         </Badge>
                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Được Tin Dùng Bởi Hàng Nghìn Nhà Sáng Tạo</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Lắng nghe trải nghiệm thực tế từ những nhà sáng tạo đang sử dụng ZDream mỗi ngày.</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -572,7 +616,7 @@ export default function LandingPage() {
                         <TabsList className="mb-12 glass border-border/30">
                             <TabsTrigger value="monthly" className="px-8 font-medium data-[state=active]:bg-background">Theo Tháng</TabsTrigger>
                             <TabsTrigger value="yearly" className="px-8 font-medium data-[state=active]:bg-background">
-                                Theo Năm <Badge variant="secondary" className="ml-2 text-[10px] bg-primary/20 text-primary border-0">−20%</Badge>
+                                Theo Năm <Badge variant="secondary" className="ml-2 text-[10px] bg-primary/20 text-primary border-0">Tiết kiệm 20%</Badge>
                             </TabsTrigger>
                         </TabsList>
                         <TabsContent value="monthly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
@@ -668,7 +712,7 @@ export default function LandingPage() {
                             </div>
 
                             <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 text-balance">
-                                Tham gia cộng đồng sáng tạo đỉnh cao
+                                Bắt đầu sáng tạo ngay hôm nay
                             </h2>
                             <p className="text-muted-foreground text-lg md:text-xl mb-10 text-balance max-w-2xl">
                                 Tạo tài khoản hoàn toàn miễn phí, nhận ngay 50 Kim Cương và bắt đầu hành trình nghệ thuật không rủi ro.
