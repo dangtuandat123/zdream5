@@ -16,7 +16,6 @@ import {
     WandSparkles,
     SwatchBook,
     Gem,
-    Zap,
     Star,
     CheckCircle2,
     Play,
@@ -286,10 +285,6 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background z-0" />
 
                 <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center">
-                    <Badge variant="secondary" className="mb-8 py-1.5 px-5 text-sm glass">
-                        <Zap className="mr-2 h-4 w-4 text-primary" /> Nền tảng sáng tạo nghệ thuật thế hệ mới
-                    </Badge>
-
                     <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-6 text-balance leading-[1.1]">
                         Biến ý tưởng thành <br className="hidden sm:block" />
                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-primary">
