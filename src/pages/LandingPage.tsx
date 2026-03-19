@@ -294,91 +294,84 @@ export default function LandingPage() {
             {/* ==========================================================================
                 HERO — Video Background + Centered Content
             ============================================================================ */}
-            <section className="relative w-full pt-16 flex flex-col items-center overflow-hidden">
+            <section className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
                 {/* Video nền */}
                 <video
                     autoPlay loop muted playsInline
                     className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none"
                     src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
                 />
-                {/* Overlay gradient kép — tối phía dưới nhiều hơn để chữ sáng rõ */}
+                {/* Overlay gradient kép */}
                 <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background z-0" />
 
-                {/* Phần text — chiếm đủ viewport, căn giữa dọc */}
-                <div className="relative z-10 min-h-[calc(100svh-4rem)] flex flex-col items-center justify-center w-full px-4 md:px-8">
-                    <div className="container mx-auto max-w-7xl text-center flex flex-col items-center">
-                        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-6 text-balance leading-[1.1]">
-                            Biến ý tưởng thành <br className="hidden sm:block" />
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-primary">
-                                nghệ thuật thị giác
-                            </span>
-                        </h1>
+                <div className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center py-24">
+                    <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-4 text-balance leading-[1.1]">
+                        Biến ý tưởng thành <br className="hidden sm:block" />
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-primary">
+                            nghệ thuật thị giác
+                        </span>
+                    </h1>
 
-                        <p className="max-w-2xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-10 text-balance">
-                            Chỉ cần mô tả, AI sẽ vẽ. Từ concept art đến logo thương hiệu — tất cả chỉ trong vài giây với chất lượng studio chuyên nghiệp.
-                        </p>
+                    <p className="max-w-2xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-8 text-balance">
+                        Chỉ cần mô tả, AI sẽ vẽ. Từ concept art đến logo thương hiệu — tất cả chỉ trong vài giây với chất lượng studio chuyên nghiệp.
+                    </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                            <Link to="/app/generate" className="w-full sm:w-auto">
-                                <Button size="lg" className="w-full h-14 px-10 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
-                                    <Play className="mr-2 h-4 w-4" /> Bắt Đầu Sáng Tạo
-                                </Button>
-                            </Link>
-                            <Link to="/app/templates" className="w-full sm:w-auto">
-                                <Button size="lg" variant="outline" className="w-full h-14 px-10 text-base backdrop-blur-sm bg-background/30 border-border/50 hover:bg-background/50 transition-all">
-                                    <SwatchBook className="mr-2 h-4 w-4" /> Trải Nghiệm Mẫu
-                                </Button>
-                            </Link>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <Link to="/app/generate" className="w-full sm:w-auto">
+                            <Button size="lg" className="w-full h-12 px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+                                <Play className="mr-2 h-4 w-4" /> Bắt Đầu Sáng Tạo
+                            </Button>
+                        </Link>
+                        <Link to="/app/templates" className="w-full sm:w-auto">
+                            <Button size="lg" variant="outline" className="w-full h-12 px-8 text-base backdrop-blur-sm bg-background/30 border-border/50 hover:bg-background/50 transition-all">
+                                <SwatchBook className="mr-2 h-4 w-4" /> Trải Nghiệm Mẫu
+                            </Button>
+                        </Link>
+                    </div>
+
+                    {/* Social Proof */}
+                    <div className="flex items-center gap-4 mt-6">
+                        <div className="flex -space-x-2">
+                            {TESTIMONIALS.map((t, i) => (
+                                <Avatar key={i} className="h-8 w-8 border-2 border-background">
+                                    <AvatarImage src={t.avatar} />
+                                    <AvatarFallback>{t.name[0]}</AvatarFallback>
+                                </Avatar>
+                            ))}
                         </div>
-
-                        {/* Social Proof nhỏ ngay dưới CTA */}
-                        <div className="flex items-center gap-4 mt-10">
-                            <div className="flex -space-x-2">
-                                {TESTIMONIALS.map((t, i) => (
-                                    <Avatar key={i} className="h-8 w-8 border-2 border-background">
-                                        <AvatarImage src={t.avatar} />
-                                        <AvatarFallback>{t.name[0]}</AvatarFallback>
-                                    </Avatar>
+                        <div className="flex flex-col text-left">
+                            <div className="flex gap-0.5">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                                 ))}
                             </div>
-                            <div className="flex flex-col text-left">
-                                <div className="flex gap-0.5">
-                                    {[...Array(5)].map((_, i) => (
-                                        <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                    ))}
-                                </div>
-                                <span className="text-xs text-muted-foreground">Được 50K+ nhà sáng tạo tin dùng</span>
-                            </div>
+                            <span className="text-xs text-muted-foreground">Được 50K+ nhà sáng tạo tin dùng</span>
                         </div>
                     </div>
 
-                    {/* Scroll indicator — nằm ở dưới cùng phần text viewport */}
-                    <div className="mt-auto pb-8 pt-6 animate-bounce">
-                        <ChevronDown className="h-6 w-6 text-muted-foreground" />
+                    {/* Gallery AI Art — ngay dưới social proof, cùng container */}
+                    <div className="hidden md:grid grid-cols-4 gap-3 mt-10 w-full max-w-3xl">
+                        {HERO_IMAGES.map((img, i) => (
+                            <Card key={i} className={`overflow-hidden border-border/20 bg-background/30 backdrop-blur-sm group hover:border-primary/30 transition-all duration-500 ${i % 2 === 1 ? 'translate-y-3' : ''}`}>
+                                <CardContent className="p-0 relative aspect-[3/4]">
+                                    <img
+                                        src={img.src}
+                                        alt={img.label}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                                        loading="lazy"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                                        <span className="text-white text-xs font-medium">{img.label}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
                     </div>
                 </div>
 
-                {/* Gallery AI Art — nằm ngoài viewport ban đầu, user scroll xuống sẽ thấy */}
-                <div className="relative z-10 w-full pb-16">
-                    <div className="container mx-auto px-4 md:px-8 max-w-4xl">
-                        <div className="hidden md:grid grid-cols-4 gap-4">
-                            {HERO_IMAGES.map((img, i) => (
-                                <Card key={i} className={`overflow-hidden border-border/20 bg-background/30 backdrop-blur-sm group hover:border-primary/30 transition-all duration-500 ${i % 2 === 1 ? 'translate-y-4' : ''}`}>
-                                    <CardContent className="p-0 relative aspect-[3/4]">
-                                        <img
-                                            src={img.src}
-                                            alt={img.label}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                                            <span className="text-white text-xs font-medium">{img.label}</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    </div>
+                {/* Scroll indicator — absolute, không chiếm không gian */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+                    <ChevronDown className="h-6 w-6 text-muted-foreground" />
                 </div>
             </section>
 
