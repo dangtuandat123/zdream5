@@ -526,9 +526,9 @@ function InteractiveDemo() {
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row min-h-[420px]">
+                <div className="relative flex flex-col lg:flex-row h-[700px] sm:h-[550px] lg:h-[420px] overflow-hidden">
                     {/* LEFT: Settings Panel */}
-                    <div className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-4 bg-background/30">
+                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[230px] sm:max-h-[220px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-4 bg-background/30 overflow-y-auto min-h-0">
                         {/* Phong cách */}
                         <div className="space-y-2">
                             <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
@@ -705,7 +705,7 @@ function InteractiveDemo() {
 
                         {/* Prompt bar */}
                         <div className="p-3 relative">
-                            <div className={`relative w-full border rounded-[22px] backdrop-blur-xl transition-all duration-500 min-h-[140px] ${
+                            <div className={`relative w-full border rounded-[22px] backdrop-blur-xl transition-all duration-500 ${
                                 promptBarHighlight
                                     ? "border-violet-500/60 bg-violet-500/[0.06] shadow-lg shadow-violet-500/10 scale-[1.01]"
                                     : "border-border/25 bg-[#37393b]/85"
@@ -723,8 +723,8 @@ function InteractiveDemo() {
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 0.3 }}
                                     >
-                                        <div className="relative shrink-0 group/ref">
-                                            <img src={DEMO_RESULTS[0]} alt="Ref" className="h-14 w-14 rounded-lg object-cover ring-1 ring-border/30" />
+                                        <div className="relative shrink-0">
+                                            <img src={DEMO_RESULTS[0]} alt="Ref" className="h-12 w-12 rounded-lg object-cover ring-1 ring-border/30" />
                                             <div className="absolute top-0.5 left-0.5 bg-black/60 text-[8px] font-bold text-white h-3.5 w-3.5 rounded-full flex items-center justify-center">
                                                 1
                                             </div>
@@ -734,11 +734,10 @@ function InteractiveDemo() {
 
                                 {/* Prompt text */}
                                 <div className="px-4 py-3">
-                                    <p className={`text-[15px] leading-relaxed min-h-[24px] ${promptText ? "text-foreground" : "text-muted-foreground/50"}`}>
-                                        {/* @Ảnh 1 mention — hiện sau khi thả reference */}
+                                    <p className={`text-[13px] lg:text-[15px] leading-relaxed min-h-[24px] ${promptText ? "text-foreground" : "text-muted-foreground/50"}`}>
                                         {showMention && (
                                             <motion.span
-                                                className="inline-flex items-center gap-1 bg-violet-500/20 text-violet-300 rounded-md px-1.5 py-0.5 text-[13px] font-medium mr-1.5 align-middle"
+                                                className="inline-flex items-center gap-1 bg-violet-500/20 text-violet-300 rounded-md px-1.5 py-0.5 text-[12px] lg:text-[13px] font-medium mr-1.5 align-middle"
                                                 initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ duration: 0.3 }}
