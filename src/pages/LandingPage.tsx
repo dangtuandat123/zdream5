@@ -33,6 +33,17 @@ import {
     Cpu,
     Download,
     ArrowRight,
+    ArrowUp,
+    Wand2,
+    ImageIcon,
+    Settings2,
+    History,
+    Square,
+    RectangleHorizontal,
+    RectangleVertical,
+    Monitor,
+    X,
+    ZoomIn,
 } from "lucide-react"
 
 // ============================================================
@@ -209,6 +220,28 @@ const STATS = [
     { label: "Đánh giá", value: 4.9, suffix: "/5", display: "4.9/5", icon: Gem },
 ]
 
+const DEMO_PROMPT = "A cute fox wearing a spacesuit, floating in a colorful nebula, digital painting, ultra detailed, cinematic lighting"
+// Prompt lần 2 — prompt KHÁC khi đã có ảnh tham chiếu
+const DEMO_PROMPT_V2 = "Biến con cáo thành phong cách cyberpunk, neon city background, giữ nguyên bố cục gốc"
+const DEMO_STYLES = ["Digital Art", "Anime", "Chân thực", "3D Render", "Sơn dầu"]
+const DEMO_RATIOS = [
+    { value: "1:1", icon: Square },
+    { value: "3:4", icon: RectangleVertical },
+    { value: "4:3", icon: RectangleHorizontal },
+    { value: "16:9", icon: RectangleHorizontal },
+    { value: "9:16", icon: RectangleVertical },
+]
+// Ảnh kết quả lần 1 — 16:9 landscape
+const DEMO_RESULTS = [
+    "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&h=450&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=800&h=450&auto=format&fit=crop",
+]
+// Ảnh kết quả lần 2 (sau khi kéo reference + prompt V2)
+const DEMO_RESULTS_V2 = [
+    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=800&h=450&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=800&h=450&auto=format&fit=crop",
+]
+
 // ============================================================
 // ANIMATION VARIANTS
 // ============================================================
@@ -290,6 +323,516 @@ function AnimatedStat({ stat }: { stat: typeof STATS[0] }) {
                 </CardContent>
             </Card>
         </motion.div>
+    )
+}
+
+// Phases: idle → typing → selecting → generating → results → dragging → dropped → retyping → regenerating → newResults → lightbox → pause → reset
+type DemoPhase = "idle" | "typing" | "selecting" | "generating" | "results" | "dragging" | "dropped" | "retyping" | "regenerating" | "newResults" | "lightbox" | "pause"
+
+function InteractiveDemo() {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const isInView = useInView(containerRef, { once: false, margin: "-100px" })
+    const [phase, setPhase] = useState<DemoPhase>("idle")
+    const [typedLength, setTypedLength] = useState(0)
+    const [activeStyle, setActiveStyle] = useState(-1)
+    const [activeRatio, setActiveRatio] = useState(-1)
+    const [progress, setProgress] = useState(0)
+    const [showResults, setShowResults] = useState(false)
+    const [showRefThumb, setShowRefThumb] = useState(false)
+    const [promptBarHighlight, setPromptBarHighlight] = useState(false)
+    const [showV2Results, setShowV2Results] = useState(false)
+    const [lightboxImg, setLightboxImg] = useState<string | null>(null)
+    const [showMention, setShowMention] = useState(false)
+    const [typedV2Length, setTypedV2Length] = useState(0)
+    const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+    // Cleanup all timeouts
+    const clearAllTimeouts = useCallback(() => {
+        timeoutsRef.current.forEach(t => clearTimeout(t))
+        timeoutsRef.current = []
+    }, [])
+    const addTimeout = useCallback((fn: () => void, ms: number) => {
+        const t = setTimeout(fn, ms)
+        timeoutsRef.current.push(t)
+        return t
+    }, [])
+    useEffect(() => () => clearAllTimeouts(), [clearAllTimeouts])
+
+    // Start animation when in view
+    useEffect(() => {
+        if (isInView && phase === "idle") setPhase("typing")
+    }, [isInView, phase])
+
+    // Typing effect
+    useEffect(() => {
+        if (phase !== "typing") return
+        if (typedLength >= DEMO_PROMPT.length) {
+            addTimeout(() => setPhase("selecting"), 400)
+            return
+        }
+        const interval = setInterval(() => {
+            setTypedLength(prev => {
+                if (prev >= DEMO_PROMPT.length) { clearInterval(interval); return prev }
+                return prev + 1
+            })
+        }, 30)
+        return () => clearInterval(interval)
+    }, [phase, typedLength, addTimeout])
+
+    // Selecting phase — auto-select style then ratio
+    useEffect(() => {
+        if (phase !== "selecting") return
+        addTimeout(() => setActiveStyle(0), 300)
+        addTimeout(() => setActiveRatio(3), 800) // 16:9
+        addTimeout(() => setPhase("generating"), 1400)
+    }, [phase, addTimeout])
+
+    // Generating phase — progress bar
+    useEffect(() => {
+        if (phase !== "generating") return
+        setProgress(0)
+        const interval = setInterval(() => {
+            setProgress(prev => {
+                if (prev >= 100) { clearInterval(interval); return 100 }
+                return prev + 2.5
+            })
+        }, 40)
+        addTimeout(() => { setShowResults(true); setPhase("results") }, 2000)
+        return () => clearInterval(interval)
+    }, [phase, addTimeout])
+
+    // Results → dragging
+    useEffect(() => {
+        if (phase !== "results") return
+        addTimeout(() => setPhase("dragging"), 2000)
+    }, [phase, addTimeout])
+
+    // Dragging — simulate drag-to-reference animation
+    useEffect(() => {
+        if (phase !== "dragging") return
+        // Highlight prompt bar as drop target
+        addTimeout(() => setPromptBarHighlight(true), 300)
+        // "Drop" — show reference thumbnail
+        addTimeout(() => {
+            setPromptBarHighlight(false)
+            setShowRefThumb(true)
+            setPhase("dropped")
+        }, 1200)
+    }, [phase, addTimeout])
+
+    // Dropped → hiện @Ảnh 1 mention → xóa prompt cũ → retyping prompt V2
+    useEffect(() => {
+        if (phase !== "dropped") return
+        addTimeout(() => setShowMention(true), 800)
+        // Xóa prompt cũ, chuẩn bị gõ prompt mới
+        addTimeout(() => {
+            setTypedLength(0)
+            setTypedV2Length(0)
+            setPhase("retyping")
+        }, 1800)
+    }, [phase, addTimeout])
+
+    // Retyping — gõ DEMO_PROMPT_V2 (prompt khác cho lần tạo thứ 2)
+    useEffect(() => {
+        if (phase !== "retyping") return
+        if (typedV2Length >= DEMO_PROMPT_V2.length) {
+            addTimeout(() => {
+                setPhase("regenerating")
+                setProgress(0)
+            }, 400)
+            return
+        }
+        const interval = setInterval(() => {
+            setTypedV2Length(prev => {
+                if (prev >= DEMO_PROMPT_V2.length) { clearInterval(interval); return prev }
+                return prev + 1
+            })
+        }, 30)
+        return () => clearInterval(interval)
+    }, [phase, typedV2Length, addTimeout])
+
+    // Regenerating — progress bar lần 2
+    useEffect(() => {
+        if (phase !== "regenerating") return
+        setShowResults(false)
+        const interval = setInterval(() => {
+            setProgress(prev => {
+                if (prev >= 100) { clearInterval(interval); return 100 }
+                return prev + 3
+            })
+        }, 35)
+        addTimeout(() => {
+            setShowV2Results(true)
+            setShowResults(true)
+            setPhase("newResults")
+        }, 1800)
+        return () => clearInterval(interval)
+    }, [phase, addTimeout])
+
+    // New Results → lightbox (click ảnh xem phóng to)
+    useEffect(() => {
+        if (phase !== "newResults") return
+        addTimeout(() => {
+            setLightboxImg(DEMO_RESULTS_V2[0])
+            setPhase("lightbox")
+        }, 1800)
+    }, [phase, addTimeout])
+
+    // Lightbox → pause → reset
+    useEffect(() => {
+        if (phase !== "lightbox") return
+        addTimeout(() => setPhase("pause"), 3000)
+    }, [phase, addTimeout])
+
+    useEffect(() => {
+        if (phase !== "pause") return
+        addTimeout(() => {
+            setTypedLength(0); setTypedV2Length(0); setActiveStyle(-1); setActiveRatio(-1)
+            setProgress(0); setShowResults(false); setShowRefThumb(false)
+            setPromptBarHighlight(false); setShowV2Results(false)
+            setLightboxImg(null); setShowMention(false); setPhase("typing")
+        }, 600)
+    }, [phase, addTimeout])
+
+    // Hiển thị prompt V2 khi đang retyping hoặc đã sang lần tạo thứ 2
+    const isV2 = phase === "retyping" || phase === "regenerating" || phase === "newResults" || phase === "lightbox" || phase === "pause"
+    const promptText = isV2
+        ? DEMO_PROMPT_V2.substring(0, phase === "retyping" ? typedV2Length : DEMO_PROMPT_V2.length)
+        : DEMO_PROMPT.substring(0, typedLength)
+    const isGenerating = phase === "generating" || phase === "regenerating"
+    const isDragging = phase === "dragging"
+    const currentResults = showV2Results ? DEMO_RESULTS_V2 : DEMO_RESULTS
+
+    return (
+        <div ref={containerRef}>
+            <Card className="relative border-border/20 bg-background/50 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
+                {/* Glow accent nền */}
+                <div className="absolute -top-20 -right-20 w-60 h-60 bg-violet-600/10 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-fuchsia-600/8 rounded-full blur-[60px] pointer-events-none" />
+
+                {/* Thanh tiêu đề giả lập window */}
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/60 backdrop-blur-sm">
+                    <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/70 bg-muted/20 rounded-md px-3 py-1 border border-border/10">
+                            <Monitor className="h-3 w-3" /> zdream.vn/app/generate
+                        </div>
+                    </div>
+                </div>
+
+                <div className="relative flex flex-col lg:flex-row min-h-[420px]">
+                    {/* LEFT: Settings Panel */}
+                    <div className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-4 bg-background/30">
+                        {/* Phong cách */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
+                                <Palette className="h-3 w-3" /> Phong cách
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {DEMO_STYLES.map((style, i) => (
+                                    <Badge
+                                        key={style}
+                                        variant={activeStyle === i ? "default" : "outline"}
+                                        className={`cursor-default text-xs transition-all duration-500 ${activeStyle === i
+                                            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-transparent shadow-lg shadow-violet-500/25 scale-105"
+                                            : "border-border/30 text-muted-foreground/60 hover:border-border/50"
+                                        }`}
+                                    >
+                                        {style}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Tỷ lệ */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">Tỷ lệ khung hình</p>
+                            <div className="grid grid-cols-5 gap-1.5">
+                                {DEMO_RATIOS.map((r, i) => (
+                                    <div
+                                        key={r.value}
+                                        className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs transition-all duration-500 ${activeRatio === i
+                                            ? "bg-gradient-to-b from-violet-500 to-violet-600 text-white shadow-md shadow-violet-500/20 scale-105"
+                                            : "bg-muted/20 text-muted-foreground/50"
+                                        }`}
+                                    >
+                                        <r.icon className="h-3.5 w-3.5" />
+                                        <span className="text-[9px] font-medium">{r.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Số lượng */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">Số lượng</p>
+                            <div className="grid grid-cols-4 gap-1.5">
+                                {[1, 2, 3, 4].map(n => (
+                                    <div
+                                        key={n}
+                                        className={`text-center py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${n === 2
+                                            ? "bg-gradient-to-b from-violet-500 to-violet-600 text-white shadow-sm"
+                                            : "bg-muted/20 text-muted-foreground/50"
+                                        }`}
+                                    >
+                                        {n}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Negative prompt */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">Negative Prompt</p>
+                            <div className="border border-border/20 bg-muted/5 rounded-lg px-3 py-2 text-[11px] text-muted-foreground/40 min-h-[40px] italic">
+                                mờ, nhòe, chữ, watermark...
+                            </div>
+                        </div>
+
+                        {/* Seed */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">Seed</p>
+                            <div className="flex gap-2">
+                                <div className="flex-1 border border-border/20 bg-muted/5 rounded-lg px-3 py-1.5 text-xs text-muted-foreground/50 tabular-nums">
+                                    482719036
+                                </div>
+                                <div className="h-8 w-8 rounded-lg bg-muted/20 flex items-center justify-center text-muted-foreground/40">
+                                    <Sparkles className="h-3.5 w-3.5" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT: Canvas + Prompt bar */}
+                    <div className="flex-1 flex flex-col min-h-0 relative">
+                        {/* Canvas area */}
+                        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center relative">
+                            {!showResults ? (
+                                <div className="w-full max-w-lg">
+                                    {isGenerating ? (
+                                        /* Skeleton loading — shimmer giống app thật */
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {[0, 1].map(i => (
+                                                <div key={i} className={`relative aspect-video rounded-xl overflow-hidden bg-muted/15 border border-border/30 flex flex-col items-center justify-center isolate ${i === 1 ? "hidden sm:flex" : ""}`}>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                                                    <Wand2 className="h-5 w-5 text-violet-400/40 animate-pulse" />
+                                                    <div className="flex gap-1.5 items-center mt-3">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                                        <span className="text-[10px] text-muted-foreground/40 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
+                                                    </div>
+                                                    {/* Progress bar gradient */}
+                                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/20">
+                                                        <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-300 ease-out" style={{ width: `${progress}%` }} />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        /* Empty state */
+                                        <div className="flex flex-col items-center justify-center text-center py-10">
+                                            <div className="relative w-16 h-16 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4">
+                                                <ImageIcon className="h-7 w-7 text-violet-400/40" />
+                                                <div className="absolute inset-0 rounded-2xl bg-violet-500/5 animate-pulse" />
+                                            </div>
+                                            <p className="text-sm text-muted-foreground/50">Mô tả ý tưởng để bắt đầu</p>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                /* Results + Drag animation */
+                                <div className="relative w-full max-w-lg">
+                                    <motion.div
+                                        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+                                        initial={{ opacity: 0, y: 12 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+                                    >
+                                        {currentResults.map((src, i) => (
+                                            <motion.div
+                                                key={i}
+                                                className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-lg group ${i === 1 ? "hidden sm:block" : ""}`}
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: isDragging && i === 0 ? 0.5 : 1, scale: 1 }}
+                                                transition={{ delay: i * 0.15, duration: 0.5 }}
+                                            >
+                                                <div className="relative aspect-video bg-muted/20">
+                                                    <img src={src} alt={`AI Result ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                                                    {/* Hover overlay giống app thật */}
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                                    {/* Action badges */}
+                                                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                                                        <Badge variant="secondary" className="text-[9px] bg-black/40 backdrop-blur-sm text-white border-0">
+                                                            AI
+                                                        </Badge>
+                                                        <div className="flex gap-1">
+                                                            <div className="h-6 w-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                                                                <Download className="h-3 w-3 text-white" />
+                                                            </div>
+                                                            <div className="h-6 w-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                                                                <ImageIcon className="h-3 w-3 text-white" />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </motion.div>
+
+                                    {/* Floating drag ghost — ảnh thu nhỏ di chuyển xuống prompt bar */}
+                                    {isDragging && (
+                                        <motion.div
+                                            className="absolute z-30 w-16 h-16 rounded-xl overflow-hidden shadow-2xl ring-2 ring-violet-500 pointer-events-none"
+                                            initial={{ top: "20%", left: "15%", opacity: 1, scale: 1, rotate: 0 }}
+                                            animate={{ top: "85%", left: "10%", opacity: 0.9, scale: 0.8, rotate: -3 }}
+                                            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                                        >
+                                            <img src={DEMO_RESULTS[0]} alt="Dragging" className="w-full h-full object-cover" />
+                                            {/* Glow trail */}
+                                            <div className="absolute inset-0 bg-violet-500/20 animate-pulse" />
+                                        </motion.div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Prompt bar */}
+                        <div className="p-3 relative">
+                            <div className={`relative w-full border rounded-[22px] backdrop-blur-xl transition-all duration-500 ${
+                                promptBarHighlight
+                                    ? "border-violet-500/60 bg-violet-500/[0.06] shadow-lg shadow-violet-500/10 scale-[1.01]"
+                                    : "border-border/25 bg-[#37393b]/85"
+                            }`}>
+                                {/* Prompt bar highlight glow khi đang kéo */}
+                                {promptBarHighlight && (
+                                    <div className="absolute inset-0 rounded-[22px] bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10 animate-pulse pointer-events-none" />
+                                )}
+
+                                {/* Reference thumbnail — hiện sau khi "thả" */}
+                                {showRefThumb && (
+                                    <motion.div
+                                        className="px-4 pt-3 pb-1 flex gap-2"
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: "auto" }}
+                                        transition={{ duration: 0.3 }}
+                                    >
+                                        <div className="relative shrink-0 group/ref">
+                                            <img src={DEMO_RESULTS[0]} alt="Ref" className="h-14 w-14 rounded-lg object-cover ring-1 ring-border/30" />
+                                            <div className="absolute top-0.5 left-0.5 bg-black/60 text-[8px] font-bold text-white h-3.5 w-3.5 rounded-full flex items-center justify-center">
+                                                1
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Prompt text */}
+                                <div className="px-4 py-3">
+                                    <p className={`text-[15px] leading-relaxed min-h-[24px] ${promptText ? "text-foreground" : "text-muted-foreground/50"}`}>
+                                        {/* @Ảnh 1 mention — hiện sau khi thả reference */}
+                                        {showMention && (
+                                            <motion.span
+                                                className="inline-flex items-center gap-1 bg-violet-500/20 text-violet-300 rounded-md px-1.5 py-0.5 text-[13px] font-medium mr-1.5 align-middle"
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                @Ảnh 1
+                                            </motion.span>
+                                        )}
+                                        {promptText || "Mô tả ý tưởng kiến tạo của bạn..."}
+                                        {(phase === "typing" || phase === "retyping") && <span className="inline-block w-[2px] h-[18px] bg-violet-400 ml-0.5 align-middle animate-pulse" />}
+                                    </p>
+                                </div>
+
+                                {/* Toolbar */}
+                                <div className="flex items-center justify-between px-3 pb-2.5">
+                                    <div className="flex items-center gap-0.5">
+                                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors">
+                                            <History className="h-4 w-4" />
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors">
+                                            <ImageIcon className="h-4 w-4" />
+                                        </div>
+                                        <div className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground/30 hover:text-muted-foreground/50 transition-colors">
+                                            <Settings2 className="h-4 w-4" />
+                                        </div>
+                                        <div className="hidden sm:flex items-center gap-1 ml-1.5">
+                                            <Badge variant="secondary" className="text-[9px] h-5 rounded-full px-2 bg-muted/30 text-muted-foreground/60 border-0">
+                                                16:9
+                                            </Badge>
+                                            <Badge variant="secondary" className="text-[9px] h-5 rounded-full px-2 bg-muted/30 text-muted-foreground/60 border-0">
+                                                ×2
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    {/* Generate button */}
+                                    <div className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${promptText
+                                        ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30"
+                                        : "bg-muted/40 text-muted-foreground/40"
+                                    }`}>
+                                        {isGenerating
+                                            ? <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            : <ArrowUp className="h-4 w-4" />
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Label khi đang kéo */}
+                            {promptBarHighlight && (
+                                <motion.div
+                                    className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-violet-500/90 text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-lg backdrop-blur-sm"
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                >
+                                    <ImageIcon className="h-3 w-3" /> Thả ảnh tham chiếu vào đây
+                                </motion.div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Lightbox overlay — mô phỏng xem ảnh phóng to */}
+                {lightboxImg && (
+                    <motion.div
+                        className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        {/* Nút đóng */}
+                        <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
+                            <X className="h-4 w-4" />
+                        </div>
+                        {/* Ảnh phóng to */}
+                        <motion.div
+                            className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
+                            initial={{ scale: 0.7, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                            <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
+                            {/* Info bar dưới ảnh */}
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                <p className="text-[11px] text-white/80 line-clamp-1">{DEMO_PROMPT_V2}</p>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                    <Badge variant="secondary" className="text-[9px] h-4 bg-violet-500/30 text-violet-200 border-0">Digital Art</Badge>
+                                    <Badge variant="secondary" className="text-[9px] h-4 bg-white/10 text-white/60 border-0">16:9</Badge>
+                                    <span className="text-[9px] text-white/40 ml-auto flex items-center gap-1">
+                                        <ZoomIn className="h-3 w-3" /> Xem chi tiết
+                                    </span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </Card>
+        </div>
     )
 }
 
@@ -658,6 +1201,53 @@ export default function LandingPage() {
                         <Link to="/login">
                             <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/20">
                                 Thử Ngay Miễn Phí <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ==================== INTERACTIVE DEMO ==================== */}
+            <section className="w-full py-24 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+                <div className="absolute top-1/3 -left-32 w-96 h-96 bg-violet-600/8 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-fuchsia-600/5 rounded-full blur-[100px] pointer-events-none" />
+
+                <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
+                    <motion.div
+                        className="text-center mb-14"
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                            <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
+                        </Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                            Studio Sáng Tạo{" "}
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 animate-gradient-text">
+                                AI
+                            </span>
+                        </h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
+                            Xem cách ZDream biến ý tưởng thành tác phẩm — chỉ trong vài giây.
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={fadeUp}
+                    >
+                        <InteractiveDemo />
+                    </motion.div>
+
+                    <motion.div
+                        className="text-center mt-12"
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <Link to="/login">
+                            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/20">
+                                Trải Nghiệm Ngay <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
                     </motion.div>
