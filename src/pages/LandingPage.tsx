@@ -705,7 +705,7 @@ function InteractiveDemo() {
 
                         {/* Prompt bar */}
                         <div className="p-3 relative">
-                            <div className={`relative w-full border rounded-[22px] backdrop-blur-xl transition-all duration-500 ${
+                            <div className={`relative w-full border rounded-[22px] backdrop-blur-xl transition-all duration-500 min-h-[140px] ${
                                 promptBarHighlight
                                     ? "border-violet-500/60 bg-violet-500/[0.06] shadow-lg shadow-violet-500/10 scale-[1.01]"
                                     : "border-border/25 bg-[#37393b]/85"
@@ -719,8 +719,8 @@ function InteractiveDemo() {
                                 {showRefThumb && (
                                     <motion.div
                                         className="px-4 pt-3 pb-1 flex gap-2"
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: "auto" }}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 0.3 }}
                                     >
                                         <div className="relative shrink-0 group/ref">
@@ -1014,7 +1014,7 @@ function TemplateDemo() {
                             </p>
                             {!showUploadedImg ? (
                                 <motion.div
-                                    className="border-2 border-dashed border-border/30 rounded-xl flex flex-col items-center justify-center py-6 gap-1.5 transition-colors"
+                                    className="border-2 border-dashed border-border/30 rounded-xl flex flex-col items-center justify-center h-[90px] gap-1.5 transition-colors"
                                     animate={phase === "uploading" ? { borderColor: "rgba(168,85,247,0.5)", backgroundColor: "rgba(168,85,247,0.05)" } : {}}
                                 >
                                     <Upload className="h-6 w-6 text-muted-foreground/40" />
