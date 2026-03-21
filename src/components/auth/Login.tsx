@@ -119,8 +119,8 @@ export function Login() {
                                 {SHOWCASE_IMAGES.map((src, index) => (
                                     <motion.div
                                         key={index}
-                                        className={index % 3 === 1 ? 'translate-y-4' : ''}
-                                        whileHover={{ scale: 1.03, transition: { duration: 0.3 } }}
+                                        initial={{ y: index % 3 === 1 ? 16 : 0 }}
+                                        animate={{ y: index % 3 === 1 ? 16 : 0 }}
                                     >
                                         <Card className="overflow-hidden border-border/30 bg-background/50 backdrop-blur-sm h-full hover:border-violet-500/30 hover:shadow-lg hover:shadow-violet-500/10 transition-all duration-500">
                                             <CardContent className="p-0 h-full">

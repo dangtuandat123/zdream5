@@ -541,8 +541,9 @@ export default function LandingPage() {
                         {HERO_IMAGES.map((img, i) => (
                             <motion.div
                                 key={i}
-                                className={i % 2 === 1 ? 'translate-y-3' : ''}
-                                whileHover={{ y: -4, transition: { duration: 0.3 } }}
+                                initial={{ y: i % 2 === 1 ? 12 : 0 }}
+                                animate={{ y: i % 2 === 1 ? 12 : 0 }}
+                                whileHover={{ y: i % 2 === 1 ? 4 : -8, transition: { duration: 0.3 } }}
                             >
                                 <Card className="overflow-hidden border-border/20 bg-background/30 backdrop-blur-sm group hover:border-violet-500/30 transition-all duration-500">
                                     <CardContent className="p-0 relative aspect-[3/4]">
