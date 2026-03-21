@@ -530,27 +530,6 @@ export default function LandingPage() {
                         </Link>
                     </motion.div>
 
-                    {/* Social Proof */}
-                    <motion.div
-                        className="flex items-center gap-4 mt-8"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.6, delay: 0.7 }}
-                    >
-                        <div className="flex -space-x-2">
-                            {TESTIMONIALS.slice(0, 3).map((t, i) => (
-                                <Avatar key={i} className="h-8 w-8 border-2 border-background">
-                                    <AvatarImage src={t.avatar} />
-                                    <AvatarFallback>{t.name[0]}</AvatarFallback>
-                                </Avatar>
-                            ))}
-                        </div>
-                        <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, i) => (
-                                <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            ))}
-                        </div>
-                    </motion.div>
 
                     {/* Gallery AI Art — responsive: 2 trên mobile, 4 trên desktop */}
                     <motion.div
