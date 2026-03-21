@@ -1407,20 +1407,11 @@ export default function LandingPage() {
                         </span>
                     </motion.h1>
 
-                    <motion.p
-                        className="max-w-2xl mx-auto text-muted-foreground sm:text-lg sm:leading-8 mb-8 text-balance"
+                    <motion.div
+                        className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-6"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                    >
-                        Chỉ cần mô tả, AI sẽ vẽ. Từ concept art đến logo thương hiệu — tất cả chỉ trong vài giây với chất lượng studio chuyên nghiệp.
-                    </motion.p>
-
-                    <motion.div
-                        className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5 }}
                     >
                         <Link to="/login" className="w-full sm:w-auto">
                             <Button size="lg" className="w-full h-12 px-8 text-base bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 transition-all">
@@ -1437,7 +1428,7 @@ export default function LandingPage() {
 
                     {/* Gallery AI Art — responsive: 2 trên mobile, 4 trên desktop */}
                     <motion.div
-                        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10 w-full max-w-3xl"
+                        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 w-full max-w-3xl"
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
@@ -1478,11 +1469,11 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== STATS ==================== */}
-            <section className="w-full py-20 relative">
+            <section className="w-full py-14 relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <motion.div
-                        className="text-center mb-12"
+                        className="text-center mb-8"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
@@ -1503,17 +1494,17 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== HOW IT WORKS ==================== */}
-            <section className="w-full py-24 relative">
+            <section className="w-full py-16 relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-10"
                         initial="hidden" whileInView="visible" viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <ZapIcon className="mr-2 h-3.5 w-3.5" /> Đơn giản & Nhanh chóng
                         </Badge>
                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình 3 Bước</h2>
@@ -1555,7 +1546,7 @@ export default function LandingPage() {
 
                     {/* CTA mini */}
                     <motion.div
-                        className="text-center mt-14"
+                        className="text-center mt-10"
                         initial="hidden" whileInView="visible" viewport={{ once: true }}
                         variants={fadeUp}
                     >
@@ -1569,18 +1560,18 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== INTERACTIVE DEMO ==================== */}
-            <section className="w-full py-24 relative overflow-hidden">
+            <section className="w-full py-16 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
                 <div className="absolute top-1/3 -left-32 w-96 h-96 bg-violet-600/8 rounded-full blur-[120px] pointer-events-none" />
                 <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-fuchsia-600/5 rounded-full blur-[100px] pointer-events-none" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
                     <motion.div
-                        className="text-center mb-14"
+                        className="text-center mb-10"
                         initial="hidden" whileInView="visible" viewport={{ once: true }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
                         </Badge>
                         <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
@@ -1640,7 +1631,7 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== FEATURES — Bento Grid ==================== */}
-            <section id="features" className="w-full py-24 relative">
+            <section id="features" className="w-full py-16 relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fuchsia-600/5 rounded-full blur-[120px] pointer-events-none" />
 
