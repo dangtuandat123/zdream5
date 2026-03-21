@@ -44,6 +44,8 @@ import {
     Monitor,
     X,
     ZoomIn,
+    Upload,
+    Check,
 } from "lucide-react"
 
 // ============================================================
@@ -836,6 +838,365 @@ function InteractiveDemo() {
     )
 }
 
+// ============================================================
+// TEMPLATE DEMO — Mô phỏng tạo ảnh bằng kiểu mẫu
+// ============================================================
+const TEMPLATE_NAME = "Render Sản Phẩm 3D"
+const TEMPLATE_URL = "zdream.vn/app/templates/render-san-pham-3d"
+// Ảnh đầu vào giả lập (sản phẩm)
+const TEMPLATE_INPUT_IMG = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop"
+// Effect groups giả lập
+const TEMPLATE_EFFECTS = [
+    {
+        name: "Phong cảnh",
+        options: [
+            { label: "Studio", image: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?q=80&w=120&auto=format&fit=crop" },
+            { label: "Thiên nhiên", image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=120&auto=format&fit=crop" },
+            { label: "Thành phố", image: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?q=80&w=120&auto=format&fit=crop" },
+            { label: "Tối giản", image: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?q=80&w=120&auto=format&fit=crop" },
+        ],
+    },
+    {
+        name: "Ánh sáng",
+        options: [
+            { label: "Tự nhiên", image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=120&auto=format&fit=crop" },
+            { label: "Neon", image: "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?q=80&w=120&auto=format&fit=crop" },
+            { label: "Hoàng hôn", image: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?q=80&w=120&auto=format&fit=crop" },
+        ],
+    },
+]
+// Kết quả 16:9
+const TEMPLATE_RESULTS = [
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&h=450&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&h=450&auto=format&fit=crop",
+]
+
+type TemplateDemoPhase = "idle" | "uploading" | "uploaded" | "selectEffect" | "generating" | "results" | "lightbox" | "pause"
+
+function TemplateDemo() {
+    const containerRef = useRef<HTMLDivElement>(null)
+    const isInView = useInView(containerRef, { once: false, margin: "-100px" })
+    const [phase, setPhase] = useState<TemplateDemoPhase>("idle")
+    const [progress, setProgress] = useState(0)
+    const [showUploadedImg, setShowUploadedImg] = useState(false)
+    const [activeEffects, setActiveEffects] = useState<Record<number, number>>({})
+    const [showResults, setShowResults] = useState(false)
+    const [lightboxImg, setLightboxImg] = useState<string | null>(null)
+    const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+    const clearAllTimeouts = useCallback(() => {
+        timeoutsRef.current.forEach(t => clearTimeout(t))
+        timeoutsRef.current = []
+    }, [])
+    const addTimeout = useCallback((fn: () => void, ms: number) => {
+        const t = setTimeout(fn, ms)
+        timeoutsRef.current.push(t)
+        return t
+    }, [])
+    useEffect(() => () => clearAllTimeouts(), [clearAllTimeouts])
+
+    // Bắt đầu khi vào view
+    useEffect(() => {
+        if (isInView && phase === "idle") setPhase("uploading")
+    }, [isInView, phase])
+
+    // Uploading — mô phỏng ảnh được thả vào
+    useEffect(() => {
+        if (phase !== "uploading") return
+        addTimeout(() => {
+            setShowUploadedImg(true)
+            setPhase("uploaded")
+        }, 1200)
+    }, [phase, addTimeout])
+
+    // Uploaded → tự động chọn effects
+    useEffect(() => {
+        if (phase !== "uploaded") return
+        addTimeout(() => setPhase("selectEffect"), 800)
+    }, [phase, addTimeout])
+
+    // Select effects — lần lượt chọn từng group
+    useEffect(() => {
+        if (phase !== "selectEffect") return
+        // Chọn effect group 0, option 1 (Thiên nhiên)
+        addTimeout(() => setActiveEffects(prev => ({ ...prev, 0: 1 })), 500)
+        // Chọn effect group 1, option 2 (Hoàng hôn)
+        addTimeout(() => setActiveEffects(prev => ({ ...prev, 1: 2 })), 1200)
+        // Chuyển sang generating
+        addTimeout(() => setPhase("generating"), 2000)
+    }, [phase, addTimeout])
+
+    // Generating
+    useEffect(() => {
+        if (phase !== "generating") return
+        setProgress(0)
+        const interval = setInterval(() => {
+            setProgress(prev => {
+                if (prev >= 100) { clearInterval(interval); return 100 }
+                return prev + 2.5
+            })
+        }, 40)
+        addTimeout(() => {
+            setShowResults(true)
+            setPhase("results")
+        }, 2000)
+        return () => clearInterval(interval)
+    }, [phase, addTimeout])
+
+    // Results → lightbox
+    useEffect(() => {
+        if (phase !== "results") return
+        addTimeout(() => {
+            setLightboxImg(TEMPLATE_RESULTS[0])
+            setPhase("lightbox")
+        }, 2200)
+    }, [phase, addTimeout])
+
+    // Lightbox → pause → reset
+    useEffect(() => {
+        if (phase !== "lightbox") return
+        addTimeout(() => setPhase("pause"), 3000)
+    }, [phase, addTimeout])
+
+    useEffect(() => {
+        if (phase !== "pause") return
+        addTimeout(() => {
+            setShowUploadedImg(false)
+            setActiveEffects({})
+            setProgress(0)
+            setShowResults(false)
+            setLightboxImg(null)
+            setPhase("uploading")
+        }, 600)
+    }, [phase, addTimeout])
+
+    const isGenerating = phase === "generating"
+
+    return (
+        <div ref={containerRef}>
+            <Card className="relative border-border/20 bg-background/50 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
+                {/* Glow */}
+                <div className="absolute -top-20 -right-20 w-60 h-60 bg-fuchsia-600/10 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-violet-600/8 rounded-full blur-[60px] pointer-events-none" />
+
+                {/* Window chrome */}
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/60 backdrop-blur-sm">
+                    <div className="flex gap-1.5">
+                        <div className="w-3 h-3 rounded-full bg-red-500/70" />
+                        <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
+                        <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/70 bg-muted/20 rounded-md px-3 py-1 border border-border/10">
+                            <Monitor className="h-3 w-3" /> {TEMPLATE_URL}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="relative flex flex-col lg:flex-row min-h-[420px]">
+                    {/* LEFT: Settings Panel */}
+                    <div className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-4 bg-background/30">
+                        {/* Template name */}
+                        <div className="flex items-center gap-2">
+                            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 flex items-center justify-center">
+                                <SwatchBook className="h-4 w-4 text-fuchsia-400" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-semibold">{TEMPLATE_NAME}</p>
+                                <p className="text-[10px] text-muted-foreground/60">Kiểu mẫu</p>
+                            </div>
+                        </div>
+
+                        {/* Upload area */}
+                        <div className="space-y-2">
+                            <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
+                                <ImageIcon className="h-3 w-3" /> Ảnh đầu vào
+                            </p>
+                            {!showUploadedImg ? (
+                                <motion.div
+                                    className="border-2 border-dashed border-border/30 rounded-xl flex flex-col items-center justify-center py-6 gap-1.5 transition-colors"
+                                    animate={phase === "uploading" ? { borderColor: "rgba(168,85,247,0.5)", backgroundColor: "rgba(168,85,247,0.05)" } : {}}
+                                >
+                                    <Upload className="h-6 w-6 text-muted-foreground/40" />
+                                    <p className="text-[11px] text-muted-foreground/50">Kéo thả hoặc nhấp để tải ảnh</p>
+                                    <p className="text-[9px] text-muted-foreground/30">PNG, JPG, WEBP</p>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    className="relative rounded-xl overflow-hidden h-[90px] ring-1 ring-border/20"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.4 }}
+                                >
+                                    <img src={TEMPLATE_INPUT_IMG} alt="Ảnh đầu vào" className="w-full h-full object-cover" />
+                                    <div className="absolute top-1.5 right-1.5 flex gap-1">
+                                        <div className="h-5 w-5 rounded bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                                            <Upload className="h-2.5 w-2.5 text-white/70" />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </div>
+
+                        {/* Effect Groups */}
+                        {TEMPLATE_EFFECTS.map((group, gi) => (
+                            <div key={gi} className="space-y-2">
+                                <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">{group.name}</p>
+                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                    {group.options.map((opt, oi) => {
+                                        const isActive = activeEffects[gi] === oi
+                                        return (
+                                            <div key={oi} className="flex flex-col items-center gap-1 shrink-0 w-[60px]">
+                                                <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all duration-500 ${
+                                                    isActive
+                                                        ? "border-violet-500 ring-2 ring-violet-500/30 scale-105"
+                                                        : "border-border/30"
+                                                }`}>
+                                                    <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" />
+                                                    {isActive && (
+                                                        <motion.div
+                                                            className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-violet-500 flex items-center justify-center"
+                                                            initial={{ scale: 0 }}
+                                                            animate={{ scale: 1 }}
+                                                            transition={{ type: "spring", stiffness: 500 }}
+                                                        >
+                                                            <Check className="h-2.5 w-2.5 text-white" />
+                                                        </motion.div>
+                                                    )}
+                                                </div>
+                                                <span className={`text-[9px] font-medium text-center ${isActive ? "text-violet-400" : "text-muted-foreground/50"}`}>
+                                                    {opt.label}
+                                                </span>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+
+                        {/* Generate button */}
+                        <div className={`w-full py-2.5 rounded-xl text-sm font-medium text-center transition-all duration-500 ${
+                            isGenerating
+                                ? "bg-muted/30 text-muted-foreground/60"
+                                : showUploadedImg && Object.keys(activeEffects).length > 0
+                                    ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/25"
+                                    : "bg-muted/20 text-muted-foreground/40"
+                        }`}>
+                            {isGenerating ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <div className="h-3.5 w-3.5 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+                                    Đang tạo... {Math.round(progress)}%
+                                </span>
+                            ) : (
+                                <span className="flex items-center justify-center gap-2">
+                                    <Wand2 className="h-4 w-4" /> Tạo ảnh
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* RIGHT: Canvas */}
+                    <div className="flex-1 flex items-center justify-center p-4 lg:p-6 relative">
+                        {!showResults ? (
+                            <div className="w-full max-w-lg">
+                                {isGenerating ? (
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {[0, 1].map(i => (
+                                            <div key={i} className={`relative aspect-video rounded-xl overflow-hidden bg-muted/15 border border-border/30 flex flex-col items-center justify-center isolate ${i === 1 ? "hidden sm:flex" : ""}`}>
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                                                <Wand2 className="h-5 w-5 text-fuchsia-400/40 animate-pulse" />
+                                                <div className="flex gap-1.5 items-center mt-3">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400/50 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400/50 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400/50 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                                    <span className="text-[10px] text-muted-foreground/40 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
+                                                </div>
+                                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/20">
+                                                    <div className="h-full bg-gradient-to-r from-fuchsia-500 to-violet-500 transition-all duration-300 ease-out" style={{ width: `${progress}%` }} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center text-center py-10">
+                                        <div className="relative w-16 h-16 rounded-2xl bg-fuchsia-500/10 flex items-center justify-center mb-4">
+                                            <SwatchBook className="h-7 w-7 text-fuchsia-400/40" />
+                                            <div className="absolute inset-0 rounded-2xl bg-fuchsia-500/5 animate-pulse" />
+                                        </div>
+                                        <p className="text-sm text-muted-foreground/50">Tải ảnh lên và chọn hiệu ứng để bắt đầu</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <motion.div
+                                className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg"
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+                            >
+                                {TEMPLATE_RESULTS.map((src, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-lg group ${i === 1 ? "hidden sm:block" : ""}`}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: i * 0.15, duration: 0.5 }}
+                                    >
+                                        <div className="relative aspect-video bg-muted/20">
+                                            <img src={src} alt={`Template Result ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                <Badge variant="secondary" className="text-[9px] bg-black/40 backdrop-blur-sm text-white border-0">
+                                                    {TEMPLATE_NAME}
+                                                </Badge>
+                                                <div className="h-6 w-6 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                                                    <Download className="h-3 w-3 text-white" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Lightbox */}
+                {lightboxImg && (
+                    <motion.div
+                        className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
+                            <X className="h-4 w-4" />
+                        </div>
+                        <motion.div
+                            className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
+                            initial={{ scale: 0.7, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                            <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
+                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                <p className="text-[11px] text-white/80 line-clamp-1">{TEMPLATE_NAME} · Thiên nhiên · Hoàng hôn</p>
+                                <div className="flex items-center gap-2 mt-1.5">
+                                    <Badge variant="secondary" className="text-[9px] h-4 bg-fuchsia-500/30 text-fuchsia-200 border-0">Kiểu mẫu</Badge>
+                                    <Badge variant="secondary" className="text-[9px] h-4 bg-white/10 text-white/60 border-0">16:9</Badge>
+                                    <span className="text-[9px] text-white/40 ml-auto flex items-center gap-1">
+                                        <ZoomIn className="h-3 w-3" /> Xem chi tiết
+                                    </span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </Card>
+        </div>
+    )
+}
+
 function PricingCard({ plan, periodLabel }: { plan: typeof MONTHLY_PLANS[0]; periodLabel: string }) {
     return (
         <motion.div variants={scaleUp} className="h-full">
@@ -1021,7 +1382,7 @@ export default function LandingPage() {
                 <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-violet-600/10 rounded-full blur-[150px] pointer-events-none z-0 animate-pulse-glow" />
 
                 <motion.div
-                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center py-24"
+                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center py-14 md:py-16"
                     style={{ opacity: heroOpacity }}
                 >
                     <motion.div
@@ -1029,7 +1390,7 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300 backdrop-blur-sm">
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300 backdrop-blur-sm">
                             <Sparkles className="mr-2 h-3 w-3" /> Nền tảng tạo ảnh AI hàng đầu Việt Nam
                         </Badge>
                     </motion.div>
@@ -1238,6 +1599,30 @@ export default function LandingPage() {
                         variants={fadeUp}
                     >
                         <InteractiveDemo />
+                    </motion.div>
+
+                    {/* Template Demo — Mô phỏng tạo ảnh bằng kiểu mẫu */}
+                    <motion.div
+                        className="mt-16"
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <div className="text-center mb-8">
+                            <Badge variant="outline" className="mb-4 border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">
+                                <SwatchBook className="mr-2 h-3.5 w-3.5" /> Kiểu mẫu có sẵn
+                            </Badge>
+                            <h3 className="text-2xl font-bold tracking-tighter sm:text-3xl">
+                                Hoặc dùng{" "}
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-400 to-violet-400">
+                                    Kiểu Mẫu
+                                </span>
+                                {" "}để tạo nhanh hơn
+                            </h3>
+                            <p className="mt-2 text-muted-foreground text-balance">
+                                Tải ảnh lên, chọn hiệu ứng — AI sẽ biến đổi sản phẩm của bạn.
+                            </p>
+                        </div>
+                        <TemplateDemo />
                     </motion.div>
 
                     <motion.div
