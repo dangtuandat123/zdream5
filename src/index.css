@@ -72,6 +72,14 @@
     @apply border-border outline-ring/50;
   }
 
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto;
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased selection:bg-primary selection:text-primary-foreground;
   }

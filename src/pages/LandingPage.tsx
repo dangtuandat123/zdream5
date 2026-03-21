@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import Lenis from "lenis"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -1269,6 +1270,21 @@ export default function LandingPage() {
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
     const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0])
     const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
+
+    // Lenis smooth scroll — hiệu ứng cuộn mượt có quán tính
+    useEffect(() => {
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+        })
+        function raf(time: number) {
+            lenis.raf(time)
+            requestAnimationFrame(raf)
+        }
+        requestAnimationFrame(raf)
+        return () => lenis.destroy()
+    }, [])
 
     useEffect(() => {
         const onScroll = () => {
