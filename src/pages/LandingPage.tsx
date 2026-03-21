@@ -1438,35 +1438,36 @@ export default function LandingPage() {
                     </motion.div>
 
 
-                    {/* Gallery AI Art — responsive: 2 trên mobile, 4 trên desktop */}
+                    {/* Gallery AI Art — lá bài xoè quạt */}
                     <motion.div
-                        className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 w-full max-w-3xl"
+                        className="relative mt-8 w-full max-w-3xl h-[180px] md:h-[280px]"
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
                     >
-                        {HERO_IMAGES.map((img, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ y: i % 2 === 1 ? 12 : 0 }}
-                                animate={{ y: i % 2 === 1 ? 12 : 0 }}
-                                whileHover={{ y: i % 2 === 1 ? 4 : -8, transition: { duration: 0.3 } }}
-                            >
-                                <Card className="overflow-hidden border-border/20 bg-background/30 backdrop-blur-sm group hover:border-violet-500/30 transition-all duration-500">
-                                    <CardContent className="p-0 relative aspect-[3/4]">
-                                        <img
-                                            src={img.src}
-                                            alt={img.label}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
-                                            <span className="text-white text-xs font-medium">{img.label}</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))}
+                        <div className="relative flex items-center justify-center h-full">
+                            {HERO_IMAGES.map((img, i) => {
+                                const rotations = [-12, -4, 4, 12]
+                                const offsetClasses = [
+                                    "-translate-x-[60px] md:-translate-x-[140px]",
+                                    "-translate-x-[20px] md:-translate-x-[47px]",
+                                    "translate-x-[20px] md:translate-x-[47px]",
+                                    "translate-x-[60px] md:translate-x-[140px]",
+                                ]
+                                return (
+                                    <div key={i} className={`absolute ${offsetClasses[i]}`} style={{ zIndex: i }}>
+                                        <motion.div
+                                            className="w-[100px] h-[140px] md:w-[150px] md:h-[210px] rounded-xl overflow-hidden shadow-xl ring-1 ring-white/10"
+                                            initial={{ opacity: 0, y: 40, rotate: 0 }}
+                                            animate={{ opacity: 1, y: 0, rotate: rotations[i] }}
+                                            transition={{ duration: 0.6, delay: 0.8 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                                        >
+                                            <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
+                                        </motion.div>
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </motion.div>
                 </motion.div>
 
