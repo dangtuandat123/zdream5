@@ -1480,97 +1480,6 @@ export default function LandingPage() {
                 </motion.div>
             </section>
 
-            {/* ==================== STATS ==================== */}
-            <section className="w-full py-14 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
-                    <motion.div
-                        className="text-center mb-8"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <Trophy className="mr-2 h-3.5 w-3.5" /> Thành tựu cộng đồng
-                        </Badge>
-                    </motion.div>
-                    <motion.div
-                        className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={staggerContainer}
-                    >
-                        {STATS.map((stat) => (
-                            <AnimatedStat key={stat.label} stat={stat} />
-                        ))}
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* ==================== HOW IT WORKS ==================== */}
-            <section className="w-full py-16 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none" />
-
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
-                    <motion.div
-                        className="text-center mb-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={fadeUp}
-                    >
-                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <ZapIcon className="mr-2 h-3.5 w-3.5" /> Đơn giản & Nhanh chóng
-                        </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình 3 Bước</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
-                            Từ ý tưởng đến tác phẩm chỉ trong vài giây — không cần kỹ năng thiết kế.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        className="grid grid-cols-1 md:grid-cols-3 gap-8 relative"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={staggerContainer}
-                    >
-                        {/* Connecting line (desktop only) */}
-                        <div className="hidden md:block absolute top-[72px] left-[16.67%] right-[16.67%] h-px">
-                            <div className="w-full h-full bg-gradient-to-r from-violet-500/40 via-fuchsia-500/40 to-pink-500/40" />
-                        </div>
-
-                        {HOW_IT_WORKS.map((item) => (
-                            <motion.div key={item.step} variants={fadeUp} className="relative">
-                                <div className="flex flex-col items-center text-center">
-                                    {/* Numbered circle */}
-                                    <div className={`relative h-[88px] w-[88px] rounded-2xl bg-gradient-to-br ${item.color} p-[2px] mb-6 shadow-lg`}>
-                                        <div className="h-full w-full rounded-[14px] bg-background flex items-center justify-center">
-                                            <item.icon className="h-8 w-8 text-violet-400" />
-                                        </div>
-                                        <div className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
-                                            {item.step}
-                                        </div>
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-                                    <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-                                        {item.desc}
-                                    </p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-
-                    {/* CTA mini */}
-                    <motion.div
-                        className="text-center mt-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={fadeUp}
-                    >
-                        <Link to="/login">
-                            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/20">
-                                Thử Ngay Miễn Phí <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
-                    </motion.div>
-                </div>
-            </section>
-
             {/* ==================== INTERACTIVE DEMO ==================== */}
             <section className="w-full py-16 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
@@ -1838,6 +1747,97 @@ export default function LandingPage() {
                             </Button>
                         </Link>
                     </div>
+                </div>
+            </section>
+
+            {/* ==================== STATS ==================== */}
+            <section className="w-full py-14 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+                    <motion.div
+                        className="text-center mb-8"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={fadeUp}
+                    >
+                        <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-300">
+                            <Trophy className="mr-2 h-3.5 w-3.5" /> Thành tựu cộng đồng
+                        </Badge>
+                    </motion.div>
+                    <motion.div
+                        className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={staggerContainer}
+                    >
+                        {STATS.map((stat) => (
+                            <AnimatedStat key={stat.label} stat={stat} />
+                        ))}
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ==================== HOW IT WORKS ==================== */}
+            <section className="w-full py-16 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none" />
+
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
+                    <motion.div
+                        className="text-center mb-10"
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                            <ZapIcon className="mr-2 h-3.5 w-3.5" /> Đơn giản & Nhanh chóng
+                        </Badge>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình 3 Bước</h2>
+                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
+                            Từ ý tưởng đến tác phẩm chỉ trong vài giây — không cần kỹ năng thiết kế.
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        className="grid grid-cols-1 md:grid-cols-3 gap-8 relative"
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        {/* Connecting line (desktop only) */}
+                        <div className="hidden md:block absolute top-[72px] left-[16.67%] right-[16.67%] h-px">
+                            <div className="w-full h-full bg-gradient-to-r from-violet-500/40 via-fuchsia-500/40 to-pink-500/40" />
+                        </div>
+
+                        {HOW_IT_WORKS.map((item) => (
+                            <motion.div key={item.step} variants={fadeUp} className="relative">
+                                <div className="flex flex-col items-center text-center">
+                                    {/* Numbered circle */}
+                                    <div className={`relative h-[88px] w-[88px] rounded-2xl bg-gradient-to-br ${item.color} p-[2px] mb-6 shadow-lg`}>
+                                        <div className="h-full w-full rounded-[14px] bg-background flex items-center justify-center">
+                                            <item.icon className="h-8 w-8 text-violet-400" />
+                                        </div>
+                                        <div className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                                            {item.step}
+                                        </div>
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                                    <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+
+                    {/* CTA mini */}
+                    <motion.div
+                        className="text-center mt-10"
+                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <Link to="/login">
+                            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/20">
+                                Thử Ngay Miễn Phí <ArrowRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
+                    </motion.div>
                 </div>
             </section>
 
