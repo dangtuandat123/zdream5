@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Link } from "react-router-dom"
-import { motion, useInView, useScroll, useTransform } from "framer-motion"
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -657,7 +657,7 @@ function InteractiveDemo() {
                                     >
                                         {currentResults.map((src, i) => (
                                             <motion.div
-                                                key={i}
+                                                key={src}
                                                 className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-lg group ${i === 1 ? "hidden sm:block" : ""}`}
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: isDragging && i === 0 ? 0.5 : 1, scale: 1 }}
@@ -799,39 +799,43 @@ function InteractiveDemo() {
                 </div>
 
                 {/* Lightbox overlay — mô phỏng xem ảnh phóng to */}
-                {lightboxImg && (
-                    <motion.div
-                        className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        {/* Nút đóng */}
-                        <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
-                            <X className="h-4 w-4" />
-                        </div>
-                        {/* Ảnh phóng to */}
+                <AnimatePresence>
+                    {lightboxImg && (
                         <motion.div
-                            className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
-                            initial={{ scale: 0.7, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
                         >
-                            <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
-                            {/* Info bar dưới ảnh */}
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <p className="text-[11px] text-white/80 line-clamp-1">{DEMO_PROMPT_V2}</p>
-                                <div className="flex items-center gap-2 mt-1.5">
-                                    <Badge variant="secondary" className="text-[9px] h-4 bg-violet-500/30 text-violet-200 border-0">Digital Art</Badge>
-                                    <Badge variant="secondary" className="text-[9px] h-4 bg-white/10 text-white/60 border-0">16:9</Badge>
-                                    <span className="text-[9px] text-white/40 ml-auto flex items-center gap-1">
-                                        <ZoomIn className="h-3 w-3" /> Xem chi tiết
-                                    </span>
-                                </div>
+                            {/* Nút đóng */}
+                            <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
+                                <X className="h-4 w-4" />
                             </div>
+                            {/* Ảnh phóng to */}
+                            <motion.div
+                                className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
+                                initial={{ scale: 0.7, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.8, opacity: 0 }}
+                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            >
+                                <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
+                                {/* Info bar dưới ảnh */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                    <p className="text-[11px] text-white/80 line-clamp-1">{DEMO_PROMPT_V2}</p>
+                                    <div className="flex items-center gap-2 mt-1.5">
+                                        <Badge variant="secondary" className="text-[9px] h-4 bg-violet-500/30 text-violet-200 border-0">Digital Art</Badge>
+                                        <Badge variant="secondary" className="text-[9px] h-4 bg-white/10 text-white/60 border-0">16:9</Badge>
+                                        <span className="text-[9px] text-white/40 ml-auto flex items-center gap-1">
+                                            <ZoomIn className="h-3 w-3" /> Xem chi tiết
+                                        </span>
+                                    </div>
+                                </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
+                    )}
+                </AnimatePresence>
             </Card>
         </div>
     )
@@ -978,34 +982,23 @@ function TemplateDemo() {
                 <div className="absolute -top-20 -right-20 w-60 h-60 bg-fuchsia-600/10 rounded-full blur-[80px] pointer-events-none" />
                 <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-violet-600/8 rounded-full blur-[60px] pointer-events-none" />
 
-                {/* Window chrome */}
+                {/* Window chrome + Template name */}
                 <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/60 backdrop-blur-sm">
                     <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-red-500/70" />
                         <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
                         <div className="w-3 h-3 rounded-full bg-green-500/70" />
                     </div>
-                    <div className="flex-1 flex justify-center">
+                    <div className="flex-1 flex items-center justify-center gap-3">
                         <div className="flex items-center gap-2 text-[11px] text-muted-foreground/70 bg-muted/20 rounded-md px-3 py-1 border border-border/10">
                             <Monitor className="h-3 w-3" /> {TEMPLATE_URL}
                         </div>
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row min-h-[420px]">
+                <div className="relative flex flex-col lg:flex-row h-[680px] sm:h-[520px] lg:h-[420px] overflow-hidden">
                     {/* LEFT: Settings Panel */}
-                    <div className="w-full lg:w-[300px] shrink-0 border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-4 bg-background/30">
-                        {/* Template name */}
-                        <div className="flex items-center gap-2">
-                            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-violet-500/20 flex items-center justify-center">
-                                <SwatchBook className="h-4 w-4 text-fuchsia-400" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-semibold">{TEMPLATE_NAME}</p>
-                                <p className="text-[10px] text-muted-foreground/60">Kiểu mẫu</p>
-                            </div>
-                        </div>
-
+                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[300px] sm:max-h-[250px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto min-h-0">
                         {/* Upload area */}
                         <div className="space-y-2">
                             <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
@@ -1013,7 +1006,7 @@ function TemplateDemo() {
                             </p>
                             {!showUploadedImg ? (
                                 <motion.div
-                                    className="border-2 border-dashed border-border/30 rounded-xl flex flex-col items-center justify-center h-[90px] gap-1.5 transition-colors"
+                                    className="border-2 border-dashed border-border/30 rounded-xl flex flex-col items-center justify-center h-[72px] gap-1.5 transition-colors"
                                     animate={phase === "uploading" ? { borderColor: "rgba(168,85,247,0.5)", backgroundColor: "rgba(168,85,247,0.05)" } : {}}
                                 >
                                     <Upload className="h-6 w-6 text-muted-foreground/40" />
@@ -1022,7 +1015,7 @@ function TemplateDemo() {
                                 </motion.div>
                             ) : (
                                 <motion.div
-                                    className="relative rounded-xl overflow-hidden h-[90px] ring-1 ring-border/20"
+                                    className="relative rounded-xl overflow-hidden h-[72px] ring-1 ring-border/20"
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.4 }}
@@ -1041,11 +1034,11 @@ function TemplateDemo() {
                         {TEMPLATE_EFFECTS.map((group, gi) => (
                             <div key={gi} className="space-y-2">
                                 <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">{group.name}</p>
-                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                <div className="flex gap-2 overflow-x-auto py-1 px-0.5">
                                     {group.options.map((opt, oi) => {
                                         const isActive = activeEffects[gi] === oi
                                         return (
-                                            <div key={oi} className="flex flex-col items-center gap-1 shrink-0 w-[60px]">
+                                            <div key={oi} className="flex flex-col items-center gap-1 shrink-0 w-[52px]">
                                                 <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all duration-500 ${
                                                     isActive
                                                         ? "border-violet-500 ring-2 ring-violet-500/30 scale-105"
@@ -1135,7 +1128,7 @@ function TemplateDemo() {
                             >
                                 {TEMPLATE_RESULTS.map((src, i) => (
                                     <motion.div
-                                        key={i}
+                                        key={src}
                                         className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-lg group ${i === 1 ? "hidden sm:block" : ""}`}
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
@@ -1161,36 +1154,40 @@ function TemplateDemo() {
                 </div>
 
                 {/* Lightbox */}
-                {lightboxImg && (
-                    <motion.div
-                        className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
-                            <X className="h-4 w-4" />
-                        </div>
+                <AnimatePresence>
+                    {lightboxImg && (
                         <motion.div
-                            className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
-                            initial={{ scale: 0.7, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
                         >
-                            <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
-                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                                <p className="text-[11px] text-white/80 line-clamp-1">{TEMPLATE_NAME} · Thiên nhiên · Hoàng hôn</p>
-                                <div className="flex items-center gap-2 mt-1.5">
-                                    <Badge variant="secondary" className="text-[9px] h-4 bg-fuchsia-500/30 text-fuchsia-200 border-0">Kiểu mẫu</Badge>
-                                    <Badge variant="secondary" className="text-[9px] h-4 bg-white/10 text-white/60 border-0">16:9</Badge>
-                                    <span className="text-[9px] text-white/40 ml-auto flex items-center gap-1">
-                                        <ZoomIn className="h-3 w-3" /> Xem chi tiết
-                                    </span>
-                                </div>
+                            <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
+                                <X className="h-4 w-4" />
                             </div>
+                            <motion.div
+                                className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
+                                initial={{ scale: 0.7, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.8, opacity: 0 }}
+                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                            >
+                                <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
+                                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                                    <p className="text-[11px] text-white/80 line-clamp-1">{TEMPLATE_NAME} · Thiên nhiên · Hoàng hôn</p>
+                                    <div className="flex items-center gap-2 mt-1.5">
+                                        <Badge variant="secondary" className="text-[9px] h-4 bg-fuchsia-500/30 text-fuchsia-200 border-0">Kiểu mẫu</Badge>
+                                        <Badge variant="secondary" className="text-[9px] h-4 bg-white/10 text-white/60 border-0">16:9</Badge>
+                                        <span className="text-[9px] text-white/40 ml-auto flex items-center gap-1">
+                                            <ZoomIn className="h-3 w-3" /> Xem chi tiết
+                                        </span>
+                                    </div>
+                                </div>
+                            </motion.div>
                         </motion.div>
-                    </motion.div>
-                )}
+                    )}
+                </AnimatePresence>
             </Card>
         </div>
     )
@@ -1783,7 +1780,7 @@ export default function LandingPage() {
                     </motion.div>
 
                     <motion.div
-                        className="w-full px-12 md:px-16 mx-auto relative cursor-grab active:cursor-grabbing"
+                        className="w-full px-14 md:px-20 mx-auto relative cursor-grab active:cursor-grabbing"
                         initial="hidden" whileInView="visible" viewport={{ once: true }}
                         variants={fadeIn}
                     >
@@ -1813,8 +1810,8 @@ export default function LandingPage() {
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="absolute -left-6 md:-left-12 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10" />
-                            <CarouselNext className="absolute -right-6 md:-right-12 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10" />
+                            <CarouselPrevious className="absolute -left-8 md:-left-14 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10" />
+                            <CarouselNext className="absolute -right-8 md:-right-14 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10" />
                         </Carousel>
                     </motion.div>
 
