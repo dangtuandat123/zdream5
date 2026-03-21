@@ -8,7 +8,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetTitle } from "@/components/ui/sheet"
 import Autoplay from "embla-carousel-autoplay"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -432,6 +432,7 @@ export default function LandingPage() {
                                 </Button>
                             </SheetTrigger>
                             <SheetContent side="right" className="w-72 bg-background border-border/50">
+                                <SheetTitle className="sr-only">Menu</SheetTitle>
                                 <nav className="flex flex-col gap-6 mt-8">
                                     {NAV_ITEMS.map((item) => (
                                         <SheetClose asChild key={item.label}>
@@ -544,13 +545,10 @@ export default function LandingPage() {
                                 </Avatar>
                             ))}
                         </div>
-                        <div className="flex flex-col text-left">
-                            <div className="flex gap-0.5">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                ))}
-                            </div>
-                            <span className="text-xs text-muted-foreground">Được 50K+ nhà sáng tạo tin dùng</span>
+                        <div className="flex gap-0.5">
+                            {[...Array(5)].map((_, i) => (
+                                <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            ))}
                         </div>
                     </motion.div>
 
