@@ -89,21 +89,7 @@ class ImageController extends Controller
 
                 $filename = 'references/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $ext;
                 Storage::disk($disk)->put($filename, $decoded, 'public');
-                $fileUrl = Storage::disk($disk)->url($filename);
-
-                // Tạo record Image type='upload' để hiện trong thư viện người dùng
-                Image::create([
-                    'user_id' => $user->id,
-                    'type' => 'upload',
-                    'project_id' => $validated['project_id'] ?? null,
-                    'prompt' => 'Ảnh tham chiếu',
-                    'model' => 'user-upload',
-                    'file_path' => $filename,
-                    'file_url' => $fileUrl,
-                    'gems_cost' => 0,
-                ]);
-
-                $referenceImageUrls[] = $fileUrl;
+                $referenceImageUrls[] = Storage::disk($disk)->url($filename);
             }
         }
 
