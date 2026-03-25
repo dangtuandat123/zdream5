@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import LandingPage from "@/pages/LandingPage";
 import { Login } from "@/components/auth/Login";
 import { AppShell } from "@/components/layout/AppShell";
@@ -26,7 +26,7 @@ const AdminSettingsPage = lazy(() => import("@/components/admin/AdminSettingsPag
 function App() {
   return (
     <Router>
-      <Toaster theme="dark" position="top-right" richColors closeButton />
+      <Toaster />
       <Routes>
 
         {/* Public Routes with standard Layout */}
