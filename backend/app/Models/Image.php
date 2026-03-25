@@ -24,6 +24,7 @@ class Image extends Model
         'seed',
         'gems_cost',
         'template_slug',
+        'reference_images',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class Image extends Model
         return [
             'seed' => 'integer',
             'gems_cost' => 'integer',
+            'reference_images' => 'array',
         ];
     }
 

@@ -871,6 +871,7 @@ export function GeneratePage() {
                 aspectRatio: arNumber,
                 aspectLabel: img.aspect_ratio,
                 createdAt: new Date(img.created_at),
+                referenceImages: img.reference_images && img.reference_images.length > 0 ? img.reference_images : undefined,
                 isNew: false,
             }
         })
@@ -1323,7 +1324,7 @@ export function GeneratePage() {
                     aspectRatio: ar.ratio,
                     aspectLabel: img.aspect_ratio,
                     createdAt: new Date(img.created_at),
-                    referenceImages: currentRefs.length > 0 ? currentRefs : undefined,
+                    referenceImages: img.reference_images && img.reference_images.length > 0 ? img.reference_images : (currentRefs.length > 0 ? currentRefs : undefined),
                     isNew: true,
                 }))
 

@@ -143,6 +143,7 @@ export interface GeneratedImageData {
     file_url: string;
     seed: number;
     gems_cost: number;
+    reference_images: string[] | null;
     created_at: string;
 }
 

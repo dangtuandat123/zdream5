@@ -67,6 +67,46 @@ class ImageController extends Controller
         $style = $validated['style'] ?? 'photorealistic';
         $seed = (int) ($validated['seed'] ?? random_int(0, 999999999));
 
+        // Upload ảnh tham chiếu lên MinIO + lưu vào thư viện người dùng
+        $referenceImageUrls = null;
+        $referenceImagesBase64 = $validated['reference_images'] ?? null;
+        if (!empty($referenceImagesBase64)) {
+            $referenceImageUrls = [];
+            $disk = config('filesystems.default');
+            foreach ($referenceImagesBase64 as $base64) {
+                // Nếu đã là URL (không phải base64) thì giữ nguyên
+                if (!str_starts_with($base64, 'data:')) {
+                    $referenceImageUrls[] = $base64;
+                    continue;
+                }
+                // Decode base64 và upload lên MinIO
+                $matches = [];
+                preg_match('/^data:image\/(\w+);base64,/', $base64, $matches);
+                $ext = $matches[1] ?? 'jpeg';
+                if ($ext === 'jpg') $ext = 'jpeg';
+                $decoded = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $base64));
+                if ($decoded === false) continue;
+
+                $filename = 'references/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $ext;
+                Storage::disk($disk)->put($filename, $decoded, 'public');
+                $fileUrl = Storage::disk($disk)->url($filename);
+
+                // Tạo record Image type='upload' để hiện trong thư viện người dùng
+                Image::create([
+                    'user_id' => $user->id,
+                    'type' => 'upload',
+                    'project_id' => $validated['project_id'] ?? null,
+                    'prompt' => 'Ảnh tham chiếu',
+                    'model' => 'user-upload',
+                    'file_path' => $filename,
+                    'file_url' => $fileUrl,
+                    'gems_cost' => 0,
+                ]);
+
+                $referenceImageUrls[] = $fileUrl;
+            }
+        }
+
         try {
             for ($i = 0; $i < $count; $i++) {
                 // Gọi OpenRouter API để tạo ảnh
@@ -94,7 +134,7 @@ class ImageController extends Controller
                     'file_url' => $result['file_url'],
                     'seed' => $seed + $i,
                     'gems_cost' => $gemsCostPerImage,
-                    'reference_images' => $validated['reference_images'] ?? null,
+                    'reference_images' => $referenceImageUrls,
                     'template_slug' => $validated['template_slug'] ?? null,
                 ]);
 

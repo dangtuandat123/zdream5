@@ -131,6 +131,7 @@ interface GeneratedImage {
     effects: Record<string, string>
     prompt: string
     gems_cost?: number
+    reference_images?: string[] | null
 }
 
 // === Component hiển thị ảnh có skeleton loading ===
@@ -226,6 +227,7 @@ export function TemplateDetailPage() {
                     effects: {},
                     prompt: img.prompt ?? "",
                     gems_cost: img.gems_cost,
+                    reference_images: img.reference_images,
                 }))
                 setGeneratedImages(historyImages)
             })
@@ -351,6 +353,7 @@ export function TemplateDetailPage() {
                 effects: { ...effectSelections },
                 prompt: finalPrompt,
                 gems_cost: img.gems_cost,
+                reference_images: img.reference_images,
             }))
             setGeneratedImages(prev => [...newImages, ...prev])
             toast.success(`Tạo ${newImages.length} ảnh thành công!`)
@@ -848,7 +851,6 @@ export function TemplateDetailPage() {
                     source={viewerSource}
                     generatedImages={generatedImages}
                     onDownload={handleDownload}
-                    uploadedImage={uploadedImage}
                 />
             </div>
         )
@@ -904,7 +906,6 @@ export function TemplateDetailPage() {
                 source={viewerSource}
                 generatedImages={generatedImages}
                 onDownload={handleDownload}
-                uploadedImage={uploadedImage}
             />
         </div>
     )
@@ -914,7 +915,7 @@ export function TemplateDetailPage() {
 const MAX_VIEWER_ZOOM = 5
 
 function ViewerDialog({
-    open, onOpenChange, images, index, setIndex, source, generatedImages, onDownload, uploadedImage
+    open, onOpenChange, images, index, setIndex, source, generatedImages, onDownload
 }: {
     open: boolean
     onOpenChange: (v: boolean) => void
@@ -924,7 +925,6 @@ function ViewerDialog({
     source: "sample" | "generated"
     generatedImages: GeneratedImage[]
     onDownload: (url: string) => void
-    uploadedImage: string | null
 }) {
     const [showInfo, setShowInfo] = useState(false)
     const [zoom, setZoom] = useState(1)
@@ -1370,15 +1370,21 @@ function ViewerDialog({
                         )}
 
                         {/* Ảnh tham chiếu */}
-                        {source === "generated" && uploadedImage && (
+                        {source === "generated" && currentGenData?.reference_images && currentGenData.reference_images.length > 0 && (
                             <div className="px-5 py-3 space-y-2">
-                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
-                                <div className="flex gap-2 mt-1">
-                                    <img
-                                        src={uploadedImage}
-                                        alt="Reference"
-                                        className="h-14 w-14 rounded-lg object-cover border border-white/10 shadow-sm"
-                                    />
+                                <div className="flex items-center gap-1.5">
+                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
+                                    <span className="text-[9px] font-bold bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{currentGenData.reference_images.length}</span>
+                                </div>
+                                <div className="grid grid-cols-5 gap-2">
+                                    {currentGenData.reference_images.map((src, i) => (
+                                        <div key={i} className="aspect-square relative">
+                                            <img src={src} className="absolute inset-0 w-full h-full rounded-lg object-cover border border-white/10" alt={`ref ${i + 1}`} />
+                                            <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
+                                                {i + 1}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
