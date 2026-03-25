@@ -2589,7 +2589,25 @@ export function GeneratePage() {
                                             <img
                                                 src={src}
                                                 alt={`Reference ${idx + 1}`}
-                                                className="h-16 w-16 rounded-xl object-cover border border-border/40 bg-muted/30"
+                                                className="h-16 w-16 rounded-xl object-cover border border-border/40 bg-muted/30 cursor-pointer hover:ring-2 hover:ring-primary/60 transition-all"
+                                                title={`Nhấn để chèn @Ảnh ${idx + 1} vào prompt`}
+                                                onClick={() => {
+                                                    // Chèn @Ảnh X vào cuối prompt
+                                                    const mention = `@Ảnh ${idx + 1} `
+                                                    setPrompt(prev => {
+                                                        const trimmed = prev.trimEnd()
+                                                        return trimmed ? trimmed + ' ' + mention : mention
+                                                    })
+                                                    // Focus và đặt cursor cuối prompt
+                                                    requestAnimationFrame(() => {
+                                                        if (textareaRef.current) {
+                                                            const el = textareaRef.current
+                                                            el.focus()
+                                                            const newLen = (prompt.trimEnd() ? prompt.trimEnd() + ' ' + mention : mention).length
+                                                            setCursorPosition(el, newLen)
+                                                        }
+                                                    })
+                                                }}
                                             />
                                             <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
                                                 {idx + 1}
