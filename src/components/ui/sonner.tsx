@@ -25,15 +25,12 @@ const Toaster = ({ ...props }: ToasterProps) => {
           align-items: center !important;
           justify-content: center !important;
           padding: 0 !important;
-          opacity: 0;
-          transition: opacity 0.2s, color 0.2s !important;
+          opacity: 1 !important;
+          transition: color 0.2s !important;
           cursor: pointer !important;
         }
-        [data-sonner-toast]:hover [data-close-button] {
-          opacity: 1 !important;
-        }
         [data-sonner-toast] [data-close-button]:hover {
-          color: rgba(244, 244, 245, 0.7) !important;
+          color: rgba(244, 244, 245, 0.9) !important;
         }
         [data-sonner-toast] [data-close-button] svg {
           width: 10px !important;
