@@ -328,6 +328,13 @@ const GalleryImage = React.memo(({
                 onLoad={() => setIsImageLoading(false)}
             />
 
+            {/* Dấu tick khi ảnh được chọn trong chế độ multi-select */}
+            {selectionMode && (
+                <div className={`absolute top-2 left-2 z-20 size-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${isSelected ? 'bg-white border-white scale-100' : 'border-white/60 bg-black/30 scale-90'}`}>
+                    {isSelected && <Check className="size-4 text-black stroke-[3]" />}
+                </div>
+            )}
+
             {!selectionMode && (
                 <>
                     {/* Hover overlay content */}
