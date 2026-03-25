@@ -1016,7 +1016,7 @@ export function GeneratePage() {
                     if (isOver) {
                         const url = touchStartRef.current.url
                         setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
-                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'drag-add-ref' })
+                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'ref-add' })
                     }
                 }
             }
@@ -1445,10 +1445,10 @@ export function GeneratePage() {
         setReferenceImages(prev => {
             const newUrls = toAdd.filter(url => !prev.includes(url))
             if (newUrls.length === 0) {
-                toast('Tất cả ảnh này đã có trong tham chiếu rồi', { icon: 'ℹ️', id: 'batch-ref-exists' })
+                toast('Tất cả ảnh này đã có trong tham chiếu rồi', { icon: 'ℹ️', id: 'ref-exists' })
                 return prev
             }
-            toast.success(`Đã thêm ${newUrls.length} ảnh vào tham chiếu`, { id: 'batch-ref-add' })
+            toast.success(`Đã thêm ${newUrls.length} ảnh vào tham chiếu`, { id: 'ref-add' })
             return [...prev, ...newUrls]
         })
         setSelectedIds(new Set())
@@ -1482,7 +1482,7 @@ export function GeneratePage() {
                 const newUrls = urls.filter(u => !prev.includes(u))
                 return [...prev, ...newUrls]
             })
-            toast.success(`Đã thêm ${files.length} ảnh tham chiếu`, { id: 'file-ref-add' })
+            toast.success(`Đã thêm ${files.length} ảnh tham chiếu`, { id: 'ref-add' })
             return
         }
 
@@ -1491,10 +1491,10 @@ export function GeneratePage() {
         if (textData && (textData.startsWith('http') || textData.startsWith('blob:') || textData.startsWith('data:'))) {
             setReferenceImages(prev => {
                 if (prev.includes(textData)) {
-                    toast('Ảnh này đã có trong phần tham chiếu rồi', { icon: 'ℹ️', id: 'text-ref-exists' })
+                    toast('Ảnh này đã có trong phần tham chiếu rồi', { icon: 'ℹ️', id: 'ref-exists' })
                     return prev
                 }
-                toast.success('Đã thêm ảnh tham chiếu', { id: 'text-ref-add' })
+                toast.success('Đã thêm ảnh tham chiếu', { id: 'ref-add' })
                 return [...prev, textData]
             })
         }
@@ -1625,7 +1625,7 @@ export function GeneratePage() {
                                                 if (prev.includes(img.file_url)) return prev
                                                 return [...prev, img.file_url]
                                             })
-                                            toast.success('Đã thêm ảnh tham chiếu', { id: 'lib-ref-add' })
+                                            toast.success('Đã thêm ảnh tham chiếu', { id: 'ref-add' })
                                         }}
                                     >
                                         <img
@@ -1867,7 +1867,7 @@ export function GeneratePage() {
                     onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
                     onSetReferenceImage={(url) => {
                         setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
-                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'gallery-ref-add' })
+                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'ref-add' })
                     }}
                     onImageDragStart={(e, url) => {
                         e.dataTransfer.setData('text/plain', url)
@@ -2253,7 +2253,7 @@ export function GeneratePage() {
                                     </Button>
                                     <Button variant="ghost" title="Ảnh tham chiếu" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3" onClick={() => {
                                         setReferenceImages(prev => prev.includes(selectedImage.url) ? prev : [...prev, selectedImage.url])
-                                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'modal-ref-add' })
+                                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'ref-add' })
                                     }}>
                                         <ImageIcon className="size-4" />
                                         <span className="hidden sm:inline text-xs font-medium">Tham chiếu</span>
