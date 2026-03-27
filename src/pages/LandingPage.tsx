@@ -23,10 +23,7 @@ import {
     Play,
     Palette,
     ZapIcon,
-    ShieldCheck,
     Quote,
-    Layers,
-    ChevronDown,
     ChevronUp,
     Menu,
     Trophy,
@@ -133,14 +130,12 @@ const HERO_IMAGES = [
     { src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop", label: "Digital Art 3D" },
     { src: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=600&auto=format&fit=crop", label: "Abstract Fluid" },
     { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop", label: "Sơn dầu cổ điển" },
+    { src: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=600&auto=format&fit=crop", label: "Fantasy World" },
+    { src: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=600&auto=format&fit=crop", label: "Sci-fi Concept" },
+    { src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=600&auto=format&fit=crop", label: "Neon Dreams" },
+    { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", label: "Abstract Art" },
 ]
 
-const FEATURE_IMAGES = [
-    { src: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=400&auto=format&fit=crop", label: "Fantasy" },
-    { src: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop", label: "Sci-fi" },
-    { src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=400&auto=format&fit=crop", label: "Neon" },
-    { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop", label: "Abstract" },
-]
 
 const TESTIMONIALS = [
     {
@@ -249,24 +244,31 @@ const DEMO_RESULTS_V2 = [
 // ANIMATION VARIANTS
 // ============================================================
 
+const ease = [0.22, 1, 0.36, 1] as const
+
 const fadeUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease } },
 }
 
-const fadeIn = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.5 } },
+const fadeLeft = {
+    hidden: { opacity: 0, x: -40 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
+}
+
+const fadeRight = {
+    hidden: { opacity: 0, x: 40 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease } },
 }
 
 const staggerContainer = {
     hidden: {},
-    visible: { transition: { staggerChildren: 0.1 } },
+    visible: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
 }
 
 const scaleUp = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
+    hidden: { opacity: 0, scale: 0.92, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.6, ease } },
 }
 
 // ============================================================
@@ -313,18 +315,16 @@ function AnimatedStat({ stat }: { stat: typeof STATS[0] }) {
     const { count, ref } = useAnimatedCounter(stat.value, 2000)
     return (
         <motion.div variants={scaleUp}>
-            <Card className="border-border/20 bg-white/[0.02] hover:bg-white/[0.05] hover:border-violet-500/20 transition-all duration-500 group">
-                <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                    <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30 transition-colors">
-                        <stat.icon className="h-5 w-5 text-violet-400" />
-                    </div>
-                    <h3 className="text-3xl font-bold tracking-tighter">
-                        <span ref={ref}>{formatStatNumber(count, stat.value)}</span>
-                        <span className="text-violet-400">{stat.suffix}</span>
-                    </h3>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
-                </CardContent>
-            </Card>
+            <div className="glass-card p-6 flex flex-col items-center justify-center text-center space-y-3 group hover:bg-white/[0.05] transition-colors duration-500">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 flex items-center justify-center group-hover:from-violet-500/25 group-hover:to-fuchsia-500/25 transition-colors duration-500 ring-1 ring-white/5">
+                    <stat.icon className="h-4 w-4 text-violet-400" />
+                </div>
+                <h3 className="text-3xl md:text-4xl font-extrabold tracking-tighter text-glow">
+                    <span ref={ref}>{formatStatNumber(count, stat.value)}</span>
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400">{stat.suffix}</span>
+                </h3>
+                <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.2em]">{stat.label}</p>
+            </div>
         </motion.div>
     )
 }
@@ -508,13 +508,13 @@ function InteractiveDemo() {
 
     return (
         <div ref={containerRef}>
-            <Card className="relative border-border/20 bg-background/50 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
-                {/* Glow accent nền */}
-                <div className="absolute -top-20 -right-20 w-60 h-60 bg-violet-600/10 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-fuchsia-600/8 rounded-full blur-[60px] pointer-events-none" />
+            <Card className="relative border-border/20 bg-background/80 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
+                {/* Subtle gradient accent */}
+                <div className="absolute -top-20 -right-20 w-60 h-60 bg-violet-600/5 rounded-full pointer-events-none" />
+                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-fuchsia-600/4 rounded-full pointer-events-none" />
 
                 {/* Thanh tiêu đề giả lập window */}
-                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/60 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/80">
                     <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-red-500/70" />
                         <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
@@ -706,7 +706,7 @@ function InteractiveDemo() {
 
                         {/* Prompt bar */}
                         <div className="p-3 relative">
-                            <div className={`relative w-full border rounded-[22px] backdrop-blur-xl transition-all duration-500 ${
+                            <div className={`relative w-full border rounded-[22px] transition-all duration-500 ${
                                 promptBarHighlight
                                     ? "border-violet-500/60 bg-violet-500/[0.06] shadow-lg shadow-violet-500/10 scale-[1.01]"
                                     : "border-border/25 bg-[#37393b]/85"
@@ -803,7 +803,7 @@ function InteractiveDemo() {
                 <AnimatePresence>
                     {lightboxImg && (
                         <motion.div
-                            className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
+                            className="absolute inset-0 z-40 bg-black/90 flex items-center justify-center rounded-2xl"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -978,13 +978,13 @@ function TemplateDemo() {
 
     return (
         <div ref={containerRef}>
-            <Card className="relative border-border/20 bg-background/50 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
-                {/* Glow */}
-                <div className="absolute -top-20 -right-20 w-60 h-60 bg-fuchsia-600/10 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-violet-600/8 rounded-full blur-[60px] pointer-events-none" />
+            <Card className="relative border-border/20 bg-background/80 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
+                {/* Subtle gradient accent */}
+                <div className="absolute -top-20 -right-20 w-60 h-60 bg-fuchsia-600/5 rounded-full pointer-events-none" />
+                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-violet-600/4 rounded-full pointer-events-none" />
 
                 {/* Window chrome + Template name */}
-                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/60 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/80">
                     <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-red-500/70" />
                         <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
@@ -1158,7 +1158,7 @@ function TemplateDemo() {
                 <AnimatePresence>
                     {lightboxImg && (
                         <motion.div
-                            className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex items-center justify-center rounded-2xl"
+                            className="absolute inset-0 z-40 bg-black/90 flex items-center justify-center rounded-2xl"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -1196,37 +1196,42 @@ function TemplateDemo() {
 
 function PricingCard({ plan, periodLabel }: { plan: typeof MONTHLY_PLANS[0]; periodLabel: string }) {
     return (
-        <motion.div variants={scaleUp} className="h-full">
-            <Card className={`flex flex-col relative overflow-hidden text-left transition-all duration-500 h-full ${plan.popular
-                ? 'border-violet-500/40 shadow-lg shadow-violet-500/5 bg-background ring-1 ring-violet-500/20'
-                : 'bg-background/50 hover:bg-background hover:border-border/80 border-border/30'}`}
+        <motion.div variants={scaleUp} className={`h-full ${plan.popular ? 'md:-mt-4 md:mb-[-16px]' : ''}`}>
+            <div className={`flex flex-col relative overflow-hidden text-left h-full rounded-2xl transition-all duration-500 ${plan.popular
+                ? 'glass-card pricing-glow'
+                : 'card-gradient-border'}`}
             >
                 {plan.popular && (
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-violet-500/10 rounded-full blur-3xl pointer-events-none" />
+                    <>
+                        <div className="absolute -top-24 -right-24 w-60 h-60 bg-violet-500/8 rounded-full pointer-events-none" />
+                        <div className="absolute -bottom-16 -left-16 w-40 h-40 bg-fuchsia-500/5 rounded-full pointer-events-none" />
+                        {/* Top gradient border accent */}
+                        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-400 to-transparent" />
+                    </>
                 )}
-                <CardContent className="p-8 flex-1 flex flex-col relative">
+                <div className="p-6 md:p-8 flex-1 flex flex-col relative">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-2xl font-bold">{plan.name}</h3>
+                        <h3 className="text-xl font-bold">{plan.name}</h3>
                         {plan.popular && (
-                            <Badge className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-0 shadow-sm">
+                            <Badge className="bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white border-0 badge-glow text-[10px] uppercase tracking-wider">
                                 Phổ Biến
                             </Badge>
                         )}
                     </div>
-                    <div className="flex items-baseline gap-1 mb-6">
-                        <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
-                        <span className="text-muted-foreground font-medium">{plan.period}</span>
+                    <div className="flex items-baseline gap-1.5 mb-2">
+                        <span className={`text-4xl md:text-5xl font-extrabold tracking-tight ${plan.popular ? 'text-glow' : ''}`}>{plan.price}</span>
+                        <span className="text-muted-foreground font-medium text-base">{plan.period}</span>
                     </div>
 
-                    <div className="bg-violet-500/10 rounded-lg p-3 flex items-center gap-3 mb-8 w-fit text-sm font-medium">
-                        <Gem className="h-5 w-5 text-violet-400" />
+                    <div className={`rounded-xl p-3 flex items-center gap-2.5 mb-6 w-fit text-sm font-medium mt-3 ${plan.popular ? 'bg-violet-500/15 ring-1 ring-violet-500/20' : 'bg-white/[0.03] ring-1 ring-white/5'}`}>
+                        <Gem className={`h-5 w-5 ${plan.popular ? 'text-violet-400' : 'text-muted-foreground/60'}`} />
                         <span>{plan.gems} Kim Cương/{periodLabel}</span>
                     </div>
 
-                    <ul className="space-y-3.5 flex-1 mb-8">
+                    <ul className="space-y-3 flex-1 mb-6">
                         {plan.features.map((f) => (
                             <li key={f} className="flex items-center gap-3 text-muted-foreground text-sm">
-                                <CheckCircle2 className="h-4 w-4 text-violet-400 shrink-0" />
+                                <CheckCircle2 className={`h-4 w-4 shrink-0 ${plan.popular ? 'text-violet-400' : 'text-white/20'}`} />
                                 {f}
                             </li>
                         ))}
@@ -1234,17 +1239,16 @@ function PricingCard({ plan, periodLabel }: { plan: typeof MONTHLY_PLANS[0]; per
 
                     <Link to="/login" className="w-full mt-auto">
                         <Button
-                            className={`w-full h-12 text-base transition-all ${plan.popular
-                                ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/20 hover:shadow-xl hover:shadow-violet-500/30 border-0'
-                                : ''}`}
-                            variant={plan.popular ? "default" : "outline"}
+                            className={`w-full h-11 text-sm font-semibold transition-all duration-500 ${plan.popular
+                                ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-[0_0_30px_-5px_rgba(139,92,246,0.4)] hover:shadow-[0_0_40px_-5px_rgba(139,92,246,0.6)] border-0'
+                                : 'bg-white/[0.03] border border-white/10 hover:bg-white/[0.07] hover:border-violet-500/20 text-foreground'}`}
                             size="lg"
                         >
                             {plan.cta}
                         </Button>
                     </Link>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </motion.div>
     )
 }
@@ -1274,9 +1278,10 @@ export default function LandingPage() {
     // Lenis smooth scroll — hiệu ứng cuộn mượt có quán tính
     useEffect(() => {
         const lenis = new Lenis({
-            duration: 1.2,
+            duration: 1.4,
             easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             smoothWheel: true,
+            touchMultiplier: 1.5,
         })
         function raf(time: number) {
             lenis.raf(time)
@@ -1301,7 +1306,7 @@ export default function LandingPage() {
     }, [])
 
     const NAV_ITEMS = [
-        { label: "Tính năng", id: "features" },
+        { label: "Trải nghiệm", id: "demo" },
         { label: "Kiểu mẫu", id: "templates" },
         { label: "Bảng giá", id: "pricing" },
         { label: "Hỏi đáp", id: "faq" },
@@ -1320,13 +1325,13 @@ export default function LandingPage() {
                         <span className="font-bold text-xl tracking-tight">ZDream</span>
                     </Link>
 
-                    {/* Desktop nav */}
-                    <div className="hidden md:flex items-center gap-8">
+                    {/* Desktop nav — pill style */}
+                    <div className={`hidden md:flex items-center gap-1 rounded-full px-1.5 py-1 border transition-all duration-500 ${scrolled ? 'bg-transparent border-transparent' : 'bg-white/[0.08] border-white/[0.1]'}`}>
                         {NAV_ITEMS.map((item) => (
                             <button
                                 key={item.label}
                                 onClick={() => scrollToSection(item.id)}
-                                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                                className="text-sm font-medium text-white/70 hover:text-white hover:bg-white/[0.08] px-4 py-1.5 rounded-full transition-all duration-300"
                             >
                                 {item.label}
                             </button>
@@ -1335,8 +1340,8 @@ export default function LandingPage() {
 
                     <div className="flex items-center gap-3">
                         <Link to="/login" className="hidden md:block">
-                            <Button size="sm" className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-md shadow-violet-500/20 hover:shadow-lg hover:shadow-violet-500/30 transition-all">
-                                Bắt Đầu <ArrowUpRight className="ml-2 h-4 w-4" />
+                            <Button size="sm" className="bg-white text-black hover:bg-white/90 font-semibold shadow-[0_0_20px_rgba(255,255,255,0.15)] hover:shadow-[0_0_30px_rgba(255,255,255,0.25)] transition-all duration-500 rounded-full px-5">
+                                Bắt Đầu <ArrowUpRight className="ml-1.5 h-3.5 w-3.5" />
                             </Button>
                         </Link>
 
@@ -1377,7 +1382,7 @@ export default function LandingPage() {
 
             {/* ==================== HERO ==================== */}
             <section ref={heroRef} className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
-                {/* Video nền với parallax */}
+                {/* Video nền */}
                 <motion.div className="absolute inset-0 z-0" style={{ scale: heroScale }}>
                     <video
                         autoPlay loop muted playsInline
@@ -1386,29 +1391,15 @@ export default function LandingPage() {
                         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
                     />
                 </motion.div>
-
-                {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/70 to-background z-0" />
-
-                {/* Ambient violet glow */}
-                <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-violet-600/10 rounded-full blur-[150px] pointer-events-none z-0 animate-pulse-glow" />
+                <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background z-0" />
 
                 <motion.div
-                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-7xl text-center flex flex-col items-center py-14 md:py-16"
+                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-3xl text-center flex flex-col items-center pt-24 pb-8"
                     style={{ opacity: heroOpacity }}
                 >
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                    >
-                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300 backdrop-blur-sm">
-                            <Sparkles className="mr-2 h-3 w-3" /> Nền tảng tạo ảnh AI hàng đầu Việt Nam
-                        </Badge>
-                    </motion.div>
-
                     <motion.h1
-                        className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl mb-5 leading-[1.1]"
+                        className="font-extrabold tracking-tight mb-4 leading-[1.08]"
+                        style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
@@ -1419,90 +1410,66 @@ export default function LandingPage() {
                         </span>
                     </motion.h1>
 
+                    <motion.p
+                        className="text-sm md:text-base text-white/50 max-w-lg mx-auto mb-8 leading-relaxed text-balance"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        Mô tả bằng ngôn ngữ tự nhiên, chọn phong cách — AI biến giấc mơ thành tác phẩm studio trong 10 giây.
+                    </motion.p>
+
                     <motion.div
-                        className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mt-6"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
                     >
-                        <Link to="/login" className="w-full sm:w-auto">
-                            <Button size="lg" className="w-full h-12 px-8 text-base bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 transition-all">
+                        <Link to="/login">
+                            <Button size="lg" className="h-12 px-10 text-sm font-semibold bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.25)] transition-all duration-500 rounded-xl">
                                 <Play className="mr-2 h-4 w-4" /> Bắt Đầu Sáng Tạo
                             </Button>
                         </Link>
-                        <Link to="/login" className="w-full sm:w-auto">
-                            <Button size="lg" variant="outline" className="w-full h-12 px-8 text-base backdrop-blur-sm bg-background/30 border-border/50 hover:bg-background/50 hover:border-violet-500/30 transition-all">
-                                <SwatchBook className="mr-2 h-4 w-4" /> Trải Nghiệm Mẫu
-                            </Button>
-                        </Link>
-                    </motion.div>
-
-
-                    {/* Gallery AI Art — lá bài xoè quạt */}
-                    <motion.div
-                        className="relative mt-8 w-full max-w-3xl h-[180px] md:h-[280px]"
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                        <div className="relative flex items-center justify-center h-full">
-                            {HERO_IMAGES.map((img, i) => {
-                                const rotations = [-12, -4, 4, 12]
-                                const offsetClasses = [
-                                    "-translate-x-[60px] md:-translate-x-[140px]",
-                                    "-translate-x-[20px] md:-translate-x-[47px]",
-                                    "translate-x-[20px] md:translate-x-[47px]",
-                                    "translate-x-[60px] md:translate-x-[140px]",
-                                ]
-                                return (
-                                    <div key={i} className={`absolute ${offsetClasses[i]}`} style={{ zIndex: i }}>
-                                        <motion.div
-                                            className="w-[100px] h-[140px] md:w-[150px] md:h-[210px] rounded-xl overflow-hidden shadow-xl ring-1 ring-white/10"
-                                            initial={{ opacity: 0, y: 40, rotate: 0 }}
-                                            animate={{ opacity: 1, y: 0, rotate: rotations[i] }}
-                                            transition={{ duration: 0.6, delay: 0.8 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                                        >
-                                            <img src={img.src} alt={img.label} className="w-full h-full object-cover" loading="lazy" />
-                                        </motion.div>
-                                    </div>
-                                )
-                            })}
-                        </div>
                     </motion.div>
                 </motion.div>
 
-                {/* Scroll indicator */}
-                <motion.div
-                    className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10"
-                    animate={{ y: [0, 8, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                >
-                    <ChevronDown className="h-6 w-6 text-muted-foreground" />
-                </motion.div>
+                {/* Scrolling image showcase — single row */}
+                <div className="relative w-full mt-auto mb-6 z-10 overflow-hidden">
+                    <div className="flex gap-3 animate-marquee" style={{ width: "max-content" }}>
+                        {[...HERO_IMAGES, ...HERO_IMAGES].map((img, i) => (
+                            <div key={`r1-${i}`} className="w-[200px] md:w-[240px] h-[120px] md:h-[140px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
+                                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <span className="text-[10px] text-white/80 bg-black/40 px-2 py-0.5 rounded-full">{img.label}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+                    <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+                </div>
             </section>
 
             {/* ==================== INTERACTIVE DEMO ==================== */}
-            <section className="w-full py-16 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
-                <div className="absolute top-1/3 -left-32 w-96 h-96 bg-violet-600/8 rounded-full blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-fuchsia-600/5 rounded-full blur-[100px] pointer-events-none" />
+            <section id="demo" className="w-full py-16 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
                     <motion.div
-                        className="text-center mb-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        className="text-center mb-8"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
                         </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
                             Studio Sáng Tạo{" "}
                             <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 animate-gradient-text">
                                 AI
                             </span>
                         </h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
+                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">
                             Xem cách ZDream biến ý tưởng thành tác phẩm — chỉ trong vài giây.
                         </p>
                     </motion.div>
@@ -1517,14 +1484,14 @@ export default function LandingPage() {
                     {/* Template Demo — Mô phỏng tạo ảnh bằng kiểu mẫu */}
                     <motion.div
                         className="mt-16"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         <div className="text-center mb-8">
                             <Badge variant="outline" className="mb-4 border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300">
                                 <SwatchBook className="mr-2 h-3.5 w-3.5" /> Kiểu mẫu có sẵn
                             </Badge>
-                            <h3 className="text-2xl font-bold tracking-tighter sm:text-3xl">
+                            <h3 className="text-xl font-bold tracking-tighter sm:text-2xl">
                                 Hoặc dùng{" "}
                                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-400 to-violet-400">
                                     Kiểu Mẫu
@@ -1540,7 +1507,7 @@ export default function LandingPage() {
 
                     <motion.div
                         className="text-center mt-12"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         <Link to="/login">
@@ -1552,153 +1519,31 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* ==================== FEATURES — Bento Grid ==================== */}
-            <section id="features" className="w-full py-16 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-fuchsia-600/5 rounded-full blur-[120px] pointer-events-none" />
-
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center relative">
-                    <motion.div
-                        className="text-center mb-16"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={fadeUp}
-                    >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <Layers className="mr-2 h-3.5 w-3.5" /> Công cụ cho nhà sáng tạo
-                        </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình Sáng Tác Đỉnh Cao</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
-                            Tối ưu hóa mọi bước từ phác thảo bố cục, tinh chỉnh chi tiết đến xuất bản thành phẩm chất lượng nhất.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={staggerContainer}
-                    >
-                        {/* Feature 1 — Card nổi bật */}
-                        <motion.div variants={fadeUp} className="lg:row-span-2">
-                            <Card className="h-full bg-background/50 border-border/30 hover:border-violet-500/30 transition-all duration-500 group overflow-hidden relative">
-                                <div className="absolute top-0 right-0 w-40 h-40 bg-violet-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-violet-500/10 transition-colors" />
-                                <CardContent className="p-8 flex flex-col h-full relative">
-                                    <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <ZapIcon className="h-7 w-7 text-violet-400" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold mb-3">Làm Chủ Mọi Khung Hình</h3>
-                                    <p className="text-muted-foreground mb-6 leading-relaxed text-sm">
-                                        Lựa chọn 10 định dạng tỷ lệ khác nhau phục vụ từ thiết kế web, in ấn đến video dọc.
-                                    </p>
-                                    <div className="grid grid-cols-2 gap-2 mb-6 flex-1">
-                                        {FEATURE_IMAGES.map((img, i) => (
-                                            <div key={i} className="rounded-lg overflow-hidden border border-border/20 aspect-square group/img">
-                                                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-500" loading="lazy" />
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="flex gap-2 flex-wrap">
-                                        <Badge variant="secondary" className="bg-violet-500/10 text-violet-400 border-violet-500/20">Chất lượng 4K</Badge>
-                                        <Badge variant="secondary" className="bg-violet-500/10 text-violet-400 border-violet-500/20">10 tỷ lệ khung</Badge>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        {/* Feature 2 */}
-                        <motion.div variants={fadeUp}>
-                            <Card className="h-full bg-background/50 border-border/30 hover:border-violet-500/30 transition-all duration-500 group">
-                                <CardContent className="p-8 flex flex-col h-full">
-                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <Palette className="h-6 w-6 text-violet-400" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-3">Hệ Thống Phong Cách Mở Rộng</h3>
-                                    <p className="text-muted-foreground flex-1 mb-6 text-sm leading-relaxed">
-                                        Bộ sưu tập kiểu mẫu đa biên độ giúp bạn áp dụng các phong cách nghệ thuật phức tạp chỉ trong một cú nhấp chuột.
-                                    </p>
-                                    <div className="flex gap-2 flex-wrap">
-                                        <Badge variant="secondary" className="bg-violet-500/10 text-violet-400 border-violet-500/20">Hoàn toàn tự động</Badge>
-                                        <Badge variant="secondary" className="bg-violet-500/10 text-violet-400 border-violet-500/20">Chuẩn hóa thẩm mỹ</Badge>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        {/* Feature 3 */}
-                        <motion.div variants={fadeUp}>
-                            <Card className="h-full bg-background/50 border-border/30 hover:border-violet-500/30 transition-all duration-500 group">
-                                <CardContent className="p-8 flex flex-col h-full">
-                                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                        <ShieldCheck className="h-6 w-6 text-violet-400" />
-                                    </div>
-                                    <h3 className="text-xl font-bold mb-3">Không Gian Làm Việc Riêng Tư</h3>
-                                    <p className="text-muted-foreground flex-1 mb-6 text-sm leading-relaxed">
-                                        Mọi thành phẩm được sắp xếp khoa học thành từng dự án riêng biệt. Cam kết bảo vệ dữ liệu và trao toàn quyền thương mại.
-                                    </p>
-                                    <div className="flex gap-2 flex-wrap">
-                                        <Badge variant="secondary" className="bg-violet-500/10 text-violet-400 border-violet-500/20">Lưu trữ đám mây</Badge>
-                                        <Badge variant="secondary" className="bg-violet-500/10 text-violet-400 border-violet-500/20">Quyền thương mại</Badge>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-
-                        {/* Feature 4 — wide card */}
-                        <motion.div variants={fadeUp} className="lg:col-span-2">
-                            <Card className="bg-background/50 border-border/30 hover:border-violet-500/30 transition-all duration-500 group">
-                                <CardContent className="p-8 flex flex-col sm:flex-row gap-6 items-start">
-                                    <div className="h-12 w-12 shrink-0 rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <WandSparkles className="h-6 w-6 text-violet-400" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-xl font-bold mb-3">Từ Prompt Đến Tác Phẩm Trong 10 Giây</h3>
-                                        <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                                            Chỉ cần mô tả ý tưởng bằng ngôn ngữ tự nhiên, chọn phong cách yêu thích, và để AI biến giấc mơ thành hiện thực. Hệ thống xử lý tốc độ cực nhanh với hàng đợi ưu tiên thông minh.
-                                        </p>
-                                        <div className="flex gap-6 text-sm flex-wrap">
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <div className="h-2 w-2 rounded-full bg-violet-400" />
-                                                Tốc độ ~10s/ảnh
-                                            </div>
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <div className="h-2 w-2 rounded-full bg-fuchsia-400" />
-                                                Hàng đợi thông minh
-                                            </div>
-                                            <div className="flex items-center gap-2 text-muted-foreground">
-                                                <div className="h-2 w-2 rounded-full bg-pink-400" />
-                                                Nhiều engine AI
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    </motion.div>
-                </div>
-            </section>
 
             {/* ==================== TEMPLATES CAROUSEL ==================== */}
-            <section id="templates" className="w-full py-24 overflow-hidden relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <section id="templates" className="w-full py-16 overflow-hidden relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_100%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
                     <motion.div
-                        className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-8 text-center md:text-left"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={fadeUp}
+                        className="flex flex-col md:flex-row md:items-end justify-between w-full mb-8 gap-6 text-center md:text-left"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={fadeLeft}
                     >
                         <div className="flex-1">
-                            <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                            <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                                 <SwatchBook className="mr-2 h-3.5 w-3.5" /> Thư viện phong cách
                             </Badge>
-                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Kiểu Mẫu Sẵn Sàng Sử Dụng</h2>
-                            <p className="mt-3 text-muted-foreground text-lg max-w-2xl text-balance">
+                            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Kiểu Mẫu Sẵn Sàng Sử Dụng</h2>
+                            <p className="mt-2 text-muted-foreground text-sm max-w-2xl text-balance">
                                 Chọn một phong cách, nhập mô tả, và nhận tác phẩm ngay lập tức — không cần tinh chỉnh phức tạp.
                             </p>
                         </div>
                         <div className="hidden md:flex shrink-0">
                             <Link to="/login">
-                                <Button variant="outline" className="backdrop-blur-sm hover:border-violet-500/30">
+                                <Button variant="outline" className="hover:border-violet-500/30">
                                     Xem tất cả <ArrowUpRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </Link>
@@ -1707,8 +1552,8 @@ export default function LandingPage() {
 
                     <motion.div
                         className="w-full px-14 md:px-20 mx-auto relative cursor-grab active:cursor-grabbing"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
-                        variants={fadeIn}
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={fadeRight}
                     >
                         <Carousel
                             plugins={[Autoplay({ delay: 3000 })]}
@@ -1718,18 +1563,18 @@ export default function LandingPage() {
                             <CarouselContent className="-ml-4 md:-ml-6">
                                 {TEMPLATES.map((tpl, index) => (
                                     <CarouselItem key={index} className="pl-4 md:pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                                        <Card className="overflow-hidden border-border/30 bg-background/50 h-full group hover:border-violet-500/30 transition-all duration-500">
+                                        <Card className="overflow-hidden border-white/[0.06] bg-background/50 h-full group hover:border-violet-500/20 transition-all duration-700 rounded-2xl">
                                             <CardContent className="p-0 relative aspect-[3/4] h-full">
                                                 <img
                                                     src={tpl.img}
                                                     alt={tpl.name}
-                                                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none group-hover:scale-105 transition-transform duration-700"
+                                                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none group-hover:scale-110 transition-transform duration-[1.2s] ease-out"
                                                     loading="lazy"
                                                     draggable={false}
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent flex flex-col justify-end p-6 select-none pointer-events-none text-left">
-                                                    <Badge variant="secondary" className="w-fit mb-3 bg-white/10 backdrop-blur-md border-white/20 text-white">{tpl.cat}</Badge>
-                                                    <h3 className="text-white font-bold text-xl">{tpl.name}</h3>
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-6 select-none pointer-events-none text-left">
+                                                    <Badge variant="secondary" className="w-fit mb-3 bg-white/10 border-white/10 text-white/90 text-[10px] uppercase tracking-wider">{tpl.cat}</Badge>
+                                                    <h3 className="text-white font-bold text-xl drop-shadow-lg">{tpl.name}</h3>
                                                 </div>
                                             </CardContent>
                                         </Card>
@@ -1753,16 +1598,18 @@ export default function LandingPage() {
 
             {/* ==================== STATS ==================== */}
             <section className="w-full py-14 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <motion.div
                         className="text-center mb-8"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-300">
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <Trophy className="mr-2 h-3.5 w-3.5" /> Thành tựu cộng đồng
                         </Badge>
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Con Số Ấn Tượng</h2>
                     </motion.div>
                     <motion.div
                         className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
@@ -1778,31 +1625,30 @@ export default function LandingPage() {
 
             {/* ==================== HOW IT WORKS ==================== */}
             <section className="w-full py-16 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
                     <motion.div
-                        className="text-center mb-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        className="text-center mb-8"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <ZapIcon className="mr-2 h-3.5 w-3.5" /> Đơn giản & Nhanh chóng
                         </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Quy Trình 3 Bước</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Quy Trình 3 Bước</h2>
+                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">
                             Từ ý tưởng đến tác phẩm chỉ trong vài giây — không cần kỹ năng thiết kế.
                         </p>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-1 md:grid-cols-3 gap-8 relative"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        className="grid grid-cols-1 md:grid-cols-3 gap-6 relative"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={staggerContainer}
                     >
                         {/* Connecting line (desktop only) */}
-                        <div className="hidden md:block absolute top-[72px] left-[16.67%] right-[16.67%] h-px">
+                        <div className="hidden md:block absolute top-[52px] left-[16.67%] right-[16.67%] h-px">
                             <div className="w-full h-full bg-gradient-to-r from-violet-500/40 via-fuchsia-500/40 to-pink-500/40" />
                         </div>
 
@@ -1810,15 +1656,15 @@ export default function LandingPage() {
                             <motion.div key={item.step} variants={fadeUp} className="relative">
                                 <div className="flex flex-col items-center text-center">
                                     {/* Numbered circle */}
-                                    <div className={`relative h-[88px] w-[88px] rounded-2xl bg-gradient-to-br ${item.color} p-[2px] mb-6 shadow-lg`}>
-                                        <div className="h-full w-full rounded-[14px] bg-background flex items-center justify-center">
-                                            <item.icon className="h-8 w-8 text-violet-400" />
+                                    <div className={`relative h-[64px] w-[64px] rounded-xl bg-gradient-to-br ${item.color} p-[2px] mb-4 shadow-lg`}>
+                                        <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center">
+                                            <item.icon className="h-6 w-6 text-violet-400" />
                                         </div>
-                                        <div className="absolute -top-2 -right-2 h-7 w-7 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                                        <div className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-[10px] font-bold shadow-md">
                                             {item.step}
                                         </div>
                                     </div>
-                                    <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                                    <h3 className="text-lg font-bold mb-1.5">{item.title}</h3>
                                     <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
                                         {item.desc}
                                     </p>
@@ -1830,7 +1676,7 @@ export default function LandingPage() {
                     {/* CTA mini */}
                     <motion.div
                         className="text-center mt-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         <Link to="/login">
@@ -1843,31 +1689,31 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== TESTIMONIALS ==================== */}
-            <section className="w-full py-24 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+            <section className="w-full py-16 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <motion.div
-                        className="text-center mb-16"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        className="text-center mb-8"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <Star className="mr-2 h-3.5 w-3.5" /> Nhận xét từ cộng đồng
                         </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl">Được Tin Dùng Bởi Hàng Nghìn Nhà Sáng Tạo</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">Lắng nghe trải nghiệm thực tế từ những nhà sáng tạo đang sử dụng ZDream mỗi ngày.</p>
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Được Tin Dùng Bởi Hàng Nghìn Nhà Sáng Tạo</h2>
+                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">Lắng nghe trải nghiệm thực tế từ những nhà sáng tạo đang sử dụng ZDream mỗi ngày.</p>
                     </motion.div>
 
                     <motion.div
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={staggerContainer}
                     >
                         {TESTIMONIALS.map((t, index) => (
-                            <motion.div key={index} variants={fadeUp}>
-                                <Card className="bg-background/50 border-border/30 hover:border-violet-500/20 transition-all duration-300 h-full">
+                            <motion.div key={index} variants={scaleUp}>
+                                <Card className="glass-card border-white/[0.06] h-full hover:border-violet-500/20 transition-colors duration-500">
                                     <CardContent className="p-7 flex flex-col h-full">
-                                        <Quote className="h-7 w-7 text-violet-500/30 mb-4" fill="currentColor" />
+                                        <Quote className="h-7 w-7 text-violet-500/20 mb-4" fill="currentColor" />
                                         <p className="text-foreground/90 flex-1 mb-6 leading-relaxed text-[15px]">
                                             &ldquo;{t.quote}&rdquo;
                                         </p>
@@ -1891,27 +1737,27 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== PRICING ==================== */}
-            <section id="pricing" className="w-full py-24 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/5 rounded-full blur-[100px] pointer-events-none" />
+            <section id="pricing" className="w-full py-16 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_1px_at_center,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[length:24px_24px] pointer-events-none opacity-30" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center relative">
                     <motion.div
-                        className="flex flex-col items-center text-center mb-16"
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        className="flex flex-col items-center text-center mb-10"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <Gem className="mr-2 h-3.5 w-3.5" /> Hệ thống Kim Cương
                         </Badge>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Gói dịch vụ linh hoạt</h2>
-                        <p className="mt-4 max-w-2xl mx-auto text-muted-foreground text-lg text-balance">
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Gói dịch vụ linh hoạt</h2>
+                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">
                             Mỗi tác phẩm AI sắc nét đều tiêu hao Kim Cương. Hãy chọn gói phù hợp nhất.
                         </p>
                     </motion.div>
 
                     <Tabs defaultValue="monthly" className="w-full flex flex-col items-center">
-                        <TabsList className="mb-12 bg-white/5 backdrop-blur-md border border-white/10">
+                        <TabsList className="mb-12 bg-white/5 border border-white/10">
                             <TabsTrigger value="monthly" className="px-8 font-medium data-[state=active]:bg-background">Theo Tháng</TabsTrigger>
                             <TabsTrigger value="yearly" className="px-8 font-medium data-[state=active]:bg-background">
                                 Theo Năm
@@ -1922,7 +1768,7 @@ export default function LandingPage() {
                         <TabsContent value="monthly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
                             <motion.div
                                 className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch"
-                                initial="hidden" whileInView="visible" viewport={{ once: true }}
+                                initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                                 variants={staggerContainer}
                             >
                                 {MONTHLY_PLANS.map((plan) => (
@@ -1933,7 +1779,7 @@ export default function LandingPage() {
                         <TabsContent value="yearly" className="w-full mt-0 focus-visible:outline-none focus-visible:ring-0">
                             <motion.div
                                 className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full items-stretch"
-                                initial="hidden" whileInView="visible" viewport={{ once: true }}
+                                initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                                 variants={staggerContainer}
                             >
                                 {YEARLY_PLANS.map((plan) => (
@@ -1946,20 +1792,20 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== FAQ ==================== */}
-            <section id="faq" className="w-full py-24 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+            <section id="faq" className="w-full py-16 relative">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl">
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 items-start">
                         {/* Cột trái */}
                         <motion.div
                             className="lg:col-span-2 lg:sticky lg:top-24"
-                            initial="hidden" whileInView="visible" viewport={{ once: true }}
-                            variants={fadeUp}
+                            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                            variants={fadeLeft}
                         >
-                            <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300">Hỏi đáp</Badge>
-                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-4">Câu hỏi thường gặp</h2>
-                            <p className="text-muted-foreground text-lg mb-8 text-balance">
+                            <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">Hỏi đáp</Badge>
+                            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl mb-3">Câu hỏi thường gặp</h2>
+                            <p className="text-muted-foreground text-sm md:text-base mb-6 text-balance">
                                 Mọi thắc mắc của bạn về nền tảng ZDream AI.
                             </p>
                             <Card className="bg-background/50 border-border/30">
@@ -1985,8 +1831,8 @@ export default function LandingPage() {
                         {/* Cột phải — Accordion */}
                         <motion.div
                             className="lg:col-span-3"
-                            initial="hidden" whileInView="visible" viewport={{ once: true }}
-                            variants={fadeUp}
+                            initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                            variants={fadeRight}
                         >
                             <Card className="bg-background/50 border-border/30 w-full">
                                 <CardContent className="p-6 md:p-8">
@@ -2010,46 +1856,50 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== CTA FINAL ==================== */}
-            <section className="w-full py-24 relative">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center">
+            <section className="w-full py-20 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+
+                {/* Subtle radial accent */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(139,92,246,0.06),transparent)] pointer-events-none" />
+
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center relative">
                     <motion.div
-                        initial="hidden" whileInView="visible" viewport={{ once: true }}
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={scaleUp}
-                        className="w-full max-w-5xl mx-auto"
+                        className="w-full max-w-3xl mx-auto text-center"
                     >
-                        <Card className="overflow-hidden relative border-border/30">
-                            {/* Ambient glows */}
-                            <div className="absolute -top-20 -left-20 w-60 h-60 bg-violet-500/10 rounded-full blur-3xl pointer-events-none animate-pulse-glow" />
-                            <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none animate-pulse-glow" style={{ animationDelay: '2s' }} />
+                        <div className="flex -space-x-2.5 justify-center mb-8">
+                            {TESTIMONIALS.slice(0, 3).map((t, i) => (
+                                <Avatar key={i} className="h-10 w-10 border-3 border-background ring-1 ring-white/5">
+                                    <AvatarImage src={t.avatar} />
+                                    <AvatarFallback>{t.name[0]}</AvatarFallback>
+                                </Avatar>
+                            ))}
+                            <Avatar className="h-10 w-10 border-3 border-background bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 ring-1 ring-violet-500/20">
+                                <AvatarFallback className="text-[10px] font-bold text-violet-300">+50K</AvatarFallback>
+                            </Avatar>
+                        </div>
 
-                            <CardContent className="p-10 md:p-20 flex flex-col items-center text-center relative">
-                                <div className="flex -space-x-3 justify-center mb-8">
-                                    {TESTIMONIALS.slice(0, 3).map((t, i) => (
-                                        <Avatar key={i} className="h-14 w-14 border-4 border-background">
-                                            <AvatarImage src={t.avatar} />
-                                            <AvatarFallback>{t.name[0]}</AvatarFallback>
-                                        </Avatar>
-                                    ))}
-                                    <Avatar className="h-14 w-14 border-4 border-background bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20">
-                                        <AvatarFallback className="text-xs font-bold text-violet-300">+50K</AvatarFallback>
-                                    </Avatar>
-                                </div>
+                        <h2 className="text-2xl font-extrabold tracking-tight sm:text-3xl md:text-4xl mb-4 text-balance text-glow leading-[1.1]">
+                            Bắt đầu sáng tạo<br className="hidden sm:block" />
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 animate-gradient-text">
+                                ngay hôm nay
+                            </span>
+                        </h2>
+                        <p className="text-muted-foreground text-sm md:text-base mb-8 text-balance max-w-xl mx-auto leading-relaxed">
+                            Tạo tài khoản hoàn toàn miễn phí, nhận ngay 50 Kim Cương và bắt đầu hành trình nghệ thuật không rủi ro.
+                        </p>
 
-                                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-6 text-balance">
-                                    Bắt đầu sáng tạo ngay hôm nay
-                                </h2>
-                                <p className="text-muted-foreground text-lg md:text-xl mb-10 text-balance max-w-2xl">
-                                    Tạo tài khoản hoàn toàn miễn phí, nhận ngay 50 Kim Cương và bắt đầu hành trình nghệ thuật không rủi ro.
-                                </p>
+                        <Link to="/login">
+                            <Button size="lg" className="h-12 px-8 text-base font-semibold bg-white text-black hover:bg-white/90 shadow-[0_0_60px_rgba(255,255,255,0.2)] hover:shadow-[0_0_80px_rgba(255,255,255,0.3)] transition-all duration-500 rounded-xl">
+                                Bắt Đầu Miễn Phí <ArrowUpRight className="ml-2 h-4 w-4" />
+                            </Button>
+                        </Link>
 
-                                <Link to="/login">
-                                    <Button size="lg" className="h-14 px-10 text-lg bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/35 transition-all">
-                                        Bắt Đầu Miễn Phí <ArrowUpRight className="ml-2 h-5 w-5" />
-                                    </Button>
-                                </Link>
-                            </CardContent>
-                        </Card>
+                        <p className="mt-5 text-xs text-muted-foreground/40 flex items-center justify-center gap-4">
+                            <span className="flex items-center gap-1.5"><CheckCircle2 className="h-3 w-3" /> Không cần thẻ tín dụng</span>
+                            <span className="flex items-center gap-1.5"><Sparkles className="h-3 w-3" /> 50 gems miễn phí</span>
+                        </p>
                     </motion.div>
                 </div>
             </section>
