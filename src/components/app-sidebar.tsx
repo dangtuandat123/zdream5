@@ -364,7 +364,7 @@ export function AppSidebar() {
                 >
                   <span className={cn(
                     "text-lg transition-all duration-300 ease-out",
-                    isActive("/app/topup") ? "scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" : "opacity-50 group-hover:opacity-100 group-hover:scale-110"
+                    isActive("/app/topup") ? "scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" : "group-hover:scale-110"
                   )}>💎</span>
                   <span className={cn(
                     "text-[11px] font-bold tabular-nums",
