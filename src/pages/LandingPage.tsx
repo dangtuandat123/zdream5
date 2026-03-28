@@ -23,12 +23,9 @@ import {
     Play,
     Palette,
     ZapIcon,
-    Quote,
     ChevronUp,
     Menu,
     Trophy,
-    PenLine,
-    Cpu,
     Download,
     ArrowRight,
     ArrowUp,
@@ -187,29 +184,6 @@ const FAQS = [
     },
 ]
 
-const HOW_IT_WORKS = [
-    {
-        step: 1,
-        icon: PenLine,
-        title: "Mô Tả Ý Tưởng",
-        desc: "Viết mô tả bằng ngôn ngữ tự nhiên, chọn phong cách và tỷ lệ khung hình.",
-        color: "from-violet-500 to-purple-600",
-    },
-    {
-        step: 2,
-        icon: Cpu,
-        title: "AI Sáng Tạo",
-        desc: "Engine AI xử lý trong ~10 giây, tạo ra tác phẩm chất lượng studio.",
-        color: "from-purple-500 to-fuchsia-600",
-    },
-    {
-        step: 3,
-        icon: Download,
-        title: "Nhận Tác Phẩm",
-        desc: "Tải về 4K, lưu vào thư viện đám mây, hoặc chia sẻ ngay lập tức.",
-        color: "from-fuchsia-500 to-pink-600",
-    },
-]
 
 const STATS = [
     { label: "Ảnh đã tạo", value: 1200000, suffix: "+", display: "1.2M+", icon: WandSparkles },
@@ -527,9 +501,21 @@ function InteractiveDemo() {
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row h-[700px] sm:h-[550px] lg:h-[420px] overflow-hidden">
-                    {/* LEFT: Settings Panel */}
-                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[230px] sm:max-h-[220px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-4 bg-background/30 overflow-y-auto min-h-0">
+                <div className="relative flex flex-col lg:flex-row min-h-[380px] lg:min-h-[420px] overflow-hidden">
+                    {/* Mobile compact settings bar — visible only on mobile */}
+                    <div className="flex lg:hidden items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/30 overflow-x-auto">
+                        <span className="text-[10px] uppercase text-muted-foreground/50 font-medium shrink-0">Cài đặt:</span>
+                        <Badge variant={activeStyle >= 0 ? "default" : "outline"} className={`text-[10px] shrink-0 transition-all duration-500 ${activeStyle >= 0 ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-transparent" : "border-border/30 text-muted-foreground/40"}`}>
+                            {activeStyle >= 0 ? DEMO_STYLES[activeStyle] : "Phong cách"}
+                        </Badge>
+                        <Badge variant={activeRatio >= 0 ? "default" : "outline"} className={`text-[10px] shrink-0 transition-all duration-500 ${activeRatio >= 0 ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-transparent" : "border-border/30 text-muted-foreground/40"}`}>
+                            {activeRatio >= 0 ? DEMO_RATIOS[activeRatio].value : "Tỷ lệ"}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px] shrink-0 border-border/30 text-muted-foreground/40">×2</Badge>
+                    </div>
+
+                    {/* LEFT: Settings Panel — hidden on mobile */}
+                    <div className="hidden lg:block w-[300px] shrink-0 border-r border-border/15 p-4 space-y-4 bg-background/30 overflow-y-auto">
                         {/* Phong cách */}
                         <div className="space-y-2">
                             <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
@@ -541,7 +527,7 @@ function InteractiveDemo() {
                                         key={style}
                                         variant={activeStyle === i ? "default" : "outline"}
                                         className={`cursor-default text-xs transition-all duration-500 ${activeStyle === i
-                                            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-transparent shadow-lg shadow-violet-500/25 scale-105"
+                                            ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white border-transparent shadow-lg shadow-violet-500/30 scale-105 ring-2 ring-violet-400/30"
                                             : "border-border/30 text-muted-foreground/60 hover:border-border/50"
                                         }`}
                                     >
@@ -559,7 +545,7 @@ function InteractiveDemo() {
                                     <div
                                         key={r.value}
                                         className={`flex flex-col items-center gap-1 py-2 rounded-lg text-xs transition-all duration-500 ${activeRatio === i
-                                            ? "bg-gradient-to-b from-violet-500 to-violet-600 text-white shadow-md shadow-violet-500/20 scale-105"
+                                            ? "bg-gradient-to-b from-violet-500 to-violet-600 text-white shadow-md shadow-violet-500/25 scale-105 ring-2 ring-violet-400/30"
                                             : "bg-muted/20 text-muted-foreground/50"
                                         }`}
                                     >
@@ -613,7 +599,7 @@ function InteractiveDemo() {
                     {/* RIGHT: Canvas + Prompt bar */}
                     <div className="flex-1 flex flex-col min-h-0 relative">
                         {/* Canvas area */}
-                        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center relative">
+                        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center relative bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(139,92,246,0.03),transparent)]">
                             {!showResults ? (
                                 <div className="w-full max-w-lg">
                                     {isGenerating ? (
@@ -686,6 +672,18 @@ function InteractiveDemo() {
                                             </motion.div>
                                         ))}
                                     </motion.div>
+
+                                    {/* Sparkle effects on results */}
+                                    {showResults && !isDragging && (
+                                        <>
+                                            <motion.div className="absolute -top-2 -right-2 text-violet-400 pointer-events-none" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: [0, 1, 0], scale: [0, 1.2, 0] }} transition={{ duration: 1.5, delay: 0.2 }}>
+                                                <Sparkles className="h-4 w-4" />
+                                            </motion.div>
+                                            <motion.div className="absolute top-4 -left-3 text-fuchsia-400 pointer-events-none" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }} transition={{ duration: 1.5, delay: 0.5 }}>
+                                                <Sparkles className="h-3 w-3" />
+                                            </motion.div>
+                                        </>
+                                    )}
 
                                     {/* Floating drag ghost — ảnh thu nhỏ di chuyển xuống prompt bar */}
                                     {isDragging && (
@@ -997,9 +995,9 @@ function TemplateDemo() {
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row h-[680px] sm:h-[520px] lg:h-[420px] overflow-hidden">
+                <div className="relative flex flex-col lg:flex-row min-h-[380px] lg:min-h-[420px] overflow-hidden">
                     {/* LEFT: Settings Panel */}
-                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[300px] sm:max-h-[250px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto min-h-0">
+                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[320px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto min-h-0">
                         {/* Upload area */}
                         <div className="space-y-2">
                             <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
@@ -1007,19 +1005,23 @@ function TemplateDemo() {
                             </p>
                             {!showUploadedImg ? (
                                 <motion.div
-                                    className="border-2 border-dashed border-border/30 rounded-xl flex flex-col items-center justify-center h-[72px] gap-1.5 transition-colors"
-                                    animate={phase === "uploading" ? { borderColor: "rgba(168,85,247,0.5)", backgroundColor: "rgba(168,85,247,0.05)" } : {}}
+                                    className="border-2 border-dashed rounded-xl flex flex-col items-center justify-center h-[72px] gap-1.5 transition-all duration-500"
+                                    animate={phase === "uploading"
+                                        ? { borderColor: "rgba(168,85,247,0.5)", backgroundColor: "rgba(168,85,247,0.05)", scale: [1, 1.01, 1] }
+                                        : { borderColor: "rgba(255,255,255,0.08)", backgroundColor: "transparent" }
+                                    }
+                                    transition={{ scale: { repeat: Infinity, duration: 1.5 } }}
                                 >
-                                    <Upload className="h-6 w-6 text-muted-foreground/40" />
+                                    <Upload className={`h-6 w-6 transition-colors duration-500 ${phase === "uploading" ? "text-violet-400/60 animate-bounce" : "text-muted-foreground/40"}`} />
                                     <p className="text-[11px] text-muted-foreground/50">Kéo thả hoặc nhấp để tải ảnh</p>
                                     <p className="text-[9px] text-muted-foreground/30">PNG, JPG, WEBP</p>
                                 </motion.div>
                             ) : (
                                 <motion.div
-                                    className="relative rounded-xl overflow-hidden h-[72px] ring-1 ring-border/20"
-                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    className="relative rounded-xl overflow-hidden h-[72px] ring-2 ring-violet-500/30 shadow-md shadow-violet-500/10"
+                                    initial={{ opacity: 0, scale: 0.85 }}
                                     animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.4 }}
+                                    transition={{ duration: 0.5, type: "spring", stiffness: 300 }}
                                 >
                                     <img src={TEMPLATE_INPUT_IMG} alt="Ảnh đầu vào" className="w-full h-full object-cover" />
                                     <div className="absolute top-1.5 right-1.5 flex gap-1">
@@ -1042,7 +1044,7 @@ function TemplateDemo() {
                                             <div key={oi} className="flex flex-col items-center gap-1 shrink-0 w-[52px]">
                                                 <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all duration-500 ${
                                                     isActive
-                                                        ? "border-violet-500 ring-2 ring-violet-500/30 scale-105"
+                                                        ? "border-violet-500 ring-2 ring-violet-500/30 scale-110 shadow-lg shadow-violet-500/20"
                                                         : "border-border/30"
                                                 }`}>
                                                     <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" />
@@ -1089,7 +1091,7 @@ function TemplateDemo() {
                     </div>
 
                     {/* RIGHT: Canvas */}
-                    <div className="flex-1 flex items-center justify-center p-4 lg:p-6 relative">
+                    <div className="flex-1 flex items-center justify-center p-4 lg:p-6 relative bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(217,70,239,0.03),transparent)]">
                         {!showResults ? (
                             <div className="w-full max-w-lg">
                                 {isGenerating ? (
@@ -1122,18 +1124,26 @@ function TemplateDemo() {
                             </div>
                         ) : (
                             <motion.div
-                                className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg"
+                                className="relative grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg"
                                 initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
                             >
+                                {/* Sparkle effects */}
+                                <motion.div className="absolute -top-3 right-4 text-fuchsia-400 pointer-events-none z-10" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: [0, 1, 0], scale: [0, 1.2, 0] }} transition={{ duration: 1.5, delay: 0.3 }}>
+                                    <Sparkles className="h-4 w-4" />
+                                </motion.div>
+                                <motion.div className="absolute bottom-2 -left-3 text-violet-400 pointer-events-none z-10" initial={{ opacity: 0, scale: 0 }} animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }} transition={{ duration: 1.5, delay: 0.6 }}>
+                                    <Sparkles className="h-3 w-3" />
+                                </motion.div>
+
                                 {TEMPLATE_RESULTS.map((src, i) => (
                                     <motion.div
                                         key={src}
-                                        className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-lg group ${i === 1 ? "hidden sm:block" : ""}`}
-                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-xl group ${i === 1 ? "hidden sm:block" : ""}`}
+                                        initial={{ opacity: 0, scale: 0.85 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: i * 0.15, duration: 0.5 }}
+                                        transition={{ delay: i * 0.15, duration: 0.5, type: "spring", stiffness: 200 }}
                                     >
                                         <div className="relative aspect-video bg-muted/20">
                                             <img src={src} alt={`Template Result ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -1264,6 +1274,50 @@ function scrollToSection(id: string) {
 }
 
 // ============================================================
+// FEATURES DATA
+// ============================================================
+
+const FEATURES = [
+    {
+        icon: WandSparkles,
+        title: "Nhiều Model AI",
+        desc: "Truy cập hàng chục model AI hàng đầu — Gemini, Flux, SDXL và nhiều hơn nữa.",
+        color: "from-violet-500 to-purple-600",
+    },
+    {
+        icon: ImageIcon,
+        title: "Xuất Ảnh 4K",
+        desc: "Xuất ảnh chất lượng cao lên đến 4K, sắc nét từng chi tiết cho mọi mục đích.",
+        color: "from-purple-500 to-fuchsia-600",
+    },
+    {
+        icon: SwatchBook,
+        title: "Template Có Sẵn",
+        desc: "Hàng trăm template được tối ưu sẵn — chỉ cần chọn và tạo, không cần viết prompt.",
+        color: "from-fuchsia-500 to-pink-600",
+    },
+    {
+        icon: Palette,
+        title: "Đa Dạng Phong Cách",
+        desc: "Anime, sơn dầu, 3D render, cyberpunk, Ghibli — mọi phong cách bạn có thể nghĩ đến.",
+        color: "from-pink-500 to-rose-600",
+    },
+    {
+        icon: ZapIcon,
+        title: "Tốc Độ 10 Giây",
+        desc: "Engine AI tối ưu cho tốc độ — từ prompt đến tác phẩm hoàn chỉnh chỉ trong ~10 giây.",
+        color: "from-amber-500 to-orange-600",
+    },
+    {
+        icon: Gem,
+        title: "50 Gems Miễn Phí",
+        desc: "Đăng ký nhận ngay 50 gems miễn phí để trải nghiệm — không cần thẻ tín dụng.",
+        color: "from-emerald-500 to-teal-600",
+    },
+]
+
+
+// ============================================================
 // LANDING PAGE
 // ============================================================
 export default function LandingPage() {
@@ -1273,7 +1327,8 @@ export default function LandingPage() {
     const heroRef = useRef<HTMLElement>(null)
     const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
     const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0])
-    const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.1])
+    const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -60])
+    const floatY2 = useTransform(scrollYProgress, [0, 1], [0, -40])
 
     // Lenis smooth scroll — hiệu ứng cuộn mượt có quán tính
     useEffect(() => {
@@ -1382,24 +1437,52 @@ export default function LandingPage() {
 
             {/* ==================== HERO ==================== */}
             <section ref={heroRef} className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
-                {/* Video nền */}
-                <motion.div className="absolute inset-0 z-0" style={{ scale: heroScale }}>
-                    <video
-                        autoPlay loop muted playsInline
-                        className="w-full h-full object-cover pointer-events-none"
-                        poster="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1920&auto=format&fit=crop"
-                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260228_065522_522e2295-ba22-457e-8fdb-fbcd68109c73.mp4"
-                    />
-                </motion.div>
-                <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background z-0" />
+                {/* BG: gradient + glowing orbs */}
+                <div className="absolute inset-0 bg-gradient-to-b from-violet-950/20 via-background to-background z-0" />
+                <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] rounded-full bg-violet-600/[0.07] blur-[120px] pointer-events-none animate-float-slow" />
+                <div className="absolute top-[30%] right-[15%] w-[400px] h-[400px] rounded-full bg-fuchsia-600/[0.06] blur-[100px] pointer-events-none animate-float-delayed" />
+                <div className="absolute bottom-[20%] left-[40%] w-[300px] h-[300px] rounded-full bg-pink-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
 
+                {/* Floating AI showcase images */}
+                {[
+                    { src: HERO_IMAGES[0].src, className: "hidden lg:block top-[18%] left-[5%] w-36 h-24 -rotate-3", delay: 0, even: true },
+                    { src: HERO_IMAGES[1].src, className: "hidden lg:block top-[12%] right-[6%] w-44 h-28 rotate-2", delay: 0.15, even: false },
+                    { src: HERO_IMAGES[2].src, className: "hidden md:block top-[38%] left-[3%] w-32 h-20 rotate-[5deg]", delay: 0.3, even: true },
+                    { src: HERO_IMAGES[3].src, className: "hidden md:block top-[32%] right-[3%] w-40 h-24 -rotate-2", delay: 0.1, even: false },
+                    { src: HERO_IMAGES[4].src, className: "hidden xl:block bottom-[32%] left-[8%] w-36 h-22 rotate-3", delay: 0.25, even: true },
+                    { src: HERO_IMAGES[5].src, className: "hidden xl:block bottom-[35%] right-[7%] w-32 h-20 -rotate-[4deg]", delay: 0.2, even: false },
+                ].map((img, i) => (
+                    <motion.div
+                        key={`float-${i}`}
+                        className={`absolute z-[1] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-black/40 ${img.className} ${img.even ? 'animate-float-slow' : 'animate-float-delayed'}`}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, delay: 0.5 + img.delay, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ y: img.even ? floatY1 : floatY2 }}
+                    >
+                        <img src={img.src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    </motion.div>
+                ))}
+
+                {/* Content center */}
                 <motion.div
-                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-3xl text-center flex flex-col items-center pt-24 pb-8"
+                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-3xl text-center flex flex-col items-center pt-28 pb-8"
                     style={{ opacity: heroOpacity }}
                 >
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                    >
+                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs px-4 py-1.5">
+                            <Sparkles className="mr-2 h-3.5 w-3.5" /> Nền tảng tạo ảnh AI #1 Việt Nam
+                        </Badge>
+                    </motion.div>
+
                     <motion.h1
-                        className="font-extrabold tracking-tight mb-4 leading-[1.08]"
-                        style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
+                        className="font-extrabold tracking-tight mb-5 leading-[1.08] text-glow"
+                        style={{ fontSize: "clamp(2.2rem, 5.5vw, 4rem)" }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
@@ -1419,24 +1502,46 @@ export default function LandingPage() {
                         Mô tả bằng ngôn ngữ tự nhiên, chọn phong cách — AI biến giấc mơ thành tác phẩm studio trong 10 giây.
                     </motion.p>
 
+                    {/* Dual CTA */}
                     <motion.div
+                        className="flex flex-col sm:flex-row items-center gap-3"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
                     >
                         <Link to="/login">
-                            <Button size="lg" className="h-12 px-10 text-sm font-semibold bg-white text-black hover:bg-white/90 shadow-[0_0_40px_rgba(255,255,255,0.15)] hover:shadow-[0_0_60px_rgba(255,255,255,0.25)] transition-all duration-500 rounded-xl">
+                            <Button size="lg" className="h-12 px-8 text-sm font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_40px_-5px_rgba(139,92,246,0.5)] hover:shadow-[0_0_60px_-5px_rgba(139,92,246,0.7)] transition-all duration-500 rounded-xl">
                                 <Play className="mr-2 h-4 w-4" /> Bắt Đầu Sáng Tạo
                             </Button>
                         </Link>
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="h-12 px-8 text-sm font-semibold border-white/15 hover:border-violet-500/30 hover:bg-violet-500/5 rounded-xl transition-all duration-500"
+                            onClick={() => scrollToSection("demo")}
+                        >
+                            Xem Demo <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </motion.div>
+
+                    {/* Mini stats bar */}
+                    <motion.div
+                        className="flex items-center gap-6 md:gap-8 mt-10 text-xs text-muted-foreground/50"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.6 }}
+                    >
+                        <span className="flex items-center gap-1.5"><WandSparkles className="h-3.5 w-3.5 text-violet-400/60" /> <strong className="text-foreground/70">1.2M+</strong> ảnh đã tạo</span>
+                        <span className="hidden sm:flex items-center gap-1.5"><Star className="h-3.5 w-3.5 text-violet-400/60" /> <strong className="text-foreground/70">50K+</strong> người dùng</span>
+                        <span className="flex items-center gap-1.5"><Gem className="h-3.5 w-3.5 text-violet-400/60" /> <strong className="text-foreground/70">50</strong> gems miễn phí</span>
                     </motion.div>
                 </motion.div>
 
-                {/* Scrolling image showcase — single row */}
-                <div className="relative w-full mt-auto mb-6 z-10 overflow-hidden">
+                {/* Marquee 2 rows */}
+                <div className="relative w-full mt-auto mb-8 z-10 overflow-hidden space-y-3">
                     <div className="flex gap-3 animate-marquee" style={{ width: "max-content" }}>
                         {[...HERO_IMAGES, ...HERO_IMAGES].map((img, i) => (
-                            <div key={`r1-${i}`} className="w-[200px] md:w-[240px] h-[120px] md:h-[140px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
+                            <div key={`r1-${i}`} className="w-[220px] md:w-[260px] h-[130px] md:h-[150px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
                                 <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -1445,14 +1550,33 @@ export default function LandingPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
-                    <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+                    <div className="flex gap-3 animate-marquee-reverse" style={{ width: "max-content" }}>
+                        {[...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8)].map((tpl, i) => (
+                            <div key={`r2-${i}`} className="w-[200px] md:w-[240px] h-[120px] md:h-[140px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
+                                <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <Badge variant="secondary" className="text-[9px] bg-black/40 text-white/80 border-0">{tpl.name}</Badge>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
+                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
                 </div>
             </section>
 
             {/* ==================== INTERACTIVE DEMO ==================== */}
-            <section id="demo" className="w-full py-16 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+            <section id="demo" className="w-full py-16 md:py-20 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-violet-500/10 to-transparent" />
+                {/* Background decorations */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
+                <div className="absolute top-20 left-[10%] w-[300px] h-[300px] bg-violet-600/[0.04] blur-[100px] rounded-full pointer-events-none" />
+                <div className="absolute bottom-20 right-[10%] w-[250px] h-[250px] bg-fuchsia-600/[0.03] blur-[100px] rounded-full pointer-events-none" />
+                {/* SVG dot pattern */}
+                <svg className="absolute top-10 right-[5%] w-24 h-24 opacity-[0.03] pointer-events-none" viewBox="0 0 100 100" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    {Array.from({ length: 25 }, (_, i) => <circle key={i} cx={(i % 5) * 20 + 10} cy={Math.floor(i / 5) * 20 + 10} r="1.5" />)}
+                </svg>
 
                 <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
                     <motion.div
@@ -1521,12 +1645,21 @@ export default function LandingPage() {
 
 
             {/* ==================== TEMPLATES CAROUSEL ==================== */}
-            <section id="templates" className="w-full py-16 overflow-hidden relative">
+            <section id="templates" className="w-full py-20 overflow-hidden relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_100%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
+                {/* SVG dot grid decoration */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="tpl-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(#tpl-dots)"/></svg>
+                {/* Decorative floating images */}
+                <div className="hidden lg:block absolute top-12 left-8 w-20 h-20 rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-[-8deg] animate-float-slow opacity-40">
+                    <img src={HERO_IMAGES[6].src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="hidden lg:block absolute bottom-16 right-10 w-24 h-16 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-[6deg] animate-float-delayed opacity-30">
+                    <img src={HERO_IMAGES[7].src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
 
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full">
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full relative">
                     <motion.div
                         className="flex flex-col md:flex-row md:items-end justify-between w-full mb-8 gap-6 text-center md:text-left"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
@@ -1597,12 +1730,25 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== STATS ==================== */}
-            <section className="w-full py-14 relative">
+            <section className="w-full py-20 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)] pointer-events-none" />
+                {/* Glow orbs */}
+                <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-violet-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
+                <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[250px] h-[250px] rounded-full bg-fuchsia-600/[0.03] blur-[60px] pointer-events-none animate-float-delayed" />
+                {/* SVG abstract ring decoration */}
+                <svg className="absolute top-8 right-[10%] w-32 h-32 opacity-[0.04] pointer-events-none animate-float-delayed" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="64" cy="64" r="50" stroke="url(#stats-ring)" strokeWidth="2"/>
+                    <circle cx="64" cy="64" r="30" stroke="url(#stats-ring)" strokeWidth="1" strokeDasharray="4 4"/>
+                    <defs><linearGradient id="stats-ring" x1="0" y1="0" x2="128" y2="128"><stop stopColor="#8B5CF6"/><stop offset="1" stopColor="#D946EF"/></linearGradient></defs>
+                </svg>
+                <svg className="absolute bottom-8 left-[8%] w-24 h-24 opacity-[0.04] pointer-events-none animate-float-slow" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="8" y="8" width="80" height="80" rx="16" stroke="white" strokeWidth="1.5" strokeDasharray="6 6"/>
+                    <rect x="24" y="24" width="48" height="48" rx="8" stroke="white" strokeWidth="1"/>
+                </svg>
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
                     <motion.div
-                        className="text-center mb-8"
+                        className="text-center mb-10"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
@@ -1610,6 +1756,7 @@ export default function LandingPage() {
                             <Trophy className="mr-2 h-3.5 w-3.5" /> Thành tựu cộng đồng
                         </Badge>
                         <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Con Số Ấn Tượng</h2>
+                        <p className="mt-3 max-w-xl mx-auto text-muted-foreground text-sm text-balance">Cộng đồng sáng tạo đang lớn mạnh mỗi ngày.</p>
                     </motion.div>
                     <motion.div
                         className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
@@ -1623,77 +1770,66 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* ==================== HOW IT WORKS ==================== */}
-            <section className="w-full py-16 relative">
+            {/* ==================== FEATURES ==================== */}
+            <section className="w-full py-20 md:py-24 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
 
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
+                <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
                     <motion.div
-                        className="text-center mb-8"
+                        className="text-center mb-14"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <ZapIcon className="mr-2 h-3.5 w-3.5" /> Đơn giản & Nhanh chóng
+                            <Sparkles className="mr-2 h-3.5 w-3.5" /> Tính năng nổi bật
                         </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Quy Trình 3 Bước</h2>
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Tất Cả Trong Một Nền Tảng</h2>
                         <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">
-                            Từ ý tưởng đến tác phẩm chỉ trong vài giây — không cần kỹ năng thiết kế.
+                            Mọi công cụ bạn cần để biến ý tưởng thành tác phẩm nghệ thuật — nhanh, đẹp, dễ dùng.
                         </p>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-1 md:grid-cols-3 gap-6 relative"
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={staggerContainer}
                     >
-                        {/* Connecting line (desktop only) */}
-                        <div className="hidden md:block absolute top-[52px] left-[16.67%] right-[16.67%] h-px">
-                            <div className="w-full h-full bg-gradient-to-r from-violet-500/40 via-fuchsia-500/40 to-pink-500/40" />
-                        </div>
-
-                        {HOW_IT_WORKS.map((item) => (
-                            <motion.div key={item.step} variants={fadeUp} className="relative">
-                                <div className="flex flex-col items-center text-center">
-                                    {/* Numbered circle */}
-                                    <div className={`relative h-[64px] w-[64px] rounded-xl bg-gradient-to-br ${item.color} p-[2px] mb-4 shadow-lg`}>
+                        {FEATURES.map((feat) => (
+                            <motion.div key={feat.title} variants={fadeUp}>
+                                <div className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 h-full hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-500">
+                                    {/* Glow on hover */}
+                                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feat.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500 pointer-events-none`} />
+                                    {/* Icon */}
+                                    <div className={`relative h-11 w-11 rounded-xl bg-gradient-to-br ${feat.color} p-[1.5px] mb-4`}>
                                         <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center">
-                                            <item.icon className="h-6 w-6 text-violet-400" />
-                                        </div>
-                                        <div className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white text-[10px] font-bold shadow-md">
-                                            {item.step}
+                                            <feat.icon className="h-5 w-5 text-violet-400" />
                                         </div>
                                     </div>
-                                    <h3 className="text-lg font-bold mb-1.5">{item.title}</h3>
-                                    <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-                                        {item.desc}
-                                    </p>
+                                    <h3 className="text-base font-semibold mb-1.5">{feat.title}</h3>
+                                    <p className="text-muted-foreground text-sm leading-relaxed">{feat.desc}</p>
                                 </div>
                             </motion.div>
                         ))}
-                    </motion.div>
-
-                    {/* CTA mini */}
-                    <motion.div
-                        className="text-center mt-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <Link to="/login">
-                            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/20">
-                                Thử Ngay Miễn Phí <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
                     </motion.div>
                 </div>
             </section>
 
             {/* ==================== TESTIMONIALS ==================== */}
-            <section className="w-full py-16 relative">
+            <section className="w-full py-20 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl">
+                {/* Decorative glow */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-violet-600/[0.03] blur-[100px] rounded-full pointer-events-none" />
+                {/* SVG quote decoration */}
+                <svg className="absolute top-16 left-[5%] w-20 h-20 opacity-[0.03] pointer-events-none" viewBox="0 0 80 80" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 42c-6.6 0-12-5.4-12-12s5.4-12 12-12c2 0 3.8.5 5.4 1.3C20.4 12.2 14 6 6 6V0c14 0 24 10.7 24 24v24H18V42zm38 0c-6.6 0-12-5.4-12-12s5.4-12 12-12c2 0 3.8.5 5.4 1.3C58.4 12.2 52 6 44 6V0c14 0 24 10.7 24 24v24H56V42z"/>
+                </svg>
+                <svg className="absolute bottom-16 right-[5%] w-16 h-16 opacity-[0.03] pointer-events-none rotate-180" viewBox="0 0 80 80" fill="white" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 42c-6.6 0-12-5.4-12-12s5.4-12 12-12c2 0 3.8.5 5.4 1.3C20.4 12.2 14 6 6 6V0c14 0 24 10.7 24 24v24H18V42zm38 0c-6.6 0-12-5.4-12-12s5.4-12 12-12c2 0 3.8.5 5.4 1.3C58.4 12.2 52 6 44 6V0c14 0 24 10.7 24 24v24H56V42z"/>
+                </svg>
+                <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
                     <motion.div
-                        className="text-center mb-8"
+                        className="text-center mb-12"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
@@ -1711,15 +1847,20 @@ export default function LandingPage() {
                     >
                         {TESTIMONIALS.map((t, index) => (
                             <motion.div key={index} variants={scaleUp}>
-                                <Card className="glass-card border-white/[0.06] h-full hover:border-violet-500/20 transition-colors duration-500">
-                                    <CardContent className="p-7 flex flex-col h-full">
-                                        <Quote className="h-7 w-7 text-violet-500/20 mb-4" fill="currentColor" />
+                                <Card className="card-gradient-border h-full hover:bg-white/[0.04] transition-all duration-500 group">
+                                    <CardContent className="p-7 flex flex-col h-full relative">
+                                        {/* Star rating */}
+                                        <div className="flex gap-0.5 mb-4">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
+                                            ))}
+                                        </div>
                                         <p className="text-foreground/90 flex-1 mb-6 leading-relaxed text-[15px]">
                                             &ldquo;{t.quote}&rdquo;
                                         </p>
-                                        <Separator className="mb-5 bg-border/30" />
+                                        <Separator className="mb-5 bg-border/20" />
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="h-10 w-10 border-2 border-violet-500/20">
+                                            <Avatar className="h-10 w-10 border-2 border-violet-500/20 group-hover:border-violet-500/40 transition-colors">
                                                 <AvatarImage src={t.avatar} />
                                                 <AvatarFallback>{t.name[0]}</AvatarFallback>
                                             </Avatar>
@@ -1856,11 +1997,38 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== CTA FINAL ==================== */}
-            <section className="w-full py-20 relative overflow-hidden">
+            <section className="w-full py-24 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
 
-                {/* Subtle radial accent */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_50%_at_50%_50%,rgba(139,92,246,0.06),transparent)] pointer-events-none" />
+                {/* Strong gradient glow */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(139,92,246,0.08),transparent)] pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-violet-600/[0.06] blur-[120px] pointer-events-none" />
+
+                {/* Floating decorative images */}
+                <div className="hidden md:block absolute top-16 left-[8%] w-20 h-14 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl -rotate-6 animate-float-slow opacity-25">
+                    <img src={HERO_IMAGES[2].src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="hidden md:block absolute top-20 right-[8%] w-24 h-16 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-3 animate-float-delayed opacity-25">
+                    <img src={HERO_IMAGES[4].src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="hidden lg:block absolute bottom-20 left-[12%] w-16 h-16 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-6 animate-float-delayed opacity-20">
+                    <img src={HERO_IMAGES[6].src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+                <div className="hidden lg:block absolute bottom-16 right-[12%] w-20 h-14 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl -rotate-3 animate-float-slow opacity-20">
+                    <img src={HERO_IMAGES[1].src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </div>
+
+                {/* SVG sparkle decorations */}
+                <svg className="absolute top-[20%] left-[18%] w-6 h-6 opacity-[0.15] pointer-events-none animate-pulse-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z" fill="url(#sparkle1)"/>
+                    <defs><linearGradient id="sparkle1" x1="2" y1="2" x2="22" y2="22"><stop stopColor="#8B5CF6"/><stop offset="1" stopColor="#D946EF"/></linearGradient></defs>
+                </svg>
+                <svg className="absolute bottom-[25%] right-[20%] w-4 h-4 opacity-[0.12] pointer-events-none animate-pulse-glow" style={{ animationDelay: '1s' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z" fill="#8B5CF6"/>
+                </svg>
+                <svg className="absolute top-[40%] right-[30%] w-3 h-3 opacity-[0.1] pointer-events-none animate-pulse-glow" style={{ animationDelay: '2s' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8L12 2z" fill="#D946EF"/>
+                </svg>
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center relative">
                     <motion.div
@@ -1891,7 +2059,7 @@ export default function LandingPage() {
                         </p>
 
                         <Link to="/login">
-                            <Button size="lg" className="h-12 px-8 text-base font-semibold bg-white text-black hover:bg-white/90 shadow-[0_0_60px_rgba(255,255,255,0.2)] hover:shadow-[0_0_80px_rgba(255,255,255,0.3)] transition-all duration-500 rounded-xl">
+                            <Button size="lg" className="h-12 px-8 text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_60px_-10px_rgba(139,92,246,0.5)] hover:shadow-[0_0_80px_-10px_rgba(139,92,246,0.7)] transition-all duration-500 rounded-xl">
                                 Bắt Đầu Miễn Phí <ArrowUpRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
