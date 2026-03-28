@@ -1037,9 +1037,9 @@ function TemplateDemo() {
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row h-[700px] sm:h-[620px] lg:h-[420px] overflow-hidden">
+                <div className="relative flex flex-col lg:flex-row h-[560px] sm:h-[520px] lg:h-[420px] overflow-hidden">
                     {/* LEFT: Settings Panel / Template List */}
-                    <div className="w-full lg:w-[300px] lg:shrink-0 h-[340px] lg:h-full border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto overflow-x-hidden min-h-0">
+                    <div className="w-full lg:w-[300px] lg:shrink-0 h-[280px] lg:h-full border-b lg:border-b-0 lg:border-r border-border/15 p-3 lg:p-4 space-y-2 lg:space-y-3 bg-background/30 overflow-y-auto overflow-x-hidden min-h-0">
                         <AnimatePresence mode="wait">
                             {!showSettings ? (
                                 <motion.div
@@ -1083,29 +1083,28 @@ function TemplateDemo() {
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.4 }}
-                                    className="space-y-3"
+                                    className="space-y-2 lg:space-y-3"
                                 >
                                     {/* Upload area */}
-                                    <div className="space-y-2">
+                                    <div className="space-y-1.5 lg:space-y-2">
                                         <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider flex items-center gap-1.5">
                                             <ImageIcon className="h-3 w-3" /> Ảnh đầu vào
                                         </p>
                                         {!showUploadedImg ? (
                                             <motion.div
-                                                className="border-2 border-dashed rounded-xl flex flex-col items-center justify-center h-[72px] gap-1.5 transition-all duration-500"
+                                                className="border-2 border-dashed rounded-xl flex flex-col items-center justify-center h-[52px] lg:h-[72px] gap-1 transition-all duration-500"
                                                 animate={phase === "uploading"
                                                     ? { borderColor: "rgba(168,85,247,0.5)", backgroundColor: "rgba(168,85,247,0.05)", scale: [1, 1.01, 1] }
                                                     : { borderColor: "rgba(255,255,255,0.08)", backgroundColor: "transparent" }
                                                 }
                                                 transition={{ scale: { repeat: Infinity, duration: 1.5 } }}
                                             >
-                                                <Upload className={`h-6 w-6 transition-colors duration-500 ${phase === "uploading" ? "text-violet-400/60 animate-bounce" : "text-muted-foreground/40"}`} />
-                                                <p className="text-[11px] text-muted-foreground/50">Kéo thả hoặc nhấp để tải ảnh</p>
-                                                <p className="text-[9px] text-muted-foreground/30">PNG, JPG, WEBP</p>
+                                                <Upload className={`h-5 w-5 lg:h-6 lg:w-6 transition-colors duration-500 ${phase === "uploading" ? "text-violet-400/60 animate-bounce" : "text-muted-foreground/40"}`} />
+                                                <p className="text-[10px] lg:text-[11px] text-muted-foreground/50">Kéo thả hoặc nhấp để tải ảnh</p>
                                             </motion.div>
                                         ) : (
                                             <motion.div
-                                                className="relative rounded-xl overflow-hidden h-[72px] ring-2 ring-violet-500/30 shadow-md shadow-violet-500/10"
+                                                className="relative rounded-xl overflow-hidden h-[52px] lg:h-[72px] ring-2 ring-violet-500/30 shadow-md shadow-violet-500/10"
                                                 initial={{ opacity: 0, scale: 0.85 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ duration: 0.5, type: "spring", stiffness: 300 }}
@@ -1120,15 +1119,15 @@ function TemplateDemo() {
                                         )}
                                     </div>
 
-                                    {/* Effect Groups */}
+                                    {/* Effect Groups — compact on mobile */}
                                     {TEMPLATE_EFFECTS.map((group, gi) => (
-                                        <div key={gi} className="space-y-2">
+                                        <div key={gi} className="space-y-1 lg:space-y-2">
                                             <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">{group.name}</p>
-                                            <div className="flex gap-2 flex-wrap py-1 px-0.5">
+                                            <div className="flex gap-1.5 lg:gap-2 flex-wrap px-0.5">
                                                 {group.options.map((opt, oi) => {
                                                     const isActive = activeEffects[gi] === oi
                                                     return (
-                                                        <div key={oi} className="flex flex-col items-center gap-1 shrink-0 w-[52px]">
+                                                        <div key={oi} className="flex flex-col items-center gap-0.5 shrink-0 w-[42px] lg:w-[52px]">
                                                             <div className={`relative w-full aspect-square rounded-lg overflow-hidden border-2 transition-all duration-500 ${
                                                                 isActive
                                                                     ? "border-violet-500 ring-2 ring-violet-500/30 scale-110 shadow-lg shadow-violet-500/20"
@@ -1137,16 +1136,16 @@ function TemplateDemo() {
                                                                 <img src={opt.image} alt={opt.label} className="w-full h-full object-cover" loading="lazy" />
                                                                 {isActive && (
                                                                     <motion.div
-                                                                        className="absolute top-0.5 right-0.5 h-4 w-4 rounded-full bg-violet-500 flex items-center justify-center"
+                                                                        className="absolute top-0.5 right-0.5 h-3.5 w-3.5 lg:h-4 lg:w-4 rounded-full bg-violet-500 flex items-center justify-center"
                                                                         initial={{ scale: 0 }}
                                                                         animate={{ scale: 1 }}
                                                                         transition={{ type: "spring", stiffness: 500 }}
                                                                     >
-                                                                        <Check className="h-2.5 w-2.5 text-white" />
+                                                                        <Check className="h-2 w-2 lg:h-2.5 lg:w-2.5 text-white" />
                                                                     </motion.div>
                                                                 )}
                                                             </div>
-                                                            <span className={`text-[9px] font-medium text-center ${isActive ? "text-violet-400" : "text-muted-foreground/50"}`}>
+                                                            <span className={`text-[8px] lg:text-[9px] font-medium text-center ${isActive ? "text-violet-400" : "text-muted-foreground/50"}`}>
                                                                 {opt.label}
                                                             </span>
                                                         </div>
@@ -1157,7 +1156,7 @@ function TemplateDemo() {
                                     ))}
 
                                     {/* Generate button */}
-                                    <div className={`w-full py-2.5 rounded-xl text-sm font-medium text-center transition-all duration-500 ${
+                                    <div className={`w-full py-2 lg:py-2.5 rounded-xl text-xs lg:text-sm font-medium text-center transition-all duration-500 ${
                                         isGenerating
                                             ? "bg-muted/30 text-muted-foreground/60"
                                             : showUploadedImg && Object.keys(activeEffects).length > 0
