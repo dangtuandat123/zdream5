@@ -14,6 +14,8 @@ use App\Services\PromptDesignerService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -32,11 +34,16 @@ class ImageController extends Controller
 
     /**
      * Tạo ảnh AI từ prompt.
-     * 
+     *
      * POST /api/images/generate
      * Body: { prompt, negative_prompt?, model?, style?, aspect_ratio?, seed?, count? }
-     * 
-     * Flow: Validate → Check gems → Gọi OpenRouter → Lưu DB → Trừ gems → Trả kết quả
+     *
+     * Flow an toàn:
+     *   1. Validate + tính cost
+     *   2. Trừ gems TRƯỚC bằng pessimistic lock (chống race condition)
+     *   3. PromptDesigner → OpenRouter → MinIO → DB
+     *   4. Nếu fail → hoàn gems cho số ảnh chưa tạo được
+     *   5. Partial success → trả ảnh đã tạo + thông báo rõ ràng
      */
     public function generate(GenerateImageRequest $request): JsonResponse
     {
@@ -55,8 +62,17 @@ class ImageController extends Controller
         $gemsCostPerImage = $aiModel?->gems_cost ?? (int) Setting::get('default_gems_per_image', 1);
         $totalCost = $count * $gemsCostPerImage;
 
-        // Kiểm tra đủ gems
-        if ($user->gems < $totalCost) {
+        // ── BƯỚC 1: Trừ gems TRƯỚC với pessimistic lock ──
+        // Giải quyết race condition: 2 request cùng lúc không thể vượt quá số dư
+        try {
+            $this->walletService->deduct(
+                user: $user,
+                amount: $totalCost,
+                description: "Đặt tạo {$count} ảnh AI: " . mb_substr($validated['prompt'], 0, 50),
+                metadata: ['type' => 'reserve', 'count' => $count],
+            );
+        } catch (\RuntimeException $e) {
+            $user->refresh();
             return response()->json([
                 'message' => "Không đủ Kim Cương. Cần {$totalCost} 💎, bạn còn {$user->gems} 💎.",
                 'gems_needed' => $totalCost,
@@ -64,25 +80,17 @@ class ImageController extends Controller
             ], 422);
         }
 
-        $generatedImages = [];
-        $aspectRatio = $validated['aspect_ratio'] ?? '1:1';
-        $model = $validated['model'] ?? Setting::get('default_model', config('services.openrouter.default_model'));
-        $style = $validated['style'] ?? 'photorealistic';
-        $seed = (int) ($validated['seed'] ?? random_int(0, 999999999));
-
-        // Upload ảnh tham chiếu lên MinIO + lưu vào thư viện người dùng
+        // ── BƯỚC 2: Upload ảnh tham chiếu lên MinIO ──
         $referenceImageUrls = null;
         $referenceImagesBase64 = $validated['reference_images'] ?? null;
         if (!empty($referenceImagesBase64)) {
             $referenceImageUrls = [];
             $disk = config('filesystems.default');
             foreach ($referenceImagesBase64 as $base64) {
-                // Nếu đã là URL (không phải base64) thì giữ nguyên
                 if (!str_starts_with($base64, 'data:')) {
                     $referenceImageUrls[] = $base64;
                     continue;
                 }
-                // Decode base64 và upload lên MinIO
                 $matches = [];
                 preg_match('/^data:image\/(\w+);base64,/', $base64, $matches);
                 $ext = $matches[1] ?? 'jpeg';
@@ -96,7 +104,12 @@ class ImageController extends Controller
             }
         }
 
-        // === AI Prompt Designer — tối ưu prompt trước khi sinh ảnh ===
+        // ── BƯỚC 3: AI Prompt Designer — tối ưu prompt trước khi sinh ảnh ──
+        $aspectRatio = $validated['aspect_ratio'] ?? '1:1';
+        $model = $validated['model'] ?? Setting::get('default_model', config('services.openrouter.default_model'));
+        $style = $validated['style'] ?? 'photorealistic';
+        $seed = (int) ($validated['seed'] ?? random_int(0, 999999999));
+
         $templateSystemPrompt = null;
         if (!empty($validated['template_slug'])) {
             $template = Template::where('slug', $validated['template_slug'])->first();
@@ -115,13 +128,15 @@ class ImageController extends Controller
         $designedPrompt = $designResult['prompt'];
         $designedNegative = $designResult['negative_prompt'];
 
-        // Nếu PromptDesigner đã tối ưu prompt → không truyền style/negativePrompt
-        // vào OpenRouterService nữa (tránh double injection)
+        // Nếu PromptDesigner đã tối ưu → không truyền style/negative nữa (tránh double injection)
         $wasDesigned = $designedPrompt !== $validated['prompt'];
 
-        try {
-            for ($i = 0; $i < $count; $i++) {
-                // Gọi OpenRouter API — dùng prompt đã được AI thiết kế
+        // ── BƯỚC 4: Sinh ảnh — xử lý partial failure ──
+        $generatedImages = [];
+        $successCount = 0;
+
+        for ($i = 0; $i < $count; $i++) {
+            try {
                 $result = $this->openRouterService->generateImage(
                     prompt: $designedPrompt,
                     negativePrompt: $wasDesigned ? null : $designedNegative,
@@ -132,13 +147,12 @@ class ImageController extends Controller
                     referenceImages: $validated['reference_images'] ?? null,
                 );
 
-                // Lưu vào database — giữ cả prompt gốc và prompt đã design
                 $image = Image::create([
                     'user_id' => $user->id,
                     'type' => 'ai',
                     'project_id' => $validated['project_id'] ?? null,
                     'prompt' => $validated['prompt'],
-                    'designed_prompt' => $designedPrompt !== $validated['prompt'] ? $designedPrompt : null,
+                    'designed_prompt' => $wasDesigned ? $designedPrompt : null,
                     'negative_prompt' => $designedNegative,
                     'model' => $model ?? config('services.openrouter.default_model'),
                     'style' => $style,
@@ -151,30 +165,55 @@ class ImageController extends Controller
                     'template_slug' => $validated['template_slug'] ?? null,
                 ]);
 
-                // Trừ gems
-                $this->walletService->deduct(
-                    user: $user,
-                    amount: $gemsCostPerImage,
-                    description: "Tạo ảnh AI: " . mb_substr($validated['prompt'], 0, 50),
-                    metadata: ['image_id' => $image->id],
-                );
-
                 $generatedImages[] = $image;
+                $successCount++;
+            } catch (\Throwable $e) {
+                // Log lỗi nhưng tiếp tục tạo ảnh còn lại
+                Log::error("Lỗi tạo ảnh [{$i}/{$count}]", [
+                    'error' => $e->getMessage(),
+                    'user_id' => $user->id,
+                    'prompt' => mb_substr($validated['prompt'], 0, 100),
+                ]);
+
+                // Nếu ảnh đầu tiên fail → dừng luôn (không cần thử tiếp)
+                if ($successCount === 0) {
+                    break;
+                }
             }
+        }
 
-            // Refresh user để lấy gems mới nhất
-            $user->refresh();
+        // ── BƯỚC 5: Hoàn gems cho số ảnh KHÔNG tạo được ──
+        $failedCount = $count - $successCount;
+        if ($failedCount > 0) {
+            $refundAmount = $failedCount * $gemsCostPerImage;
+            $this->walletService->credit(
+                user: $user,
+                amount: $refundAmount,
+                description: "Hoàn gems: {$failedCount}/{$count} ảnh lỗi",
+                metadata: ['type' => 'refund', 'failed_count' => $failedCount],
+            );
+        }
 
+        $user->refresh();
+
+        // Nếu không tạo được ảnh nào → trả 500
+        if ($successCount === 0) {
             return response()->json([
-                'message' => "Tạo {$count} ảnh thành công!",
-                'images' => $generatedImages,
+                'message' => 'Lỗi khi tạo ảnh. Gems đã được hoàn lại.',
                 'gems_remaining' => $user->gems,
-            ], 201);
-        } catch (\RuntimeException $e) {
-            return response()->json([
-                'message' => 'Lỗi khi tạo ảnh: ' . $e->getMessage(),
             ], 500);
         }
+
+        // Partial success hoặc full success
+        $message = $successCount === $count
+            ? "Tạo {$count} ảnh thành công!"
+            : "Tạo {$successCount}/{$count} ảnh thành công. {$failedCount} ảnh lỗi, gems đã hoàn.";
+
+        return response()->json([
+            'message' => $message,
+            'images' => $generatedImages,
+            'gems_remaining' => $user->gems,
+        ], 201);
     }
 
     /**

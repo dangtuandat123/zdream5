@@ -1110,12 +1110,26 @@ export function GeneratePage() {
             }, 400)
 
         } catch (error: any) {
-            // Đã toast.error bên dưới
             clearInterval(interval)
             progressIntervalRef.current = null
             setIsGenerating(false)
             setGenerateProgress(0)
-            toast.error(error.message || 'Lỗi khi tạo ảnh. Vui lòng thử lại.', { id: 'generate-error' })
+
+            // Phân loại lỗi để thông báo phù hợp
+            const msg = error.message || ''
+            if (msg.includes('429') || msg.includes('Too Many')) {
+                toast.error('Bạn đang tạo quá nhanh. Vui lòng đợi 1 phút.', { id: 'generate-error' })
+            } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('AbortError')) {
+                // Mất kết nối — backend có thể vẫn đang chạy
+                toast.warning('Mất kết nối. Ảnh có thể vẫn đang tạo — kiểm tra Thư viện sau ít phút.', {
+                    id: 'generate-error',
+                    duration: 8000,
+                })
+                // Refresh gems vì có thể đã bị trừ
+                refreshUser()
+            } else {
+                toast.error(msg || 'Lỗi khi tạo ảnh. Vui lòng thử lại.', { id: 'generate-error' })
+            }
         }
     }, [prompt, isGenerating, imageCount, model, style, aspectRatioValue, imageSize, negativePrompt, seed, referenceImages, updateGems, refreshUser, currentProjectId, setTotalImages])
 

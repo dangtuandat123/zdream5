@@ -65,6 +65,11 @@ async function request<T>(
         throw new Error('Phiên đăng nhập đã hết. Vui lòng đăng nhập lại.');
     }
 
+    // Xử lý 429 — Rate limit (quá nhiều request)
+    if (response.status === 429) {
+        throw new Error('429 Too Many Requests — Bạn đang thao tác quá nhanh. Vui lòng đợi.');
+    }
+
     // Xử lý lỗi validation (422)
     if (response.status === 422) {
         const errorData = await response.json();

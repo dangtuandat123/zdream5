@@ -356,7 +356,14 @@ export function TemplateDetailPage() {
         } catch (err) {
             clearInterval(interval)
             setHasError(true)
-            toast.error(err instanceof Error ? err.message : "Không thể tạo ảnh. Vui lòng thử lại.")
+            const msg = err instanceof Error ? err.message : ''
+            if (msg.includes('429') || msg.includes('Too Many')) {
+                toast.error('Bạn đang tạo quá nhanh. Vui lòng đợi 1 phút.')
+            } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
+                toast.warning('Mất kết nối. Ảnh có thể vẫn đang tạo — kiểm tra Thư viện sau.', { duration: 8000 })
+            } else {
+                toast.error(msg || "Không thể tạo ảnh. Vui lòng thử lại.")
+            }
         } finally {
             setIsGenerating(false)
             setGenerateProgress(0)
