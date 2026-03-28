@@ -23,7 +23,7 @@ class TemplateController extends Controller
             ->reorder('created_at', 'desc')
             ->get([
                 'id', 'name', 'slug', 'category', 'description',
-                'system_prompt', 'model', 'thumbnail', 'effect_groups',
+                'model', 'thumbnail', 'effect_groups',
             ]);
 
         return response()->json(['data' => $templates]);
@@ -40,6 +40,7 @@ class TemplateController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        return response()->json($template);
+        // Ẩn system_prompt khỏi public API — chỉ admin mới cần thấy
+        return response()->json($template->makeHidden('system_prompt'));
     }
 }

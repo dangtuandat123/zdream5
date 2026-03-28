@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -116,8 +117,12 @@ class OpenRouterService
             ->post("{$this->baseUrl}/chat/completions", $payload);
 
         if ($response->failed()) {
+            Log::error('OpenRouter API lỗi', [
+                'status' => $response->status(),
+                'body' => mb_substr($response->body(), 0, 500),
+            ]);
             throw new \RuntimeException(
-                "OpenRouter API lỗi: " . $response->status() . " - " . $response->body()
+                "OpenRouter API lỗi: HTTP " . $response->status()
             );
         }
 

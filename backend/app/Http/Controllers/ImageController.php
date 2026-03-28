@@ -64,20 +64,23 @@ class ImageController extends Controller
 
         // ── BƯỚC 1: Trừ gems TRƯỚC với pessimistic lock ──
         // Giải quyết race condition: 2 request cùng lúc không thể vượt quá số dư
-        try {
-            $this->walletService->deduct(
-                user: $user,
-                amount: $totalCost,
-                description: "Đặt tạo {$count} ảnh AI: " . mb_substr($validated['prompt'], 0, 50),
-                metadata: ['type' => 'reserve', 'count' => $count],
-            );
-        } catch (\RuntimeException $e) {
-            $user->refresh();
-            return response()->json([
-                'message' => "Không đủ Kim Cương. Cần {$totalCost} 💎, bạn còn {$user->gems} 💎.",
-                'gems_needed' => $totalCost,
-                'gems_available' => $user->gems,
-            ], 422);
+        // Nếu model miễn phí (gems_cost = 0) → bỏ qua bước trừ gems
+        if ($totalCost > 0) {
+            try {
+                $this->walletService->deduct(
+                    user: $user,
+                    amount: $totalCost,
+                    description: "Đặt tạo {$count} ảnh AI: " . mb_substr($validated['prompt'], 0, 50),
+                    metadata: ['type' => 'reserve', 'count' => $count],
+                );
+            } catch (\RuntimeException $e) {
+                $user->refresh();
+                return response()->json([
+                    'message' => "Không đủ Kim Cương. Cần {$totalCost} 💎, bạn còn {$user->gems} 💎.",
+                    'gems_needed' => $totalCost,
+                    'gems_available' => $user->gems,
+                ], 422);
+            }
         }
 
         // ── BƯỚC 2: Upload ảnh tham chiếu lên MinIO ──
@@ -168,7 +171,15 @@ class ImageController extends Controller
                 $generatedImages[] = $image;
                 $successCount++;
             } catch (\Throwable $e) {
-                // Log lỗi nhưng tiếp tục tạo ảnh còn lại
+                // Dọn file orphaned trên MinIO nếu đã upload nhưng DB fail
+                if (isset($result['file_path'])) {
+                    try {
+                        Storage::disk(config('filesystems.default'))->delete($result['file_path']);
+                    } catch (\Throwable) {
+                        // Bỏ qua — sẽ cleanup bằng scheduled job
+                    }
+                }
+
                 Log::error("Lỗi tạo ảnh [{$i}/{$count}]", [
                     'error' => $e->getMessage(),
                     'user_id' => $user->id,
@@ -184,8 +195,8 @@ class ImageController extends Controller
 
         // ── BƯỚC 5: Hoàn gems cho số ảnh KHÔNG tạo được ──
         $failedCount = $count - $successCount;
-        if ($failedCount > 0) {
-            $refundAmount = $failedCount * $gemsCostPerImage;
+        $refundAmount = $failedCount * $gemsCostPerImage;
+        if ($refundAmount > 0) {
             $this->walletService->credit(
                 user: $user,
                 amount: $refundAmount,
@@ -196,8 +207,25 @@ class ImageController extends Controller
 
         $user->refresh();
 
-        // Nếu không tạo được ảnh nào → trả 500
+        // Nếu không tạo được ảnh nào → dọn reference images orphaned + trả 500
         if ($successCount === 0) {
+            // Dọn reference images đã upload — không còn ảnh nào tham chiếu
+            if (!empty($referenceImageUrls)) {
+                $disk = config('filesystems.default');
+                foreach ($referenceImageUrls as $url) {
+                    try {
+                        // Chỉ xoá file do chính bước 2 upload (có prefix references/)
+                        $path = parse_url($url, PHP_URL_PATH);
+                        if ($path && str_contains($path, 'references/')) {
+                            $relativePath = ltrim(substr($path, strpos($path, 'references/')), '/');
+                            Storage::disk($disk)->delete($relativePath);
+                        }
+                    } catch (\Throwable) {
+                        // Bỏ qua — cleanup best-effort
+                    }
+                }
+            }
+
             return response()->json([
                 'message' => 'Lỗi khi tạo ảnh. Gems đã được hoàn lại.',
                 'gems_remaining' => $user->gems,
@@ -225,11 +253,17 @@ class ImageController extends Controller
     {
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
-            'project_id' => 'nullable|integer',
+            'project_id' => 'nullable|integer|exists:projects,id',
         ]);
 
         $file = $request->file('image');
         $user = $request->user();
+
+        // Kiểm tra project thuộc về user hiện tại
+        $projectId = $request->input('project_id');
+        if ($projectId && !$user->projects()->where('id', $projectId)->exists()) {
+            return response()->json(['message' => 'Dự án không tồn tại hoặc không thuộc về bạn.'], 403);
+        }
 
         // Dùng extension() thay vì getClientOriginalExtension() — an toàn hơn (derive từ MIME)
         $filename = 'uploads/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->extension();
@@ -242,7 +276,7 @@ class ImageController extends Controller
             $image = Image::create([
                 'user_id' => $user->id,
                 'type' => 'upload',
-                'project_id' => $request->input('project_id'),
+                'project_id' => $projectId,
                 'prompt' => $file->getClientOriginalName(),
                 'model' => 'user-upload',
                 'file_path' => $filename,
@@ -280,7 +314,17 @@ class ImageController extends Controller
         }
 
         if ($request->has('type')) {
-            $query->where('type', $request->input('type'));
+            $type = $request->input('type');
+            if ($type === 'template') {
+                // Ảnh tạo từ template = type ai + có template_slug
+                $query->whereNotNull('template_slug');
+            } else {
+                $query->where('type', $type);
+                // Khi filter type=ai, loại trừ ảnh template để tránh trùng
+                if ($type === 'ai') {
+                    $query->whereNull('template_slug');
+                }
+            }
         }
 
         if ($request->has('template_slug')) {

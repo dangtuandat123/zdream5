@@ -63,9 +63,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Đăng nhập bằng token (Google OAuth)
     const loginWithToken = useCallback(async (token: string) => {
         setToken(token)
-        const data = await authApi.getUser()
-        setUser(data.user)
-        setIsLoggedIn(true)
+        try {
+            const data = await authApi.getUser()
+            setUser(data.user)
+            setIsLoggedIn(true)
+        } catch {
+            // Token không hợp lệ → xoá ngay để tránh auth state inconsistent
+            clearToken()
+            throw new Error('Đăng nhập thất bại. Vui lòng thử lại.')
+        }
     }, [])
 
     // Đăng ký

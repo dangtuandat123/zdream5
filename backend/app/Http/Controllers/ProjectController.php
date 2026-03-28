@@ -43,6 +43,10 @@ class ProjectController extends Controller
     public function destroy(Request $request, int $id): JsonResponse
     {
         $project = $request->user()->projects()->findOrFail($id);
+
+        // Gỡ ảnh khỏi project trước khi xoá — tránh orphaned foreign key
+        \App\Models\Image::where('project_id', $project->id)->update(['project_id' => null]);
+
         $project->delete();
 
         return response()->json([

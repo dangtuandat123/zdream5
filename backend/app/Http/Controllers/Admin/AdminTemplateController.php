@@ -120,7 +120,8 @@ class AdminTemplateController extends Controller
         ]);
 
         $file = $request->file('image');
-        $filename = 'templates/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        // Dùng extension() — derive từ MIME, an toàn hơn getClientOriginalExtension()
+        $filename = 'templates/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->extension();
 
         $disk = config('filesystems.default');
         Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');

@@ -161,11 +161,13 @@ export function LibraryPage() {
     const [totalPages, setTotalPages] = useState(1)
     const PER_PAGE = 30
 
-    // Fetch images from API — phân trang server-side
-    const fetchImages = useCallback(async (pageNum: number) => {
+    // Fetch images from API — phân trang + filter server-side
+    const fetchImages = useCallback(async (pageNum: number, filterType?: string) => {
         try {
             setIsLoading(true)
-            const res = await imageApi.list(pageNum, PER_PAGE)
+            // "all" → không filter, các tab khác ("ai", "upload", "template") → truyền thẳng
+            const apiType = filterType === "all" || !filterType ? null : filterType
+            const res = await imageApi.list(pageNum, PER_PAGE, null, apiType)
             const mapped = res.data.map(apiToMediaItem)
             setItems(mapped)
             setTotalPages(res.last_page)
@@ -177,15 +179,15 @@ export function LibraryPage() {
         }
     }, [toast])
 
-    useEffect(() => { fetchImages(1) }, [fetchImages])
+    useEffect(() => { fetchImages(1, tab) }, [fetchImages, tab])
 
     // Chuyển trang
     const goToPage = useCallback((p: number) => {
         if (p < 1 || p > totalPages || p === page) return
-        fetchImages(p)
+        fetchImages(p, tab)
         // Scroll lên đầu danh sách khi chuyển trang
         window.scrollTo({ top: 0, behavior: "smooth" })
-    }, [page, totalPages, fetchImages])
+    }, [page, totalPages, tab, fetchImages])
 
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
@@ -343,11 +345,7 @@ export function LibraryPage() {
     const filteredItems = useMemo(() => {
         let currentItems = [...items]
 
-        // Lọc theo tab — flat, mỗi tab = 1 loại
-        if (tab !== "all") {
-            currentItems = currentItems.filter((item) => item.type === tab)
-        }
-
+        // Tab filter đã xử lý server-side, chỉ cần filter search client-side
         // Lọc theo search
         if (search.trim()) {
             const q = search.toLowerCase()
@@ -372,7 +370,7 @@ export function LibraryPage() {
         })
 
         return currentItems
-    }, [items, tab, search, sort])
+    }, [items, search, sort])
 
     const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
 

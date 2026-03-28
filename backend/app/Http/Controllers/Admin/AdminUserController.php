@@ -131,18 +131,19 @@ class AdminUserController extends Controller
                 metadata: ['admin_id' => $admin->id],
             );
         } else {
-            // Kiểm tra đủ gems để trừ
-            if ($user->gems < abs($amount)) {
+            try {
+                $this->walletService->deduct(
+                    user: $user,
+                    amount: abs($amount),
+                    description: $description,
+                    metadata: ['admin_id' => $admin->id],
+                );
+            } catch (\RuntimeException $e) {
+                $user->refresh();
                 return response()->json([
                     'message' => "User chỉ còn {$user->gems} 💎, không thể trừ " . abs($amount) . " 💎.",
                 ], 422);
             }
-            $this->walletService->deduct(
-                user: $user,
-                amount: abs($amount),
-                description: $description,
-                metadata: ['admin_id' => $admin->id],
-            );
         }
 
         return response()->json([

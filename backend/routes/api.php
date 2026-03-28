@@ -49,7 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // Rate limit: 5 lần/phút/user — chống spam, giảm tải server khi đông
     Route::post('/images/generate', [ImageController::class, 'generate'])
         ->middleware('throttle:5,1');
-    Route::post('/images/upload', [ImageController::class, 'upload']);
+    Route::post('/images/upload', [ImageController::class, 'upload'])
+        ->middleware('throttle:10,1'); // 10 lần/phút — chống spam upload
     Route::get('/images', [ImageController::class, 'index']);
     Route::delete('/images/{id}', [ImageController::class, 'destroy']);
 
