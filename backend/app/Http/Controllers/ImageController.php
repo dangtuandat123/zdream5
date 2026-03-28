@@ -119,12 +119,13 @@ class ImageController extends Controller
             $templateSystemPrompt = $template?->system_prompt;
         }
 
+        // Gửi MinIO URLs (đã upload ở Bước 2) thay vì base64 gốc → nhẹ hơn, nhanh hơn
         $designResult = $this->promptDesignerService->design(
             userPrompt: $validated['prompt'],
             style: $style,
             negativePrompt: $validated['negative_prompt'] ?? null,
             templateSystemPrompt: $templateSystemPrompt,
-            referenceImages: $validated['reference_images'] ?? null,
+            referenceImages: $referenceImageUrls,
             aspectRatio: $aspectRatio,
         );
 

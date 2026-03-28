@@ -190,9 +190,10 @@ PROMPT;
                 ['type' => 'text', 'text' => $userText],
             ];
 
+            $imageCount = 0;
             foreach ($referenceImages as $imgRef) {
                 // Chỉ gửi tối đa 3 ảnh tham chiếu để tiết kiệm token
-                if (count($content) > 3) {
+                if ($imageCount >= 3) {
                     break;
                 }
 
@@ -205,6 +206,7 @@ PROMPT;
                     'type' => 'image_url',
                     'image_url' => ['url' => $imgRef],
                 ];
+                $imageCount++;
             }
         } else {
             $content = $userText;
