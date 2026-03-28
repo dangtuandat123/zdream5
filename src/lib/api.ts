@@ -135,6 +135,7 @@ export interface GeneratedImageData {
     id: number;
     type: string;
     prompt: string;
+    designed_prompt: string | null;
     negative_prompt: string | null;
     model: string;
     style: string;

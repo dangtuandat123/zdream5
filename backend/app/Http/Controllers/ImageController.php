@@ -8,7 +8,9 @@ use App\Http\Requests\GenerateImageRequest;
 use App\Models\AiModel;
 use App\Models\Image;
 use App\Models\Setting;
+use App\Models\Template;
 use App\Services\OpenRouterService;
+use App\Services\PromptDesignerService;
 use App\Services\WalletService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,6 +26,7 @@ class ImageController extends Controller
 {
     public function __construct(
         private OpenRouterService $openRouterService,
+        private PromptDesignerService $promptDesignerService,
         private WalletService $walletService,
     ) {}
 
@@ -93,12 +96,31 @@ class ImageController extends Controller
             }
         }
 
+        // === AI Prompt Designer — tối ưu prompt trước khi sinh ảnh ===
+        $templateSystemPrompt = null;
+        if (!empty($validated['template_slug'])) {
+            $template = Template::where('slug', $validated['template_slug'])->first();
+            $templateSystemPrompt = $template?->system_prompt;
+        }
+
+        $designResult = $this->promptDesignerService->design(
+            userPrompt: $validated['prompt'],
+            style: $style,
+            negativePrompt: $validated['negative_prompt'] ?? null,
+            templateSystemPrompt: $templateSystemPrompt,
+            referenceImages: $validated['reference_images'] ?? null,
+            aspectRatio: $aspectRatio,
+        );
+
+        $designedPrompt = $designResult['prompt'];
+        $designedNegative = $designResult['negative_prompt'];
+
         try {
             for ($i = 0; $i < $count; $i++) {
-                // Gọi OpenRouter API để tạo ảnh
+                // Gọi OpenRouter API — dùng prompt đã được AI thiết kế
                 $result = $this->openRouterService->generateImage(
-                    prompt: $validated['prompt'],
-                    negativePrompt: $validated['negative_prompt'] ?? null,
+                    prompt: $designedPrompt,
+                    negativePrompt: $designedNegative,
                     aspectRatio: $aspectRatio,
                     imageSize: $validated['image_size'] ?? '1K',
                     model: $model,
@@ -106,13 +128,14 @@ class ImageController extends Controller
                     referenceImages: $validated['reference_images'] ?? null,
                 );
 
-                // Lưu vào database
+                // Lưu vào database — giữ cả prompt gốc và prompt đã design
                 $image = Image::create([
                     'user_id' => $user->id,
                     'type' => 'ai',
                     'project_id' => $validated['project_id'] ?? null,
                     'prompt' => $validated['prompt'],
-                    'negative_prompt' => $validated['negative_prompt'] ?? null,
+                    'designed_prompt' => $designedPrompt !== $validated['prompt'] ? $designedPrompt : null,
+                    'negative_prompt' => $designedNegative,
                     'model' => $model ?? config('services.openrouter.default_model'),
                     'style' => $style,
                     'aspect_ratio' => $aspectRatio,

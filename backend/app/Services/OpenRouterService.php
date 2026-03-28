@@ -110,8 +110,9 @@ class OpenRouterService
             ->withHeaders([
                 'Authorization' => "Bearer {$this->apiKey}",
                 'Content-Type' => 'application/json',
-                'HTTP-Referer' => config('app.url'),
-                'X-Title' => config('app.name'),
+                'HTTP-Referer' => 'https://zdream.vn',
+                'X-OpenRouter-Title' => 'ZDream - AI Image Generator',
+                'X-OpenRouter-Categories' => 'image-gen',
             ])
             ->post("{$this->baseUrl}/chat/completions", $payload);
 

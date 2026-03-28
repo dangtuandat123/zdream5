@@ -15,6 +15,7 @@ class Image extends Model
         'type',
         'project_id',
         'prompt',
+        'designed_prompt',
         'negative_prompt',
         'model',
         'style',

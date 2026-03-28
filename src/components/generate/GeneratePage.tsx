@@ -36,7 +36,8 @@ import {
     Palette,
     Ruler,
     Hash,
-    Clock
+    Clock,
+    Sparkles
 } from "lucide-react"
 
 import {
@@ -116,6 +117,7 @@ interface GeneratedImage {
     batchId: string
     url: string
     prompt: string
+    designedPrompt?: string
     negativePrompt?: string
     seed: number
     model: string
@@ -623,6 +625,7 @@ export function GeneratePage() {
                 batchId: String(img.id),
                 url: img.file_url,
                 prompt: img.prompt,
+                designedPrompt: img.designed_prompt || undefined,
                 negativePrompt: img.negative_prompt || undefined,
                 seed: img.seed ?? 0,
                 model: img.model,
@@ -1076,6 +1079,7 @@ export function GeneratePage() {
                     batchId,
                     url: img.file_url,
                     prompt: img.prompt,
+                    designedPrompt: img.designed_prompt || undefined,
                     negativePrompt: img.negative_prompt || undefined,
                     seed: img.seed ?? (currentSeed + i),
                     model: img.model,
@@ -2001,6 +2005,28 @@ export function GeneratePage() {
                                 )}
                             </p>
                         </div>
+
+                        {/* AI Designed Prompt */}
+                        {selectedImage.designedPrompt && (
+                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
+                                        <Sparkles className="size-3" />
+                                        AI Designed Prompt
+                                    </p>
+                                    <button
+                                        className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(selectedImage.designedPrompt || '')
+                                            toast.success('Đã sao chép AI prompt')
+                                        }}
+                                    >
+                                        Sao chép
+                                    </button>
+                                </div>
+                                <p className="text-sm text-white/75 leading-relaxed">{selectedImage.designedPrompt}</p>
+                            </div>
+                        )}
 
                         {/* Negative Prompt */}
                         {selectedImage.negativePrompt && (

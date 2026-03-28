@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, BrainCircuit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { adminApi, type AdminAiModelData } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -46,7 +47,16 @@ const settingMeta: Record<string, { label: string; description: string; type: 't
     },
 };
 
-// Thứ tự hiển thị
+// Settings cho Prompt Designer — render riêng
+const PROMPT_DESIGNER_KEYS = ['prompt_designer_enabled', 'prompt_designer_model', 'prompt_designer_system_prompt'];
+
+const promptDesignerMeta: Record<string, { label: string; description: string; type: 'switch' | 'text' | 'textarea' }> = {
+    prompt_designer_enabled: { label: 'Bật AI Prompt Designer', description: 'Tự động dùng AI để phân tích ảnh tham chiếu và thiết kế prompt tối ưu trước khi sinh ảnh', type: 'switch' },
+    prompt_designer_model: { label: 'Model LLM', description: 'Model text (có vision) dùng để thiết kế prompt. Nên dùng model nhanh và rẻ.', type: 'text' },
+    prompt_designer_system_prompt: { label: 'System Prompt', description: 'Hướng dẫn cho AI Prompt Designer. Để trống để dùng mặc định.', type: 'textarea' },
+};
+
+// Thứ tự hiển thị (chỉ settings chung, không bao gồm prompt designer)
 const SETTING_ORDER = ['default_model', 'default_gems_per_image', 'max_images_per_request', 'default_aspect_ratio', 'default_style'];
 
 export default function AdminGeneratePage() {
@@ -114,8 +124,12 @@ export default function AdminGeneratePage() {
         );
     }
 
+    // Tách settings chung và prompt designer
+    const generalSettings = settings.filter(s => !PROMPT_DESIGNER_KEYS.includes(s.key));
+    const designerSettings = settings.filter(s => PROMPT_DESIGNER_KEYS.includes(s.key));
+
     // Sắp xếp settings theo thứ tự cố định
-    const sortedSettings = [...settings].sort((a, b) => {
+    const sortedSettings = [...generalSettings].sort((a, b) => {
         const ia = SETTING_ORDER.indexOf(a.key);
         const ib = SETTING_ORDER.indexOf(b.key);
         return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
@@ -202,6 +216,70 @@ export default function AdminGeneratePage() {
                     {settings.length === 0 && (
                         <p className="text-sm text-muted-foreground text-center py-4">
                             Chưa có cài đặt nào. Chạy AdminSeeder để khởi tạo.
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* AI Prompt Designer */}
+            <Card>
+                <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                        <BrainCircuit className="size-5 text-violet-500" />
+                        <CardTitle className="text-base">AI Prompt Designer</CardTitle>
+                    </div>
+                    <CardDescription className="text-xs">
+                        Workflow AI tự động phân tích ảnh tham chiếu, hiểu yêu cầu và thiết kế prompt tối ưu trước khi sinh ảnh.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                    {designerSettings.length > 0 ? (
+                        PROMPT_DESIGNER_KEYS.map(key => {
+                            const s = designerSettings.find(ds => ds.key === key);
+                            if (!s) return null;
+                            const meta = promptDesignerMeta[s.key];
+                            if (!meta) return null;
+                            const value = edits[s.key] ?? '';
+
+                            return (
+                                <div key={s.key} className="space-y-1.5">
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <Label className="text-sm font-medium">{meta.label}</Label>
+                                        <span className="text-[10px] font-mono text-muted-foreground/50 shrink-0">{s.key}</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground -mt-0.5">{meta.description}</p>
+                                    {meta.type === 'switch' ? (
+                                        <div className="flex items-center gap-2">
+                                            <Switch
+                                                checked={value === '1'}
+                                                onCheckedChange={(v) => setEdits({ ...edits, [s.key]: v ? '1' : '0' })}
+                                            />
+                                            <span className={`text-xs font-medium ${value === '1' ? 'text-green-500' : 'text-muted-foreground'}`}>
+                                                {value === '1' ? 'Đang bật' : 'Đã tắt'}
+                                            </span>
+                                        </div>
+                                    ) : meta.type === 'textarea' ? (
+                                        <Textarea
+                                            value={value}
+                                            onChange={(e) => setEdits({ ...edits, [s.key]: e.target.value })}
+                                            placeholder="Để trống để dùng system prompt mặc định..."
+                                            rows={8}
+                                            className="font-mono text-xs"
+                                        />
+                                    ) : (
+                                        <Input
+                                            value={value}
+                                            onChange={(e) => setEdits({ ...edits, [s.key]: e.target.value })}
+                                            placeholder="google/gemini-2.5-flash"
+                                            className="max-w-sm"
+                                        />
+                                    )}
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                            Chưa có cài đặt Prompt Designer. Chạy AdminSeeder để khởi tạo.
                         </p>
                     )}
                 </CardContent>

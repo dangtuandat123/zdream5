@@ -69,6 +69,7 @@ interface MediaItem {
     createdAt: string
     createdAtFull: string // dd/MM/yyyy HH:mm
     prompt?: string
+    designedPrompt?: string
     negativePrompt?: string
     templateName?: string
     model?: string
@@ -115,6 +116,7 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
         createdAt: img.created_at.split('T')[0],
         createdAtFull: formatDate(img.created_at),
         prompt: img.prompt,
+        designedPrompt: img.designed_prompt || undefined,
         negativePrompt: img.negative_prompt || undefined,
         model: img.model,
         style: img.style,
@@ -666,6 +668,31 @@ export function LibraryPage() {
                                     onClick={() => {
                                         navigator.clipboard.writeText(selectedItem.prompt || '')
                                         toast({ title: "Đã sao chép prompt" })
+                                    }}
+                                >
+                                    <CopyIcon className="size-3" />
+                                    Sao chép
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* AI Designed Prompt */}
+                        {selectedItem.designedPrompt && (
+                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
+                                <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
+                                    <SparklesIcon className="size-3" />
+                                    AI Designed Prompt
+                                </p>
+                                <p className="text-sm text-white/75 leading-relaxed">
+                                    {selectedItem.designedPrompt}
+                                </p>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(selectedItem.designedPrompt || '')
+                                        toast({ title: "Đã sao chép AI prompt" })
                                     }}
                                 >
                                     <CopyIcon className="size-3" />

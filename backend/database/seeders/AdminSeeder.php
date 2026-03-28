@@ -105,6 +105,9 @@ class AdminSeeder extends Seeder
             ['key' => 'max_images_per_request', 'value' => '4', 'group' => 'generation'],
             ['key' => 'default_aspect_ratio', 'value' => '1:1', 'group' => 'generation'],
             ['key' => 'default_style', 'value' => 'photorealistic', 'group' => 'generation'],
+            ['key' => 'prompt_designer_enabled', 'value' => '1', 'group' => 'generation'],
+            ['key' => 'prompt_designer_model', 'value' => 'google/gemini-2.5-flash', 'group' => 'generation'],
+            ['key' => 'prompt_designer_system_prompt', 'value' => '', 'group' => 'generation'],
 
             // === Billing ===
             ['key' => 'gem_price_vnd', 'value' => '500', 'group' => 'billing'],
