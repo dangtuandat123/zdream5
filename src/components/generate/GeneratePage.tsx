@@ -976,7 +976,7 @@ export function GeneratePage() {
                     setModel(res.data[0].model_id)
                 }
             })
-            .catch(() => {})
+            .catch(() => { toast.error("Không thể tải danh sách model AI.") })
     }, [])
 
     // Settings

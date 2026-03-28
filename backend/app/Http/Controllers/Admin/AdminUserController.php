@@ -101,7 +101,8 @@ class AdminUserController extends Controller
             ], 403);
         }
 
-        $user->update(['level' => $newLevel]);
+        $user->level = $newLevel;
+        $user->save();
 
         return response()->json([
             'message' => 'Cập nhật level thành công.',

@@ -171,7 +171,6 @@ PROMPT;
 
         // Gọi OpenRouter API — model text (có vision capability)
         $response = Http::timeout(30)
-            ->withoutVerifying()
             ->withHeaders([
                 'Authorization' => "Bearer {$this->apiKey}",
                 'Content-Type' => 'application/json',
@@ -238,6 +237,7 @@ PROMPT;
             'negative_prompt' => !empty($parsed['negative_prompt'])
                 ? trim($parsed['negative_prompt'])
                 : $originalNegative,
+            'designed' => true,
         ];
     }
 
@@ -249,6 +249,7 @@ PROMPT;
         return [
             'prompt' => $prompt,
             'negative_prompt' => $negativePrompt,
+            'designed' => false,
         ];
     }
 }

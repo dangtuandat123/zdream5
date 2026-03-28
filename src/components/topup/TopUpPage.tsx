@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useAuth } from "@/contexts/AuthContext"
 import { motion, AnimatePresence } from "framer-motion"
 import {
     Gem,
@@ -92,8 +93,9 @@ const BANK_INFO = {
 }
 
 export function TopUpPage() {
+    const { gems, refreshUser } = useAuth()
     const [selectedPkgId, setSelectedPkgId] = useState<string>(PACKAGES[1].id)
-    const [customAmountStr, setCustomAmountStr] = useState<string>("50000") // String cho thẻ input để dễ format
+    const [customAmountStr, setCustomAmountStr] = useState<string>("50000")
     const [isProcessing, setIsProcessing] = useState(false)
 
     // Tính toán số tiền thực tế và số kim cương nhận được cho gói đang chọn
@@ -115,9 +117,13 @@ export function TopUpPage() {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount)
     }
 
-    const handleCopy = (text: string, label: string) => {
-        navigator.clipboard.writeText(text)
-        toast.success(`Đã sao chép ${label}`)
+    const handleCopy = async (text: string, label: string) => {
+        try {
+            await navigator.clipboard.writeText(text)
+            toast.success(`Đã sao chép ${label}`)
+        } catch {
+            toast.error("Không thể sao chép. Vui lòng copy thủ công.")
+        }
     }
 
     const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,7 +154,7 @@ export function TopUpPage() {
                     <div className="flex flex-col">
                         <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Số dư hiện tại</span>
                         <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-lg font-black tracking-tight">926</span>
+                            <span className="text-lg font-black tracking-tight">{gems ?? 0}</span>
                         </div>
                     </div>
                     <div className="size-10 rounded-xl bg-cyan-500/10 flex items-center justify-center shrink-0">
@@ -385,13 +391,12 @@ export function TopUpPage() {
                                 <CardFooter className="bg-muted/10 pt-4 mt-auto shrink-0">
                                     <Button
                                         className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold h-11 lg:h-12 shadow-[0_4px_14px_rgba(139,92,246,0.3)] transition-all hover:shadow-[0_6px_20px_rgba(139,92,246,0.4)] hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50 flex items-center justify-center gap-2"
-                                        onClick={() => {
+                                        onClick={async () => {
                                             setIsProcessing(true)
-                                            toast.loading("Đang chờ xác nhận giao dịch...", { duration: 3000 })
-                                            setTimeout(() => {
-                                                setIsProcessing(false)
-                                                toast.success("Thành công! Kim Cương đã về ví.")
-                                            }, 3000)
+                                            toast.info("Hệ thống sẽ tự động xác nhận sau khi nhận được chuyển khoản (1-3 phút). Vui lòng kiểm tra lại sau.", { duration: 6000 })
+                                            // Refresh gems để user thấy cập nhật nếu đã xử lý xong
+                                            await refreshUser()
+                                            setIsProcessing(false)
                                         }}
                                         disabled={isProcessing || (isCustom && customAmountNum < MIN_CUSTOM_AMOUNT)}
                                     >

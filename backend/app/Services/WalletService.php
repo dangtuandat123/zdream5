@@ -23,6 +23,10 @@ class WalletService
      */
     public function deduct(User $user, int $amount, string $description, ?array $metadata = null): Transaction
     {
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException("Số gems trừ phải lớn hơn 0, nhận được: {$amount}");
+        }
+
         return DB::transaction(function () use ($user, $amount, $description, $metadata) {
             // Lock row để tránh race condition
             $user = User::lockForUpdate()->find($user->id);
@@ -52,6 +56,10 @@ class WalletService
      */
     public function credit(User $user, int $amount, string $description, ?array $metadata = null): Transaction
     {
+        if ($amount <= 0) {
+            throw new \InvalidArgumentException("Số gems cộng phải lớn hơn 0, nhận được: {$amount}");
+        }
+
         return DB::transaction(function () use ($user, $amount, $description, $metadata) {
             $user = User::lockForUpdate()->find($user->id);
 

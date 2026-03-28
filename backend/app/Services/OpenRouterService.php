@@ -106,7 +106,6 @@ class OpenRouterService
 
         // Gọi API OpenRouter
         $response = Http::timeout(120)
-            ->withoutVerifying()
             ->withHeaders([
                 'Authorization' => "Bearer {$this->apiKey}",
                 'Content-Type' => 'application/json',
@@ -167,15 +166,20 @@ class OpenRouterService
         $extension = 'png';
 
         if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
-            // Tải ảnh từ HTTP URL
-            $imageResponse = Http::timeout(30)->withoutVerifying()->get($imageUrl);
+            // Chống SSRF: chỉ cho phép HTTPS
+            if (!str_starts_with($imageUrl, 'https://')) {
+                throw new \RuntimeException("Chỉ chấp nhận HTTPS URL cho ảnh.");
+            }
+
+            // Tải ảnh từ HTTPS URL
+            $imageResponse = Http::timeout(30)->get($imageUrl);
             if ($imageResponse->failed()) {
-                throw new \RuntimeException("Không thể tải ảnh từ URL: " . $imageUrl);
+                throw new \RuntimeException("Không thể tải ảnh từ URL.");
             }
             $imageData = $imageResponse->body();
-            
-            // Thử xác định extension từ header hoặc URL
-            $contentType = $imageResponse->header('Content-Type');
+
+            // Xác định extension từ header hoặc URL — null-safe cho content-type
+            $contentType = $imageResponse->header('Content-Type') ?? '';
             if (str_contains($contentType, 'jpeg') || str_contains($contentType, 'jpg')) $extension = 'jpg';
             elseif (str_contains($contentType, 'webp')) $extension = 'webp';
             elseif (str_contains(strtolower($imageUrl), '.jpg')) $extension = 'jpg';

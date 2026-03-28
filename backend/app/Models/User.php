@@ -23,15 +23,15 @@ class User extends Authenticatable
     /**
      * @var list<string>
      */
+    /**
+     * Chỉ cho phép mass-assign các trường an toàn.
+     * gems, level, google_id, email_verified_at phải set trực tiếp để chống escalation.
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'gems',
         'avatar',
-        'google_id',
-        'email_verified_at',
-        'level',
     ];
 
     /**

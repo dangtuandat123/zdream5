@@ -55,6 +55,17 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+
 import { useToast } from "@/hooks/use-toast"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { imageApi, type GeneratedImageData } from "@/lib/api"
@@ -141,6 +152,8 @@ export function LibraryPage() {
     const [search, setSearch] = useState("")
     // Action menu state — mobile dùng Drawer, desktop dùng DropdownMenu
     const [actionItem, setActionItem] = useState<MediaItem | null>(null)
+    // Delete confirmation dialog
+    const [deleteTarget, setDeleteTarget] = useState<MediaItem | null>(null)
     const [tab, setTab] = useState<string>("all")
     const [sort, setSort] = useState("newest")
     const [isLoading, setIsLoading] = useState(true)
@@ -176,9 +189,14 @@ export function LibraryPage() {
 
     // Lightbox / Image Viewer Navigation State
     const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
-    // Delete image via API
-    const handleDeleteImage = useCallback(async (item: MediaItem, e?: React.MouseEvent) => {
+    // Mở dialog xác nhận xoá — không xoá trực tiếp
+    const confirmDelete = useCallback((item: MediaItem, e?: React.MouseEvent) => {
         e?.stopPropagation()
+        setDeleteTarget(item)
+    }, [])
+
+    // Thực thi xoá sau khi user xác nhận
+    const handleDeleteImage = useCallback(async (item: MediaItem) => {
         if (!item.numericId) {
             setItems(prev => prev.filter(i => i.id !== item.id))
             return
@@ -192,6 +210,25 @@ export function LibraryPage() {
             toast({ variant: "destructive", title: "Lỗi", description: "Không thể xóa ảnh." })
         }
     }, [selectedIndex, toast])
+
+    // Download ảnh
+    const handleDownload = useCallback(async (item: MediaItem) => {
+        try {
+            const response = await fetch(item.thumbnail)
+            const blob = await response.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement("a")
+            a.href = url
+            a.download = `zdream-${item.id}.png`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
+        } catch {
+            // Fallback: mở ảnh trong tab mới
+            window.open(item.thumbnail, "_blank")
+        }
+    }, [])
 
     // Upload refs & state
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -493,22 +530,20 @@ export function LibraryPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-44">
-                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+                                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDownload(item) }}>
                                                         <DownloadIcon className="size-4 mr-2" />
                                                         Tải xuống
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                                        <WandIcon className="size-4 mr-2" />
-                                                        Tạo tương tự
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
-                                                        <LayoutGridIcon className="size-4 mr-2" />
-                                                        Dùng làm mẫu
-                                                    </DropdownMenuItem>
+                                                    {item.type === "ai" && item.prompt && (
+                                                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.location.href = `/app/generate?prompt=${encodeURIComponent(item.prompt || "")}` }}>
+                                                            <WandIcon className="size-4 mr-2" />
+                                                            Tạo tương tự
+                                                        </DropdownMenuItem>
+                                                    )}
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
                                                         className="text-destructive focus:text-destructive"
-                                                        onClick={(e) => handleDeleteImage(item, e)}
+                                                        onClick={(e) => confirmDelete(item, e)}
                                                     >
                                                         <Trash2Icon className="size-4 mr-2" />
                                                         Xóa ảnh
@@ -645,11 +680,12 @@ export function LibraryPage() {
                                 <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
                             </Button>
                         )}
-                        <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl">
+                        <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl"
+                            onClick={() => selectedItem && handleDownload(selectedItem)}>
                             <DownloadIcon className="size-4" />
                         </Button>
                         <Button variant="ghost" size="icon" title="Xóa ảnh" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5"
-                            onClick={(e) => selectedItem && handleDeleteImage(selectedItem, e)}>
+                            onClick={(e) => selectedItem && confirmDelete(selectedItem, e)}>
                             <Trash2Icon className="size-4" />
                         </Button>
                     </> : undefined}
@@ -810,32 +846,27 @@ export function LibraryPage() {
                         {/* Actions — vùng bấm lớn, icon rõ ràng */}
                         <button
                             className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
-                            onClick={() => { setActionItem(null) }}
+                            onClick={() => { if (actionItem) handleDownload(actionItem); setActionItem(null) }}
                         >
                             <DownloadIcon className="size-5 text-muted-foreground" />
                             Tải xuống
                         </button>
-                        <button
-                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
-                            onClick={() => { setActionItem(null) }}
-                        >
-                            <WandIcon className="size-5 text-muted-foreground" />
-                            Tạo tương tự
-                        </button>
-                        <button
-                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
-                            onClick={() => { setActionItem(null) }}
-                        >
-                            <LayoutGridIcon className="size-5 text-muted-foreground" />
-                            Dùng làm mẫu
-                        </button>
+                        {actionItem?.type === "ai" && actionItem?.prompt && (
+                            <button
+                                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
+                                onClick={() => { setActionItem(null); window.location.href = `/app/generate?prompt=${encodeURIComponent(actionItem?.prompt || "")}` }}
+                            >
+                                <WandIcon className="size-5 text-muted-foreground" />
+                                Tạo tương tự
+                            </button>
+                        )}
 
                         {/* Separator + Delete */}
                         <div className="border-t my-1" />
                         <button
                             className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
                             onClick={() => {
-                                if (actionItem) handleDeleteImage(actionItem)
+                                if (actionItem) confirmDelete(actionItem)
                                 setActionItem(null)
                             }}
                         >
@@ -845,6 +876,30 @@ export function LibraryPage() {
                     </div>
                 </DrawerContent>
             </Drawer>
+
+            {/* Dialog xác nhận xoá ảnh */}
+            <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Xóa ảnh này?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Hành động này không thể hoàn tác. Ảnh sẽ bị xóa vĩnh viễn khỏi thư viện.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => {
+                                if (deleteTarget) handleDeleteImage(deleteTarget)
+                                setDeleteTarget(null)
+                            }}
+                        >
+                            Xóa
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }

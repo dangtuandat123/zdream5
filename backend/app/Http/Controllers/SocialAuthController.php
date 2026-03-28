@@ -32,24 +32,24 @@ class SocialAuthController extends Controller
             return redirect(config('app.frontend_url') . '/login?error=google_failed');
         }
 
-        $user = User::firstOrCreate(
-            ['email' => $googleUser->getEmail()],
-            [
-                'name'              => $googleUser->getName(),
-                'google_id'         => $googleUser->getId(),
-                'avatar'            => $googleUser->getAvatar(),
-                'password'          => bcrypt(\Illuminate\Support\Str::random(32)),
-                'gems'              => (int) Setting::get('new_user_gems', 50),
-                'email_verified_at' => now(),
-            ]
-        );
+        $user = User::where('email', $googleUser->getEmail())->first();
 
-        // Cập nhật google_id nếu user đã tồn tại nhưng chưa liên kết
-        if (!$user->google_id) {
-            $user->update([
-                'google_id' => $googleUser->getId(),
-                'avatar'    => $googleUser->getAvatar(),
-            ]);
+        if (!$user) {
+            // Tạo user mới — set gems, google_id, email_verified_at trực tiếp (không qua mass-assign)
+            $user = new User();
+            $user->name = $googleUser->getName();
+            $user->email = $googleUser->getEmail();
+            $user->password = bcrypt(\Illuminate\Support\Str::random(32));
+            $user->avatar = $googleUser->getAvatar();
+            $user->google_id = $googleUser->getId();
+            $user->gems = (int) Setting::get('new_user_gems', 50);
+            $user->email_verified_at = now();
+            $user->save();
+        } elseif (!$user->google_id) {
+            // Cập nhật google_id nếu user đã tồn tại nhưng chưa liên kết
+            $user->google_id = $googleUser->getId();
+            $user->avatar = $googleUser->getAvatar();
+            $user->save();
         }
 
         $token = $user->createToken('auth-token')->plainTextToken;

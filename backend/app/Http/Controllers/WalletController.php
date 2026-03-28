@@ -38,19 +38,22 @@ class WalletController extends Controller
     }
 
     /**
-     * Nạp tiền (Xác nhận top-up — giả lập hoặc webhook).
-     * 
+     * Nạp gems thủ công (chỉ dành cho Admin).
+     *
      * POST /api/wallet/topup
-     * Body: { amount (gems), package_name? }
-     * 
-     * Lưu ý: Trong production, endpoint này sẽ được gọi bởi webhook
-     * từ payment gateway (VietQR), không phải từ frontend trực tiếp.
-     * Hiện tại giả lập để test.
+     * Body: { amount (gems, tối đa 10000), package_name? }
+     *
+     * Production: endpoint này sẽ được thay bằng webhook từ payment gateway.
      */
     public function topup(Request $request): JsonResponse
     {
+        // Chỉ admin mới được nạp thủ công — chống user tự nạp gems
+        if (!$request->user()->isAdmin()) {
+            return response()->json(['message' => 'Bạn không có quyền thực hiện.'], 403);
+        }
+
         $request->validate([
-            'amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'integer', 'min:1', 'max:10000'],
             'package_name' => ['nullable', 'string', 'max:100'],
         ]);
 

@@ -128,8 +128,8 @@ class ImageController extends Controller
         $designedPrompt = $designResult['prompt'];
         $designedNegative = $designResult['negative_prompt'];
 
-        // Nếu PromptDesigner đã tối ưu → không truyền style/negative nữa (tránh double injection)
-        $wasDesigned = $designedPrompt !== $validated['prompt'];
+        // Flag từ service — đáng tin cậy hơn so sánh string (tránh double injection)
+        $wasDesigned = $designResult['designed'] ?? false;
 
         // ── BƯỚC 4: Sinh ảnh — xử lý partial failure ──
         $generatedImages = [];
@@ -223,12 +223,6 @@ class ImageController extends Controller
      */
     public function upload(Request $request): JsonResponse
     {
-        \Illuminate\Support\Facades\Log::debug('Upload request received', [
-            'has_file' => $request->hasFile('image'),
-            'file_name' => $request->file('image')?->getClientOriginalName(),
-            'file_size' => $request->file('image')?->getSize(),
-        ]);
-
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120', // Max 5MB
             'project_id' => 'nullable|integer',
@@ -237,22 +231,19 @@ class ImageController extends Controller
         $file = $request->file('image');
         $user = $request->user();
 
-        // Tạo đường dẫn file unique tương tự AI images
-        $filename = 'uploads/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+        // Dùng extension() thay vì getClientOriginalExtension() — an toàn hơn (derive từ MIME)
+        $filename = 'uploads/' . date('Y/m/d') . '/' . Str::uuid() . '.' . $file->extension();
 
         // Lưu vào storage
         $disk = config('filesystems.default');
-        $stored = Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');
-
-        \Illuminate\Support\Facades\Log::debug('File storage result', ['filename' => $filename, 'stored' => $stored]);
+        Storage::disk($disk)->put($filename, file_get_contents($file->getRealPath()), 'public');
 
         try {
-            // Lưu database
             $image = Image::create([
                 'user_id' => $user->id,
                 'type' => 'upload',
                 'project_id' => $request->input('project_id'),
-                'prompt' => $file->getClientOriginalName(), // Lưu tên gốc vào prompt để ref
+                'prompt' => $file->getClientOriginalName(),
                 'model' => 'user-upload',
                 'file_path' => $filename,
                 'file_url' => Storage::disk($disk)->url($filename),
@@ -264,12 +255,10 @@ class ImageController extends Controller
                 'image' => $image,
             ], 201);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Database error during upload', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Log lỗi nhưng KHÔNG trả message nội bộ cho client
+            Log::error('Upload DB error', ['error' => $e->getMessage()]);
             return response()->json([
-                'message' => 'Lỗi lưu trữ dữ liệu: ' . $e->getMessage(),
+                'message' => 'Lỗi lưu trữ dữ liệu. Vui lòng thử lại.',
             ], 500);
         }
     }
