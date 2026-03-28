@@ -95,7 +95,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Link to="/app/topup">
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-secondary active:scale-95 transition-all cursor-pointer">
-              <Diamond className="size-3.5 text-primary fill-primary/20" />
+              <Diamond className="size-3.5 text-blue-400 fill-blue-400/20" />
               <span className="tabular-nums">{gems}</span>
             </Badge>
           </Link>
@@ -192,7 +192,7 @@ export function AppSidebar() {
                   "flex items-center justify-center size-10 rounded-xl shrink-0",
                   isActive("/app/topup") ? "bg-primary/15" : "bg-muted"
                 )}>
-                  <DiamondPlus className={cn("size-5", isActive("/app/topup") ? "text-primary" : "text-muted-foreground")} />
+                  <DiamondPlus className={cn("size-5", isActive("/app/topup") ? "text-blue-400" : "text-blue-400/70")} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={cn("text-sm", isActive("/app/topup") ? "font-semibold" : "font-medium")}>Nạp Kim Cương</p>
@@ -267,7 +267,7 @@ export function AppSidebar() {
                 onSelect={() => runCommand(() => navigate('/app/topup'))}
                 className="cursor-pointer py-3"
               >
-                <DiamondPlus className="mr-2 size-4 text-muted-foreground" />
+                <DiamondPlus className="mr-2 size-4 text-blue-400" />
                 <span className="font-medium">Nạp Kim Cương</span>
                 <CommandShortcut>{gems} 💎</CommandShortcut>
               </CommandItem>
@@ -365,8 +365,8 @@ export function AppSidebar() {
                   )}
                 >
                   <Diamond className={cn(
-                    "size-[20px] transition-transform duration-300 ease-out",
-                    isActive("/app/topup") ? "text-white scale-110 fill-white/20 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "group-hover:scale-110"
+                    "size-[20px] transition-transform duration-300 ease-out text-blue-400 fill-blue-400/20",
+                    isActive("/app/topup") ? "scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" : "group-hover:scale-110"
                   )} />
                   <span className={cn(
                     "text-[11px] font-bold tabular-nums",
