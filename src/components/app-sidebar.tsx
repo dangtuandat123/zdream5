@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   CommandDialog,
@@ -177,27 +178,21 @@ export function AppSidebar() {
               <div className="border-t my-3" />
 
               {/* Nạp Kim Cương */}
-              <button
+              <Button
+                variant="default"
                 onClick={() => runCommand(() => navigate('/app/topup'))}
                 className={cn(
-                  "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left",
-                  isActive("/app/topup")
-                    ? "bg-primary/10 text-primary"
-                    : "hover:bg-muted active:bg-muted"
+                  "w-full h-auto justify-start gap-3.5 rounded-xl px-4 py-3.5 text-left",
+                  isActive("/app/topup") && "ring-2 ring-primary/30 shadow-lg"
                 )}
               >
-                <div className={cn(
-                  "flex items-center justify-center size-10 rounded-xl shrink-0",
-                  isActive("/app/topup") ? "bg-primary/15" : "bg-muted"
-                )}>
-                  <span className="text-lg">💎</span>
-                </div>
+                <span className="text-lg shrink-0">💎</span>
                 <div className="flex-1 min-w-0">
-                  <p className={cn("text-sm", isActive("/app/topup") ? "font-semibold" : "font-medium")}>Nạp Kim Cương</p>
-                  <p className="text-xs text-muted-foreground">Hiện có <span className="font-semibold text-foreground">{gems}</span> 💎</p>
+                  <p className="text-sm font-semibold">Nạp Kim Cương</p>
+                  <p className="text-xs opacity-80">Hiện có <span className="font-bold">{gems}</span> 💎</p>
                 </div>
-                <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-              </button>
+                <ChevronRight className="size-4 opacity-60 shrink-0" />
+              </Button>
 
               {/* Đăng xuất */}
               <button
@@ -353,28 +348,22 @@ export function AppSidebar() {
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Link
-                  to="/app/topup"
+                <Button
+                  variant="default"
+                  asChild
                   className={cn(
-                    "group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 border active:scale-95",
+                    "group h-auto w-full flex-col gap-1 py-2.5 rounded-xl transition-all duration-200",
                     isActive("/app/topup")
-                      ? "bg-gradient-to-b from-blue-500/30 to-cyan-500/20 border-blue-400/40 shadow-[0_0_24px_rgba(59,130,246,0.25)]"
-                      : "bg-gradient-to-b from-blue-500/15 to-cyan-500/10 border-blue-400/20 hover:from-blue-500/25 hover:to-cyan-500/20 hover:border-blue-400/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                      ? "bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/30"
+                      : "bg-primary text-primary-foreground shadow hover:bg-primary/90 hover:shadow-md active:scale-95"
                   )}
                 >
-                  <span className={cn(
-                    "text-xl transition-transform duration-300 ease-out",
-                    isActive("/app/topup") ? "scale-125 drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]" : "group-hover:scale-125 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
-                  )}>💎</span>
-                  <span className={cn(
-                    "text-[11px] font-bold tabular-nums",
-                    isActive("/app/topup") ? "text-white" : "text-blue-300"
-                  )}>{gems}</span>
-                  <span className={cn(
-                    "text-[9px] font-semibold tracking-wide transition-colors",
-                    isActive("/app/topup") ? "text-white" : "text-blue-400/80 group-hover:text-blue-300"
-                  )}>Nạp thêm</span>
-                </Link>
+                  <Link to="/app/topup">
+                    <span className="text-lg leading-none">💎</span>
+                    <span className="text-[11px] font-bold tabular-nums leading-none">{gems}</span>
+                    <span className="text-[9px] font-medium tracking-wide leading-none opacity-80">Nạp thêm</span>
+                  </Link>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-xs">
                 <p>Bạn có <strong>{gems}</strong> Kim Cương 💎</p>
