@@ -508,6 +508,26 @@ export function GeneratePage() {
     const [images, setImages] = useState<GeneratedImage[]>([])
     const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null)
     const [referenceImages, setReferenceImages] = useState<string[]>([])
+    const MAX_REFERENCE_IMAGES = 6
+
+    // Helper: thêm ảnh tham chiếu có kiểm tra giới hạn tối đa 6 ảnh
+    const addReferenceImages = useCallback((urls: string[]) => {
+        setReferenceImages(prev => {
+            const unique = urls.filter(u => !prev.includes(u))
+            if (unique.length === 0) return prev
+            const remaining = MAX_REFERENCE_IMAGES - prev.length
+            if (remaining <= 0) {
+                toast.error(`Tối đa ${MAX_REFERENCE_IMAGES} ảnh tham chiếu.`, { id: 'ref-limit' })
+                return prev
+            }
+            const toAdd = unique.slice(0, remaining)
+            if (toAdd.length < unique.length) {
+                toast.warning(`Chỉ thêm được ${toAdd.length}/${unique.length} ảnh (đã đạt tối đa ${MAX_REFERENCE_IMAGES}).`, { id: 'ref-limit' })
+            }
+            return [...prev, ...toAdd]
+        })
+    }, [])
+
     const [refImageUrlInput, setRefImageUrlInput] = useState("")
     const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false)
     // New states for 12 upgrades
@@ -770,7 +790,7 @@ export function GeneratePage() {
                     )
                     if (isOver) {
                         const url = touchStartRef.current.url
-                        setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
+                        addReferenceImages([url])
                         toast.success('Đã thêm vào ảnh tham chiếu', { id: 'ref-add' })
                     }
                 }
@@ -1252,25 +1272,14 @@ export function GeneratePage() {
         const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'))
         if (files.length > 0) {
             const urls = files.map(f => URL.createObjectURL(f))
-            setReferenceImages(prev => {
-                const newUrls = urls.filter(u => !prev.includes(u))
-                return [...prev, ...newUrls]
-            })
-            toast.success(`Đã thêm ${files.length} ảnh tham chiếu`, { id: 'ref-add' })
+            addReferenceImages(urls)
             return
         }
 
         // 2. Xử lý Drop Text (Dữ liệu URL kéo từ gallery xuống)
         const textData = e.dataTransfer.getData('text/plain')
         if (textData && (textData.startsWith('http') || textData.startsWith('blob:') || textData.startsWith('data:'))) {
-            setReferenceImages(prev => {
-                if (prev.includes(textData)) {
-                    toast('Ảnh này đã có trong phần tham chiếu rồi', { icon: 'ℹ️', id: 'ref-exists' })
-                    return prev
-                }
-                toast.success('Đã thêm ảnh tham chiếu', { id: 'ref-add' })
-                return [...prev, textData]
-            })
+            addReferenceImages([textData])
         }
     }
 
@@ -1278,7 +1287,7 @@ export function GeneratePage() {
         const files = Array.from(e.target.files || [])
         if (files.length > 0) {
             const urls = files.map(file => URL.createObjectURL(file))
-            setReferenceImages(prev => [...prev, ...urls])
+            addReferenceImages(urls)
             setIsImagePopoverOpen(false) // Tự động đóng Popover khi chọn xong file từ máy
         }
         // Cho phép chọn lại file vừa xoá
@@ -1289,7 +1298,7 @@ export function GeneratePage() {
 
     const handleUrlSubmit = () => {
         if (refImageUrlInput.trim()) {
-            setReferenceImages(prev => [...prev, refImageUrlInput.trim()])
+            addReferenceImages([refImageUrlInput.trim()])
             setRefImageUrlInput("")
         }
     }
@@ -1640,8 +1649,7 @@ export function GeneratePage() {
                     onDeleteImage={handleDelete}
                     onDownloadImage={(url, id) => downloadImage(url, `zdream-${id}.jpg`)}
                     onSetReferenceImage={(url) => {
-                        setReferenceImages(prev => prev.includes(url) ? prev : [...prev, url])
-                        toast.success('Đã thêm vào ảnh tham chiếu', { id: 'ref-add' })
+                        addReferenceImages([url])
                     }}
                     onImageDragStart={(e, url) => {
                         e.dataTransfer.setData('text/plain', url)
@@ -1977,8 +1985,7 @@ export function GeneratePage() {
                             <Download className="size-4" />
                         </Button>
                         <Button variant="ghost" title="Ảnh tham chiếu" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3" onClick={() => {
-                            setReferenceImages(prev => prev.includes(selectedImage.url) ? prev : [...prev, selectedImage.url])
-                            toast.success('Đã thêm vào ảnh tham chiếu', { id: 'ref-add' })
+                            addReferenceImages([selectedImage.url])
                         }}>
                             <ImageIcon className="size-4" />
                             <span className="hidden sm:inline text-xs font-medium">Tham chiếu</span>
@@ -2317,7 +2324,7 @@ export function GeneratePage() {
                                             <div className="p-1.5">
                                                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2.5 py-1.5 select-none flex items-center gap-1.5">
                                                     <ImageIcon className="size-3" />
-                                                    Ảnh tham chiếu
+                                                    Ảnh tham chiếu ({referenceImages.length}/{MAX_REFERENCE_IMAGES})
                                                 </div>
                                                 {referenceImages.length > 0 ? (
                                                     referenceImages.map((src, idx) => (

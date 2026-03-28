@@ -35,7 +35,7 @@ class GenerateImageRequest extends FormRequest
             'image_size' => ['nullable', 'string', 'in:1K,2K,4K'],
             'seed' => ['nullable', 'integer', 'min:0'],
             'count' => ['nullable', 'integer', 'min:1', 'max:4'],
-            'reference_images' => ['nullable', 'array', 'max:5'],
+            'reference_images' => ['nullable', 'array', 'max:6'],
             // Giới hạn mỗi ảnh tham chiếu tối đa ~10MB base64 — chống memory exhaustion
             'reference_images.*' => ['string', 'max:13500000'],
             'template_slug' => ['nullable', 'string', 'max:255'],
@@ -52,6 +52,7 @@ class GenerateImageRequest extends FormRequest
             'prompt.max' => 'Mô tả ảnh tối đa 2000 ký tự.',
             'aspect_ratio.in' => 'Tỉ lệ ảnh không hợp lệ.',
             'count.max' => 'Tối đa tạo 4 ảnh mỗi lần.',
+            'reference_images.max' => 'Tối đa 6 ảnh tham chiếu.',
         ];
     }
 }

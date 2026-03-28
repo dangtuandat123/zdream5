@@ -192,8 +192,8 @@ PROMPT;
 
             $imageCount = 0;
             foreach ($referenceImages as $imgRef) {
-                // Chỉ gửi tối đa 3 ảnh tham chiếu để tiết kiệm token
-                if ($imageCount >= 3) {
+                // Gửi tối đa 6 ảnh tham chiếu — khớp với giới hạn frontend/backend validation
+                if ($imageCount >= 6) {
                     break;
                 }
 
