@@ -349,19 +349,19 @@ export function AppSidebar() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="default"
+                  variant="outline"
                   asChild
                   className={cn(
                     "group h-auto w-full flex-col gap-1 py-2.5 rounded-xl transition-all duration-200",
                     isActive("/app/topup")
-                      ? "bg-primary text-primary-foreground shadow-lg ring-2 ring-primary/30"
-                      : "bg-primary text-primary-foreground shadow hover:bg-primary/90 hover:shadow-md active:scale-95"
+                      ? "bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.2)] ring-1 ring-blue-400/30"
+                      : "bg-blue-500/10 border-blue-400/25 text-blue-300/90 hover:bg-blue-500/20 hover:border-blue-400/40 hover:shadow-[0_0_10px_rgba(59,130,246,0.15)] active:scale-95"
                   )}
                 >
                   <Link to="/app/topup">
                     <span className="text-lg leading-none">💎</span>
                     <span className="text-[11px] font-bold tabular-nums leading-none">{gems}</span>
-                    <span className="text-[9px] font-medium tracking-wide leading-none opacity-80">Nạp thêm</span>
+                    <span className="text-[9px] font-medium tracking-wide leading-none opacity-70">Nạp thêm</span>
                   </Link>
                 </Button>
               </TooltipTrigger>
