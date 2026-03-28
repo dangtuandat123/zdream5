@@ -115,16 +115,20 @@ class ImageController extends Controller
         $designedPrompt = $designResult['prompt'];
         $designedNegative = $designResult['negative_prompt'];
 
+        // Nếu PromptDesigner đã tối ưu prompt → không truyền style/negativePrompt
+        // vào OpenRouterService nữa (tránh double injection)
+        $wasDesigned = $designedPrompt !== $validated['prompt'];
+
         try {
             for ($i = 0; $i < $count; $i++) {
                 // Gọi OpenRouter API — dùng prompt đã được AI thiết kế
                 $result = $this->openRouterService->generateImage(
                     prompt: $designedPrompt,
-                    negativePrompt: $designedNegative,
+                    negativePrompt: $wasDesigned ? null : $designedNegative,
                     aspectRatio: $aspectRatio,
                     imageSize: $validated['image_size'] ?? '1K',
                     model: $model,
-                    style: $style,
+                    style: $wasDesigned ? null : $style,
                     referenceImages: $validated['reference_images'] ?? null,
                 );
 
