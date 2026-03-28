@@ -1039,7 +1039,7 @@ function TemplateDemo() {
 
                 <div className="relative flex flex-col lg:flex-row min-h-[380px] lg:min-h-[420px] overflow-hidden">
                     {/* LEFT: Settings Panel / Template List */}
-                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[320px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto min-h-0">
+                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[320px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto overflow-x-hidden min-h-0">
                         <AnimatePresence mode="wait">
                             {!showSettings ? (
                                 <motion.div
@@ -1124,7 +1124,7 @@ function TemplateDemo() {
                                     {TEMPLATE_EFFECTS.map((group, gi) => (
                                         <div key={gi} className="space-y-2">
                                             <p className="text-[10px] uppercase text-muted-foreground/70 font-medium tracking-wider">{group.name}</p>
-                                            <div className="flex gap-2 overflow-x-auto py-1 px-0.5">
+                                            <div className="flex gap-2 flex-wrap py-1 px-0.5">
                                                 {group.options.map((opt, oi) => {
                                                     const isActive = activeEffects[gi] === oi
                                                     return (
