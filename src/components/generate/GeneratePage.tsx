@@ -1095,6 +1095,10 @@ export function GeneratePage() {
                 setIsGenerating(false)
                 setGenerateProgress(0)
                 
+                // Clear prompt + ảnh tham chiếu sau khi tạo thành công
+                setPrompt("")
+                setReferenceImages([])
+
                 // Auto-randomize seed cho lần tạo tiếp theo
                 setSeed(Math.floor(Math.random() * 999999999))
 
