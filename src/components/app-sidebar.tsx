@@ -7,13 +7,11 @@ import {
   SwatchBook,
   WandSparkles,
   Images,
-  DiamondPlus,
   Hexagon,
   LogOut,
   Menu,
   ChevronRight,
   Shield,
-  Diamond,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
@@ -95,7 +93,7 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Link to="/app/topup">
             <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-secondary active:scale-95 transition-all cursor-pointer">
-              <Diamond className="size-3.5 text-blue-400 fill-blue-400/20" />
+              <span className="text-sm">💎</span>
               <span className="tabular-nums">{gems}</span>
             </Badge>
           </Link>
@@ -192,7 +190,7 @@ export function AppSidebar() {
                   "flex items-center justify-center size-10 rounded-xl shrink-0",
                   isActive("/app/topup") ? "bg-primary/15" : "bg-muted"
                 )}>
-                  <DiamondPlus className={cn("size-5", isActive("/app/topup") ? "text-blue-400" : "text-blue-400/70")} />
+                  <span className="text-lg">💎</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={cn("text-sm", isActive("/app/topup") ? "font-semibold" : "font-medium")}>Nạp Kim Cương</p>
@@ -267,7 +265,7 @@ export function AppSidebar() {
                 onSelect={() => runCommand(() => navigate('/app/topup'))}
                 className="cursor-pointer py-3"
               >
-                <DiamondPlus className="mr-2 size-4 text-blue-400" />
+                <span className="mr-2">💎</span>
                 <span className="font-medium">Nạp Kim Cương</span>
                 <CommandShortcut>{gems} 💎</CommandShortcut>
               </CommandItem>
@@ -364,10 +362,10 @@ export function AppSidebar() {
                       : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5 active:bg-white/10"
                   )}
                 >
-                  <Diamond className={cn(
-                    "size-[20px] transition-transform duration-300 ease-out text-blue-400 fill-blue-400/20",
+                  <span className={cn(
+                    "text-lg transition-transform duration-300 ease-out",
                     isActive("/app/topup") ? "scale-110 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" : "group-hover:scale-110"
-                  )} />
+                  )}>💎</span>
                   <span className={cn(
                     "text-[11px] font-bold tabular-nums",
                     isActive("/app/topup") ? "text-white" : ""
