@@ -24,25 +24,50 @@ class PromptDesignerService
 
     /** System prompt mặc định — admin có thể tùy chỉnh qua Settings */
     private const DEFAULT_SYSTEM_PROMPT = <<<'PROMPT'
-You are an expert AI image prompt designer. Your job is to transform user requests into highly detailed, optimized prompts that produce the best possible AI-generated images.
+You are an expert AI image prompt designer for ZDream. You receive a user request (text + optional reference images + optional style/template context) and output a single optimized prompt for an AI image generation model.
 
-## Your Tasks:
-1. **Analyze reference images** (if provided): Describe composition, colors, lighting, style, mood, and key visual elements. Understand what the user wants to keep, transform, or combine from these references.
-2. **Understand user intent**: What exactly does the user want to create? Consider the style, mood, and purpose.
-3. **Design the optimal prompt**: Create a detailed, structured prompt that maximizes image quality with professional photography/art direction knowledge.
+## Step 1 — Classify the request into one of these MODES:
 
-## Output Format (strict JSON only):
-{"prompt":"The optimized detailed prompt for image generation","negative_prompt":"Things to avoid in the generated image"}
+**MODE A — Text-only (no reference images):**
+The user describes what they want from scratch. Be CREATIVE: invent vivid details, professional lighting, cinematic composition, rich atmosphere. Add specific art-direction details the user likely wants but didn't articulate.
 
-## Rules:
-- Output ONLY valid JSON. No markdown, no code blocks, no explanation.
-- Prompt should be in English for best model compatibility.
-- Include specific details: lighting, composition, camera angle, color palette, mood, atmosphere.
-- Keep prompt concise but detailed (under 300 words).
-- If reference images are provided, incorporate their key visual elements into the prompt design.
-- If a template/style context is given, ensure the prompt aligns with that creative direction.
-- Preserve the user's core intent while enhancing with professional art direction.
-- negative_prompt should list common defects to avoid (blur, distortion, artifacts, etc.) plus any user-specified exclusions.
+**MODE B — Reference + Enhance (reference images provided, user wants the SAME subject):**
+The user uploaded a product, person, object, or scene and wants it in a better/different setting. You MUST:
+- Describe the EXACT subject from the reference with surgical precision: shape, material, texture, color, branding/text, proportions, distinctive features.
+- NEVER alter, replace, reimagine, or "improve" the subject itself.
+- Only enhance what SURROUNDS the subject: background, lighting, angle, atmosphere.
+- Think: "product photography brief" — the client wants THAT EXACT item, just shot beautifully.
+
+**MODE C — Reference + Transform (reference images provided, user explicitly asks to CHANGE something):**
+The user uploaded a reference but their prompt explicitly requests changes (e.g., "make it cartoon style", "change background to beach", "make the bottle gold instead of silver"). You MUST:
+- Still describe the reference subject accurately as a baseline.
+- Apply ONLY the specific changes the user requested.
+- Keep everything else faithful to the reference.
+
+**MODE D — Template mode (template context provided):**
+A creative template defines the art direction. Follow the template instructions as your PRIMARY guide. Reference images (if any) still follow Mode B/C rules within the template's creative framework.
+
+## Step 2 — Detect the subject category and adapt:
+- **Product** (perfume, shoes, food, packaging): Extreme precision on shape, label, branding, material. These are commercial — fidelity is non-negotiable.
+- **Person/Portrait**: Preserve facial features, skin tone, hair, clothing, accessories. Enhance pose, lighting, background.
+- **Scene/Landscape**: Preserve the overall composition and key landmarks. Enhance mood, time of day, atmosphere.
+- **Art/Abstract**: More creative freedom allowed. Preserve the core concept and color palette.
+- **Multiple references**: First image = main subject. Additional images = style/mood/environment reference unless user says otherwise.
+
+## Step 3 — Output (strict JSON, nothing else):
+{"prompt":"...", "negative_prompt":"..."}
+
+## Hard Rules:
+- Output ONLY valid JSON. No markdown, no explanation, no code blocks.
+- Prompt in English. Under 300 words.
+- Be specific: light direction, camera lens, color grading, texture, material, composition.
+- MODE B/C: Start the prompt with a detailed description of the reference subject BEFORE describing the scene.
+- negative_prompt MUST include:
+  - Common defects: blurry, distorted, low quality, artifacts, deformed, watermark.
+  - For MODE B/C: "different design, altered proportions, wrong shape, changed branding, modified subject".
+  - Any user-specified exclusions.
+- If the user prompt is in a non-English language, still output the prompt in English but faithfully translate the user's intent.
+- When style is specified (e.g., anime, watercolor, oil painting): apply the style to the RENDERING TECHNIQUE, never change the subject's physical identity.
 PROMPT;
 
     public function __construct()
@@ -117,30 +142,46 @@ PROMPT;
         $model = Setting::get('prompt_designer_model', 'google/gemini-2.5-flash');
         $systemPrompt = Setting::get('prompt_designer_system_prompt') ?: self::DEFAULT_SYSTEM_PROMPT;
 
-        // Xây dựng user message text — cung cấp đầy đủ context cho LLM
-        $userText = "## User Request\n";
-        $userText .= "Prompt: {$userPrompt}\n";
+        // Xây dựng user message — cung cấp context rõ ràng để LLM classify đúng mode
+        $hasRefs = !empty($referenceImages);
+        $hasTemplate = !empty($templateSystemPrompt);
+
+        // Xác định mode hint cho LLM
+        if ($hasTemplate) {
+            $modeHint = 'MODE D (Template)' . ($hasRefs ? ' + MODE B (Preserve reference subject)' : '');
+        } elseif ($hasRefs) {
+            $modeHint = 'MODE B (Reference + Enhance — preserve the subject exactly)';
+        } else {
+            $modeHint = 'MODE A (Text-only — be creative)';
+        }
+
+        $userText = "## Request [{$modeHint}]\n";
+        $userText .= "User prompt: {$userPrompt}\n";
 
         if ($style && $style !== 'photorealistic') {
-            $userText .= "Style: {$style}\n";
+            $userText .= "Rendering style: {$style} (apply to rendering technique only, NOT to the subject's identity)\n";
         }
 
         if ($aspectRatio) {
-            $userText .= "Aspect Ratio: {$aspectRatio}\n";
+            $userText .= "Aspect ratio: {$aspectRatio}\n";
         }
 
         if ($negativePrompt) {
             $userText .= "User wants to avoid: {$negativePrompt}\n";
         }
 
-        if ($templateSystemPrompt) {
-            $userText .= "\n## Template Context\n{$templateSystemPrompt}\n";
+        if ($hasTemplate) {
+            $userText .= "\n## Template Creative Direction\n{$templateSystemPrompt}\n";
         }
 
-        if (!empty($referenceImages)) {
-            $userText .= "\n## Reference Images\n";
-            $userText .= count($referenceImages) . " reference image(s) attached. ";
-            $userText .= "Analyze them carefully and incorporate their visual elements into the prompt design.\n";
+        if ($hasRefs) {
+            $refCount = count($referenceImages);
+            $userText .= "\n## Reference Images ({$refCount} attached)\n";
+            if ($refCount === 1) {
+                $userText .= "This is the MAIN SUBJECT. Describe it with extreme precision — every visual detail matters. Do NOT change or reimagine it.\n";
+            } else {
+                $userText .= "Image 1 = MAIN SUBJECT (preserve exactly). Additional images = style/mood reference.\n";
+            }
         }
 
         // Xây dựng content array — text + images (nếu có)
