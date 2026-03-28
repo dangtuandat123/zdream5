@@ -355,11 +355,25 @@ export function AppSidebar() {
               <TooltipTrigger asChild>
                 <Link
                   to="/app/topup"
-                  className="group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 bg-gradient-to-b from-blue-500/15 to-cyan-500/10 border border-blue-400/20 hover:from-blue-500/25 hover:to-cyan-500/20 hover:border-blue-400/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] active:scale-95"
+                  className={cn(
+                    "group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 border active:scale-95",
+                    isActive("/app/topup")
+                      ? "bg-gradient-to-b from-blue-500/30 to-cyan-500/20 border-blue-400/40 shadow-[0_0_24px_rgba(59,130,246,0.25)]"
+                      : "bg-gradient-to-b from-blue-500/15 to-cyan-500/10 border-blue-400/20 hover:from-blue-500/25 hover:to-cyan-500/20 hover:border-blue-400/40 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                  )}
                 >
-                  <span className="text-xl transition-transform duration-300 ease-out group-hover:scale-125 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]">💎</span>
-                  <span className="text-[11px] font-bold tabular-nums text-blue-300">{gems}</span>
-                  <span className="text-[9px] font-semibold tracking-wide text-blue-400/80 group-hover:text-blue-300 transition-colors">Nạp thêm</span>
+                  <span className={cn(
+                    "text-xl transition-transform duration-300 ease-out",
+                    isActive("/app/topup") ? "scale-125 drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]" : "group-hover:scale-125 group-hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                  )}>💎</span>
+                  <span className={cn(
+                    "text-[11px] font-bold tabular-nums",
+                    isActive("/app/topup") ? "text-white" : "text-blue-300"
+                  )}>{gems}</span>
+                  <span className={cn(
+                    "text-[9px] font-semibold tracking-wide transition-colors",
+                    isActive("/app/topup") ? "text-white" : "text-blue-400/80 group-hover:text-blue-300"
+                  )}>Nạp thêm</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-xs">
