@@ -501,7 +501,7 @@ function InteractiveDemo() {
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row min-h-[380px] lg:min-h-[420px] overflow-hidden">
+                <div className="relative flex flex-col lg:flex-row min-h-[480px] sm:min-h-[420px] lg:min-h-[420px] overflow-hidden">
                     {/* Mobile compact settings bar — visible only on mobile */}
                     <div className="flex lg:hidden items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/30 overflow-x-auto">
                         <span className="text-[10px] uppercase text-muted-foreground/50 font-medium shrink-0">Cài đặt:</span>
@@ -1037,9 +1037,9 @@ function TemplateDemo() {
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row min-h-[380px] lg:min-h-[420px] overflow-hidden">
+                <div className="relative flex flex-col lg:flex-row h-[700px] sm:h-[620px] lg:h-[420px] overflow-hidden">
                     {/* LEFT: Settings Panel / Template List */}
-                    <div className="w-full lg:w-[300px] lg:shrink-0 max-h-[320px] lg:max-h-none border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto overflow-x-hidden min-h-0">
+                    <div className="w-full lg:w-[300px] lg:shrink-0 h-[340px] lg:h-full border-b lg:border-b-0 lg:border-r border-border/15 p-4 space-y-3 bg-background/30 overflow-y-auto overflow-x-hidden min-h-0">
                         <AnimatePresence mode="wait">
                             {!showSettings ? (
                                 <motion.div
