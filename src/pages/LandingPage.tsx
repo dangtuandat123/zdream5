@@ -1824,34 +1824,14 @@ export default function LandingPage() {
                     <defs><linearGradient id="gc1" x1="0" y1="0" x2="80" y2="80"><stop stopColor="#a78bfa" /><stop offset="1" stopColor="#e879f9" /></linearGradient></defs>
                 </svg>
 
-                {/* ===== FLOATING IMAGES — InteractiveDemo ===== */}
-                <motion.div className="hidden lg:block absolute top-28 left-6 xl:left-12 w-[100px] h-[100px] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-violet-500/10 -rotate-6 z-10"
-                    initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 0.45, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3, duration: 0.8 }}>
-                    <img src={HERO_IMAGES[0].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                </motion.div>
-                <motion.div className="hidden xl:block absolute top-56 right-6 xl:right-10 w-[90px] h-[90px] rounded-xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-fuchsia-500/10 rotate-[8deg] z-10"
-                    initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 0.35, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.5, duration: 0.8 }}>
-                    <img src={HERO_IMAGES[2].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                </motion.div>
-                <motion.div className="hidden lg:block absolute bottom-[340px] left-4 xl:left-8 w-[80px] h-[56px] rounded-xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-violet-500/10 rotate-3 z-10"
-                    initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 0.3, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.7, duration: 0.8 }}>
-                    <img src={HERO_IMAGES[5].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                </motion.div>
+                {/* ===== PREMIUM AMBIENT EFFECTS — InteractiveDemo ===== */}
+                <div className="absolute top-[10%] left-[5%] w-[400px] h-[400px] rounded-full bg-violet-600/[0.04] blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-[20%] right-[5%] w-[350px] h-[350px] rounded-full bg-fuchsia-600/[0.03] blur-[100px] pointer-events-none" />
+                <motion.div className="hidden lg:block absolute top-[20%] right-[15%] w-[1px] h-[300px] bg-gradient-to-b from-transparent via-violet-500/20 to-transparent pointer-events-none"
+                    animate={{ opacity: [0.3, 0.7, 0.3], height: ["200px", "400px", "200px"] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
 
-                {/* ===== FLOATING IMAGES — TemplateDemo ===== */}
-                <motion.div className="hidden xl:block absolute bottom-[200px] right-4 xl:right-8 w-[90px] h-[90px] rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-fuchsia-500/10 -rotate-[5deg] z-10"
-                    initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 0.4, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4, duration: 0.8 }}>
-                    <img src={HERO_IMAGES[3].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                </motion.div>
-                <motion.div className="hidden lg:block absolute bottom-32 left-6 xl:left-14 w-[85px] h-[60px] rounded-xl overflow-hidden ring-1 ring-white/10 shadow-2xl shadow-violet-500/10 rotate-[6deg] z-10"
-                    initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 0.35, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.6, duration: 0.8 }}>
-                    <img src={HERO_IMAGES[4].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                </motion.div>
+                {/* ===== PREMIUM AMBIENT EFFECTS — TemplateDemo ===== */}
+                <div className="absolute top-1/4 left-[15%] w-[450px] h-[250px] bg-indigo-600/[0.03] blur-[150px] pointer-events-none transform -rotate-12" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
                     {/* ===== InteractiveDemo Header ===== */}
@@ -1970,13 +1950,7 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_100%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
                 {/* SVG dot grid decoration */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="tpl-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(#tpl-dots)"/></svg>
-                {/* Decorative floating images */}
-                <div className="hidden lg:block absolute top-12 left-8 w-20 h-20 rounded-2xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-[-8deg] animate-float-slow opacity-40">
-                    <img src={HERO_IMAGES[6].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="hidden lg:block absolute bottom-16 right-10 w-24 h-16 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-[6deg] animate-float-delayed opacity-30">
-                    <img src={HERO_IMAGES[7].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
+                {/* Advanced SVG Decor Cleared for Kawaii aesthetics */}
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full relative">
                     <motion.div
@@ -2323,19 +2297,13 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(139,92,246,0.08),transparent)] pointer-events-none" />
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full bg-violet-600/[0.06] blur-[120px] pointer-events-none" />
 
-                {/* Floating decorative images */}
-                <div className="hidden md:block absolute top-16 left-[8%] w-20 h-14 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl -rotate-6 animate-float-slow opacity-25">
-                    <img src={HERO_IMAGES[2].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="hidden md:block absolute top-20 right-[8%] w-24 h-16 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-3 animate-float-delayed opacity-25">
-                    <img src={HERO_IMAGES[4].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="hidden lg:block absolute bottom-20 left-[12%] w-16 h-16 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl rotate-6 animate-float-delayed opacity-20">
-                    <img src={HERO_IMAGES[6].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
-                <div className="hidden lg:block absolute bottom-16 right-[12%] w-20 h-14 rounded-xl overflow-hidden ring-1 ring-white/10 shadow-xl -rotate-3 animate-float-slow opacity-20">
-                    <img src={HERO_IMAGES[1].src} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </div>
+                {/* ===== PREMIUM AMBIENT EFFECTS — CTA FINAL ===== */}
+                <div className="absolute top-0 left-[20%] right-[20%] h-px bg-gradient-to-r from-transparent via-violet-500/20 to-transparent pointer-events-none" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.06),transparent_70%)] pointer-events-none" />
+                
+                {/* Sweeping Light Beam */}
+                <motion.div className="absolute top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-fuchsia-500/15 to-transparent pointer-events-none blur-[1px]"
+                    animate={{ left: ["10%", "90%", "10%"] }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} />
 
                 {/* SVG sparkle decorations */}
                 <svg className="absolute top-[20%] left-[18%] w-6 h-6 opacity-[0.15] pointer-events-none animate-pulse-glow" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
