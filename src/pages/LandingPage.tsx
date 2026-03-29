@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Link } from "react-router-dom"
-import { motion, useInView, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValueEvent } from "framer-motion"
 import Lenis from "lenis"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -1490,10 +1490,18 @@ export default function LandingPage() {
     const [showScrollTop, setShowScrollTop] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const heroRef = useRef<HTMLElement>(null)
-    const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
-    const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0])
-    const floatY1 = useTransform(scrollYProgress, [0, 1], [0, -60])
-    const floatY2 = useTransform(scrollYProgress, [0, 1], [0, -40])
+    const { scrollY } = useScroll()
+    const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
+    const heroOpacity = useTransform(heroProgress, [0, 1], [1, 0])
+    const floatY1 = useTransform(heroProgress, [0, 1], [0, -60])
+    const floatY2 = useTransform(heroProgress, [0, 1], [0, -40])
+
+    useMotionValueEvent(scrollY, "change", (latest) => {
+        const isScrolled = latest > 50;
+        const isShowTop = latest > 500;
+        if (scrolled !== isScrolled) setScrolled(isScrolled);
+        if (showScrollTop !== isShowTop) setShowScrollTop(isShowTop);
+    });
 
     // Lenis smooth scroll — hiệu ứng cuộn mượt có quán tính
     useEffect(() => {
@@ -1503,21 +1511,16 @@ export default function LandingPage() {
             smoothWheel: true,
             touchMultiplier: 1.5,
         })
+        let rafId: number;
         function raf(time: number) {
             lenis.raf(time)
-            requestAnimationFrame(raf)
+            rafId = requestAnimationFrame(raf)
         }
-        requestAnimationFrame(raf)
-        return () => lenis.destroy()
-    }, [])
-
-    useEffect(() => {
-        const onScroll = () => {
-            setScrolled(window.scrollY > 50)
-            setShowScrollTop(window.scrollY > 500)
+        rafId = requestAnimationFrame(raf)
+        return () => {
+            cancelAnimationFrame(rafId)
+            lenis.destroy()
         }
-        window.addEventListener('scroll', onScroll, { passive: true })
-        return () => window.removeEventListener('scroll', onScroll)
     }, [])
 
     const handleNavClick = useCallback((id: string) => {
@@ -1610,10 +1613,10 @@ export default function LandingPage() {
 
                 {/* Floating AI showcase images */}
                 {[
-                    { src: HERO_IMAGES[0].src, className: "hidden lg:block top-[18%] left-[5%] w-36 h-24 -rotate-3", delay: 0, even: true },
+                    { src: HERO_IMAGES[0].src, className: "top-[10%] left-[2%] w-24 h-16 md:top-[18%] md:left-[5%] md:w-36 md:h-24 -rotate-3", delay: 0, even: true },
                     { src: HERO_IMAGES[1].src, className: "hidden lg:block top-[12%] right-[6%] w-44 h-28 rotate-2", delay: 0.15, even: false },
                     { src: HERO_IMAGES[2].src, className: "hidden md:block top-[38%] left-[3%] w-32 h-20 rotate-[5deg]", delay: 0.3, even: true },
-                    { src: HERO_IMAGES[3].src, className: "hidden md:block top-[32%] right-[3%] w-40 h-24 -rotate-2", delay: 0.1, even: false },
+                    { src: HERO_IMAGES[3].src, className: "top-[15%] right-[2%] w-28 h-20 md:top-[32%] md:right-[3%] md:w-40 md:h-24 -rotate-2", delay: 0.1, even: false },
                     { src: HERO_IMAGES[4].src, className: "hidden xl:block bottom-[32%] left-[8%] w-36 h-22 rotate-3", delay: 0.25, even: true },
                     { src: HERO_IMAGES[5].src, className: "hidden xl:block bottom-[35%] right-[7%] w-32 h-20 -rotate-[4deg]", delay: 0.2, even: false },
                 ].map((img, i) => (
@@ -1625,7 +1628,7 @@ export default function LandingPage() {
                         transition={{ duration: 0.8, delay: 0.5 + img.delay, ease: [0.22, 1, 0.36, 1] }}
                         style={{ y: img.even ? floatY1 : floatY2 }}
                     >
-                        <img src={img.src} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        <img src={img.src} alt="AI Artwork Concept" className="w-full h-full object-cover" fetchPriority="high" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                     </motion.div>
                 ))}
@@ -1703,11 +1706,11 @@ export default function LandingPage() {
                 </motion.div>
 
                 {/* Marquee 2 rows */}
-                <div className="relative w-full mt-auto mb-8 z-10 overflow-hidden space-y-3">
+                <div className="relative w-full mt-auto mb-8 z-10 overflow-hidden flex flex-col gap-3">
                     <div className="flex gap-3 animate-marquee" style={{ width: "max-content" }}>
-                        {[...HERO_IMAGES, ...HERO_IMAGES].map((img, i) => (
+                        {[...HERO_IMAGES, ...HERO_IMAGES, ...HERO_IMAGES].map((img, i) => (
                             <div key={`r1-${i}`} className="w-[220px] md:w-[260px] h-[130px] md:h-[150px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
-                                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <span className="text-[10px] text-white/80 bg-black/40 px-2 py-0.5 rounded-full">{img.label}</span>
@@ -1716,9 +1719,9 @@ export default function LandingPage() {
                         ))}
                     </div>
                     <div className="flex gap-3 animate-marquee-reverse" style={{ width: "max-content" }}>
-                        {[...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8)].map((tpl, i) => (
+                        {[...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8)].map((tpl, i) => (
                             <div key={`r2-${i}`} className="w-[200px] md:w-[240px] h-[120px] md:h-[140px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
-                                <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                                <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <Badge variant="secondary" className="text-[9px] bg-black/40 text-white/80 border-0">{tpl.name}</Badge>
