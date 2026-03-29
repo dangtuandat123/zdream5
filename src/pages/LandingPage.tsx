@@ -1611,14 +1611,61 @@ export default function LandingPage() {
                 <div className="absolute top-[30%] right-[15%] w-[400px] h-[400px] rounded-full bg-fuchsia-600/[0.06] blur-[100px] pointer-events-none animate-float-delayed" />
                 <div className="absolute bottom-[20%] left-[40%] w-[300px] h-[300px] rounded-full bg-pink-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
 
+                {/* Decorative Cybernetic Dot Grid */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.04] z-0" xmlns="http://www.w3.org/2000/svg">
+                    <defs><pattern id="hero-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="white"/></pattern></defs>
+                    <rect width="100%" height="100%" fill="url(#hero-dots)"/>
+                </svg>
+
+                {/* Cute Magic SVGs Floating in Space */}
+                {/* 1. Wand */}
+                <motion.div className="absolute z-0 top-[22%] right-[15%] md:right-[25%] pointer-events-none opacity-60 text-violet-400"
+                    animate={{ y: [0, -20, 0], rotate: [0, 15, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+                    <WandSparkles className="w-10 h-10 md:w-16 md:h-16 drop-shadow-[0_0_20px_rgba(139,92,246,0.6)]" />
+                </motion.div>
+                {/* 2. Sparkles */}
+                <motion.div className="absolute z-0 top-[40%] left-[10%] md:left-[22%] pointer-events-none opacity-50 text-fuchsia-400"
+                    animate={{ y: [0, 25, 0], rotate: [0, -20, 10, 0], scale: [1, 1.15, 1] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
+                    <Sparkles className="w-8 h-8 md:w-12 md:h-12 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]" />
+                </motion.div>
+                {/* 3. Magic Spiral */}
+                <motion.div className="absolute z-0 bottom-[35%] right-[10%] md:right-[28%] pointer-events-none opacity-40 text-pink-400"
+                    animate={{ y: [0, -15, 0], rotate: [0, 45, 0], scale: [1, 0.9, 1] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}>
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-[0_0_15px_rgba(244,114,182,0.5)]">
+                         <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                </motion.div>
+                {/* 4. Glass Sphere */}
+                <motion.div className="absolute z-0 top-[15%] left-[8%] md:left-[12%] pointer-events-none opacity-40"
+                    animate={{ y: [0, 30, 0], scale: [1, 1.1, 1] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>
+                    <svg width="60" height="60" viewBox="0 0 100 100" fill="url(#sphere-grad)" className="drop-shadow-[0_0_20px_rgba(139,92,246,0.2)]">
+                        <defs><radialGradient id="sphere-grad" cx="30%" cy="30%" r="70%"><stop stopColor="#c4b5fd" /><stop offset="1" stopColor="#4c1d95" /></radialGradient></defs>
+                        <circle cx="50" cy="50" r="40" opacity="0.8" />
+                        <path d="M 30 30 Q 50 10 70 30" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.4" />
+                    </svg>
+                </motion.div>
+                {/* 5. Glowing Diamond */}
+                <motion.div className="absolute z-0 top-[60%] left-[8%] pointer-events-none opacity-50"
+                    animate={{ y: [0, -20, 0], rotate: [0, 90, 180] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }}>
+                    <svg width="45" height="45" viewBox="0 0 24 24" fill="none" stroke="url(#diamond-grad)" strokeWidth="1.5" className="drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]">
+                        <defs><linearGradient id="diamond-grad" x1="0" y1="0" x2="24" y2="24"><stop stopColor="#f0abfc" /><stop offset="1" stopColor="#c084fc" /></linearGradient></defs>
+                        <path d="M12 2L2 12l10 10 10-10L12 2z" />
+                    </svg>
+                </motion.div>
+                {/* 6. Star Dust */}
+                <motion.div className="absolute z-0 top-[55%] right-[5%] pointer-events-none opacity-30 text-white"
+                    animate={{ scale: [0.8, 1.2, 0.8], rotate: [0, 180, 360], opacity: [0.1, 0.4, 0.1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+                    <Star className="w-8 h-8 fill-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)]" />
+                </motion.div>
+
                 {/* Floating AI showcase images */}
                 {[
                     { src: HERO_IMAGES[0].src, className: "top-[10%] left-[2%] w-24 h-16 md:top-[18%] md:left-[5%] md:w-36 md:h-24 -rotate-3", delay: 0, even: true },
                     { src: HERO_IMAGES[1].src, className: "hidden lg:block top-[12%] right-[6%] w-44 h-28 rotate-2", delay: 0.15, even: false },
                     { src: HERO_IMAGES[2].src, className: "hidden md:block top-[38%] left-[3%] w-32 h-20 rotate-[5deg]", delay: 0.3, even: true },
-                    { src: HERO_IMAGES[3].src, className: "top-[15%] right-[2%] w-28 h-20 md:top-[32%] md:right-[3%] md:w-40 md:h-24 -rotate-2", delay: 0.1, even: false },
-                    { src: HERO_IMAGES[4].src, className: "hidden xl:block bottom-[32%] left-[8%] w-36 h-22 rotate-3", delay: 0.25, even: true },
-                    { src: HERO_IMAGES[5].src, className: "hidden xl:block bottom-[35%] right-[7%] w-32 h-20 -rotate-[4deg]", delay: 0.2, even: false },
+                    { src: HERO_IMAGES[3].src, className: "top-[15%] right-[2%] w-28 h-20 md:top-[30%] md:right-[3%] md:w-40 md:h-24 -rotate-2", delay: 0.1, even: false },
+                    { src: HERO_IMAGES[4].src, className: "hidden xl:block top-[50%] left-[8%] w-36 h-22 rotate-3", delay: 0.25, even: true },
+                    { src: HERO_IMAGES[5].src, className: "hidden xl:block top-[45%] right-[7%] w-32 h-20 -rotate-[4deg]", delay: 0.2, even: false },
                 ].map((img, i) => (
                     <motion.div
                         key={`float-${i}`}
@@ -1672,23 +1719,31 @@ export default function LandingPage() {
 
                     {/* Dual CTA */}
                     <motion.div
-                        className="flex flex-col sm:flex-row items-center gap-3"
+                        className="flex flex-col sm:flex-row items-center gap-4 mt-4"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
                     >
                         <Link to="/login">
-                            <Button size="lg" className="h-12 px-8 text-sm font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_40px_-5px_rgba(139,92,246,0.5)] hover:shadow-[0_0_60px_-5px_rgba(139,92,246,0.7)] transition-all duration-500 rounded-xl">
-                                <Play className="mr-2 h-4 w-4" /> Bắt Đầu Sáng Tạo
+                            <Button size="lg" className="relative group overflow-hidden h-14 px-8 text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_40px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_60px_-5px_rgba(139,92,246,0.8)] transition-all duration-500 rounded-xl hover:scale-105 active:scale-95">
+                                <motion.div 
+                                    className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
+                                    animate={{ left: ["-100%", "200%"] }}
+                                    transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                                />
+                                <WandSparkles className="mr-2 h-5 w-5 relative z-10 animate-pulse" /> <span className="relative z-10">Bắt Đầu Cùng AI</span>
                             </Button>
                         </Link>
                         <Button
                             size="lg"
                             variant="outline"
-                            className="h-12 px-8 text-sm font-semibold border-white/15 hover:border-violet-500/30 hover:bg-violet-500/5 rounded-xl transition-all duration-500"
-                            onClick={() => scrollToSection("demo")}
+                            className="group h-14 px-8 text-base font-semibold border-white/20 hover:border-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 bg-background/50 backdrop-blur-sm"
+                            onClick={() => {
+                                const el = document.getElementById("demo");
+                                if(el) window.scrollTo({ top: el.offsetTop - 80, behavior: "smooth" });
+                            }}
                         >
-                            Xem Demo <ArrowRight className="ml-2 h-4 w-4" />
+                            Xem Chế Độ Demo <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Button>
                     </motion.div>
 
@@ -1706,10 +1761,10 @@ export default function LandingPage() {
                 </motion.div>
 
                 {/* Marquee 2 rows */}
-                <div className="relative w-full mt-auto mb-8 z-10 overflow-hidden flex flex-col gap-3">
+                <div className="relative w-full mt-auto mb-6 z-10 overflow-hidden flex flex-col gap-3">
                     <div className="flex gap-3 animate-marquee" style={{ width: "max-content" }}>
                         {[...HERO_IMAGES, ...HERO_IMAGES, ...HERO_IMAGES].map((img, i) => (
-                            <div key={`r1-${i}`} className="w-[220px] md:w-[260px] h-[130px] md:h-[150px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
+                            <div key={`r1-${i}`} className="w-[180px] md:w-[220px] h-[100px] md:h-[120px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
                                 <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -1720,7 +1775,7 @@ export default function LandingPage() {
                     </div>
                     <div className="flex gap-3 animate-marquee-reverse" style={{ width: "max-content" }}>
                         {[...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8)].map((tpl, i) => (
-                            <div key={`r2-${i}`} className="w-[200px] md:w-[240px] h-[120px] md:h-[140px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
+                            <div key={`r2-${i}`} className="w-[160px] md:w-[200px] h-[90px] md:h-[110px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
                                 <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -1729,8 +1784,9 @@ export default function LandingPage() {
                             </div>
                         ))}
                     </div>
-                    <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent pointer-events-none z-10" />
-                    <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent pointer-events-none z-10" />
+                    {/* Soft wide fade on edges */}
+                    <div className="absolute inset-y-0 left-0 w-32 md:w-56 bg-gradient-to-r from-background via-background/80 to-transparent pointer-events-none z-10" />
+                    <div className="absolute inset-y-0 right-0 w-32 md:w-56 bg-gradient-to-l from-background via-background/80 to-transparent pointer-events-none z-10" />
                 </div>
             </section>
 
