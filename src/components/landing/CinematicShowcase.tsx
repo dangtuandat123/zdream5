@@ -19,12 +19,7 @@ import {
 const PROMPT_TEXT = "A cute fox wearing a spacesuit, floating in galaxy"
 const STYLES = ["Digital Art", "Anime", "Chân thực", "3D Render", "Sơn dầu"]
 const RATIOS = ["1:1", "3:4", "4:3", "16:9", "9:16"]
-const RESULT_IMAGES = [
-    "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=400&h=225&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=400&h=225&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?q=80&w=400&h=225&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=400&h=225&auto=format&fit=crop"
-]
+const RESULT_IMAGE = "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&h=675&auto=format&fit=crop"
 
 type Scene = "idle" | "prompt" | "style" | "generate" | "result" | "pause"
 
@@ -465,20 +460,17 @@ export default function CinematicShowcase() {
                                 {/* Aurora Render Canvas */}
                                 <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0a0a0c] border border-white/[0.08] shadow-[0_40px_100px_-20px_rgba(232,121,249,0.3)] ring-1 ring-white/5">
                                     
-                                {/* 1. Base Image (4 Grid) heavily blurred and progressively sharpening */}
-                                    <div className="absolute inset-0 z-0 grid grid-cols-2 grid-rows-2 gap-[2px] bg-black">
-                                        {RESULT_IMAGES.map((img, i) => (
-                                            <motion.img 
-                                                key={`gen-${i}`}
-                                                src={img}
-                                                alt={`rendering-${i}...`}
-                                                className="w-full h-full object-cover"
-                                                style={{
-                                                    filter: `blur(${Math.max(100 - progress, 0)}px) contrast(${0.5 + progress * 0.005}) brightness(${0.4 + progress * 0.006})`,
-                                                    scale: 1.2 - (progress * 0.001)
-                                                }}
-                                            />
-                                        ))}
+                                {/* 1. Base Image heavily blurred and progressively sharpening */}
+                                    <div className="absolute inset-0 z-0 bg-black">
+                                        <motion.img 
+                                            src={RESULT_IMAGE}
+                                            alt="rendering..."
+                                            className="w-full h-full object-cover"
+                                            style={{
+                                                filter: `blur(${Math.max(100 - progress, 0)}px) contrast(${0.5 + progress * 0.005}) brightness(${0.4 + progress * 0.006})`,
+                                                scale: 1.2 - (progress * 0.001)
+                                            }}
+                                        />
                                     </div>
 
                                     {/* 2. Abstract Shifting Gradient Layer multiplying over it to simulate "AI processing colors" */}
@@ -599,24 +591,26 @@ export default function CinematicShowcase() {
                                     animate={{ scale: 1, filter: "blur(0px)" }}
                                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 >
-                                    {/* The 4-Grid Artwork */}
-                                    <div className="absolute inset-0 z-0 grid grid-cols-2 grid-rows-2 gap-[2px] bg-black pointer-events-auto">
-                                        {RESULT_IMAGES.map((img, i) => (
-                                            <div key={`res-${i}`} className="relative w-full h-full overflow-hidden group/img cursor-pointer bg-[#0a0a0c]">
-                                                <img
-                                                    src={img}
-                                                    alt={`Generated Fox ${i + 1}`}
-                                                    className="w-full h-full object-cover scale-[1.02] group-hover/img:scale-110 transition-transform duration-700 ease-out"
-                                                />
-                                                <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors duration-300 pointer-events-none" />
-                                                
-                                                {/* Simulate Upscale Badges appearing on hover */}
-                                                <div className="absolute bottom-2 right-2 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex gap-1 pointer-events-none">
-                                                    <span className="bg-black/60 backdrop-blur-sm text-white/90 text-[10px] px-2 py-0.5 rounded-sm border border-white/20">V{i+1}</span>
-                                                    <span className="bg-black/60 backdrop-blur-sm text-white/90 text-[10px] px-2 py-0.5 rounded-sm border border-white/20">U{i+1}</span>
+                                    {/* The Single Target Artwork */}
+                                    <div className="absolute inset-0 z-0 bg-black pointer-events-auto group/img cursor-pointer">
+                                        <div className="relative w-full h-full overflow-hidden bg-[#0a0a0c]">
+                                            <img
+                                                src={RESULT_IMAGE}
+                                                alt="Generated AI Art"
+                                                className="w-full h-full object-cover scale-[1.02] group-hover/img:scale-110 transition-transform duration-700 ease-out"
+                                            />
+                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors duration-300 pointer-events-none" />
+                                            
+                                            {/* Simulate Interactive Badges appearing on hover */}
+                                            <div className="absolute top-4 right-4 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex flex-wrap justify-end gap-2">
+                                                <div className="backdrop-blur-md bg-black/40 border border-white/20 text-white/90 text-xs sm:text-sm px-3 py-1.5 rounded-lg shadow-lg hover:bg-white/20 hover:text-white transition-colors">
+                                                    Upscale
+                                                </div>
+                                                <div className="backdrop-blur-md bg-black/40 border border-white/20 text-white/90 text-xs sm:text-sm px-3 py-1.5 rounded-lg shadow-lg hover:bg-white/20 hover:text-white transition-colors">
+                                                    Variation
                                                 </div>
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
                                     
                                     {/* Laser Scanner Line matching the image width */}
@@ -637,10 +631,10 @@ export default function CinematicShowcase() {
                                         </h2>
                                     </div>
                                     
-                                    {/* Top Right Specs */}
-                                    <div className="absolute top-5 right-5 flex gap-2" style={{ transform: "translateZ(20px)" }}>
-                                        <div className="bg-black/40 backdrop-blur-md text-white/90 text-xs font-bold px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-1.5">
-                                            <ZapIcon className="w-3.5 h-3.5 text-amber-400" /> ~10s
+                                    {/* Top Left Specs */}
+                                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 flex gap-2" style={{ transform: "translateZ(20px)" }}>
+                                        <div className="bg-black/40 backdrop-blur-md text-white/90 text-xs font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/10 flex items-center gap-1.5">
+                                            <ZapIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" /> ~10s
                                         </div>
                                     </div>
                                 </motion.div>
