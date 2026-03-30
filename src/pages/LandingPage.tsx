@@ -1517,6 +1517,80 @@ const FEATURES = [
 ]
 
 // ============================================================
+// BENTO CARD COMPONENT (Ultra-Premium Interactive Grid)
+// ============================================================
+const BentoCard = ({ feat }: { feat: typeof FEATURES[0] }) => {
+    const mouseX = useMotionValue(0)
+    const mouseY = useMotionValue(0)
+
+    function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+        const { left, top } = currentTarget.getBoundingClientRect()
+        mouseX.set(clientX - left)
+        mouseY.set(clientY - top)
+    }
+
+    return (
+        <div
+            onMouseMove={handleMouseMove}
+            className="group relative h-full rounded-[32px] overflow-hidden bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.04] transition-all duration-700 w-full"
+        >
+            {/* 1. Underlying Premium Grid Pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
+
+            {/* 2. Constant Atmospheric Aurora (Always visible, intensified on hover) */}
+            <div className="absolute inset-0 opacity-50 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none mix-blend-screen overflow-hidden">
+                <motion.div 
+                    className={`absolute inset-[-50%] bg-gradient-to-tr ${feat.color} blur-[100px] opacity-30`}
+                    animate={{ rotate: [0, 360], scale: [1, 1.15, 1] }}
+                    transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+                />
+            </div>
+
+            {/* 3. Precision Spotlight chasing mouse */}
+            <motion.div
+                className="pointer-events-none absolute -inset-px rounded-[32px] opacity-0 transition duration-500 group-hover:opacity-100 mix-blend-plus-lighter z-10"
+                style={{
+                    background: useMotionTemplate`
+                        radial-gradient(
+                            500px circle at ${mouseX}px ${mouseY}px,
+                            rgba(255, 255, 255, 0.15),
+                            transparent 60%
+                        )
+                    `,
+                }}
+            />
+
+            {/* 4. Giant Watermark Icon in background */}
+            <feat.icon strokeWidth={1} className="absolute -bottom-8 -right-8 w-64 h-64 text-white/[0.03] group-hover:text-white/[0.08] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-1000 pointer-events-none z-0" />
+
+            {/* 5. Actual Content */}
+            <div className="relative p-8 sm:p-10 h-full flex flex-col justify-between z-20 pointer-events-none">
+                <div className="flex justify-between items-start mb-12">
+                    {/* Sleek Floating Glass Icon Box */}
+                    <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(255,255,255,0.1)] group-hover:bg-white/[0.1] group-hover:border-white/30 transition-all duration-500 overflow-hidden relative backdrop-blur-md">
+                        {/* Shimmer Swipe Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out" />
+                        <feat.icon className="w-6 h-6 text-white/80 group-hover:text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] transition-colors duration-500 relative z-10" />
+                    </div>
+                </div>
+
+                <div className="relative">
+                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white/95 mb-3 group-hover:text-white transition-colors duration-500">
+                        {feat.title}
+                    </h3>
+                    <p className="text-muted-foreground/90 leading-relaxed text-sm sm:text-[15px] group-hover:text-white/80 transition-colors duration-500 pr-6">
+                        {feat.desc}
+                    </p>
+                </div>
+            </div>
+            
+            {/* Premium Top Border Reveal (Apple style) */}
+            <div className="absolute top-0 inset-x-8 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-1000 ease-out z-30" />
+        </div>
+    )
+}
+
+// ============================================================
 // TEMPLATE CARD COMPONENT (3D Tilt Effect)
 // ============================================================
 const TemplateCard = ({ tpl, index }: { tpl: any; index: number }) => {
@@ -2151,46 +2225,41 @@ export default function LandingPage() {
             </section>
 
             {/* ==================== FEATURES ==================== */}
-            <section className="w-full py-20 md:py-24 relative overflow-hidden">
+            <section className="w-full py-16 relative overflow-hidden">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
 
-                <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
+                <div className="container mx-auto px-4 md:px-8 max-w-5xl relative">
                     <motion.div
-                        className="text-center mb-14"
+                        className="text-center mb-8"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                        <Badge variant="outline" className="mb-3 border-violet-500/30 bg-violet-500/10 text-violet-300">
                             <Sparkles className="mr-2 h-3.5 w-3.5" /> Tính năng nổi bật
                         </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Tất Cả Trong Một Nền Tảng</h2>
-                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl lg:text-4xl">Tất Cả Trong Một Nền Tảng</h2>
+                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm lg:text-base text-balance">
                             Mọi công cụ bạn cần để biến ý tưởng thành tác phẩm nghệ thuật — nhanh, đẹp, dễ dùng.
                         </p>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={staggerContainer}
                     >
-                        {FEATURES.map((feat) => (
-                            <motion.div key={feat.title} variants={fadeUp}>
-                                <div className="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 h-full hover:bg-white/[0.04] hover:border-white/[0.1] transition-all duration-500">
-                                    {/* Glow on hover */}
-                                    <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feat.color} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500 pointer-events-none`} />
-                                    {/* Icon */}
-                                    <div className={`relative h-11 w-11 rounded-xl bg-gradient-to-br ${feat.color} p-[1.5px] mb-4`}>
-                                        <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center">
-                                            <feat.icon className="h-5 w-5 text-violet-400" />
-                                        </div>
-                                    </div>
-                                    <h3 className="text-base font-semibold mb-1.5">{feat.title}</h3>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{feat.desc}</p>
-                                </div>
-                            </motion.div>
-                        ))}
+                        {FEATURES.map((feat, i) => {
+                            let spanClass = "col-span-1"
+                            if (i === 0) spanClass = "col-span-1 md:col-span-2 lg:col-span-2"
+                            if (i === 5) spanClass = "col-span-1 md:col-span-2 lg:col-span-3"
+
+                            return (
+                                <motion.div key={feat.title} variants={fadeUp} className={`h-full ${spanClass}`}>
+                                    <BentoCard feat={feat} />
+                                </motion.div>
+                            )
+                        })}
                     </motion.div>
                 </div>
             </section>
