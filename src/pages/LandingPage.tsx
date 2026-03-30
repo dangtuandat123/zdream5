@@ -483,26 +483,30 @@ export function InteractiveDemo() {
 
     return (
         <div ref={containerRef}>
-            <Card className="relative border-border/20 bg-background/80 rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/[0.03]">
-                {/* Subtle gradient accent */}
-                <div className="absolute -top-20 -right-20 w-60 h-60 bg-violet-600/5 rounded-full pointer-events-none" />
-                <div className="absolute -bottom-20 -left-20 w-48 h-48 bg-fuchsia-600/4 rounded-full pointer-events-none" />
+            <Card className="group/card relative border-white/[0.08] bg-black/60 backdrop-blur-xl rounded-2xl overflow-hidden shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)] ring-1 ring-white/[0.05]">
+                {/* Animated gradient accents */}
+                <motion.div className="absolute -top-20 -right-20 w-72 h-72 bg-violet-600/8 rounded-full pointer-events-none blur-xl"
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
+                <motion.div className="absolute -bottom-20 -left-20 w-56 h-56 bg-fuchsia-600/6 rounded-full pointer-events-none blur-xl"
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 2 }} />
+                {/* Glass grid background */}
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_20%,transparent_100%)] pointer-events-none" />
 
-                {/* Thanh tiêu đề giả lập window */}
-                <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/80">
-                    <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-red-500/70" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                        <div className="w-3 h-3 rounded-full bg-green-500/70" />
+                {/* Window header — premium glass */}
+                <div className="h-[42px] border-b border-white/[0.08] bg-white/[0.02] flex items-center px-4 justify-between relative z-20 backdrop-blur-xl">
+                    <div className="flex gap-2.5 items-center">
+                        <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-[0_0_8px_rgba(255,95,86,0.4)]" />
+                        <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-[0_0_8px_rgba(255,189,46,0.4)]" />
+                        <div className="w-3 h-3 rounded-full bg-[#27c93f] shadow-[0_0_8px_rgba(39,201,63,0.4)]" />
                     </div>
-                    <div className="flex-1 flex justify-center">
-                        <div className="flex items-center gap-2 text-[11px] text-muted-foreground/70 bg-muted/20 rounded-md px-3 py-1 border border-border/10">
-                            <Monitor className="h-3 w-3" /> zdream.vn/app/generate
-                        </div>
+                    <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/40 rounded-full px-5 py-1.5 text-[10px] sm:text-[11px] font-medium text-white/50 border border-white/5 ring-1 ring-white/5 shadow-inner">
+                        <Monitor className="h-3 w-3 text-violet-400" /> zdream.vn/app/generate
                     </div>
                 </div>
 
-                <div className="relative flex flex-col lg:flex-row min-h-[480px] sm:min-h-[420px] lg:min-h-[420px] overflow-hidden">
+                <div className="relative flex flex-col lg:flex-row min-h-[480px] sm:min-h-[420px] lg:min-h-[460px] overflow-hidden">
                     {/* Mobile compact settings bar — visible only on mobile */}
                     <div className="flex lg:hidden items-center gap-2 px-4 py-2.5 border-b border-border/15 bg-background/30 overflow-x-auto">
                         <span className="text-[10px] uppercase text-muted-foreground/50 font-medium shrink-0">Cài đặt:</span>
@@ -600,28 +604,44 @@ export function InteractiveDemo() {
                     {/* RIGHT: Canvas + Prompt bar */}
                     <div className="flex-1 flex flex-col min-h-0 relative">
                         {/* Canvas area */}
-                        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center relative bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(139,92,246,0.03),transparent)]">
+                        <div className="flex-1 p-4 lg:p-6 flex items-center justify-center relative bg-[radial-gradient(ellipse_60%_50%_at_50%_50%,rgba(139,92,246,0.05),transparent)]">
                             {!showResults ? (
                                 <div className="w-full max-w-lg">
                                     {isGenerating ? (
-                                        /* Skeleton loading — shimmer giống app thật */
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                            {[0, 1].map(i => (
-                                                <div key={i} className={`relative aspect-video rounded-xl overflow-hidden bg-muted/15 border border-border/30 flex flex-col items-center justify-center isolate ${i === 1 ? "hidden sm:flex" : ""}`}>
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                                                    <Wand2 className="h-5 w-5 text-violet-400/40 animate-pulse" />
-                                                    <div className="flex gap-1.5 items-center mt-3">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400/50 animate-bounce" style={{ animationDelay: '0ms' }} />
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400/50 animate-bounce" style={{ animationDelay: '150ms' }} />
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-violet-400/50 animate-bounce" style={{ animationDelay: '300ms' }} />
-                                                        <span className="text-[10px] text-muted-foreground/40 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
-                                                    </div>
-                                                    {/* Progress bar gradient */}
-                                                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/20">
-                                                        <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-300 ease-out" style={{ width: `${progress}%` }} />
-                                                    </div>
-                                                </div>
-                                            ))}
+                                        /* Cinematic generation — aurora + percentage */
+                                        <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-black border border-white/[0.06] shadow-[0_20px_60px_-15px_rgba(139,92,246,0.3)]">
+                                            {/* Aurora blobs */}
+                                            <motion.div className="absolute top-[-10%] left-[10%] w-[60%] h-[70%] bg-violet-600/40 rounded-full blur-[60px] mix-blend-screen"
+                                                animate={{ x: [0, 50, -30, 0], y: [0, 30, -50, 0], scale: [1, 1.2, 0.9, 1] }}
+                                                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} />
+                                            <motion.div className="absolute bottom-[-10%] right-[5%] w-[50%] h-[60%] bg-fuchsia-600/40 rounded-full blur-[70px] mix-blend-screen"
+                                                animate={{ x: [0, -40, 40, 0], y: [0, -40, 20, 0], scale: [1, 1.3, 0.8, 1] }}
+                                                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }} />
+                                            <motion.div className="absolute top-[20%] right-[30%] w-[40%] h-[50%] bg-blue-500/30 rounded-full blur-[50px] mix-blend-screen"
+                                                animate={{ x: [0, 30, -40, 0], y: [0, -20, 50, 0] }}
+                                                transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
+                                            {/* Big percentage */}
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                                                <motion.span className="text-[4rem] sm:text-[6rem] font-extralight text-transparent bg-clip-text bg-gradient-to-b from-white to-white/40 tracking-tighter tabular-nums"
+                                                    animate={{ scale: [0.98, 1.02, 0.98] }}
+                                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+                                                    {Math.round(progress)}<span className="text-2xl sm:text-3xl font-light text-white/50">%</span>
+                                                </motion.span>
+                                                <motion.p className="text-white/60 font-light tracking-[0.15em] text-[10px] sm:text-xs uppercase mt-2"
+                                                    animate={{ opacity: [0.5, 1, 0.5] }}
+                                                    transition={{ duration: 2, repeat: Infinity }}>
+                                                    {progress < 30 ? "Khởi tạo không gian..." : progress < 70 ? "Hội tụ chi tiết..." : "Hoàn thiện tác phẩm..."}
+                                                </motion.p>
+                                                <Sparkles className="w-4 h-4 text-fuchsia-300 mt-3 drop-shadow-[0_0_10px_rgba(217,70,239,0.8)]" />
+                                            </div>
+                                            {/* Light sweep */}
+                                            <motion.div className="absolute top-0 bottom-0 w-[40%] bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-15deg]"
+                                                animate={{ left: ["-50%", "150%"] }}
+                                                transition={{ duration: 3, repeat: Infinity, ease: "linear", delay: 1 }} />
+                                            {/* Progress bar bottom */}
+                                            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/5 z-20">
+                                                <motion.div className="h-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 shadow-[0_0_10px_rgba(217,70,239,0.6)]" style={{ width: `${progress}%` }} />
+                                            </div>
                                         </div>
                                     ) : (
                                         /* Empty state */
@@ -637,19 +657,25 @@ export function InteractiveDemo() {
                             ) : (
                                 /* Results + Drag animation */
                                 <div className="relative w-full max-w-lg">
+                                    {/* White flash on first reveal */}
+                                    {showResults && !showV2Results && (
+                                        <motion.div className="absolute inset-0 bg-white rounded-xl z-20 pointer-events-none"
+                                            initial={{ opacity: 0.8 }} animate={{ opacity: 0 }}
+                                            transition={{ duration: 0.8, ease: "easeOut" }} />
+                                    )}
                                     <motion.div
                                         className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-                                        initial={{ opacity: 0, y: 12 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] as const }}
+                                        initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                                        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
                                     >
                                         {currentResults.map((src, i) => (
                                             <motion.div
                                                 key={src}
-                                                className={`relative rounded-xl overflow-hidden ring-1 ring-border/20 shadow-lg group ${i === 1 ? "hidden sm:block" : ""}`}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: isDragging && i === 0 ? 0.5 : 1, scale: 1 }}
-                                                transition={{ delay: i * 0.15, duration: 0.5 }}
+                                                className={`relative rounded-xl overflow-hidden ring-1 ring-white/10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] group ${i === 1 ? "hidden sm:block" : ""}`}
+                                                initial={{ opacity: 0, scale: 0.85, y: 20 }}
+                                                animate={{ opacity: isDragging && i === 0 ? 0.5 : 1, scale: 1, y: 0 }}
+                                                transition={{ delay: i * 0.2, duration: 0.6, type: "spring", stiffness: 100, damping: 15 }}
                                             >
                                                 <div className="relative aspect-video bg-muted/20">
                                                     <img src={src} alt={`AI Result ${i + 1}`} className="w-full h-full object-cover" loading="lazy" />
@@ -705,11 +731,15 @@ export function InteractiveDemo() {
 
                         {/* Prompt bar */}
                         <div className="p-3 relative">
-                            <div className={`relative w-full border rounded-[22px] transition-all duration-500 ${
+                            <div className={`relative w-full border rounded-[22px] transition-all duration-700 ${
                                 promptBarHighlight
-                                    ? "border-violet-500/60 bg-violet-500/[0.06] shadow-lg shadow-violet-500/10 scale-[1.01]"
-                                    : "border-border/25 bg-[#37393b]/85"
+                                    ? "border-violet-500/60 bg-violet-500/[0.08] shadow-[0_0_30px_rgba(139,92,246,0.15)] scale-[1.02]"
+                                    : "border-white/[0.08] bg-[#0c0c0e]/80 backdrop-blur-xl"
                             }`}>
+                                {/* Subtle glow border when typing */}
+                                {(phase === "typing" || phase === "retyping") && (
+                                    <div className="absolute -inset-[1px] rounded-[22px] bg-gradient-to-r from-violet-600/20 via-fuchsia-600/20 to-violet-600/20 pointer-events-none" />
+                                )}
                                 {/* Prompt bar highlight glow khi đang kéo */}
                                 {promptBarHighlight && (
                                     <div className="absolute inset-0 rounded-[22px] bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-violet-500/10 animate-pulse pointer-events-none" />
@@ -772,15 +802,19 @@ export function InteractiveDemo() {
                                         </div>
                                     </div>
                                     {/* Generate button */}
-                                    <div className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${promptText
-                                        ? "bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30"
-                                        : "bg-muted/40 text-muted-foreground/40"
-                                    }`}>
+                                    <motion.div
+                                        className={`h-9 w-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${promptText
+                                            ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-[0_0_20px_rgba(139,92,246,0.5)] ring-2 ring-violet-400/20"
+                                            : "bg-white/5 text-white/30"
+                                        }`}
+                                        animate={promptText && !isGenerating ? { scale: [1, 1.08, 1], boxShadow: ["0 0 20px rgba(139,92,246,0.5)", "0 0 35px rgba(217,70,239,0.7)", "0 0 20px rgba(139,92,246,0.5)"] } : {}}
+                                        transition={{ duration: 1.5, repeat: Infinity }}
+                                    >
                                         {isGenerating
                                             ? <div className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                             : <ArrowUp className="h-4 w-4" />
                                         }
-                                    </div>
+                                    </motion.div>
                                 </div>
                             </div>
 
@@ -802,23 +836,23 @@ export function InteractiveDemo() {
                 <AnimatePresence>
                     {lightboxImg && (
                         <motion.div
-                            className="absolute inset-0 z-40 bg-black/90 flex items-center justify-center rounded-2xl"
+                            className="absolute inset-0 z-40 bg-black/80 backdrop-blur-xl flex items-center justify-center rounded-2xl"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.3 }}
+                            transition={{ duration: 0.4 }}
                         >
                             {/* Nút đóng */}
-                            <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-white/70">
+                            <div className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white/70 border border-white/10">
                                 <X className="h-4 w-4" />
                             </div>
                             {/* Ảnh phóng to */}
                             <motion.div
-                                className="relative max-w-[70%] max-h-[75%] rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/10"
-                                initial={{ scale: 0.7, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                exit={{ scale: 0.8, opacity: 0 }}
-                                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                className="relative max-w-[70%] max-h-[75%] rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(139,92,246,0.3)] ring-1 ring-white/10"
+                                initial={{ scale: 0.6, opacity: 0, filter: "blur(20px)" }}
+                                animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+                                exit={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }}
+                                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                             >
                                 <img src={lightboxImg} alt="Preview" className="w-full h-full object-cover" />
                                 {/* Info bar dưới ảnh */}

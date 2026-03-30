@@ -240,7 +240,7 @@ export default function CinematicShowcase() {
             {/* === MAIN SHOWCASE CONTAINER (Fake Browser Window) === */}
             <div 
                 onMouseMove={handleMouseMove}
-                className="group/window relative rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_30px_80px_-20px_rgba(0,0,0,1)] bg-black/60 backdrop-blur-3xl min-h-[460px] sm:min-h-[520px]"
+                className="group/window relative rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_30px_80px_-20px_rgba(0,0,0,1)] bg-black/60 backdrop-blur-3xl"
             >
                 {/* Dynamic Spotlight following cursor */}
                 <motion.div
@@ -283,7 +283,7 @@ export default function CinematicShowcase() {
                 </div>
 
                 {/* === SCENE CONTENT (Global Wrapper) === */}
-                <div ref={sceneContainerRef} className="relative flex items-center justify-center min-h-[420px] sm:min-h-[480px] p-6 sm:p-10 z-10 w-full">
+                <div ref={sceneContainerRef} className="relative flex items-center justify-center h-[340px] sm:h-[440px] lg:h-[500px] p-3 sm:p-6 z-10 w-full">
                     
                     {/* Fake Cursor (Global) */}
                     <AnimatePresence>
@@ -456,7 +456,7 @@ export default function CinematicShowcase() {
                         {scene === "generate" && (
                             <motion.div
                                 key="scene-generate"
-                                className="w-full max-w-3xl mx-auto flex items-center justify-center p-4 sm:p-8"
+                                className="w-full max-w-2xl mx-auto flex items-center justify-center p-2 sm:p-4"
                                 initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
                                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
                                 exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
@@ -576,7 +576,7 @@ export default function CinematicShowcase() {
                         {scene === "result" && (
                             <motion.div
                                 key="scene-result"
-                                className="w-full h-full absolute inset-0 flex items-center justify-center p-6 sm:p-10 perspective-1000"
+                                className="w-full h-full absolute inset-0 flex items-center justify-center p-4 sm:p-6 perspective-1000"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
@@ -594,7 +594,7 @@ export default function CinematicShowcase() {
                                     onMouseMove={handleCardMouseMove}
                                     onMouseLeave={handleCardMouseLeave}
                                     style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-                                    className="relative w-full max-w-3xl aspect-video rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(139,92,246,0.5)] ring-1 ring-white/20 transition-all duration-300 ease-out z-30"
+                                    className="relative w-full max-w-2xl aspect-video rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(139,92,246,0.5)] ring-1 ring-white/20 transition-all duration-300 ease-out z-30"
                                     initial={{ scale: 0.8, filter: "blur(20px)" }}
                                     animate={{ scale: 1, filter: "blur(0px)" }}
                                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
