@@ -283,7 +283,7 @@ export default function CinematicShowcase() {
                 </div>
 
                 {/* === SCENE CONTENT (Global Wrapper) === */}
-                <div ref={sceneContainerRef} className="relative flex items-center justify-center h-[340px] sm:h-[440px] lg:h-[500px] p-3 sm:p-6 z-10 w-full">
+                <div ref={sceneContainerRef} className="relative flex items-center justify-center h-[460px] sm:h-[480px] lg:h-[500px] p-3 sm:p-6 z-10 w-full">
                     
                     {/* Fake Cursor (Global) */}
                     <AnimatePresence>
@@ -380,14 +380,14 @@ export default function CinematicShowcase() {
                         {scene === "style" && (
                             <motion.div
                                 key="scene-style"
-                                className="w-full max-w-xl mx-auto flex flex-col items-center gap-10"
+                                className="w-full max-w-xl mx-auto flex flex-col items-center gap-6 sm:gap-10"
                                 initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)", y: 20 }}
                                 animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
                                 exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)", y: -20 }}
                                 transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
                             >
                                 <motion.div className="text-center">
-                                    <h3 className="text-3xl sm:text-4xl font-black tracking-tighter">
+                                    <h3 className="text-2xl sm:text-4xl font-black tracking-tighter">
                                         <span className="text-white/80">Tùy chỉnh </span>
                                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-400 to-violet-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">
                                             phong cách
@@ -411,7 +411,7 @@ export default function CinematicShowcase() {
                                             >
                                                 <Badge
                                                     variant={activeStyle === i ? "default" : "outline"}
-                                                    className={`cursor-default text-sm sm:text-base px-5 py-2.5 transition-all duration-500 rounded-xl font-medium ${activeStyle === i
+                                                    className={`cursor-default text-xs sm:text-base px-3 py-1.5 sm:px-5 sm:py-2.5 transition-all duration-500 rounded-xl font-medium ${activeStyle === i
                                                         ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-[0_0_20px_rgba(217,70,239,0.6)] scale-110 ring-2 ring-white/20"
                                                         : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                                                         }`}
@@ -424,19 +424,19 @@ export default function CinematicShowcase() {
                                 </div>
 
                                 {/* Divider */}
-                                <div className="h-px w-3/4 mx-auto bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                                <div className="mt-2 mb-4 sm:my-8 h-px w-3/4 mx-auto bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-                                <div className="w-full space-y-4">
+                                <div className="w-full space-y-3 sm:space-y-4">
                                     <div className="flex items-center gap-2 justify-center">
-                                        <RectangleHorizontal className="h-5 w-5 text-violet-400" />
-                                        <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-white/50 font-bold">Tỷ lệ khung hình</span>
+                                        <RectangleHorizontal className="h-4 w-4 sm:h-5 sm:w-5 text-violet-400" />
+                                        <span className="text-[10px] sm:text-sm uppercase tracking-[0.2em] text-white/50 font-bold">Tỷ lệ khung hình</span>
                                     </div>
-                                    <div className="flex gap-3 justify-center flex-wrap">
+                                    <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
                                         {RATIOS.map((ratio, i) => (
                                             <motion.div
                                                 key={ratio}
                                                 ref={i === 3 ? targetRatioRef : undefined}
-                                                className={`px-5 py-3 rounded-xl text-sm sm:text-base font-bold transition-all duration-500 flex items-center justify-center min-w-[64px] ${activeRatio === i
+                                                className={`px-3 py-2 sm:px-5 sm:py-3 rounded-xl text-xs sm:text-base font-bold transition-all duration-500 flex items-center justify-center min-w-[48px] sm:min-w-[64px] ${activeRatio === i
                                                     ? "bg-gradient-to-b from-fuchsia-500 to-violet-600 text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] scale-110 ring-2 ring-white/20"
                                                     : "bg-white/[0.03] text-white/40 border border-white/10"
                                                     }`}
@@ -536,7 +536,7 @@ export default function CinematicShowcase() {
                                     />
 
                                     {/* 5. Central Sleek Progress Indicator */}
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 scale-75 sm:scale-100">
                                         <motion.div 
                                             className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-white/20 bg-black/40 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10"
                                             animate={{ boxShadow: ["0 0 20px rgba(139,92,246,0.3)", "0 0 50px rgba(217,70,239,0.5)", "0 0 20px rgba(139,92,246,0.3)"] }}
@@ -552,12 +552,12 @@ export default function CinematicShowcase() {
                                             </motion.svg>
                                         </motion.div>
 
-                                        <div className="mt-6 flex flex-col items-center">
-                                            <Badge className="bg-white/10 text-white/90 border-white/20 px-4 py-1.5 mb-2 font-semibold tracking-wider text-[10px] sm:text-xs">
-                                                <Sparkles className="w-3.5 h-3.5 mr-1.5 text-fuchsia-300" /> AI Rendering Engine
+                                        <div className="mt-4 sm:mt-6 flex flex-col items-center">
+                                            <Badge className="bg-white/10 text-white/90 border-white/20 px-3 py-1 sm:px-4 sm:py-1.5 mb-1.5 sm:mb-2 font-semibold tracking-wider text-[9px] sm:text-xs">
+                                                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5 text-fuchsia-300" /> AI Rendering Engine
                                             </Badge>
                                             <motion.p 
-                                                className="text-white/80 font-medium tracking-[0.1em] text-xs sm:text-sm drop-shadow-md uppercase text-center"
+                                                className="text-white/80 font-medium tracking-[0.1em] text-[10px] sm:text-sm drop-shadow-md uppercase text-center px-4"
                                                 animate={{ opacity: [0.4, 1, 0.4] }}
                                                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
                                             >
@@ -627,9 +627,9 @@ export default function CinematicShowcase() {
                                         transition={{ duration: 2.5, ease: "linear", times: [0, 0.1, 0.9, 1] }}
                                     />
 
-                                    {/* Dark overlay at bottom for text readability */}
-                                    <div className="absolute inset-x-0 bottom-0 h-[60%] sm:h-1/2 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-3 sm:p-8 pointer-events-none rounded-b-2xl" style={{ transform: "translateZ(30px)" }}>
-                                        <Badge className="w-fit mb-2 sm:mb-3 bg-black/40 backdrop-blur-md text-white/90 border border-white/20 shadow-xl px-3 py-1 text-[10px] sm:text-xs">
+                                    {/* Dark overlay at bottom for text readability (Flexible padding instead of height to prevent squishing) */}
+                                    <div className="absolute inset-x-0 bottom-0 pt-16 pb-3 px-3 sm:pt-24 sm:pb-8 sm:px-8 bg-gradient-to-t from-black/95 via-black/60 to-transparent flex flex-col justify-end pointer-events-none rounded-b-2xl" style={{ transform: "translateZ(30px)" }}>
+                                        <Badge className="w-fit mb-2 sm:mb-3 bg-black/40 backdrop-blur-md text-white/90 border border-white/20 shadow-xl px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs">
                                             <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-fuchsia-300" /> Studio AI Render
                                         </Badge>
                                         <h2 className="text-white font-bold text-sm sm:text-xl lg:text-2xl leading-snug drop-shadow-xl line-clamp-2 md:line-clamp-3">
