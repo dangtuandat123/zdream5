@@ -628,11 +628,11 @@ export default function CinematicShowcase() {
                                     />
 
                                     {/* Dark overlay at bottom for text readability */}
-                                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-5 sm:p-8" style={{ transform: "translateZ(30px)" }}>
-                                        <Badge className="w-fit mb-3 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/20 shadow-xl px-4 py-1.5 text-xs sm:text-sm">
-                                            <Sparkles className="w-4 h-4 mr-2" /> Kết quả sáng tạo
+                                    <div className="absolute inset-x-0 bottom-0 h-[60%] sm:h-1/2 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-3 sm:p-8 pointer-events-none rounded-b-2xl" style={{ transform: "translateZ(30px)" }}>
+                                        <Badge className="w-fit mb-2 sm:mb-3 bg-black/40 backdrop-blur-md text-white/90 border border-white/20 shadow-xl px-3 py-1 text-[10px] sm:text-xs">
+                                            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-fuchsia-300" /> Studio AI Render
                                         </Badge>
-                                        <h2 className="text-white font-bold text-lg sm:text-xl lg:text-3xl leading-tight drop-shadow-md">
+                                        <h2 className="text-white font-bold text-sm sm:text-xl lg:text-2xl leading-snug drop-shadow-xl line-clamp-2 md:line-clamp-3">
                                             {PROMPT_TEXT}
                                         </h2>
                                     </div>
