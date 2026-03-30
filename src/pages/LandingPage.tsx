@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import { Link } from "react-router-dom"
-import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValueEvent } from "framer-motion"
+import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValueEvent, useMotionValue, useSpring, useMotionTemplate } from "framer-motion"
 import Lenis from "lenis"
+import CinematicShowcase from "@/components/landing/CinematicShowcase"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
@@ -306,7 +307,7 @@ function AnimatedStat({ stat }: { stat: typeof STATS[0] }) {
 // Phases: idle → typing → selecting → generating → results → dragging → dropped → retyping → regenerating → newResults → lightbox → pause → reset
 type DemoPhase = "idle" | "typing" | "selecting" | "generating" | "results" | "dragging" | "dropped" | "retyping" | "regenerating" | "newResults" | "lightbox" | "pause"
 
-function InteractiveDemo() {
+export function InteractiveDemo() {
     const containerRef = useRef<HTMLDivElement>(null)
     const isInView = useInView(containerRef, { once: false, margin: "-100px" })
     const [phase, setPhase] = useState<DemoPhase>("idle")
@@ -882,7 +883,7 @@ const TEMPLATE_RESULTS = [
 
 type TemplateDemoPhase = "idle" | "browseTemplate" | "selectTemplate" | "uploading" | "uploaded" | "selectEffect" | "generating" | "results" | "lightbox" | "pause"
 
-function TemplateDemo() {
+export function TemplateDemo() {
     const containerRef = useRef<HTMLDivElement>(null)
     const isInView = useInView(containerRef, { once: false, margin: "-100px" })
     const [phase, setPhase] = useState<TemplateDemoPhase>("idle")
@@ -1481,6 +1482,95 @@ const FEATURES = [
     },
 ]
 
+// ============================================================
+// TEMPLATE CARD COMPONENT (3D Tilt Effect)
+// ============================================================
+const TemplateCard = ({ tpl, index }: { tpl: any; index: number }) => {
+    const cardRef = useRef<HTMLDivElement>(null)
+    const x = useMotionValue(0)
+    const y = useMotionValue(0)
+
+    const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 })
+    const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 })
+
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["12deg", "-12deg"])
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-12deg", "12deg"])
+
+    const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ["0%", "100%"])
+    const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["0%", "100%"])
+    const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.25) 0%, transparent 60%)`
+
+    const handleMouseMove = (e: any) => {
+        if (!cardRef.current) return
+        const rect = cardRef.current.getBoundingClientRect()
+        const width = rect.width
+        const height = rect.height
+        const mouseX = e.clientX - rect.left
+        const mouseY = e.clientY - rect.top
+        const xPct = mouseX / width - 0.5
+        const yPct = mouseY / height - 0.5
+        x.set(xPct)
+        y.set(yPct)
+    }
+
+    const handleMouseLeave = () => {
+        x.set(0)
+        y.set(0)
+    }
+
+    return (
+        <div style={{ perspective: 1200 }} className="h-full w-full">
+            <motion.div
+                ref={cardRef}
+                style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+                className="h-full w-full group relative"
+            >
+                <Card className="overflow-hidden border-white/[0.08] bg-background/50 h-full group-hover:border-violet-500/40 group-hover:shadow-[0_20px_40px_-15px_rgba(139,92,246,0.3)] transition-all duration-500 rounded-2xl ring-1 ring-transparent group-hover:ring-violet-500/20 shadow-lg cursor-pointer">
+                    <CardContent className="p-0 relative aspect-[3/4] h-full overflow-hidden">
+                        <img
+                            src={tpl.img}
+                            alt={tpl.name}
+                            className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none group-hover:scale-110 transition-transform duration-[1.5s] ease-out"
+                            loading="lazy"
+                            draggable={false}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/5 group-hover:from-black/95 group-hover:via-black/40 transition-all duration-700 pointer-events-none" />
+                        
+                        <motion.div 
+                            className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 mix-blend-overlay transition-opacity duration-500"
+                            style={{ background: glareBackground as any }}
+                        />
+
+                        {/* Top shimmer */}
+                        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-violet-500/0 group-hover:from-violet-500/10 to-transparent transition-all duration-700 pointer-events-none" />
+                        
+                        {index < 2 && (
+                            <div className="absolute top-3 right-3 z-10 [transform:translateZ(30px)] shadow-2xl pointer-events-none transition-transform duration-500">
+                                <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-amber-200 bg-gradient-to-r from-amber-500/20 to-orange-500/20 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/30 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                                    <Star className="h-2.5 w-2.5 fill-amber-300" /> Nổi bật
+                                </span>
+                            </div>
+                        )}
+                        
+                        <div className="absolute inset-0 flex flex-col justify-end p-5 sm:p-6 select-none text-left pointer-events-none" style={{ transformStyle: "preserve-3d" }}>
+                            <div className="group-hover:[transform:translateZ(40px)] transition-transform duration-500 ease-out">
+                                <Badge variant="secondary" className="w-fit mb-2.5 bg-white/10 backdrop-blur-md border-white/15 text-white/90 text-[10px] uppercase tracking-[0.15em] font-semibold shadow-sm">{tpl.cat}</Badge>
+                                <h3 className="text-white font-bold text-lg sm:text-xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] mb-0.5 group-hover:text-violet-100 transition-colors duration-500 pointer-events-auto">{tpl.name}</h3>
+                                <div className="overflow-hidden h-0 group-hover:h-8 transition-all duration-500 ease-out">
+                                    <Link to="/login" className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-300 hover:text-violet-200 mt-1.5 pointer-events-auto group-hover:translate-x-0 translate-x-[-8px] transition-transform duration-500">
+                                        Thử phong cách này <ArrowUpRight className="h-3.5 w-3.5" />
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+        </div>
+    )
+}
 
 // ============================================================
 // LANDING PAGE
@@ -1860,76 +1950,25 @@ export default function LandingPage() {
                         </p>
                     </motion.div>
 
-                    {/* ===== InteractiveDemo Card with glow ring ===== */}
+                    {/* ===== CinematicShowcase Card with perfectly snapped glow ring ===== */}
                     <motion.div
-                        className="relative"
+                        className="relative max-w-5xl mx-auto"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
                         {/* Animated glow ring behind card */}
-                        <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-violet-500/20 via-fuchsia-500/10 to-violet-500/20 blur-sm pointer-events-none" />
+                        <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-violet-500/30 via-fuchsia-500/15 to-violet-500/30 blur-md pointer-events-none" />
                         <div className="relative">
-                            <InteractiveDemo />
+                            <CinematicShowcase />
                         </div>
                         {/* Card reflection */}
-                        <div className="hidden lg:block absolute -bottom-16 inset-x-4 h-16 rounded-b-2xl bg-gradient-to-b from-violet-500/[0.02] to-transparent blur-md pointer-events-none" style={{ transform: "scaleY(-0.3)" }} />
+                        <div className="hidden lg:block absolute -bottom-16 inset-x-8 h-16 rounded-b-2xl bg-gradient-to-b from-violet-500/[0.03] to-transparent blur-xl pointer-events-none" style={{ transform: "scaleY(-0.3)" }} />
                     </motion.div>
 
-                    {/* ===== HOẶC Connector ===== */}
-                    <div className="relative my-16">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full h-px bg-gradient-to-r from-transparent via-violet-500/15 to-transparent" />
-                        </div>
-                        <div className="relative flex justify-center">
-                            <Badge variant="outline" className="px-4 py-1 border-violet-500/20 bg-background/80 backdrop-blur-sm text-muted-foreground/60 text-xs">
-                                HOẶC
-                            </Badge>
-                        </div>
-                        {/* SVG wave decoration */}
-                        <svg className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-8 opacity-[0.04] pointer-events-none" viewBox="0 0 256 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0 16 C32 4 64 28 96 16 S160 4 192 16 S224 28 256 16" stroke="url(#wave-g)" strokeWidth="1" />
-                            <defs><linearGradient id="wave-g" x1="0" y1="0" x2="256" y2="0"><stop stopColor="#a78bfa" /><stop offset="1" stopColor="#e879f9" /></linearGradient></defs>
-                        </svg>
-                    </div>
 
-                    {/* ===== TemplateDemo Header ===== */}
-                    <motion.div
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <div className="text-center mb-8">
-                            <Badge variant="outline" className="mb-4 border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-300 animate-pulse-glow">
-                                <SwatchBook className="mr-2 h-3.5 w-3.5" /> Kiểu mẫu có sẵn
-                            </Badge>
-                            <h3 className="text-xl font-bold tracking-tighter sm:text-2xl">
-                                Hoặc dùng{" "}
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-400 to-violet-400 text-glow">
-                                    Kiểu Mẫu
-                                </span>
-                                {" "}để tạo nhanh hơn
-                            </h3>
-                            <motion.div
-                                className="mx-auto mt-2 h-[2px] bg-gradient-to-r from-transparent via-fuchsia-500/40 to-transparent"
-                                initial={{ width: 0 }} whileInView={{ width: "10rem" }} viewport={{ once: true }}
-                                transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                            />
-                            <p className="mt-3 text-muted-foreground text-balance">
-                                Tải ảnh lên, chọn hiệu ứng — AI sẽ biến đổi sản phẩm của bạn.
-                            </p>
-                        </div>
-
-                        {/* TemplateDemo Card with glow ring */}
-                        <div className="relative">
-                            <div className="absolute -inset-[1px] rounded-2xl bg-gradient-to-r from-fuchsia-500/15 via-violet-500/10 to-fuchsia-500/15 blur-sm pointer-events-none" />
-                            <div className="relative">
-                                <TemplateDemo />
-                            </div>
-                            <div className="hidden lg:block absolute -bottom-16 inset-x-4 h-16 rounded-b-2xl bg-gradient-to-b from-fuchsia-500/[0.02] to-transparent blur-md pointer-events-none" style={{ transform: "scaleY(-0.3)" }} />
-                        </div>
-                    </motion.div>
 
                     <motion.div
-                        className="text-center mt-12"
+                        className="text-center mt-12 mb-8"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
@@ -1940,81 +1979,105 @@ export default function LandingPage() {
                         </Link>
                     </motion.div>
                 </div>
+
+                {/* Vertical Seamless Connector */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-10 hidden md:flex flex-col items-center">
+                    <div className="w-px h-16 bg-gradient-to-b from-violet-500/0 via-violet-500/50 to-fuchsia-500/0" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-fuchsia-500/80 shadow-[0_0_10px_rgba(217,70,239,0.8)] animate-pulse" />
+                    <div className="w-px h-16 bg-gradient-to-b from-fuchsia-500/0 via-fuchsia-500/50 to-violet-500/0" />
+                </div>
             </section>
 
 
             {/* ==================== TEMPLATES CAROUSEL ==================== */}
-            <section id="templates" className="w-full py-20 overflow-hidden relative">
+            <section id="templates" className="w-full py-20 md:py-28 overflow-hidden relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_50%_at_50%_100%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
-                {/* SVG dot grid decoration */}
+                {/* SVG dot grid */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="tpl-dots" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="white"/></pattern></defs><rect width="100%" height="100%" fill="url(#tpl-dots)"/></svg>
-                {/* Advanced SVG Decor Cleared for Kawaii aesthetics */}
+                {/* Floating glow orbs */}
+                <div className="absolute top-1/3 left-[15%] w-[350px] h-[350px] rounded-full bg-violet-600/[0.04] blur-[100px] pointer-events-none animate-float-slow" />
+                <div className="absolute bottom-1/4 right-[10%] w-[280px] h-[280px] rounded-full bg-fuchsia-600/[0.03] blur-[80px] pointer-events-none animate-float-delayed" />
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full relative">
                     <motion.div
-                        className="flex flex-col md:flex-row md:items-end justify-between w-full mb-8 gap-6 text-center md:text-left"
+                        className="flex flex-col md:flex-row md:items-end justify-between w-full mb-10 gap-6 text-center md:text-left"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeLeft}
                     >
                         <div className="flex-1">
-                            <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                                <SwatchBook className="mr-2 h-3.5 w-3.5" /> Thư viện phong cách
-                            </Badge>
-                            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Kiểu Mẫu Sẵn Sàng Sử Dụng</h2>
-                            <p className="mt-2 text-muted-foreground text-sm max-w-2xl text-balance">
+                            <div className="flex items-center gap-3 justify-center md:justify-start mb-4">
+                                <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-300 backdrop-blur-sm">
+                                    <SwatchBook className="mr-2 h-3.5 w-3.5" /> Thư viện phong cách
+                                </Badge>
+                                <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-white/40 font-medium bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.06]">
+                                    <Sparkles className="h-3 w-3 text-violet-400" /> 12+ phong cách • Cập nhật hàng tuần
+                                </span>
+                            </div>
+                            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/70">Kiểu Mẫu </span>
+                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300">Sẵn Sàng Sử Dụng</span>
+                            </h2>
+                            <p className="mt-3 text-muted-foreground text-sm sm:text-base max-w-2xl text-balance leading-relaxed">
                                 Chọn một phong cách, nhập mô tả, và nhận tác phẩm ngay lập tức — không cần tinh chỉnh phức tạp.
                             </p>
                         </div>
                         <div className="hidden md:flex shrink-0">
                             <Link to="/login">
-                                <Button variant="outline" className="hover:border-violet-500/30">
-                                    Xem tất cả <ArrowUpRight className="ml-2 h-4 w-4" />
+                                <Button variant="outline" className="group/btn hover:border-violet-500/40 hover:bg-violet-500/5 hover:shadow-lg hover:shadow-violet-500/10 transition-all duration-500">
+                                    Xem tất cả <ArrowUpRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
                                 </Button>
                             </Link>
                         </div>
                     </motion.div>
 
                     <motion.div
-                        className="w-full px-14 md:px-20 mx-auto relative cursor-grab active:cursor-grabbing"
+                        className="w-full px-14 md:px-20 mx-auto relative cursor-grab active:cursor-grabbing pb-4"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeRight}
                     >
                         <Carousel
-                            plugins={[Autoplay({ delay: 3000 })]}
+                            plugins={[Autoplay({ delay: 3500 })]}
                             opts={{ align: "start", loop: true }}
-                            className="w-full"
+                            className="w-full relative z-10"
                         >
-                            <CarouselContent className="-ml-4 md:-ml-6">
+                            <CarouselContent className="-ml-4 md:-ml-6 pb-12 pt-4">
                                 {TEMPLATES.map((tpl, index) => (
                                     <CarouselItem key={index} className="pl-4 md:pl-6 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                                        <Card className="overflow-hidden border-white/[0.06] bg-background/50 h-full group hover:border-violet-500/20 transition-all duration-700 rounded-2xl">
-                                            <CardContent className="p-0 relative aspect-[3/4] h-full">
-                                                <img
-                                                    src={tpl.img}
-                                                    alt={tpl.name}
-                                                    className="absolute inset-0 w-full h-full object-cover select-none pointer-events-none group-hover:scale-110 transition-transform duration-[1.2s] ease-out"
-                                                    loading="lazy"
-                                                    draggable={false}
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex flex-col justify-end p-6 select-none pointer-events-none text-left">
-                                                    <Badge variant="secondary" className="w-fit mb-3 bg-white/10 border-white/10 text-white/90 text-[10px] uppercase tracking-wider">{tpl.cat}</Badge>
-                                                    <h3 className="text-white font-bold text-xl drop-shadow-lg">{tpl.name}</h3>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
+                                        <TemplateCard tpl={tpl} index={index} />
                                     </CarouselItem>
                                 ))}
                             </CarouselContent>
-                            <CarouselPrevious className="absolute -left-8 md:-left-14 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10" />
-                            <CarouselNext className="absolute -right-8 md:-right-14 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10" />
+                            <CarouselPrevious className="absolute -left-8 md:-left-14 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10 hover:shadow-lg hover:shadow-violet-500/10 transition-all z-20" />
+                            <CarouselNext className="absolute -right-8 md:-right-14 h-12 w-12 border-border/30 hover:border-violet-500/30 hover:bg-violet-500/10 hover:shadow-lg hover:shadow-violet-500/10 transition-all z-20" />
                         </Carousel>
                     </motion.div>
 
-                    <div className="md:hidden mt-12 text-center flex justify-center w-full">
+                    {/* ═══ SCROLLING STYLE MARQUEE ═══ */}
+                    <div className="w-full overflow-hidden relative">
+                        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
+                        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+                        <motion.div
+                            className="flex gap-3 whitespace-nowrap"
+                            animate={{ x: ['0%', '-50%'] }}
+                            transition={{ duration: 25, repeat: Infinity, ease: 'linear' }}
+                        >
+                            {[...TEMPLATES, ...TEMPLATES].map((tpl, i) => (
+                                <span
+                                    key={i}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium border border-white/[0.06] bg-white/[0.02] text-white/30 hover:text-white/60 hover:border-violet-500/20 hover:bg-violet-500/5 transition-all duration-300 cursor-default"
+                                >
+                                    <span className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-violet-400 to-fuchsia-400 opacity-40" />
+                                    {tpl.name}
+                                </span>
+                            ))}
+                        </motion.div>
+                    </div>
+
+                    <div className="md:hidden mt-10 text-center flex justify-center w-full">
                         <Link to="/login" className="w-full">
-                            <Button variant="outline" className="w-full hover:border-violet-500/30">
+                            <Button className="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/20 border-0">
                                 Xem tất cả kiểu mẫu <ArrowUpRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
