@@ -9,8 +9,7 @@ import {
     ArrowUp,
     ImageIcon,
     RectangleHorizontal,
-    MonitorPlay,
-    Cpu
+    MonitorPlay
 } from "lucide-react"
 
 // ============================================================
@@ -448,75 +447,120 @@ export default function CinematicShowcase() {
                             </motion.div>
                         )}
 
-                        {/* ─── SCENE 3: GENERATE (High-end rings & particles) ─── */}
+                        {/* ─── SCENE 3: GENERATE (Ultra-Premium Fluid Aurora Glassmorphism) ─── */}
                         {scene === "generate" && (
                             <motion.div
                                 key="scene-generate"
-                                className="w-full flex flex-col items-center justify-center relative"
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
-                                transition={{ duration: 0.8, ease: "easeInOut" }}
+                                className="w-full max-w-3xl mx-auto flex items-center justify-center p-4 sm:p-8"
+                                initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
+                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             >
-                                {/* Advanced Generative Core */}
-                                <div className="relative flex items-center justify-center w-[300px] h-[300px]">
+                                {/* Aurora Render Canvas */}
+                                <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0a0a0c] border border-white/[0.08] shadow-[0_40px_100px_-20px_rgba(232,121,249,0.3)] ring-1 ring-white/5">
                                     
-                                    {/* Core Background Blur */}
+                                {/* 1. Base Image heavily blurred and progressively sharpening */}
+                                    <div className="absolute inset-0 z-0">
+                                        <motion.img 
+                                            src={RESULT_IMG}
+                                            alt="rendering..."
+                                            className="w-full h-full object-cover"
+                                            style={{
+                                                filter: `blur(${Math.max(100 - progress, 0)}px) contrast(${0.5 + progress * 0.005}) brightness(${0.4 + progress * 0.006})`,
+                                                scale: 1.2 - (progress * 0.001)
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* 2. Abstract Shifting Gradient Layer multiplying over it to simulate "AI processing colors" */}
                                     <motion.div 
-                                        className="absolute inset-0 rounded-full bg-violet-600/20 blur-3xl"
-                                        animate={{ opacity: [0.5, 1, 0.5], scale: [0.8, 1.2, 0.8] }}
-                                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                                    />
-
-                                    {/* 3D Spinning Ring 1 (Outer, thick, slow) */}
-                                    <motion.div
-                                        className="absolute inset-0 rounded-full border-b-[3px] border-l-[1px] border-fuchsia-500/40"
-                                        animate={{ rotate: 360, rotateX: 60, rotateY: 20 }}
-                                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                                    />
-                                    
-                                    {/* 3D Spinning Ring 2 (Middle, intense, fast opposite) */}
-                                    <motion.div
-                                        className="absolute inset-6 rounded-full border-t-[2px] border-r-[2px] border-violet-400"
-                                        style={{ boxShadow: "inset 0 0 15px rgba(139,92,246,0.5), 0 0 15px rgba(139,92,246,0.5)" }}
-                                        animate={{ rotate: -360, rotateX: 45, rotateY: -30 }}
-                                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                                    />
-
-                                    {/* Magic Sphere Core */}
-                                    <motion.div
-                                        className="absolute w-24 h-24 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-[0_0_40px_rgba(217,70,239,0.8)] z-20 border border-white/20"
-                                        animate={{ scale: [1, 1.15, 1], boxShadow: ["0 0 40px rgba(217,70,239,0.8)", "0 0 80px rgba(139,92,246,1)", "0 0 40px rgba(217,70,239,0.8)"] }}
-                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                        className="absolute inset-0 mix-blend-color z-10"
+                                        style={{ opacity: (100 - progress) / 100 }}
+                                        animate={{ backgroundPosition: ["0% 0%", "200% 200%", "0% 0%"] }}
+                                        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
                                     >
-                                        <Cpu className="w-10 h-10 text-white drop-shadow-[0_0_10px_white]" />
+                                        <div className="w-full h-full bg-gradient-to-tr from-fuchsia-600/60 via-violet-600/60 to-blue-500/60" style={{ backgroundSize: "200% 200%" }} />
                                     </motion.div>
 
-                                    {/* Outer Progress Ring */}
-                                    <svg viewBox="0 0 100 100" className="absolute inset-[-20px] w-[340px] h-[340px] -rotate-90 z-10 pointer-events-none">
-                                        <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="2" />
-                                        <motion.circle 
-                                            cx="50" cy="50" r="48" fill="none" stroke="url(#progress-gradient)" 
-                                            strokeWidth="2.5" strokeLinecap="round" strokeDasharray="301" 
-                                            strokeDashoffset={301 - (301 * progress) / 100}
-                                        />
-                                        <defs>
-                                            <linearGradient id="progress-gradient" x1="0" y1="0" x2="1" y2="1">
-                                                <stop offset="0%" stopColor="#c084fc" />
-                                                <stop offset="100%" stopColor="#e879f9" />
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
-                                </div>
+                                    {/* 3. Magic Generative Dust (Deterministic pseudo-random) */}
+                                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
+                                    {[...Array(20)].map((_, i) => {
+                                        const r1 = (Math.sin(i * 12.34) + 1) / 2
+                                        const r2 = (Math.cos(i * 43.21) + 1) / 2
+                                        const r3 = (Math.sin(i * 76.54) + 1) / 2
+                                        return (
+                                            <motion.div
+                                                key={`dust-${i}`}
+                                                className="absolute w-1 h-1 bg-white rounded-full z-10"
+                                                style={{
+                                                    left: `${r1 * 100}%`,
+                                                    top: `${r2 * 100}%`,
+                                                    opacity: r3 * 0.5 + 0.1,
+                                                    transform: `scale(${r1 * 0.5 + 0.5})`
+                                                }}
+                                                animate={{
+                                                    y: [0, r2 * -50 - 20],
+                                                    x: [0, r3 * 30 - 15],
+                                                    opacity: [0, (r1 * 0.8 + 0.2), 0]
+                                                }}
+                                                transition={{
+                                                    duration: r2 * 3 + 2,
+                                                    repeat: Infinity,
+                                                    delay: r3 * 2,
+                                                    ease: "linear"
+                                                }}
+                                            />
+                                        )
+                                    })}
 
-                                <motion.div className="mt-12 text-center z-20">
-                                    <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-200 to-fuchsia-200 tracking-wider uppercase drop-shadow-[0_0_8px_rgba(217,70,239,0.8)]">
-                                        Đang tổng hợp điểm ảnh...
-                                    </h3>
-                                    <p className="text-fuchsia-400/80 font-mono mt-2 text-lg font-bold">
-                                        {Math.round(progress)}%
-                                    </p>
-                                </motion.div>
+                                    {/* 4. Scanning Render Line */}
+                                    <motion.div 
+                                        className="absolute top-0 bottom-0 w-1 bg-white/[0.15] shadow-[0_0_20px_2px_rgba(255,255,255,0.8)] z-20 mix-blend-screen"
+                                        style={{ left: `${progress}%` }}
+                                        animate={{ opacity: [0.8, 1, 0.8] }}
+                                        transition={{ duration: 0.5, repeat: Infinity }}
+                                    />
+                                    {/* Progress Highlight block behind scanner */}
+                                    <div 
+                                        className="absolute top-0 bottom-0 left-0 bg-white/[0.03] backdrop-blur-md z-10"
+                                        style={{ width: `${progress}%` }}
+                                    />
+
+                                    {/* 5. Central Sleek Progress Indicator */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
+                                        <motion.div 
+                                            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-white/20 bg-black/40 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10"
+                                            animate={{ boxShadow: ["0 0 20px rgba(139,92,246,0.3)", "0 0 50px rgba(217,70,239,0.5)", "0 0 20px rgba(139,92,246,0.3)"] }}
+                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                        >
+                                            <span className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60 tracking-tighter mix-blend-screen drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
+                                                {Math.round(progress)}<span className="text-xl sm:text-2xl text-white/40">%</span>
+                                            </span>
+                                            {/* Rotating dashed ring inside */}
+                                            <motion.svg className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)]" viewBox="0 0 100 100"
+                                                animate={{ rotate: 360 }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }}>
+                                                <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 8" />
+                                            </motion.svg>
+                                        </motion.div>
+
+                                        <div className="mt-6 flex flex-col items-center">
+                                            <Badge className="bg-white/10 text-white/90 border-white/20 px-4 py-1.5 mb-2 font-semibold tracking-wider text-[10px] sm:text-xs">
+                                                <Sparkles className="w-3.5 h-3.5 mr-1.5 text-fuchsia-300" /> AI Rendering Engine
+                                            </Badge>
+                                            <motion.p 
+                                                className="text-white/80 font-medium tracking-[0.1em] text-xs sm:text-sm drop-shadow-md uppercase text-center"
+                                                animate={{ opacity: [0.4, 1, 0.4] }}
+                                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                            >
+                                                {progress < 30 ? "Đang phân tích ngữ nghĩa..." : progress < 70 ? "Đang kết xuất không gian 3D..." : "Đang hoàn thiện chi tiết cuối..."}
+                                            </motion.p>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Scanline overlay for that premium screen effect */}
+                                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px] mix-blend-overlay pointer-events-none z-40 opacity-50" />
+                                </div>
                             </motion.div>
                         )}
 
