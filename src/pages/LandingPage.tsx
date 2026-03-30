@@ -1967,17 +1967,7 @@ export default function LandingPage() {
 
 
 
-                    <motion.div
-                        className="text-center mt-12 mb-8"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <Link to="/login">
-                            <Button size="lg" className="h-12 px-8 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-lg shadow-violet-500/20">
-                                Trải Nghiệm Ngay <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
-                    </motion.div>
+                    {/* The Trải Nghiệm Ngay button was removed here by request */}
                 </div>
 
                 {/* Vertical Seamless Connector */}
