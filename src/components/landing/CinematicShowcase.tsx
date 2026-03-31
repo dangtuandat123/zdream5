@@ -594,10 +594,13 @@ export default function CinematicShowcase() {
                                     {/* The Single Target Artwork */}
                                     <div className="absolute inset-0 z-0 bg-black pointer-events-auto group/img cursor-pointer">
                                         <div className="relative w-full h-full overflow-hidden bg-[#0a0a0c]">
-                                            <img
+                                            <motion.img
                                                 src={RESULT_IMAGE}
                                                 alt="Generated AI Art"
-                                                className="w-full h-full object-cover scale-[1.02] group-hover/img:scale-110 transition-transform duration-700 ease-out"
+                                                className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-700 ease-out"
+                                                initial={{ scale: 1 }}
+                                                animate={{ scale: 1.08 }}
+                                                transition={{ duration: 5, ease: "easeOut" }}
                                             />
                                             <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors duration-300 pointer-events-none" />
                                             
