@@ -1530,19 +1530,19 @@ const renderBentoVisual = (id: string) => {
         case "models":
             return (
                 <div className="absolute inset-y-0 right-0 w-[55%] pointer-events-none overflow-hidden hidden sm:flex items-center justify-end pr-8 z-0">
-                    <div className="relative w-full h-full flex items-center justify-center">
+                    <div className="relative w-full h-full flex items-center justify-center translate-x-4 group-hover:translate-x-0 transition-transform duration-700">
                         <motion.div 
-                            className="absolute top-[15%] right-[20%] w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 backdrop-blur-md shadow-[0_0_30px_rgba(139,92,246,0.3)] flex items-center justify-center font-bold text-white/90 border border-white/20"
+                            className="absolute top-[10%] right-[30%] w-24 h-24 rounded-3xl bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(139,92,246,0.2)] flex items-center justify-center font-bold text-white/90 border border-white/20 group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(139,92,246,0.6)] transition-all duration-500"
                             animate={{ y: [-10, 10, -10], rotate: [0, 5, -5, 0] }}
                             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                         >MJ v6.0</motion.div>
                         <motion.div 
-                            className="absolute bottom-[20%] right-[40%] w-28 h-28 rounded-2xl bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 backdrop-blur-md shadow-[0_0_40px_rgba(56,189,248,0.2)] flex items-center justify-center font-bold text-white/90 border border-white/20 z-10"
+                            className="absolute bottom-[20%] right-[50%] w-28 h-28 rounded-3xl bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(56,189,248,0.2)] flex items-center justify-center font-bold text-white/90 border border-white/20 z-10 group-hover:scale-110 group-hover:-translate-y-4 group-hover:shadow-[0_0_60px_rgba(56,189,248,0.6)] transition-all duration-700"
                             animate={{ y: [10, -10, 10], x: [-5, 5, -5] }}
                             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
                         >FLUX.1</motion.div>
                         <motion.div 
-                            className="absolute top-[40%] right-[10%] w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-600/20 backdrop-blur-md shadow-[0_0_20px_rgba(52,211,153,0.2)] flex items-center justify-center font-bold text-white/90 text-sm border border-white/20"
+                            className="absolute top-[45%] right-[10%] w-20 h-20 rounded-3xl bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(52,211,153,0.2)] flex items-center justify-center font-bold text-white/90 text-sm border border-white/20 group-hover:scale-125 group-hover:shadow-[0_0_50px_rgba(52,211,153,0.6)] transition-all duration-500 delay-100"
                             animate={{ y: [-15, 15, -15], scale: [1, 1.05, 1] }}
                             transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
                         >SDXL</motion.div>
@@ -1551,58 +1551,72 @@ const renderBentoVisual = (id: string) => {
             )
         case "4k":
             return (
-                <div className="absolute -bottom-10 -right-10 w-48 h-48 pointer-events-none opacity-40 group-hover:opacity-100 transition-all duration-700 group-hover:-translate-y-4 group-hover:-translate-x-4 z-0">
-                    <div className="w-full h-full rounded-tl-3xl bg-[url('https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=400')] bg-cover bg-center border-t border-l border-white/20 shadow-[-20px_-20px_50px_rgba(0,0,0,0.5)]" />
+                <div className="absolute -bottom-10 -right-10 w-64 h-64 pointer-events-none opacity-40 group-hover:opacity-100 transition-all duration-700 group-hover:-translate-y-6 group-hover:-translate-x-6 z-0">
+                    <div className="w-full h-full rounded-[40px] bg-[url('https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600')] bg-cover bg-center border-t border-l border-white/30 shadow-[-20px_-20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden group-hover:shadow-[-30px_-30px_60px_rgba(59,130,246,0.3)] transition-all duration-700">
+                        {/* Shimmer sweep effect inside the image */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/50 to-transparent -translate-x-[200%] group-hover:translate-x-[200%] transition-transform duration-[1.5s] ease-in-out delay-100" />
+                    </div>
                 </div>
             )
         case "templates":
             return (
-                <div className="absolute inset-x-0 -bottom-20 h-48 pointer-events-none opacity-30 group-hover:opacity-80 transition-all duration-1000 flex items-start justify-center overflow-hidden z-0">
-                    <div className="flex -space-x-4 group-hover:space-x-4 transition-all duration-700 mt-10">
-                        <div className="w-20 h-32 sm:w-24 sm:h-36 rounded-lg bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=200')] bg-cover bg-center border border-white/20 shadow-2xl -rotate-12 group-hover:rotate-[-6deg] transition-transform duration-700" />
-                        <div className="w-20 h-32 sm:w-24 sm:h-36 rounded-lg bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200')] bg-cover bg-center border border-white/20 shadow-2xl z-10 scale-110 -translate-y-4" />
-                        <div className="w-20 h-32 sm:w-24 sm:h-36 rounded-lg bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200')] bg-cover bg-center border border-white/20 shadow-2xl rotate-12 group-hover:rotate-[6deg] transition-transform duration-700" />
+                <div className="absolute inset-x-0 -bottom-24 h-56 pointer-events-none opacity-30 group-hover:opacity-100 transition-all duration-1000 flex items-start justify-center overflow-hidden z-0">
+                    <div className="flex -space-x-8 group-hover:space-x-4 transition-all duration-700 mt-12 perspective-[1000px]">
+                        <div className="w-24 h-40 rounded-xl bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=300')] bg-cover bg-center border border-white/30 shadow-2xl -rotate-12 group-hover:rotate-[-20deg] group-hover:-translate-y-4 group-hover:-translate-x-4 transition-all duration-700" />
+                        <div className="w-24 h-40 rounded-xl bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=300')] bg-cover bg-center border border-white/40 shadow-2xl z-10 scale-110 group-hover:-translate-y-8 transition-all duration-700 drop-shadow-[0_20px_40px_rgba(0,0,0,0.8)]" />
+                        <div className="w-24 h-40 rounded-xl bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300')] bg-cover bg-center border border-white/30 shadow-2xl rotate-12 group-hover:rotate-[20deg] group-hover:-translate-y-4 group-hover:translate-x-4 transition-all duration-700" />
                     </div>
                 </div>
             )
         case "styles":
             return (
-                <div className="absolute -right-4 -bottom-4 w-40 h-40 pointer-events-none opacity-30 group-hover:opacity-70 transition-all duration-700 translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:-translate-y-2 z-0">
-                    <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full p-4 rotate-12 scale-125">
-                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=200')] bg-cover bg-center shadow-lg" />
-                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=200')] bg-cover bg-center shadow-lg" />
-                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200')] bg-cover bg-center shadow-lg" />
-                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=200')] bg-cover bg-center shadow-lg" />
+                <div className="absolute -right-6 -bottom-6 w-52 h-52 pointer-events-none opacity-30 group-hover:opacity-100 transition-all duration-700 translate-x-8 translate-y-8 group-hover:translate-x-0 group-hover:-translate-y-0 z-0 perspective-[1000px]">
+                    <div className="grid grid-cols-2 grid-rows-2 gap-3 w-full h-full p-4 rotate-12 group-hover:rotate-6 scale-125 group-hover:scale-110 transition-transform duration-700 drop-shadow-[0_0_30px_rgba(244,63,94,0.3)]">
+                        <div className="rounded-2xl border border-white/20 bg-[url('https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=200')] bg-cover bg-center shadow-lg group-hover:-translate-y-2 group-hover:-translate-x-2 transition-transform duration-500 delay-75" />
+                        <div className="rounded-2xl border border-white/20 bg-[url('https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=200')] bg-cover bg-center shadow-lg group-hover:-translate-y-2 group-hover:translate-x-2 transition-transform duration-500 delay-100" />
+                        <div className="rounded-2xl border border-white/20 bg-[url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200')] bg-cover bg-center shadow-lg group-hover:translate-y-2 group-hover:-translate-x-2 transition-transform duration-500 delay-150" />
+                        <div className="rounded-2xl border border-white/20 bg-[url('https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=200')] bg-cover bg-center shadow-lg group-hover:translate-y-2 group-hover:translate-x-2 transition-transform duration-500 delay-200" />
                     </div>
                 </div>
             )
         case "speed":
             return (
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20 group-hover:opacity-50 transition-opacity duration-700 z-0 overflow-hidden">
-                    <svg className="w-[150%] h-[150%] absolute right-[-25%] bottom-[-25%]" viewBox="0 0 100 100">
-                        <motion.circle 
-                            cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-amber-500"
-                            strokeDasharray="283"
-                            initial={{ strokeDashoffset: 283 }}
-                            animate={{ strokeDashoffset: [283, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        />
-                        <motion.circle 
-                            cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-orange-500 opacity-50"
-                            strokeDasharray="220"
-                            initial={{ strokeDashoffset: 220 }}
-                            animate={{ strokeDashoffset: [220, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                        />
-                    </svg>
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-30 group-hover:opacity-100 transition-opacity duration-700 z-0 overflow-hidden">
+                    <div className="absolute right-[-10%] bottom-[-10%] w-[120%] h-[120%]">
+                        <svg className="w-full h-full drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]" viewBox="0 0 100 100">
+                            <motion.circle 
+                                cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-amber-500"
+                                strokeDasharray="264"
+                                initial={{ strokeDashoffset: 264 }}
+                                animate={{ strokeDashoffset: 0 }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                            <motion.circle 
+                                cx="50" cy="50" r="32" fill="none" stroke="currentColor" strokeWidth="2" className="text-orange-500 opacity-60"
+                                strokeDasharray="10 15"
+                                animate={{ rotate: 360 }}
+                                style={{ originX: "50px", originY: "50px" }}
+                                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                            />
+                        </svg>
+                        <div className="absolute top-1/2 left-[55%] -translate-x-1/2 -translate-y-1/2 text-white font-black text-5xl italic opacity-0 group-hover:opacity-100 transition-all duration-700 drop-shadow-[0_0_25px_rgba(255,255,255,0.8)] mix-blend-plus-lighter scale-50 group-hover:scale-100">
+                            10<span className="text-3xl text-amber-400">s</span>
+                        </div>
+                    </div>
                 </div>
             )
         case "gems":
             return (
-                <div className="absolute inset-y-0 right-0 w-1/2 pointer-events-none overflow-hidden hidden sm:flex flex-col items-center justify-center opacity-30 group-hover:opacity-70 transition-opacity duration-1000 z-0 scale-[1.5] translate-x-12">
+                <div className="absolute inset-y-0 right-0 w-1/2 pointer-events-none overflow-hidden hidden sm:flex flex-col items-center justify-center transition-opacity duration-1000 z-0 scale-[1.3] translate-x-16">
+                    {/* Spinning God Rays */}
                     <motion.div 
-                        className="w-full h-full text-emerald-400 drop-shadow-[0_0_50px_rgba(52,211,153,0.4)] flex items-center justify-center"
-                        animate={{ y: [-15, 15, -15], rotate: [-10, 10, -10] }}
+                        className="absolute inset-[-150%] bg-[conic-gradient(from_90deg_at_50%_50%,rgba(16,185,129,0)_0%,rgba(16,185,129,0)_20%,rgba(16,185,129,0.3)_50%,rgba(16,185,129,0)_80%,rgba(16,185,129,0)_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 mix-blend-screen blur-xl"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    />
+                    <motion.div 
+                        className="relative w-full h-full text-emerald-400 drop-shadow-[0_0_80px_rgba(16,185,129,0.5)] flex items-center justify-center group-hover:scale-125 transition-transform duration-700 filter saturate-150"
+                        animate={{ y: [-15, 15, -15] }}
                         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                     >
                         <Gem className="w-64 h-64 stroke-[0.3]" />
@@ -1630,16 +1644,16 @@ const BentoCard = ({ feat }: { feat: typeof FEATURES[0] }) => {
     return (
         <div
             onMouseMove={handleMouseMove}
-            className="group relative h-full rounded-[32px] overflow-hidden bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.04] transition-all duration-700 w-full"
+            className="group relative h-full rounded-[32px] overflow-hidden bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] hover:border-white/[0.15] hover:bg-white/[0.04] hover:-translate-y-1 hover:shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)] transition-all duration-700 w-full"
         >
             {/* 1. Underlying Premium Grid Pattern */}
             <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:24px_24px] opacity-20 pointer-events-none" />
 
-            {/* 2. Constant Atmospheric Aurora (Always visible, intensified on hover) */}
-            <div className="absolute inset-0 opacity-50 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none mix-blend-screen overflow-hidden">
+            {/* 2. Constant Atmospheric Aurora (Intensified) */}
+            <div className="absolute inset-0 opacity-60 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none mix-blend-screen overflow-hidden">
                 <motion.div 
-                    className={`absolute inset-[-50%] bg-gradient-to-tr ${feat.color} blur-[100px] opacity-30`}
-                    animate={{ rotate: [0, 360], scale: [1, 1.15, 1] }}
+                    className={`absolute inset-[-50%] bg-gradient-to-tr ${feat.color} blur-[100px] opacity-40`}
+                    animate={{ rotate: [0, 360], scale: [1, 1.2, 1] }}
                     transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                 />
             </div>
@@ -1650,9 +1664,9 @@ const BentoCard = ({ feat }: { feat: typeof FEATURES[0] }) => {
                 style={{
                     background: useMotionTemplate`
                         radial-gradient(
-                            500px circle at ${mouseX}px ${mouseY}px,
-                            rgba(255, 255, 255, 0.15),
-                            transparent 60%
+                            600px circle at ${mouseX}px ${mouseY}px,
+                            rgba(255, 255, 255, 0.2),
+                            transparent 70%
                         )
                     `,
                 }}
@@ -1662,28 +1676,28 @@ const BentoCard = ({ feat }: { feat: typeof FEATURES[0] }) => {
             {renderBentoVisual(feat.id)}
 
             {/* 5. Actual Content */}
-            <div className={`relative p-8 sm:p-10 h-full flex flex-col justify-between z-20 pointer-events-none ${(feat.id === 'models' || feat.id === 'gems') ? 'sm:w-[50%]' : 'w-full'}`}>
-                <div className="flex justify-between items-start mb-12">
+            <div className={`relative p-8 sm:p-10 h-full flex flex-col justify-between z-20 pointer-events-none ${feat.id === 'models' || feat.id === 'gems' ? 'sm:w-[50%]' : 'w-full'}`}>
+                <div className="flex justify-between items-start mb-16">
                     {/* Sleek Floating Glass Icon Box */}
-                    <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(255,255,255,0.1)] group-hover:bg-white/[0.1] group-hover:border-white/30 transition-all duration-500 overflow-hidden relative backdrop-blur-md">
+                    <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/20 flex items-center justify-center shadow-[0_10px_30px_-5px_rgba(0,0,0,0.5)] group-hover:shadow-[0_0_30px_0_rgba(255,255,255,0.2)] group-hover:bg-white/[0.1] group-hover:border-white/40 group-hover:scale-110 transition-all duration-500 overflow-hidden relative backdrop-blur-md">
                         {/* Shimmer Swipe Effect */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out" />
-                        <feat.icon className="w-6 h-6 text-white/80 group-hover:text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] transition-colors duration-500 relative z-10" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/50 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out delay-100" />
+                        <feat.icon className="w-6 h-6 text-white/90 group-hover:text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-colors duration-500 relative z-10" />
                     </div>
                 </div>
 
                 <div className="relative">
-                    <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white/95 mb-3 group-hover:text-white transition-colors duration-500">
+                    <h3 className={`text-xl sm:text-2xl font-black tracking-tight text-white mb-3 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r ${feat.color} transition-all duration-500 filter drop-shadow-md`}>
                         {feat.title}
                     </h3>
-                    <p className="text-muted-foreground/90 leading-relaxed text-sm sm:text-[15px] group-hover:text-white/80 transition-colors duration-500 pr-6">
+                    <p className="text-muted-foreground/90 leading-relaxed text-sm sm:text-[15px] group-hover:text-white/90 transition-colors duration-500 pr-4 drop-shadow-sm">
                         {feat.desc}
                     </p>
                 </div>
             </div>
             
-            {/* Premium Top Border Reveal (Apple style) */}
-            <div className="absolute top-0 inset-x-8 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-1000 ease-out z-30" />
+            {/* Premium Top Border Reveal (Apple style - Upgraded) */}
+            <div className="absolute top-0 inset-x-8 h-[2px] bg-gradient-to-r from-transparent via-white/80 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-1000 ease-out z-30 opacity-70" />
         </div>
     )
 }
