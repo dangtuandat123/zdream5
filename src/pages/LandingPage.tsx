@@ -2153,20 +2153,23 @@ export default function LandingPage() {
                         <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300 animate-pulse-glow">
                             <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
                         </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">
-                            Studio Sáng Tạo{" "}
-                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 animate-gradient-text text-glow">
-                                AI
+                        <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl mt-2 mb-2">
+                            Mọi Ý Tưởng Đều{" "}
+                            <span className="relative inline-block whitespace-nowrap">
+                                <span className="absolute -inset-2 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 blur-2xl opacity-40 animate-pulse" />
+                                <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 font-black drop-shadow-lg">
+                                    Thành Sự Thật
+                                </span>
                             </span>
                         </h2>
                         {/* Animated underline */}
                         <motion.div
-                            className="mx-auto mt-2 h-[2px] bg-gradient-to-r from-transparent via-violet-500/40 to-transparent"
-                            initial={{ width: 0 }} whileInView={{ width: "12rem" }} viewport={{ once: true }}
+                            className="mx-auto mt-4 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                            initial={{ width: 0 }} whileInView={{ width: "16rem" }} viewport={{ once: true }}
                             transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
                         />
-                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm md:text-base text-balance">
-                            Xem cách ZDream biến ý tưởng thành tác phẩm — chỉ trong vài giây.
+                        <p className="mt-5 max-w-xl mx-auto text-muted-foreground/90 text-sm md:text-[15px] font-medium leading-relaxed text-balance">
+                            Bạn không cần học kỹ thuật phức tạp. Chỉ cần miêu tả mong muốn từ trong đầu, hệ thống sẽ vẽ ngay lập tức.
                         </p>
                     </motion.div>
 
@@ -2265,12 +2268,17 @@ export default function LandingPage() {
                                     <Sparkles className="h-3 w-3 text-violet-400" /> 12+ phong cách • Cập nhật hàng tuần
                                 </span>
                             </div>
-                            <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl lg:text-5xl">
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/70">Kiểu Mẫu </span>
-                                <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300">Sẵn Sàng Sử Dụng</span>
+                            <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl lg:text-5xl mb-3">
+                                <span className="text-white drop-shadow-md">Thư Viện </span>
+                                <span className="relative inline-block whitespace-nowrap">
+                                    <span className="absolute -inset-2 bg-gradient-to-r from-fuchsia-500 to-pink-500 blur-2xl opacity-30 animate-pulse" />
+                                    <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 to-pink-400 drop-shadow-lg font-black">
+                                        Cảm Hứng
+                                    </span>
+                                </span>
                             </h2>
-                            <p className="mt-3 text-muted-foreground text-sm sm:text-base max-w-2xl text-balance leading-relaxed">
-                                Chọn một phong cách, nhập mô tả, và nhận tác phẩm ngay lập tức — không cần tinh chỉnh phức tạp.
+                            <p className="mt-4 text-muted-foreground/90 text-sm sm:text-base max-w-xl text-balance leading-relaxed font-medium">
+                                Khám phá hàng trăm mẫu tranh nghệ thuật tuyệt đẹp đã được pha sẵn công thức màu. Nhấp là vẽ ngay.
                             </p>
                         </div>
                         <div className="hidden md:flex shrink-0">
