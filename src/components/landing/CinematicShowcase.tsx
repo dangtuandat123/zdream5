@@ -335,8 +335,8 @@ export default function CinematicShowcase() {
 
                                 {/* Prompt Glass Input Box */}
                                 <div className="w-full relative group/input">
-                                    <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-violet-600 to-fuchsia-600 blur opacity-20 group-hover/input:opacity-50 transition duration-1000 group-hover/input:duration-200" />
-                                    <div className="relative w-full border border-white/10 rounded-2xl bg-[#0c0c0e]/80 backdrop-blur-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
+                                    <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-r from-violet-600 to-fuchsia-600 blur-xl opacity-20 group-hover/input:opacity-50 transition duration-1000 group-hover/input:duration-200" />
+                                    <div className="relative w-full border border-white/10 rounded-[2rem] bg-[#0c0c0e]/80 backdrop-blur-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
                                         
                                         <div ref={promptInputRef} className="px-6 py-6 sm:py-7">
                                             <p className="text-lg sm:text-xl lg:text-2xl text-white/90 font-medium leading-relaxed min-h-[40px] font-sans">
