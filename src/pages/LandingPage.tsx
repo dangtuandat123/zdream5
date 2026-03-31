@@ -109,14 +109,14 @@ const YEARLY_PLANS = [
 ]
 
 const TEMPLATES = [
-    { name: "Cyberpunk", cat: "Chân dung", img: "https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=400&auto=format&fit=crop" },
-    { name: "Ghibli", cat: "Anime", img: "https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=400&auto=format&fit=crop" },
-    { name: "Sản phẩm 3D", cat: "3D", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=400&auto=format&fit=crop" },
-    { name: "Logo Minimal", cat: "Logo", img: "https://images.unsplash.com/photo-1626785774573-4b799315345d?q=80&w=400&auto=format&fit=crop" },
-    { name: "Sơn dầu", cat: "Phong cảnh", img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=400&auto=format&fit=crop" },
-    { name: "Anime Waifu", cat: "Anime", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=400&auto=format&fit=crop" },
-    { name: "Thời trang", cat: "Chân dung", img: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=400&auto=format&fit=crop" },
-    { name: "Concept Art", cat: "Phong cảnh", img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=400&auto=format&fit=crop" },
+    { name: "Phép thuật rừng", cat: "Mascot", img: "/assets/nana_1.png" },
+    { name: "Cyber Shiba", cat: "Chân dung", img: "/assets/nana_2.png" },
+    { name: "Đảo Trà Sữa", cat: "Phong cảnh", img: "/assets/nana_3.png" },
+    { name: "Phi Hành Mèo", cat: "Vũ trụ", img: "/assets/nana_4.png" },
+    { name: "Neon Fox", cat: "Logo", img: "/assets/nana_5.png" },
+    { name: "Ghibli World", cat: "Phong cảnh", img: "/assets/nana_6.png" },
+    { name: "Cyberpunk Girl", cat: "Anime", img: "/assets/nana_7.png" },
+    { name: "Pop Sneaker", cat: "3D", img: "/assets/nana_8.png" },
     { name: "Neon Art", cat: "Trừu tượng", img: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=400&auto=format&fit=crop" },
     { name: "Abstract", cat: "Nghệ thuật", img: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" },
     { name: "Sci-fi", cat: "Vũ trụ", img: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=400&auto=format&fit=crop" },
@@ -124,14 +124,14 @@ const TEMPLATES = [
 ]
 
 const HERO_IMAGES = [
-    { src: "https://images.unsplash.com/photo-1547891654-e66ed7ebb968?q=80&w=600&auto=format&fit=crop", label: "Chân dung Cyberpunk" },
-    { src: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=600&auto=format&fit=crop", label: "Digital Art 3D" },
-    { src: "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=600&auto=format&fit=crop", label: "Abstract Fluid" },
-    { src: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop", label: "Sơn dầu cổ điển" },
-    { src: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=600&auto=format&fit=crop", label: "Fantasy World" },
-    { src: "https://images.unsplash.com/photo-1549490349-8643362247b5?q=80&w=600&auto=format&fit=crop", label: "Sci-fi Concept" },
-    { src: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?q=80&w=600&auto=format&fit=crop", label: "Neon Dreams" },
-    { src: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop", label: "Abstract Art" },
+    { src: "/assets/wow_1.png", label: "Sinh vật biển Neon" },
+    { src: "/assets/real_1.png", label: "Chân dung Cyberpunk" },
+    { src: "/assets/wow_2.png", label: "Cây thần thoại" },
+    { src: "/assets/real_2.png", label: "Nhiếp ảnh Levitating" },
+    { src: "/assets/wow_3.png", label: "Android Geisha" },
+    { src: "/assets/real_3.png", label: "Kiến trúc siêu thực" },
+    { src: "/assets/wow_4.png", label: "Tiểu vũ trụ" },
+    { src: "/assets/real_4.png", label: "Macro thiên nhiên" },
 ]
 
 
