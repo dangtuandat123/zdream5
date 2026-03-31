@@ -2199,6 +2199,46 @@ export default function LandingPage() {
             </section>
 
 
+            {/* ==================== FEATURES ==================== */}
+            <section className="w-full py-16 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
+
+                <div className="container mx-auto px-4 md:px-8 max-w-5xl relative">
+                    <motion.div
+                        className="text-center mb-8"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={fadeUp}
+                    >
+                        <Badge variant="outline" className="mb-3 border-violet-500/30 bg-violet-500/10 text-violet-300">
+                            <Sparkles className="mr-2 h-3.5 w-3.5" /> Tính năng nổi bật
+                        </Badge>
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl lg:text-4xl">Tất Cả Trong Một Nền Tảng</h2>
+                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm lg:text-base text-balance">
+                            Mọi công cụ bạn cần để biến ý tưởng thành tác phẩm nghệ thuật — nhanh, đẹp, dễ dùng.
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={staggerContainer}
+                    >
+                        {FEATURES.map((feat, i) => {
+                            let spanClass = "col-span-1"
+                            if (i === 0) spanClass = "col-span-1 md:col-span-2 lg:col-span-2"
+                            if (i === 5) spanClass = "col-span-1 md:col-span-2 lg:col-span-3"
+
+                            return (
+                                <motion.div key={feat.title} variants={fadeUp} className={`h-full ${spanClass}`}>
+                                    <BentoCard feat={feat} />
+                                </motion.div>
+                            )
+                        })}
+                    </motion.div>
+                </div>
+            </section>
+
             {/* ==================== TEMPLATES CAROUSEL ==================== */}
             <section id="templates" className="w-full py-20 md:py-28 overflow-hidden relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
@@ -2332,46 +2372,6 @@ export default function LandingPage() {
                         {STATS.map((stat) => (
                             <AnimatedStat key={stat.label} stat={stat} />
                         ))}
-                    </motion.div>
-                </div>
-            </section>
-
-            {/* ==================== FEATURES ==================== */}
-            <section className="w-full py-16 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
-
-                <div className="container mx-auto px-4 md:px-8 max-w-5xl relative">
-                    <motion.div
-                        className="text-center mb-8"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <Badge variant="outline" className="mb-3 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <Sparkles className="mr-2 h-3.5 w-3.5" /> Tính năng nổi bật
-                        </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl lg:text-4xl">Tất Cả Trong Một Nền Tảng</h2>
-                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm lg:text-base text-balance">
-                            Mọi công cụ bạn cần để biến ý tưởng thành tác phẩm nghệ thuật — nhanh, đẹp, dễ dùng.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={staggerContainer}
-                    >
-                        {FEATURES.map((feat, i) => {
-                            let spanClass = "col-span-1"
-                            if (i === 0) spanClass = "col-span-1 md:col-span-2 lg:col-span-2"
-                            if (i === 5) spanClass = "col-span-1 md:col-span-2 lg:col-span-3"
-
-                            return (
-                                <motion.div key={feat.title} variants={fadeUp} className={`h-full ${spanClass}`}>
-                                    <BentoCard feat={feat} />
-                                </motion.div>
-                            )
-                        })}
                     </motion.div>
                 </div>
             </section>
