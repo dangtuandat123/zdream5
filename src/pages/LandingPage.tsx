@@ -1479,42 +1479,140 @@ function scrollToSection(id: string) {
 
 const FEATURES = [
     {
+        id: "models",
         icon: WandSparkles,
-        title: "Nhiều Model AI",
-        desc: "Truy cập hàng chục model AI hàng đầu — Gemini, Flux, SDXL và nhiều hơn nữa.",
+        title: "Đa Dạng Model AI",
+        desc: "Dễ dàng truy cập các model tạo ảnh hàng đầu thế giới ngay trong cùng một nền tảng: Midjourney, Flux.1, SDXL.",
         color: "from-violet-500 to-purple-600",
     },
     {
+        id: "4k",
         icon: ImageIcon,
-        title: "Xuất Ảnh 4K",
-        desc: "Xuất ảnh chất lượng cao lên đến 4K, sắc nét từng chi tiết cho mọi mục đích.",
-        color: "from-purple-500 to-fuchsia-600",
+        title: "Xuất Ảnh Siêu Nét 4K",
+        desc: "Tích hợp công nghệ AI Upscale mạnh mẽ, tự động nâng cấp độ phân giải hình ảnh lên định dạng 4K cực rõ nét.",
+        color: "from-blue-500 to-cyan-600",
     },
     {
+        id: "templates",
         icon: SwatchBook,
-        title: "Template Có Sẵn",
-        desc: "Hàng trăm template được tối ưu sẵn — chỉ cần chọn và tạo, không cần viết prompt.",
+        title: "Thư Viện Prompt & Mẫu",
+        desc: "Hàng trăm hình mẫu tuyệt đẹp đã được thiết kế sẵn. Bắt đầu sáng tạo ngay lập tức mà không cần suy nghĩ từ khóa.",
         color: "from-fuchsia-500 to-pink-600",
     },
     {
+        id: "styles",
         icon: Palette,
-        title: "Đa Dạng Phong Cách",
-        desc: "Anime, sơn dầu, 3D render, cyberpunk, Ghibli — mọi phong cách bạn có thể nghĩ đến.",
+        title: "Đầy Đủ Phong Cách Hội Họa",
+        desc: "Từ nét vẽ Anime, Ghibli, 3D Render cho đến ảnh chụp Photorealistic siêu thực và thế giới Cyberpunk.",
         color: "from-pink-500 to-rose-600",
     },
     {
+        id: "speed",
         icon: ZapIcon,
-        title: "Tốc Độ 10 Giây",
-        desc: "Engine AI tối ưu cho tốc độ — từ prompt đến tác phẩm hoàn chỉnh chỉ trong ~10 giây.",
+        title: "Tạo Ảnh Trong Vài Giây",
+        desc: "Hệ thống máy chủ tối ưu hóa tự động trên GPU tốc độ cao. Trả về kết quả hình ảnh ngay lập tức chỉ từ 5 đến 10 giây.",
         color: "from-amber-500 to-orange-600",
     },
     {
+        id: "gems",
         icon: Gem,
-        title: "50 Gems Miễn Phí",
-        desc: "Đăng ký nhận ngay 50 gems miễn phí để trải nghiệm — không cần thẻ tín dụng.",
+        title: "Nhận 50 Gems Trải Nghiệm",
+        desc: "Tạo ngay tài khoản và nhận 50 Gems miễn phí để thoải mái dùng thử mọi chức năng. Không yêu cầu thẻ tín dụng.",
         color: "from-emerald-500 to-teal-600",
     },
 ]
+
+// ============================================================
+// BENTO VISUAL MOCKUPS
+// ============================================================
+const renderBentoVisual = (id: string) => {
+    switch (id) {
+        case "models":
+            return (
+                <div className="absolute inset-y-0 right-0 w-[55%] pointer-events-none overflow-hidden hidden sm:flex items-center justify-end pr-8 z-0">
+                    <div className="relative w-full h-full flex items-center justify-center">
+                        <motion.div 
+                            className="absolute top-[15%] right-[20%] w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 backdrop-blur-md shadow-[0_0_30px_rgba(139,92,246,0.3)] flex items-center justify-center font-bold text-white/90 border border-white/20"
+                            animate={{ y: [-10, 10, -10], rotate: [0, 5, -5, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                        >MJ v6.0</motion.div>
+                        <motion.div 
+                            className="absolute bottom-[20%] right-[40%] w-28 h-28 rounded-2xl bg-gradient-to-tr from-cyan-400/20 to-blue-600/20 backdrop-blur-md shadow-[0_0_40px_rgba(56,189,248,0.2)] flex items-center justify-center font-bold text-white/90 border border-white/20 z-10"
+                            animate={{ y: [10, -10, 10], x: [-5, 5, -5] }}
+                            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                        >FLUX.1</motion.div>
+                        <motion.div 
+                            className="absolute top-[40%] right-[10%] w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-teal-600/20 backdrop-blur-md shadow-[0_0_20px_rgba(52,211,153,0.2)] flex items-center justify-center font-bold text-white/90 text-sm border border-white/20"
+                            animate={{ y: [-15, 15, -15], scale: [1, 1.05, 1] }}
+                            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+                        >SDXL</motion.div>
+                    </div>
+                </div>
+            )
+        case "4k":
+            return (
+                <div className="absolute -bottom-10 -right-10 w-48 h-48 pointer-events-none opacity-40 group-hover:opacity-100 transition-all duration-700 group-hover:-translate-y-4 group-hover:-translate-x-4 z-0">
+                    <div className="w-full h-full rounded-tl-3xl bg-[url('https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=400')] bg-cover bg-center border-t border-l border-white/20 shadow-[-20px_-20px_50px_rgba(0,0,0,0.5)]" />
+                </div>
+            )
+        case "templates":
+            return (
+                <div className="absolute inset-x-0 -bottom-20 h-48 pointer-events-none opacity-30 group-hover:opacity-80 transition-all duration-1000 flex items-start justify-center overflow-hidden z-0">
+                    <div className="flex -space-x-4 group-hover:space-x-4 transition-all duration-700 mt-10">
+                        <div className="w-20 h-32 sm:w-24 sm:h-36 rounded-lg bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=200')] bg-cover bg-center border border-white/20 shadow-2xl -rotate-12 group-hover:rotate-[-6deg] transition-transform duration-700" />
+                        <div className="w-20 h-32 sm:w-24 sm:h-36 rounded-lg bg-[url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=200')] bg-cover bg-center border border-white/20 shadow-2xl z-10 scale-110 -translate-y-4" />
+                        <div className="w-20 h-32 sm:w-24 sm:h-36 rounded-lg bg-[url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=200')] bg-cover bg-center border border-white/20 shadow-2xl rotate-12 group-hover:rotate-[6deg] transition-transform duration-700" />
+                    </div>
+                </div>
+            )
+        case "styles":
+            return (
+                <div className="absolute -right-4 -bottom-4 w-40 h-40 pointer-events-none opacity-30 group-hover:opacity-70 transition-all duration-700 translate-x-4 translate-y-4 group-hover:translate-x-0 group-hover:-translate-y-2 z-0">
+                    <div className="grid grid-cols-2 grid-rows-2 gap-2 w-full h-full p-4 rotate-12 scale-125">
+                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1542442828-287217bfb21f?q=80&w=200')] bg-cover bg-center shadow-lg" />
+                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1498453488252-0974dcabe0cb?q=80&w=200')] bg-cover bg-center shadow-lg" />
+                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=200')] bg-cover bg-center shadow-lg" />
+                        <div className="rounded-xl bg-[url('https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=200')] bg-cover bg-center shadow-lg" />
+                    </div>
+                </div>
+            )
+        case "speed":
+            return (
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-20 group-hover:opacity-50 transition-opacity duration-700 z-0 overflow-hidden">
+                    <svg className="w-[150%] h-[150%] absolute right-[-25%] bottom-[-25%]" viewBox="0 0 100 100">
+                        <motion.circle 
+                            cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-amber-500"
+                            strokeDasharray="283"
+                            initial={{ strokeDashoffset: 283 }}
+                            animate={{ strokeDashoffset: [283, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                        <motion.circle 
+                            cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-orange-500 opacity-50"
+                            strokeDasharray="220"
+                            initial={{ strokeDashoffset: 220 }}
+                            animate={{ strokeDashoffset: [220, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        />
+                    </svg>
+                </div>
+            )
+        case "gems":
+            return (
+                <div className="absolute inset-y-0 right-0 w-1/2 pointer-events-none overflow-hidden hidden sm:flex flex-col items-center justify-center opacity-30 group-hover:opacity-70 transition-opacity duration-1000 z-0 scale-[1.5] translate-x-12">
+                    <motion.div 
+                        className="w-full h-full text-emerald-400 drop-shadow-[0_0_50px_rgba(52,211,153,0.4)] flex items-center justify-center"
+                        animate={{ y: [-15, 15, -15], rotate: [-10, 10, -10] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                        <Gem className="w-64 h-64 stroke-[0.3]" />
+                    </motion.div>
+                </div>
+            )
+        default:
+            return null
+    }
+}
 
 // ============================================================
 // BENTO CARD COMPONENT (Ultra-Premium Interactive Grid)
@@ -1560,11 +1658,11 @@ const BentoCard = ({ feat }: { feat: typeof FEATURES[0] }) => {
                 }}
             />
 
-            {/* 4. Giant Watermark Icon in background */}
-            <feat.icon strokeWidth={1} className="absolute -bottom-8 -right-8 w-64 h-64 text-white/[0.03] group-hover:text-white/[0.08] group-hover:scale-110 group-hover:-rotate-12 transition-all duration-1000 pointer-events-none z-0" />
+            {/* 4. Bespoke Product Visual Representation */}
+            {renderBentoVisual(feat.id)}
 
             {/* 5. Actual Content */}
-            <div className="relative p-8 sm:p-10 h-full flex flex-col justify-between z-20 pointer-events-none">
+            <div className={`relative p-8 sm:p-10 h-full flex flex-col justify-between z-20 pointer-events-none ${(feat.id === 'models' || feat.id === 'gems') ? 'sm:w-[50%]' : 'w-full'}`}>
                 <div className="flex justify-between items-start mb-12">
                     {/* Sleek Floating Glass Icon Box */}
                     <div className="w-14 h-14 rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center shadow-[0_0_30px_-5px_rgba(255,255,255,0.1)] group-hover:bg-white/[0.1] group-hover:border-white/30 transition-all duration-500 overflow-hidden relative backdrop-blur-md">
