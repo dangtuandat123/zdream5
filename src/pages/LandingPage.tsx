@@ -187,10 +187,10 @@ const FAQS = [
 
 
 const STATS = [
-    { label: "Ảnh đã tạo", value: 1200000, suffix: "+", display: "1.2M+", icon: WandSparkles },
-    { label: "Người dùng", value: 50000, suffix: "+", display: "50K+", icon: Star },
-    { label: "Kiểu mẫu", value: 12, suffix: "+", display: "12+", icon: SwatchBook },
-    { label: "Đánh giá", value: 4.9, suffix: "/5", display: "4.9/5", icon: Gem },
+    { label: "Tác Phẩm Ra Đời", value: 1200000, suffix: "+", display: "1.2M+", icon: WandSparkles },
+    { label: "Nhà Sáng Tạo", value: 50000, suffix: "+", display: "50K+", icon: Star },
+    { label: "Phong Cách Vẽ", value: 50, suffix: "+", display: "50+", icon: Palette },
+    { label: "Đánh Giá 5 Sao", value: 15000, suffix: "+", display: "15K+", icon: Gem },
 ]
 
 const DEMO_PROMPT = "A cute fox wearing a spacesuit, floating in a colorful nebula, digital painting, ultra detailed, cinematic lighting"
@@ -2319,10 +2319,10 @@ export default function LandingPage() {
                         variants={fadeUp}
                     >
                         <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <Trophy className="mr-2 h-3.5 w-3.5" /> Thành tựu cộng đồng
+                            <Trophy className="mr-2 h-3.5 w-3.5" /> Sức mạnh từ cộng đồng
                         </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Con Số Ấn Tượng</h2>
-                        <p className="mt-3 max-w-xl mx-auto text-muted-foreground text-sm text-balance">Cộng đồng sáng tạo đang lớn mạnh mỗi ngày.</p>
+                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Đồng Hành Cùng Hàng Nghìn Nhà Sáng Tạo</h2>
+                        <p className="mt-3 max-w-xl mx-auto text-muted-foreground text-sm text-balance">Hàng triệu ý tưởng điên rồ nhất đã được chuyển hóa thành hiện thực.</p>
                     </motion.div>
                     <motion.div
                         className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
