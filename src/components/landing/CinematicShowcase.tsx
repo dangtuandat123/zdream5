@@ -16,10 +16,10 @@ import {
 // DATA & CONSTANTS
 // ============================================================
 
-const PROMPT_TEXT = "A cute fox wearing a spacesuit, floating in galaxy"
-const STYLES = ["Digital Art", "Anime", "Chân thực", "3D Render", "Sơn dầu"]
+const PROMPT_TEXT = "Một bé cáo nhỏ mặc bộ đồ phi hành gia lơ lửng trong dải ngân hà kỳ ảo"
+const STYLES = ["Digital Art", "Anime", "Chân thực", "3D Render", "Sơn dầu", "Cyberpunk"]
 const RATIOS = ["1:1", "3:4", "4:3", "16:9", "9:16"]
-const RESULT_IMAGE = "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=1200&h=675&auto=format&fit=crop"
+const RESULT_IMAGE = "/assets/space_fox_nana.png"
 
 type Scene = "idle" | "prompt" | "style" | "generate" | "result" | "pause"
 
@@ -321,10 +321,10 @@ export default function CinematicShowcase() {
                                 <motion.div className="mb-8 text-center" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
                                     <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter">
                                         <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-200 to-pink-300">
-                                            Nhập mô tả
+                                            Bạn muốn vẽ gì
                                         </span>{" "}
                                         <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-                                            tuyệt tác
+                                            hôm nay?
                                         </span>
                                     </h3>
                                     <motion.div
@@ -395,7 +395,7 @@ export default function CinematicShowcase() {
                                         <Palette className="h-5 w-5 text-fuchsia-400" />
                                         <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-white/50 font-bold">Menu Phong Cách</span>
                                     </div>
-                                    <div className="flex flex-wrap gap-3 justify-center">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 justify-center w-full max-w-[500px] mx-auto px-4">
                                         {STYLES.map((style, i) => (
                                             <motion.div
                                                 key={style}
@@ -406,7 +406,7 @@ export default function CinematicShowcase() {
                                             >
                                                 <Badge
                                                     variant={activeStyle === i ? "default" : "outline"}
-                                                    className={`cursor-default text-xs sm:text-base px-3 py-1.5 sm:px-5 sm:py-2.5 transition-all duration-500 rounded-xl font-medium ${activeStyle === i
+                                                    className={`w-full flex justify-center cursor-default text-[11px] sm:text-[14px] py-2 sm:py-2.5 transition-all duration-500 rounded-xl font-medium ${activeStyle === i
                                                         ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-[0_0_20px_rgba(217,70,239,0.6)] scale-110 ring-2 ring-white/20"
                                                         : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
                                                         }`}

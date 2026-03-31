@@ -1517,7 +1517,7 @@ const FEATURES = [
         id: "gems",
         icon: Gem,
         title: "Trải Nghiệm Trọn Vẹn",
-        desc: "Đăng ký nhận quà và thỏa sức sáng tạo không tốn một đồng. Miễn phí dùng thử mọi chức năng vẽ, tải ảnh.",
+        desc: "Tặng ngay 50 Kim Cương cho tài khoản mới. Trải nghiệm không giới hạn mọi phong cách vẽ và tải ảnh chất lượng cao.",
         color: "from-emerald-500 to-teal-600",
     },
 ]
@@ -1529,23 +1529,39 @@ const renderBentoVisual = (id: string) => {
     switch (id) {
         case "models":
             return (
-                <div className="absolute inset-y-0 right-0 w-[55%] pointer-events-none overflow-hidden hidden sm:flex items-center justify-end pr-8 z-0">
-                    <div className="relative w-full h-full flex items-center justify-center translate-x-4 group-hover:translate-x-0 transition-transform duration-700">
+                <div className="absolute inset-y-0 right-0 w-[60%] pointer-events-none overflow-hidden hidden sm:flex items-center justify-end pr-6 z-0">
+                    <div className="relative w-full h-full flex items-center justify-center translate-x-4 group-hover:translate-x-0 transition-transform duration-[1.2s] ease-[0.22,1,0.36,1]">
+                        {/* Static connection rings to reduce paint cost */}
+                        <svg className="absolute w-[140%] h-[140%] opacity-0 group-hover:opacity-30 transition-opacity duration-1000 z-0" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="35" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-sky-500" strokeDasharray="4 6" />
+                            <circle cx="50" cy="50" r="25" fill="none" stroke="currentColor" strokeWidth="0.5" className="text-fuchsia-400" strokeDasharray="2 4" />
+                        </svg>
+
+                        {/* FLUX 2 Optimized Chip */}
                         <motion.div 
-                            className="absolute top-[10%] right-[30%] w-24 h-24 rounded-3xl bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(139,92,246,0.2)] flex items-center justify-center font-bold text-white/90 border border-white/20 group-hover:scale-110 group-hover:shadow-[0_0_60px_rgba(139,92,246,0.6)] transition-all duration-500"
-                            animate={{ y: [-10, 10, -10], rotate: [0, 5, -5, 0] }}
-                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                        >MJ v6.0</motion.div>
+                            className="absolute top-[15%] right-[20%] w-32 h-32 rounded-[1.5rem] bg-slate-900/60 flex flex-col items-center justify-center border border-sky-400/20 z-10 group-hover:scale-110 group-hover:-translate-y-2 group-hover:border-sky-400/40 transition-all duration-500 will-change-transform"
+                            animate={{ y: [8, -8, 8], rotate: [0, 2, -2, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                        >
+                            <div className="w-10 h-10 mb-2 rounded-full bg-sky-500/10 flex items-center justify-center border border-sky-400/20">
+                                <Sparkles className="w-5 h-5 text-sky-400" />
+                            </div>
+                            <span className="font-black text-xl text-sky-300 drop-shadow-sm tracking-wider">FLUX 2</span>
+                        </motion.div>
+
+                        {/* Nana Banana 2 Optimized Chip */}
                         <motion.div 
-                            className="absolute bottom-[20%] right-[50%] w-28 h-28 rounded-3xl bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(56,189,248,0.2)] flex items-center justify-center font-bold text-white/90 border border-white/20 z-10 group-hover:scale-110 group-hover:-translate-y-4 group-hover:shadow-[0_0_60px_rgba(56,189,248,0.6)] transition-all duration-700"
-                            animate={{ y: [10, -10, 10], x: [-5, 5, -5] }}
-                            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                        >FLUX.1</motion.div>
-                        <motion.div 
-                            className="absolute top-[45%] right-[10%] w-20 h-20 rounded-3xl bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_40px_-10px_rgba(52,211,153,0.2)] flex items-center justify-center font-bold text-white/90 text-sm border border-white/20 group-hover:scale-125 group-hover:shadow-[0_0_50px_rgba(52,211,153,0.6)] transition-all duration-500 delay-100"
-                            animate={{ y: [-15, 15, -15], scale: [1, 1.05, 1] }}
-                            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                        >SDXL</motion.div>
+                            className="absolute bottom-[20%] right-[35%] w-auto px-5 h-14 rounded-full bg-slate-900/60 flex items-center gap-3 border border-fuchsia-400/20 z-20 group-hover:scale-110 group-hover:-translate-x-3 group-hover:border-fuchsia-400/40 transition-all duration-500 will-change-transform"
+                            animate={{ y: [-8, 8, -8], rotate: [0, -2, 2, 0] }}
+                            transition={{ duration: 7, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                        >
+                            <div className="w-8 h-8 shrink-0 rounded-full bg-fuchsia-500/10 flex items-center justify-center border border-fuchsia-400/20">
+                                <ZapIcon className="w-4 h-4 text-fuchsia-400" />
+                            </div>
+                            <span className="font-extrabold text-base whitespace-nowrap text-fuchsia-300 drop-shadow-sm tracking-wide">
+                                Nana Banana 2
+                            </span>
+                        </motion.div>
                     </div>
                 </div>
             )
@@ -1607,20 +1623,60 @@ const renderBentoVisual = (id: string) => {
             )
         case "gems":
             return (
-                <div className="absolute inset-y-0 right-0 w-1/2 pointer-events-none overflow-hidden hidden sm:flex flex-col items-center justify-center transition-opacity duration-1000 z-0 scale-[1.3] translate-x-16">
-                    {/* Spinning God Rays */}
-                    <motion.div 
-                        className="absolute inset-[-150%] bg-[conic-gradient(from_90deg_at_50%_50%,rgba(16,185,129,0)_0%,rgba(16,185,129,0)_20%,rgba(16,185,129,0.3)_50%,rgba(16,185,129,0)_80%,rgba(16,185,129,0)_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-1000 mix-blend-screen blur-xl"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                    />
-                    <motion.div 
-                        className="relative w-full h-full text-emerald-400 drop-shadow-[0_0_80px_rgba(16,185,129,0.5)] flex items-center justify-center group-hover:scale-125 transition-transform duration-700 filter saturate-150"
-                        animate={{ y: [-15, 15, -15] }}
-                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                        <Gem className="w-64 h-64 stroke-[0.3]" />
-                    </motion.div>
+                <div className="absolute inset-y-0 right-0 w-[55%] pointer-events-none overflow-hidden hidden sm:flex items-center justify-center pr-6 z-0">
+                    <div className="relative w-full h-full flex items-center justify-center translate-x-4 group-hover:translate-x-0 transition-transform duration-[1.2s] ease-[0.22,1,0.36,1]">
+                        
+                        {/* Cheerful radial burst background */}
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(52,211,153,0.15),transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                        
+                        {/* Fun rotating dashed rings */}
+                        <svg className="absolute w-[150%] h-[150%] opacity-0 group-hover:opacity-40 transition-opacity duration-1000 z-0" viewBox="0 0 100 100">
+                            <motion.circle cx="50" cy="50" r="38" fill="none" stroke="url(#joy-grad)" strokeWidth="0.5" strokeDasharray="8 8" strokeLinecap="round"
+                                animate={{ rotate: 360 }} transition={{ duration: 25, repeat: Infinity, ease: "linear" }} style={{ originX: "50px", originY: "50px" }} />
+                            <motion.circle cx="50" cy="50" r="28" fill="none" stroke="url(#joy-grad2)" strokeWidth="0.8" strokeDasharray="4 8" strokeLinecap="round"
+                                animate={{ rotate: -360 }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} style={{ originX: "50px", originY: "50px" }} />
+                            <defs>
+                                <linearGradient id="joy-grad" x1="0" y1="0" x2="100" y2="100"><stop stopColor="#34d399"/><stop offset="1" stopColor="#fbbf24"/></linearGradient>
+                                <linearGradient id="joy-grad2" x1="100" y1="0" x2="0" y2="100"><stop stopColor="#fbbf24"/><stop offset="1" stopColor="#10b981"/></linearGradient>
+                            </defs>
+                        </svg>
+
+                        {/* Floating Coins/Sparkles */}
+                        <motion.div className="absolute top-[25%] right-[20%] text-amber-300 opacity-0 group-hover:opacity-100 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]"
+                            animate={{ y: [-15, 0, -15], rotate: [0, 45, 0], scale: [1, 1.2, 1] }} transition={{ duration: 3, repeat: Infinity }}>
+                            <Sparkles className="w-8 h-8 fill-amber-300/40" />
+                        </motion.div>
+                        <motion.div className="absolute bottom-[20%] left-[25%] text-emerald-300 opacity-0 group-hover:opacity-100 drop-shadow-[0_0_15px_rgba(16,185,129,0.6)]"
+                            animate={{ y: [10, -10, 10], rotate: [0, -30, 0], scale: [1, 1.3, 1] }} transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}>
+                            <Sparkles className="w-6 h-6 fill-emerald-300/40" />
+                        </motion.div>
+
+                        {/* Main Joyful Gem Card */}
+                        <motion.div 
+                            className="relative w-36 h-36 rounded-[2rem] bg-gradient-to-tr from-emerald-500/20 to-amber-400/20 backdrop-blur-xl border border-white/30 shadow-[0_10px_40px_-10px_rgba(16,185,129,0.4)] flex items-center justify-center group-hover:scale-110 group-hover:-translate-y-4 group-hover:shadow-[0_0_60px_rgba(52,211,153,0.5)] transition-all duration-700 z-10 will-change-transform"
+                            animate={{ y: [8, -8, 8], rotate: [0, 5, -5, 0] }}
+                            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                            <div className="absolute inset-0 rounded-[2rem] bg-emerald-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-pulse pointer-events-none" />
+                            
+                            <motion.div 
+                                className="relative text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]"
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <Gem className="w-16 h-16 text-emerald-100 fill-emerald-400/30" strokeWidth={1.5} />
+                            </motion.div>
+
+                            {/* 'FREE' Badge popping out */}
+                            <motion.div 
+                                className="absolute -right-8 -top-5 flex items-center justify-center gap-1 bg-gradient-to-r from-amber-300 to-orange-500 text-slate-900 font-black text-sm px-4 py-1.5 rounded-full shadow-xl border border-yellow-200/50 drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]"
+                                animate={{ rotate: [12, -5, 12], scale: [1, 1.15, 1] }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                            >
+                                +50 <Gem className="w-4 h-4 fill-slate-900/10 stroke-[2] -mt-0.5" />
+                            </motion.div>
+                        </motion.div>
+                    </div>
                 </div>
             )
         default:
