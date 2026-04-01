@@ -2060,7 +2060,7 @@ export default function LandingPage() {
 
                 {/* Content center */}
                 <motion.div
-                    className="container relative z-10 mx-auto px-4 md:px-8 max-w-3xl text-center flex flex-col items-center pt-28 pb-8"
+                    className="container relative z-10 mx-auto px-5 sm:px-8 max-w-3xl text-center flex flex-col items-center pt-20 sm:pt-28 pb-6 sm:pb-8"
                     style={{ opacity: heroOpacity }}
                 >
                     <motion.div
@@ -2068,7 +2068,7 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
-                        <div className="group relative overflow-hidden inline-flex items-center rounded-full border border-white/20 bg-white/5 px-5 py-2 text-sm font-medium text-white/90 backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(255,255,255,0.05)] transition-all hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                        <div className="group relative overflow-hidden inline-flex items-center rounded-full border border-white/20 bg-white/5 px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white/90 backdrop-blur-md mb-5 sm:mb-8 shadow-[0_0_20px_rgba(255,255,255,0.05)] transition-all hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]">
                             <motion.div 
                                 className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
                                 animate={{ left: ["-100%", "200%"] }}
@@ -2080,21 +2080,21 @@ export default function LandingPage() {
                     </motion.div>
 
                     <motion.h1
-                        className="font-sans font-black tracking-tighter mb-5 leading-[1.05] text-white"
-                        style={{ fontSize: "clamp(2.2rem, 6vw, 4.5rem)" }}
+                        className="font-sans font-black tracking-tighter mb-3 sm:mb-5 leading-[1.15] sm:leading-[1.05] text-white text-center"
+                        style={{ fontSize: "clamp(2rem, 5.5vw, 4.5rem)" }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
-                        Khai phá ý tưởng <br className="hidden sm:block" />
-                        cùng <span className="relative inline-block mt-2 ml-3 drop-shadow-[0_0_12px_rgba(232,121,249,0.8)] drop-shadow-[0_0_35px_rgba(192,38,211,0.6)]">
+                        Khai phá ý tưởng <br />
+                        cùng <span className="relative inline-block mt-1 sm:mt-2 sm:ml-2 drop-shadow-[0_0_8px_rgba(232,121,249,0.6)] sm:drop-shadow-[0_0_12px_rgba(232,121,249,0.8)] drop-shadow-[0_0_20px_rgba(192,38,211,0.4)] sm:drop-shadow-[0_0_35px_rgba(192,38,211,0.6)]">
                             {/* Perfect Outside Border Layer */}
                             <span 
-                                className="absolute inset-0 z-0 tracking-normal text-[1.05em] pr-2"
+                                className="absolute inset-0 z-0 tracking-normal text-[1em] sm:text-[1.05em] pr-1 sm:pr-2"
                                 aria-hidden="true"
                                 style={{ 
                                     fontFamily: "'Caveat Brush', cursive",
-                                    WebkitTextStroke: "4px rgba(255,255,255,0.95)",
+                                    WebkitTextStroke: "3px rgba(255,255,255,0.95)",
                                     WebkitTextFillColor: "transparent"
                                 }}
                             >
@@ -2102,7 +2102,7 @@ export default function LandingPage() {
                             </span>
                             {/* Foreground Gradient Layer */}
                             <span 
-                                className="relative z-10 text-btn-shine tracking-normal text-[1.05em] pr-2"
+                                className="relative z-10 text-btn-shine tracking-normal text-[1em] sm:text-[1.05em] pr-1 sm:pr-2"
                                 style={{ 
                                     fontFamily: "'Caveat Brush', cursive"
                                 }}
@@ -2124,8 +2124,8 @@ export default function LandingPage() {
                     </motion.h1>
 
                     <motion.p
-                        className="text-3xl md:text-4xl text-zinc-300 font-normal max-w-2xl mx-auto mb-10 leading-relaxed tracking-wide"
-                        style={{ fontFamily: "'Caveat', cursive" }}
+                        className="text-xl sm:text-2xl md:text-4xl text-zinc-300 font-normal max-w-2xl mx-auto mb-6 sm:mb-10 leading-relaxed tracking-wide"
+                        style={{ fontFamily: "'Caveat', cursive", textShadow: "0 2px 15px rgba(0,0,0,0.6)" }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
@@ -2135,25 +2135,25 @@ export default function LandingPage() {
 
                     {/* Dual CTA */}
                     <motion.div
-                        className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-8 w-full"
+                        className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mt-4 sm:mt-8 w-full px-4 sm:px-0"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
                     >
                         <Link to="/login">
-                            <Button size="lg" className="relative group overflow-hidden h-14 px-8 text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_40px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_60px_-5px_rgba(139,92,246,0.8)] transition-all duration-500 rounded-xl hover:scale-105 active:scale-95">
+                            <Button size="lg" className="relative group overflow-hidden h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_40px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_60px_-5px_rgba(139,92,246,0.8)] transition-all duration-500 rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto">
                                 <motion.div 
                                     className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
                                     animate={{ left: ["-100%", "200%"] }}
                                     transition={{ duration: 2.5, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
                                 />
-                                <WandSparkles className="mr-2 h-5 w-5 relative z-10 animate-pulse" /> <span className="relative z-10">Bắt Đầu Cùng AI</span>
+                                <WandSparkles className="mr-2 h-5 w-5 relative z-10 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" /> <span className="relative z-10">Bắt Đầu Cùng AI</span>
                             </Button>
                         </Link>
                         <Button
                             size="lg"
                             variant="outline"
-                            className="group h-14 px-8 text-base font-semibold border-white/20 hover:border-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 bg-background/50 backdrop-blur-sm"
+                            className="group h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold border-white/20 hover:border-violet-400 hover:bg-violet-500/10 rounded-xl transition-all duration-500 hover:scale-105 active:scale-95 bg-background/50 backdrop-blur-sm hover:shadow-[0_0_25px_-3px_rgba(139,92,246,0.5)] w-full sm:w-auto"
                             onClick={() => {
                                 const el = document.getElementById("demo");
                                 if(el) window.scrollTo({ top: el.offsetTop - 80, behavior: "smooth" });
@@ -2165,7 +2165,7 @@ export default function LandingPage() {
 
                     {/* Mini stats bar */}
                     <motion.div
-                        className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mt-12 text-sm text-white/60 font-medium"
+                        className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-10 mt-8 sm:mt-12 text-xs sm:text-sm text-white/60 font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
