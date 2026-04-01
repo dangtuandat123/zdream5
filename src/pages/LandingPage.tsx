@@ -2087,17 +2087,20 @@ export default function LandingPage() {
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
                         Khai phá ý tưởng <br className="hidden sm:block" />
-                        cùng <span className="relative inline-block mt-2">
-                            <span className="relative z-10 text-btn-shine drop-shadow-[0_0_15px_rgba(192,38,211,0.5)]">
-                                ZDream
+                        cùng <span className="relative inline-block mt-2 ml-3">
+                            <span 
+                                className="relative z-10 text-btn-shine tracking-normal text-[1.15em] pr-2 drop-shadow-[0_0_15px_rgba(192,38,211,0.5)]"
+                                style={{ fontFamily: "'Caveat Brush', cursive" }}
+                            >
+                                ZDream!
                             </span>
                             {/* Hand-drawn underline SVG */}
                             <svg className="absolute -bottom-1 sm:-bottom-3 left-[-3%] w-[106%] h-3 sm:h-5 z-0 drop-shadow-[0_2px_10px_rgba(217,70,239,0.5)]" viewBox="0 0 300 20" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                        <stop offset="0%" stopColor="#a78bfa" />   {/* violet-400 */}
-                                        <stop offset="50%" stopColor="#e879f9" />  {/* fuchsia-400 */}
-                                        <stop offset="100%" stopColor="#c084fc" /> {/* purple-400 */}
+                                        <stop offset="0%" stopColor="#a78bfa" />
+                                        <stop offset="50%" stopColor="#e879f9" />
+                                        <stop offset="100%" stopColor="#c084fc" />
                                     </linearGradient>
                                 </defs>
                                 <path d="M5,15 Q150,0 295,12" stroke="url(#line-gradient)" strokeWidth="8" fill="none" strokeLinecap="round" />
