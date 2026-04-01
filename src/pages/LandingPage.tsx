@@ -2265,11 +2265,11 @@ export default function LandingPage() {
                             <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
                         </Badge>
                         <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl mt-2 mb-2">
-                            Mọi Ý Tưởng Đều{" "}
+                            Biến Ý Tưởng Thành{" "}
                             <span className="relative inline-block whitespace-nowrap">
-                                <span className="absolute -inset-2 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 blur-2xl opacity-40 animate-pulse" />
+                                <span className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 blur-lg opacity-30" />
                                 <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 font-black drop-shadow-lg">
-                                    Thành Sự Thật
+                                    Tuyệt Tác
                                 </span>
                             </span>
                         </h2>
@@ -2382,7 +2382,7 @@ export default function LandingPage() {
                             <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl lg:text-5xl mb-3">
                                 <span className="text-white drop-shadow-md">Thư Viện </span>
                                 <span className="relative inline-block whitespace-nowrap">
-                                    <span className="absolute -inset-2 bg-gradient-to-r from-fuchsia-500 to-pink-500 blur-2xl opacity-30 animate-pulse" />
+                                    <span className="absolute -inset-0.5 bg-gradient-to-r from-fuchsia-500 to-pink-500 blur-lg opacity-20" />
                                     <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 to-pink-400 drop-shadow-lg font-black">
                                         Cảm Hứng
                                     </span>
