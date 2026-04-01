@@ -2126,12 +2126,17 @@ export default function LandingPage() {
                     </motion.div>
                 </motion.div>
 
-                {/* Marquee 2 rows */}
-                <div className="relative w-full mt-auto mb-6 z-10 overflow-hidden flex flex-col gap-3">
+
+
+            </section>
+
+            {/* ==================== MARQUEE GALLERY — Social Proof ==================== */}
+            <section className="w-full py-8 md:py-12 relative overflow-hidden">
+                <div className="relative w-full overflow-hidden flex flex-col gap-3">
                     <div className="flex gap-3 animate-marquee" style={{ width: "max-content" }}>
                         {[...HERO_IMAGES, ...HERO_IMAGES, ...HERO_IMAGES].map((img, i) => (
                             <div key={`r1-${i}`} className="w-[180px] md:w-[220px] h-[100px] md:h-[120px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
-                                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
+                                <img src={img.src} alt={img.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <span className="text-[10px] text-white/80 bg-black/40 px-2 py-0.5 rounded-full">{img.label}</span>
@@ -2142,7 +2147,7 @@ export default function LandingPage() {
                     <div className="flex gap-3 animate-marquee-reverse" style={{ width: "max-content" }}>
                         {[...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8), ...TEMPLATES.slice(0, 8)].map((tpl, i) => (
                             <div key={`r2-${i}`} className="w-[160px] md:w-[200px] h-[90px] md:h-[110px] rounded-xl overflow-hidden ring-1 ring-white/10 shrink-0 group relative">
-                                <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" fetchPriority="high" />
+                                <img src={tpl.img} alt={tpl.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                                 <div className="absolute bottom-2 left-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <Badge variant="secondary" className="text-[9px] bg-black/40 text-white/80 border-0">{tpl.name}</Badge>
@@ -2150,7 +2155,7 @@ export default function LandingPage() {
                             </div>
                         ))}
                     </div>
-                    {/* Soft wide fade on edges */}
+                    {/* Soft fade on edges */}
                     <div className="absolute inset-y-0 left-0 w-32 md:w-56 bg-gradient-to-r from-background via-background/80 to-transparent pointer-events-none z-10" />
                     <div className="absolute inset-y-0 right-0 w-32 md:w-56 bg-gradient-to-l from-background via-background/80 to-transparent pointer-events-none z-10" />
                 </div>
