@@ -1987,7 +1987,7 @@ export default function LandingPage() {
             </nav>
 
             {/* ==================== HERO ==================== */}
-            <section ref={heroRef} className="relative w-full min-h-screen flex flex-col items-center justify-center overflow-hidden">
+            <section ref={heroRef} className="relative w-full min-h-[100svh] flex flex-col items-center justify-center overflow-hidden">
                 {/* BG: gradient + animated Video + glowing orbs */}
                 <div className="absolute inset-0 bg-background z-0" />
                 
@@ -2053,9 +2053,9 @@ export default function LandingPage() {
                     <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b z-20 from-black/50 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
                 </motion.div>
-                <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] rounded-full bg-violet-600/[0.07] blur-[120px] pointer-events-none animate-float-slow" />
-                <div className="absolute top-[30%] right-[15%] w-[400px] h-[400px] rounded-full bg-fuchsia-600/[0.06] blur-[100px] pointer-events-none animate-float-delayed" />
-                <div className="absolute bottom-[20%] left-[40%] w-[300px] h-[300px] rounded-full bg-pink-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
+                <div className="hidden sm:block absolute top-[15%] left-[20%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-violet-600/[0.07] blur-[120px] pointer-events-none animate-float-slow" />
+                <div className="hidden sm:block absolute top-[30%] right-[15%] w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full bg-fuchsia-600/[0.06] blur-[100px] pointer-events-none animate-float-delayed" />
+                <div className="hidden sm:block absolute bottom-[20%] left-[40%] w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] rounded-full bg-pink-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
 
 
                 {/* Content center */}
@@ -2140,7 +2140,7 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
                     >
-                        <Link to="/login">
+                        <Link to="/login" className="w-full sm:w-auto">
                             <Button size="lg" className="relative group overflow-hidden h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white border-0 shadow-[0_0_40px_-5px_rgba(139,92,246,0.6)] hover:shadow-[0_0_60px_-5px_rgba(139,92,246,0.8)] transition-all duration-500 rounded-xl hover:scale-105 active:scale-95 w-full sm:w-auto">
                                 <motion.div 
                                     className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12"
@@ -2171,7 +2171,7 @@ export default function LandingPage() {
                         transition={{ duration: 0.6, delay: 0.6 }}
                     >
                         <span className="flex items-center gap-1.5"><WandSparkles className="h-4 w-4 text-fuchsia-400" /> <strong className="text-white">1.2M+</strong> ảnh đã tạo</span>
-                        <span className="hidden sm:flex items-center gap-1.5"><Star className="h-4 w-4 text-fuchsia-400" /> <strong className="text-white">50K+</strong> người dùng</span>
+                        <span className="flex items-center gap-1.5"><Star className="h-4 w-4 text-fuchsia-400" /> <strong className="text-white">50K+</strong> người dùng</span>
                         <span className="flex items-center gap-1.5"><Gem className="h-4 w-4 text-pink-400" /> <strong className="text-white">50</strong> gems miễn phí</span>
                     </motion.div>
                 </motion.div>
