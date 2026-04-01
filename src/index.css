@@ -132,6 +132,101 @@
   animation: pulse-glow 4s ease-in-out infinite;
 }
 
+/* ===== Advanced Multi-Pattern Glitch System ===== */
+
+/* --- Layer 1: RGB Channel Split (tiny rectangular blocks only) --- */
+@keyframes glitch-rgb-split {
+  0%, 100% { clip-path: inset(50% 50% 50% 50%); transform: none; opacity: 0; }
+  
+  8% { opacity: 0; }
+  8.5% { clip-path: inset(15% 60% 80% 10%); transform: translate(5px, 0); opacity: 1; }
+  9% { clip-path: inset(60% 20% 35% 50%); transform: translate(-4px, 0); opacity: 1; }
+  9.5% { clip-path: inset(35% 70% 58% 5%); transform: translate(6px, 0); opacity: 1; }
+  10% { opacity: 0; }
+
+  38% { opacity: 0; }
+  38.5% { clip-path: inset(5% 40% 88% 30%); transform: translate(-6px, 0); opacity: 1; }
+  39% { clip-path: inset(70% 10% 22% 65%); transform: translate(5px, 0); opacity: 1; }
+  39.5% { clip-path: inset(42% 55% 52% 15%); transform: translate(-4px, 0); opacity: 1; }
+  40% { opacity: 0; }
+
+  72% { opacity: 0; }
+  72.5% { clip-path: inset(25% 15% 68% 60%); transform: translate(7px, 0); opacity: 1; }
+  73% { clip-path: inset(80% 65% 14% 10%); transform: translate(-5px, 0); opacity: 1; }
+  73.5% { opacity: 0; }
+}
+
+/* --- Layer 2: Rapid Single-Block Cuts (Replaces multi-polygon to fix triangle artifacts) --- */
+@keyframes glitch-mosaic {
+  0%, 100% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+  
+  15% { clip-path: inset(10% 80% 82% 5%); transform: translate(-6px, 0); filter: contrast(160%); }
+  15.5% { clip-path: inset(70% 10% 22% 80%); transform: translate(6px, -2px); filter: hue-rotate(90deg); }
+  16% { clip-path: inset(40% 50% 52% 40%); transform: translate(-4px, 2px); filter: brightness(120%); }
+  16.5% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+
+  48% { clip-path: inset(22% 70% 70% 15%); transform: translate(5px, -2px); filter: saturate(200%); }
+  48.5% { clip-path: inset(75% 20% 17% 65%); transform: translate(-10px, 2px); filter: invert(70%); }
+  49% { clip-path: inset(8% 85% 85% 5%); transform: translate(3px, -1px); filter: hue-rotate(180deg); }
+  49.5% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+
+  80% { clip-path: inset(50% 10% 42% 65%); transform: translate(12px, 0); filter: hue-rotate(-45deg) contrast(180%); }
+  80.5% { clip-path: inset(12% 50% 80% 40%); transform: translate(-8px, 0); filter: invert(30%); }
+  81% { clip-path: inset(85% 5% 8% 80%); transform: translate(5px, 2px); filter: saturate(300%); }
+  81.5% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+}
+
+/* --- Layer 3: Micro Block Displacement (Small rect blocks with skew) --- */
+@keyframes glitch-micro-blocks {
+  0%, 100% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+  
+  20% { clip-path: inset(18% 65% 75% 10%); transform: translate(-15px, 3px) skewX(-8deg); filter: hue-rotate(90deg) contrast(180%); }
+  20.5% { clip-path: inset(55% 10% 38% 70%); transform: translate(18px, -2px) skewX(5deg); filter: invert(100%); }
+  21% { clip-path: inset(8% 30% 85% 45%); transform: translate(-10px, 0) skewX(-12deg); filter: saturate(300%); }
+  21.5% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+  
+  55% { clip-path: inset(30% 50% 62% 20%); transform: translate(20px, 5px) skewX(10deg); filter: contrast(250%) brightness(130%); }
+  55.5% { clip-path: inset(70% 20% 22% 55%); transform: translate(-22px, -3px) skewX(-6deg); filter: hue-rotate(-90deg); }
+  56% { clip-path: inset(12% 75% 82% 5%); transform: translate(12px, 0) skewX(15deg); filter: invert(60%); }
+  56.5% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+  
+  85% { clip-path: inset(42% 8% 50% 72%); transform: translate(-18px, 4px) skewX(-10deg); filter: sepia(100%) hue-rotate(180deg); }
+  85.5% { clip-path: inset(5% 55% 88% 15%); transform: translate(15px, -5px) skewX(8deg); filter: invert(80%); }
+  86% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+}
+
+.animate-glitch-rgb-r {
+  animation: glitch-rgb-split 4s infinite steps(1);
+  mix-blend-mode: screen;
+}
+.animate-glitch-rgb-c {
+  animation: glitch-rgb-split 4.5s infinite steps(1);
+  animation-delay: -1.5s;
+  mix-blend-mode: screen;
+}
+.animate-glitch-mosaic {
+  animation: glitch-mosaic 6s infinite steps(1);
+}
+.animate-glitch-micro-blocks {
+  animation: glitch-micro-blocks 5s infinite steps(1);
+}
+
+/* --- GLITCH BURST: Subtle cover at video loop point --- */
+@keyframes glitch-burst {
+  0%, 100% { clip-path: inset(50% 50% 50% 50%); transform: none; filter: none; }
+  10% { clip-path: inset(15% 70% 78% 10%); transform: translate(-5px, 0); filter: contrast(130%); }
+  20% { clip-path: inset(60% 15% 32% 65%); transform: translate(6px, 0); filter: hue-rotate(30deg); }
+  35% { clip-path: inset(5% 50% 85% 35%); transform: translate(-4px, 0); filter: contrast(140%); }
+  50% { clip-path: inset(80% 10% 12% 70%); transform: translate(5px, 0); filter: hue-rotate(-20deg); }
+  65% { clip-path: inset(35% 80% 55% 15%); transform: translate(-3px, 2px); filter: saturate(150%); }
+  80% { clip-path: inset(70% 50% 22% 35%); transform: translate(4px, -2px); filter: brightness(120%); }
+}
+
+.glitch-burst-active {
+  animation: glitch-burst 0.8s steps(1) forwards !important;
+  opacity: 1 !important;
+}
+
 /* ===== Premium Landing — Visual Systems ===== */
 
 /* Aurora mesh gradient — static, lightweight (kept for backward compat) */

@@ -1858,20 +1858,24 @@ export default function LandingPage() {
     const heroRef = useRef<HTMLElement>(null)
     const heroVideoRef = useRef<HTMLVideoElement>(null)
     const [videoFaded, setVideoFaded] = useState(false)
+    const [glitchBurst, setGlitchBurst] = useState(false)
     const { scrollY } = useScroll()
     const { scrollYProgress: heroProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] })
     const heroOpacity = useTransform(heroProgress, [0, 1], [1, 0])
 
 
-    // Hiệu ứng chuyển cảnh nhẹ nhàng khi video lặp lại (chỉ hơi mờ đi, không tắt đen)
+    // Hiệu ứng chuyển cảnh + glitch burst khi video lặp lại
     const handleVideoTimeUpdate = useCallback(() => {
         const video = heroVideoRef.current
         if (!video || !video.duration) return
         const timeLeft = video.duration - video.currentTime
-        if (timeLeft <= 0.8 && !videoFaded) {
+        if (timeLeft <= 1.5 && !videoFaded) {
             setVideoFaded(true)
-        } else if (timeLeft > 0.8 && videoFaded) {
+            setGlitchBurst(true)
+        } else if (timeLeft > 1.5 && videoFaded) {
             setVideoFaded(false)
+            // Tắt glitch burst sau 1s để animation chạy xong
+            setTimeout(() => setGlitchBurst(false), 1000)
         }
     }, [videoFaded])
 
@@ -1988,7 +1992,12 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-background z-0" />
                 
                 {/* Custom Cinematic Video Background */}
-                <div className={`absolute inset-0 z-0 overflow-hidden pointer-events-none transition-opacity duration-[800ms] ease-in-out ${videoFaded ? 'opacity-40' : 'opacity-70'}`}>
+                <motion.div 
+                    initial={{ opacity: 0.7 }}
+                    animate={{ opacity: videoFaded ? 0.2 : 0.7 }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
+                >
                     <video 
                         ref={heroVideoRef}
                         src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4" 
@@ -2000,10 +2009,50 @@ export default function LandingPage() {
                         onTimeUpdate={handleVideoTimeUpdate}
                         className="w-full h-full object-cover" 
                     />
+                    
+                    {/* === Layer 1: RGB Split — RED channel (Chromatic Aberration) === */}
+                    <video 
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4" 
+                        autoPlay loop muted playsInline
+                        onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).playbackRate = 0.7 }}
+                        className="absolute inset-0 z-10 w-full h-full object-cover animate-glitch-rgb-r pointer-events-none" 
+                        style={{ filter: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\"><filter id=\"r\"><feColorMatrix type=\"matrix\" values=\"1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0\"/></filter></svg>#r')" }}
+                    />
+                    {/* === Layer 2: RGB Split — CYAN channel === */}
+                    <video 
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4" 
+                        autoPlay loop muted playsInline
+                        onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).playbackRate = 0.7 }}
+                        className="absolute inset-0 z-10 w-full h-full object-cover animate-glitch-rgb-c pointer-events-none" 
+                        style={{ filter: "url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\"><filter id=\"c\"><feColorMatrix type=\"matrix\" values=\"0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0\"/></filter></svg>#c')" }}
+                    />
+                    {/* === Layer 3: Mosaic Block Tear === */}
+                    <video 
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4" 
+                        autoPlay loop muted playsInline
+                        onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).playbackRate = 0.7 }}
+                        className="absolute inset-0 z-10 w-full h-full object-cover animate-glitch-mosaic pointer-events-none opacity-90" 
+                    />
+                    {/* === Layer 4: Micro Block Displacement (Small rects with skew) === */}
+                    <video 
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4" 
+                        autoPlay loop muted playsInline
+                        onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).playbackRate = 0.7 }}
+                        className="absolute inset-0 z-10 w-full h-full object-cover animate-glitch-micro-blocks pointer-events-none opacity-90" 
+                    />
+                    
+                    {/* === Layer 5: GLITCH BURST — Intensive overlay at video loop point === */}
+                    <video 
+                        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260319_165750_358b1e72-c921-48b7-aaac-f200994f32fb.mp4" 
+                        autoPlay loop muted playsInline
+                        onLoadedMetadata={(e) => { (e.target as HTMLVideoElement).playbackRate = 0.7 }}
+                        className={`absolute inset-0 z-20 w-full h-full object-cover pointer-events-none opacity-0 ${glitchBurst ? 'glitch-burst-active' : ''}`}
+                    />
+                    
                     {/* Top gradient to ensure Navbar text contrast */}
-                    <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b from-black/50 to-transparent" />
+                    <div className="absolute top-0 inset-x-0 h-32 bg-gradient-to-b z-20 from-black/50 to-transparent" />
                     <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/40 to-background" />
-                </div>
+                </motion.div>
                 <div className="absolute top-[15%] left-[20%] w-[500px] h-[500px] rounded-full bg-violet-600/[0.07] blur-[120px] pointer-events-none animate-float-slow" />
                 <div className="absolute top-[30%] right-[15%] w-[400px] h-[400px] rounded-full bg-fuchsia-600/[0.06] blur-[100px] pointer-events-none animate-float-delayed" />
                 <div className="absolute bottom-[20%] left-[40%] w-[300px] h-[300px] rounded-full bg-pink-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
