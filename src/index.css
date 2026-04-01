@@ -222,9 +222,26 @@
   80% { clip-path: inset(70% 50% 22% 35%); transform: translate(4px, -2px); filter: brightness(120%); }
 }
 
-.glitch-burst-active {
-  animation: glitch-burst 0.8s steps(1) forwards !important;
-  opacity: 1 !important;
+@keyframes btnSweepShine {
+  0%, 10% { background-position: 200% center; }
+  90%, 100% { background-position: -100% center; }
+}
+
+.text-btn-shine {
+  background: linear-gradient(
+    110deg,
+    #7c3aed 0%,   /* violet-600 */
+    #c026d3 40%,  /* fuchsia-600 */
+    #ffffff 50%,  /* White sweeping glare */
+    #c026d3 60%,  /* fuchsia-600 */
+    #7c3aed 100%  /* violet-600 */
+  );
+  background-size: 300% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: btnSweepShine 3s ease-in-out infinite;
 }
 
 /* ===== Premium Landing — Visual Systems ===== */

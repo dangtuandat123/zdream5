@@ -2080,35 +2080,39 @@ export default function LandingPage() {
                     </motion.div>
 
                     <motion.h1
-                        className="font-extrabold tracking-tight mb-6 leading-[1.1] text-white/95"
-                        style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}
+                        className="font-sans font-black tracking-tighter mb-5 leading-[1.05] text-white"
+                        style={{ fontSize: "clamp(2.2rem, 6vw, 4.5rem)" }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
-                        Biến ý tưởng thành <br className="hidden sm:block" />
-                        <span className="relative inline-block mt-3 mb-2">
-                            <span 
-                                className="text-pink-50 pr-3 pb-2 block"
-                                style={{ 
-                                    fontFamily: "'Dancing Script', cursive", 
-                                    fontSize: "1.25em", 
-                                    fontWeight: 500,
-                                    textShadow: "0 0 20px rgba(236,72,153,0.8), 0 0 40px rgba(236,72,153,0.4), 0 0 10px rgba(255,255,255,0.4)"
-                                }}
-                            >
-                                nghệ thuật thị giác
+                        Khai phá ý tưởng <br className="hidden sm:block" />
+                        cùng <span className="relative inline-block mt-2">
+                            <span className="relative z-10 text-btn-shine drop-shadow-[0_0_15px_rgba(192,38,211,0.5)]">
+                                ZDream
                             </span>
+                            {/* Hand-drawn underline SVG */}
+                            <svg className="absolute -bottom-1 sm:-bottom-3 left-[-3%] w-[106%] h-3 sm:h-5 z-0 drop-shadow-[0_2px_10px_rgba(217,70,239,0.5)]" viewBox="0 0 300 20" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#a78bfa" />   {/* violet-400 */}
+                                        <stop offset="50%" stopColor="#e879f9" />  {/* fuchsia-400 */}
+                                        <stop offset="100%" stopColor="#c084fc" /> {/* purple-400 */}
+                                    </linearGradient>
+                                </defs>
+                                <path d="M5,15 Q150,0 295,12" stroke="url(#line-gradient)" strokeWidth="8" fill="none" strokeLinecap="round" />
+                            </svg>
                         </span>
                     </motion.h1>
 
                     <motion.p
-                        className="text-base md:text-lg text-white/60 font-light max-w-xl mx-auto mb-10 leading-relaxed text-balance tracking-wide"
+                        className="text-3xl md:text-4xl text-zinc-300 font-normal max-w-2xl mx-auto mb-10 leading-relaxed tracking-wide"
+                        style={{ fontFamily: "'Caveat', cursive" }}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                     >
-                        Chỉ cần nhập mô tả và chọn phong cách, AI sẽ tạo ra bức ảnh bạn cần trong 10 giây.
+                        Witness your wildest dreams come to life!
                     </motion.p>
 
                     {/* Dual CTA */}
