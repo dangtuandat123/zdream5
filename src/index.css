@@ -229,15 +229,19 @@
 
 .text-btn-shine {
   background: linear-gradient(
-    135deg,
-    #a78bfa 0%,   /* violet-400 */
-    #e879f9 50%,  /* fuchsia-400 */
-    #c084fc 100%  /* purple-400 */
+    110deg,
+    #7c3aed 0%,   /* violet-600 */
+    #c026d3 40%,  /* fuchsia-600 */
+    #ffffff 50%,  /* White sweeping glare */
+    #c026d3 60%,  /* fuchsia-600 */
+    #7c3aed 100%  /* violet-600 */
   );
+  background-size: 300% auto;
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+  animation: btnSweepShine 3s ease-in-out infinite;
 }
 
 /* ===== Premium Landing — Visual Systems ===== */

@@ -2080,29 +2080,32 @@ export default function LandingPage() {
                     </motion.div>
 
                     <motion.h1
-                        className="font-sans font-black tracking-tighter mb-3 sm:mb-5 leading-[1.15] sm:leading-[1.05] text-white text-center"
-                        style={{ fontSize: "clamp(2rem, 5.5vw, 4.5rem)" }}
+                        className="font-black tracking-tighter mb-3 sm:mb-5 leading-[1.15] sm:leading-[1.05] text-white text-center"
+                        style={{ 
+                            fontSize: "clamp(2rem, 5.5vw, 4.5rem)",
+                            fontFamily: "'Plus Jakarta Sans', sans-serif" 
+                        }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
                         Khai phá ý tưởng <br />
-                        cùng <span className="relative inline-block mt-1 sm:mt-2 sm:ml-2 drop-shadow-[0_0_8px_rgba(232,121,249,0.6)] sm:drop-shadow-[0_0_12px_rgba(232,121,249,0.8)] drop-shadow-[0_0_20px_rgba(192,38,211,0.4)] sm:drop-shadow-[0_0_35px_rgba(192,38,211,0.6)]">
-                            {/* Perfect Outside Border Layer */}
+                        cùng <span className="relative inline-grid place-items-center mt-1 sm:mt-2 sm:ml-2 drop-shadow-[0_0_8px_rgba(232,121,249,0.6)] sm:drop-shadow-[0_0_12px_rgba(232,121,249,0.8)] drop-shadow-[0_0_20px_rgba(192,38,211,0.4)] sm:drop-shadow-[0_0_35px_rgba(192,38,211,0.6)]">
+                            {/* Outline Background Layer */}
                             <span 
-                                className="absolute inset-0 z-0 tracking-normal text-[1em] sm:text-[1.05em] pr-1 sm:pr-2"
+                                className="col-start-1 row-start-1 z-0 tracking-normal text-[1em] sm:text-[1.05em] pr-2 sm:pr-3"
                                 aria-hidden="true"
                                 style={{ 
                                     fontFamily: "'Caveat Brush', cursive",
-                                    WebkitTextStroke: "3px rgba(255,255,255,0.95)",
+                                    WebkitTextStroke: "4px rgba(255,255,255,0.95)",
                                     WebkitTextFillColor: "transparent"
                                 }}
                             >
                                 ZDream!
                             </span>
-                            {/* Foreground Gradient Layer */}
+                            {/* Gradient Foreground Layer */}
                             <span 
-                                className="relative z-10 text-btn-shine tracking-normal text-[1em] sm:text-[1.05em] pr-1 sm:pr-2"
+                                className="col-start-1 row-start-1 z-10 text-btn-shine tracking-normal text-[1em] sm:text-[1.05em] pr-2 sm:pr-3"
                                 style={{ 
                                     fontFamily: "'Caveat Brush', cursive"
                                 }}
@@ -2265,11 +2268,11 @@ export default function LandingPage() {
                             <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
                         </Badge>
                         <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl mt-2 mb-2">
-                            Biến Ý Tưởng Thành{" "}
+                            Mọi Ý Tưởng Đều{" "}
                             <span className="relative inline-block whitespace-nowrap">
-                                <span className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 blur-lg opacity-30" />
+                                <span className="absolute -inset-2 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 blur-2xl opacity-40 animate-pulse" />
                                 <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 font-black drop-shadow-lg">
-                                    Tuyệt Tác
+                                    Thành Sự Thật
                                 </span>
                             </span>
                         </h2>
@@ -2382,7 +2385,7 @@ export default function LandingPage() {
                             <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl lg:text-5xl mb-3">
                                 <span className="text-white drop-shadow-md">Thư Viện </span>
                                 <span className="relative inline-block whitespace-nowrap">
-                                    <span className="absolute -inset-0.5 bg-gradient-to-r from-fuchsia-500 to-pink-500 blur-lg opacity-20" />
+                                    <span className="absolute -inset-2 bg-gradient-to-r from-fuchsia-500 to-pink-500 blur-2xl opacity-30 animate-pulse" />
                                     <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 to-pink-400 drop-shadow-lg font-black">
                                         Cảm Hứng
                                     </span>
