@@ -2019,29 +2019,42 @@ export default function LandingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
                     >
-                        <Badge variant="outline" className="mb-6 border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs px-4 py-1.5">
-                            <Sparkles className="mr-2 h-3.5 w-3.5" /> Nền tảng tạo ảnh AI #1 Việt Nam
-                        </Badge>
+                        <div className="group relative overflow-hidden inline-flex items-center rounded-full border border-white/20 bg-white/5 px-5 py-2 text-sm font-medium text-white/90 backdrop-blur-md mb-8 shadow-[0_0_20px_rgba(255,255,255,0.05)] transition-all hover:bg-white/10 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)]">
+                            <motion.div 
+                                className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+                                animate={{ left: ["-100%", "200%"] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
+                            />
+                            <Sparkles className="mr-2 h-4 w-4 text-pink-400 relative z-10" /> 
+                            <span className="relative z-10">Nền tảng tạo ảnh AI #1 Việt Nam</span>
+                        </div>
                     </motion.div>
 
                     <motion.h1
-                        className="font-extrabold tracking-tight mb-5 leading-[1.08] text-glow"
-                        style={{ fontSize: "clamp(2.2rem, 5.5vw, 4rem)" }}
+                        className="font-extrabold tracking-tight mb-6 leading-[1.1] text-white/95"
+                        style={{ fontSize: "clamp(2.2rem, 5vw, 4rem)" }}
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
                         Biến ý tưởng thành <br className="hidden sm:block" />
-                        <span 
-                            className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-fuchsia-400 to-pink-400 animate-gradient-text tracking-normal inline-block"
-                            style={{ fontFamily: "'Dancing Script', cursive", fontSize: "1.15em", letterSpacing: "1px", fontWeight: 700 }}
-                        >
-                            nghệ thuật thị giác
+                        <span className="relative inline-block mt-3 mb-2">
+                            <span 
+                                className="text-pink-50 pr-3 pb-2 block"
+                                style={{ 
+                                    fontFamily: "'Dancing Script', cursive", 
+                                    fontSize: "1.25em", 
+                                    fontWeight: 500,
+                                    textShadow: "0 0 20px rgba(236,72,153,0.8), 0 0 40px rgba(236,72,153,0.4), 0 0 10px rgba(255,255,255,0.4)"
+                                }}
+                            >
+                                nghệ thuật thị giác
+                            </span>
                         </span>
                     </motion.h1>
 
                     <motion.p
-                        className="text-sm md:text-base text-white/50 max-w-lg mx-auto mb-8 leading-relaxed text-balance"
+                        className="text-base md:text-lg text-white/60 font-light max-w-xl mx-auto mb-10 leading-relaxed text-balance tracking-wide"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
@@ -2051,7 +2064,7 @@ export default function LandingPage() {
 
                     {/* Dual CTA */}
                     <motion.div
-                        className="flex flex-col sm:flex-row items-center gap-4 mt-4"
+                        className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-8 w-full"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.4 }}
@@ -2081,14 +2094,14 @@ export default function LandingPage() {
 
                     {/* Mini stats bar */}
                     <motion.div
-                        className="flex items-center gap-6 md:gap-8 mt-10 text-xs text-muted-foreground/50"
+                        className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mt-12 text-sm text-white/60 font-medium"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.6, delay: 0.6 }}
                     >
-                        <span className="flex items-center gap-1.5"><WandSparkles className="h-3.5 w-3.5 text-violet-400/60" /> <strong className="text-foreground/70">1.2M+</strong> ảnh đã tạo</span>
-                        <span className="hidden sm:flex items-center gap-1.5"><Star className="h-3.5 w-3.5 text-violet-400/60" /> <strong className="text-foreground/70">50K+</strong> người dùng</span>
-                        <span className="flex items-center gap-1.5"><Gem className="h-3.5 w-3.5 text-violet-400/60" /> <strong className="text-foreground/70">50</strong> gems miễn phí</span>
+                        <span className="flex items-center gap-1.5"><WandSparkles className="h-4 w-4 text-fuchsia-400" /> <strong className="text-white">1.2M+</strong> ảnh đã tạo</span>
+                        <span className="hidden sm:flex items-center gap-1.5"><Star className="h-4 w-4 text-fuchsia-400" /> <strong className="text-white">50K+</strong> người dùng</span>
+                        <span className="flex items-center gap-1.5"><Gem className="h-4 w-4 text-pink-400" /> <strong className="text-white">50</strong> gems miễn phí</span>
                     </motion.div>
                 </motion.div>
 
