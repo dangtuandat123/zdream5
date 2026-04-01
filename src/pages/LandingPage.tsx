@@ -2087,15 +2087,30 @@ export default function LandingPage() {
                         transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
                     >
                         Khai phá ý tưởng <br className="hidden sm:block" />
-                        cùng <span className="relative inline-block mt-2 ml-3">
+                        cùng <span className="relative inline-block mt-2 ml-3 drop-shadow-[0_0_12px_rgba(232,121,249,0.8)] drop-shadow-[0_0_35px_rgba(192,38,211,0.6)]">
+                            {/* Perfect Outside Border Layer */}
                             <span 
-                                className="relative z-10 text-btn-shine tracking-normal text-[1.15em] pr-2 drop-shadow-[0_0_15px_rgba(192,38,211,0.5)]"
-                                style={{ fontFamily: "'Caveat Brush', cursive" }}
+                                className="absolute inset-0 z-0 tracking-normal text-[1.05em] pr-2"
+                                aria-hidden="true"
+                                style={{ 
+                                    fontFamily: "'Caveat Brush', cursive",
+                                    WebkitTextStroke: "4px rgba(255,255,255,0.95)",
+                                    WebkitTextFillColor: "transparent"
+                                }}
+                            >
+                                ZDream!
+                            </span>
+                            {/* Foreground Gradient Layer */}
+                            <span 
+                                className="relative z-10 text-btn-shine tracking-normal text-[1.05em] pr-2"
+                                style={{ 
+                                    fontFamily: "'Caveat Brush', cursive"
+                                }}
                             >
                                 ZDream!
                             </span>
                             {/* Hand-drawn underline SVG */}
-                            <svg className="absolute -bottom-1 sm:-bottom-3 left-[-3%] w-[106%] h-3 sm:h-5 z-0 drop-shadow-[0_2px_10px_rgba(217,70,239,0.5)]" viewBox="0 0 300 20" preserveAspectRatio="none">
+                            <svg className="absolute -bottom-1 sm:-bottom-3 left-[-3%] w-[106%] h-3 sm:h-5 z-0 drop-shadow-[0_0_20px_rgba(232,121,249,0.9)]" viewBox="0 0 300 20" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                         <stop offset="0%" stopColor="#a78bfa" />
