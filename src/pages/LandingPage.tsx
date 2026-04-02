@@ -1866,15 +1866,19 @@ const Fireflies = ({ count = 40 }) => {
             const glowStyles = [
                 {
                     background: 'linear-gradient(to right, #8b5cf6, #d946ef)', // from-violet-500 to-fuchsia-500
-                    boxShadow: '0 0 12px 2px rgba(139, 92, 246, 0.8), 0 0 25px 4px rgba(217, 70, 239, 0.6)'
+                    boxShadow: '0 0 4px 1px rgba(139, 92, 246, 0.9), 0 0 8px 1px rgba(217, 70, 239, 0.6)'
                 },
                 {
                     background: 'linear-gradient(to right, #a855f7, #ec4899)', // from-purple-500 to-pink-500
-                    boxShadow: '0 0 12px 2px rgba(168, 85, 247, 0.8), 0 0 25px 4px rgba(236, 72, 153, 0.6)'
+                    boxShadow: '0 0 4px 1px rgba(168, 85, 247, 0.9), 0 0 8px 1px rgba(236, 72, 153, 0.6)'
                 },
                 {
                     background: '#fff',
-                    boxShadow: '0 0 10px 2px rgba(139, 92, 246, 0.9), 0 0 20px 4px rgba(217, 70, 239, 0.7)'
+                    boxShadow: '0 0 3px 1px rgba(139, 92, 246, 0.9), 0 0 6px 1px rgba(217, 70, 239, 0.8)'
+                },
+                {
+                    background: '#ffffff',
+                    boxShadow: '0 0 4px 1px rgba(255, 255, 255, 0.8), 0 0 8px 2px rgba(255, 255, 255, 0.5)'
                 }
             ];
             const style = glowStyles[Math.floor(Math.random() * glowStyles.length)];
