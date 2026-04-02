@@ -21,7 +21,6 @@ import {
     Gem,
     Star,
     CheckCircle2,
-    Play,
     Palette,
     ZapIcon,
     ChevronUp,
@@ -1991,7 +1990,7 @@ export default function LandingPage() {
     ]
 
     return (
-        <div className="relative w-full min-h-screen bg-background text-foreground selection:bg-violet-500 selection:text-white">
+        <div className="relative w-full min-h-screen bg-black text-foreground selection:bg-violet-500 selection:text-white">
 
             {/* ==================== NAVBAR ==================== */}
             <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 border-b ${scrolled ? 'bg-background/80 backdrop-blur-xl shadow-lg shadow-black/5 border-border/50' : 'bg-transparent border-transparent'}`}>
@@ -2334,30 +2333,23 @@ export default function LandingPage() {
                 <div className="container mx-auto px-4 md:px-8 max-w-6xl relative">
                     {/* ===== InteractiveDemo Header ===== */}
                     <motion.div
-                        className="text-center mb-8"
+                        className="text-center mb-10 md:mb-14"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeUp}
                     >
-                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300 animate-pulse-glow">
-                            <Play className="mr-2 h-3.5 w-3.5" /> Trải nghiệm ngay
-                        </Badge>
-                        <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl mt-2 mb-2">
-                            Mọi Ý Tưởng Đều{" "}
-                            <span className="relative inline-block whitespace-nowrap">
-                                <span className="absolute -inset-2 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 blur-2xl opacity-40 animate-pulse" />
-                                <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 font-black drop-shadow-lg">
-                                    Thành Sự Thật
+
+                        <h2 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-5xl mb-4 text-white">
+                            Từ Văn Bản Thành <br className="sm:hidden" />
+                            <span className="relative inline-block whitespace-nowrap mt-1 sm:mt-0">
+                                <span className="absolute inset-x-0 bottom-2 h-1/2 bg-gradient-to-r from-violet-500/0 via-fuchsia-500/40 to-pink-500/0 blur-md pointer-events-none" />
+                                <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-300 to-pink-300 drop-shadow-[0_2px_10px_rgba(217,70,239,0.3)]">
+                                    Hình Ảnh
                                 </span>
+                                <span className="absolute -bottom-1 lg:-bottom-2 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-fuchsia-400 to-transparent shadow-[0_0_8px_rgba(217,70,239,0.8)]" />
                             </span>
                         </h2>
-                        {/* Animated underline */}
-                        <motion.div
-                            className="mx-auto mt-4 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                            initial={{ width: 0 }} whileInView={{ width: "16rem" }} viewport={{ once: true }}
-                            transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                        />
-                        <p className="mt-5 max-w-xl mx-auto text-muted-foreground/90 text-sm md:text-[15px] font-medium leading-relaxed text-balance">
-                            Bạn không cần học kỹ thuật phức tạp. Chỉ cần miêu tả mong muốn từ trong đầu, hệ thống sẽ vẽ ngay lập tức.
+                        <p className="mt-5 max-w-xl mx-auto text-muted-foreground/80 text-[15px] sm:text-base font-medium leading-relaxed text-balance">
+                            Biến câu chữ của bạn thành tác phẩm nghệ thuật chất lượng cao ngay trên trình duyệt chỉ trong vài giây.
                         </p>
                     </motion.div>
 
@@ -2391,45 +2383,6 @@ export default function LandingPage() {
 
 
             {/* ==================== FEATURES ==================== */}
-            <section className="w-full py-16 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
-
-                <div className="container mx-auto px-4 md:px-8 max-w-5xl relative">
-                    <motion.div
-                        className="text-center mb-8"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <Badge variant="outline" className="mb-3 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <Sparkles className="mr-2 h-3.5 w-3.5" /> Tính năng nổi bật
-                        </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl lg:text-4xl">Tất Cả Trong Một Nền Tảng</h2>
-                        <p className="mt-3 max-w-2xl mx-auto text-muted-foreground text-sm lg:text-base text-balance">
-                            Mọi công cụ bạn cần để biến ý tưởng thành tác phẩm nghệ thuật — nhanh, đẹp, dễ dùng.
-                        </p>
-                    </motion.div>
-
-                    <motion.div
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={staggerContainer}
-                    >
-                        {FEATURES.map((feat, i) => {
-                            let spanClass = "col-span-1"
-                            if (i === 0) spanClass = "col-span-1 md:col-span-2 lg:col-span-2"
-                            if (i === 5) spanClass = "col-span-1 md:col-span-2 lg:col-span-3"
-
-                            return (
-                                <motion.div key={feat.title} variants={fadeUp} className={`h-full ${spanClass}`}>
-                                    <BentoCard feat={feat} />
-                                </motion.div>
-                            )
-                        })}
-                    </motion.div>
-                </div>
-            </section>
-
             {/* ==================== TEMPLATES CAROUSEL ==================== */}
             <section id="templates" className="w-full py-20 md:py-28 overflow-hidden relative">
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
@@ -2443,30 +2396,24 @@ export default function LandingPage() {
 
                 <div className="container mx-auto px-4 md:px-8 max-w-7xl flex flex-col items-center w-full relative">
                     <motion.div
-                        className="flex flex-col md:flex-row md:items-end justify-between w-full mb-10 gap-6 text-center md:text-left"
+                        className="flex flex-col md:flex-row md:items-end justify-between w-full mb-12 gap-6 text-center md:text-left"
                         initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
                         variants={fadeLeft}
                     >
                         <div className="flex-1">
-                            <div className="flex items-center gap-3 justify-center md:justify-start mb-4">
-                                <Badge variant="outline" className="border-violet-500/30 bg-violet-500/10 text-violet-300 backdrop-blur-sm">
-                                    <SwatchBook className="mr-2 h-3.5 w-3.5" /> Thư viện phong cách
-                                </Badge>
-                                <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-white/40 font-medium bg-white/[0.04] px-3 py-1 rounded-full border border-white/[0.06]">
-                                    <Sparkles className="h-3 w-3 text-violet-400" /> 12+ phong cách • Cập nhật hàng tuần
-                                </span>
-                            </div>
-                            <h2 className="text-3xl font-black tracking-tighter sm:text-4xl md:text-5xl lg:text-5xl mb-3">
-                                <span className="text-white drop-shadow-md">Thư Viện </span>
-                                <span className="relative inline-block whitespace-nowrap">
-                                    <span className="absolute -inset-2 bg-gradient-to-r from-fuchsia-500 to-pink-500 blur-2xl opacity-30 animate-pulse" />
-                                    <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 to-pink-400 drop-shadow-lg font-black">
-                                        Cảm Hứng
+
+                            <h2 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-5xl mb-4">
+                                <span className="text-white drop-shadow-md">Chọn Phong Cách, </span>
+                                <span className="relative inline-block whitespace-nowrap mt-1 sm:mt-0">
+                                    <span className="absolute inset-x-0 bottom-2 h-1/2 bg-gradient-to-r from-fuchsia-500/0 via-pink-500/40 to-rose-500/0 blur-md pointer-events-none" />
+                                    <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 to-pink-400 drop-shadow-[0_2px_10px_rgba(236,72,153,0.3)]">
+                                        Áp Dụng Nhanh
                                     </span>
+                                    <span className="absolute -bottom-1 lg:-bottom-2 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-pink-400 to-transparent shadow-[0_0_8px_rgba(236,72,153,0.8)]" />
                                 </span>
                             </h2>
-                            <p className="mt-4 text-muted-foreground/90 text-sm sm:text-base max-w-xl text-balance leading-relaxed font-medium">
-                                Khám phá hàng trăm mẫu tranh nghệ thuật tuyệt đẹp đã được pha sẵn công thức màu. Nhấp là vẽ ngay.
+                            <p className="mt-5 max-w-xl mx-auto md:mx-0 text-muted-foreground/80 text-[15px] sm:text-base font-medium leading-relaxed text-balance">
+                                Khám phá hàng trăm mẫu prompt chuẩn xác kèm thiết lập thông số cho sẵn. Bạn không bao giờ phải bắt đầu từ một trang giấy trắng.
                             </p>
                         </div>
                         <div className="hidden md:flex shrink-0">
@@ -2528,6 +2475,53 @@ export default function LandingPage() {
                             </Button>
                         </Link>
                     </div>
+                </div>
+            </section>
+
+            {/* ==================== FEATURES ==================== */}
+            <section className="w-full py-16 relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(139,92,246,0.04),transparent)] pointer-events-none" />
+
+                <div className="container mx-auto px-4 md:px-8 max-w-5xl relative">
+                    <motion.div
+                        className="text-center mb-10 md:mb-14"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={fadeUp}
+                    >
+
+                        <h2 className="text-3xl font-black tracking-tight sm:text-4xl md:text-5xl lg:text-5xl mb-4 text-white">
+                            Tất Cả Trong Một <br className="sm:hidden" />
+                            <span className="relative inline-block whitespace-nowrap mt-1 sm:mt-0">
+                                <span className="absolute inset-x-0 bottom-2 h-1/2 bg-gradient-to-r from-violet-500/0 via-fuchsia-500/40 to-pink-500/0 blur-md pointer-events-none" />
+                                <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-300 to-pink-400 drop-shadow-[0_2px_10px_rgba(217,70,239,0.3)]">
+                                    Nền Tảng
+                                </span>
+                                <span className="absolute -bottom-1 lg:-bottom-2 left-[5%] right-[5%] h-[1px] bg-gradient-to-r from-transparent via-pink-400 to-transparent shadow-[0_0_8px_rgba(236,72,153,0.8)]" />
+                            </span>
+                        </h2>
+                        <p className="mt-5 max-w-2xl mx-auto text-muted-foreground/80 text-[15px] sm:text-base font-medium leading-relaxed text-balance">
+                            Hệ thống chuyên nghiệp được tinh gọn hóa, đáp ứng tối đa mọi nhu cầu sáng tạo của bạn.
+                        </p>
+                    </motion.div>
+
+                    <motion.div
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
+                        variants={staggerContainer}
+                    >
+                        {FEATURES.map((feat, i) => {
+                            let spanClass = "col-span-1"
+                            if (i === 0) spanClass = "col-span-1 md:col-span-2 lg:col-span-2"
+                            if (i === 5) spanClass = "col-span-1 md:col-span-2 lg:col-span-3"
+
+                            return (
+                                <motion.div key={feat.title} variants={fadeUp} className={`h-full ${spanClass}`}>
+                                    <BentoCard feat={feat} />
+                                </motion.div>
+                            )
+                        })}
+                    </motion.div>
                 </div>
             </section>
 
