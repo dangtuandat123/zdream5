@@ -21,10 +21,10 @@ const PROMPT_AFTER_MENTION = "hãy đưa cô ấy đến một buổi tiệc bã
 const REF_IMAGE = "/assets/ref_person.png"
 
 const AGENT_LOGS = [
-    { atProgress: 0, image: REF_IMAGE, agent: "AI Dữ Liệu Gốc", avatar: "🖼️", text: "Đang dò quét hình ảnh đính kèm. Tiến hành nhận diện và bóc tách các đặc điểm sinh trắc học trên khuôn mặt..." },
-    { atProgress: 25, agent: "AI Phân Tích Ý Tưởng", avatar: "📝", text: "Đang đọc yêu cầu của bạn: 'Tiệc bãi biển Y2K pha trộn Cyberpunk'. Bắt đầu tính toán các tham số cho bối cảnh..." },
-    { atProgress: 55, agent: "AI Môi Trường", avatar: "🌌", text: "Đang thiết kế Background... Dựng lưới 3D bãi biển đêm, đổ màu Neon và tạo các hạt bụi sương mờ (Volumetric Fog)." },
-    { atProgress: 75, agent: "AI Tổng Hòa", avatar: "✨", text: "Đang ghép nét mặt của bạn vào bối cảnh. Khử nhiễu đa lớp (Multi-pass) và hoàn thiện chất liệu da... Bức ảnh sắp hoàn thành!" }
+    { atProgress: 0, image: REF_IMAGE, agent: "Agent 1", avatar: "🟢", text: "Đang dò quét hình ảnh đính kèm. Tiến hành nhận diện và bóc tách các đặc điểm sinh trắc học trên khuôn mặt..." },
+    { atProgress: 25, agent: "Agent 3", avatar: "🟣", text: "Đang đọc yêu cầu của bạn: 'Tiệc bãi biển Y2K pha trộn Cyberpunk'. Bắt đầu tính toán các tham số cho bối cảnh..." },
+    { atProgress: 55, agent: "Agent 2", avatar: "🔴", text: "Đang thiết kế Background... Dựng lưới 3D bãi biển đêm, đổ màu Neon và tạo các hạt bụi sương mờ (Volumetric Fog)." },
+    { atProgress: 75, agent: "Agent 1", avatar: "🟢", text: "Đang ghép nét mặt của bạn vào bối cảnh. Khử nhiễu đa lớp (Multi-pass) và hoàn thiện chất liệu da... Bức ảnh sắp hoàn thành!" }
 ]
 const BEACH_BG_IMAGE = "/assets/beach_bg_environment.png"
 const STYLES = [
@@ -58,6 +58,7 @@ function CursorSVG({ className }: { className?: string }) {
 
 export default function CinematicShowcase() {
     const containerRef = useRef<HTMLDivElement>(null)
+    const logsScrollRef = useRef<HTMLDivElement>(null)
     const sceneContainerRef = useRef<HTMLDivElement>(null)
     const promptInputRef = useRef<HTMLDivElement>(null)
     const generateBtnRef = useRef<HTMLDivElement>(null)
@@ -278,6 +279,21 @@ export default function CinematicShowcase() {
         addTimeout(() => setScene("result"), totalDuration + 200)
         return () => clearInterval(interval)
     }, [scene, addTimeout])
+
+    // Auto-scroll logic for agent logs
+    const activeLogsCount = AGENT_LOGS.filter(log => progress >= log.atProgress).length
+    useEffect(() => {
+        if (scene === "generate" && logsScrollRef.current) {
+            const node = logsScrollRef.current
+            const t = setTimeout(() => {
+                node.scrollTo({
+                    top: node.scrollHeight,
+                    behavior: "smooth"
+                })
+            }, 50)
+            return () => clearTimeout(t)
+        }
+    }, [activeLogsCount, scene])
 
     // Result Showoff
     useEffect(() => {
@@ -714,46 +730,51 @@ export default function CinematicShowcase() {
                             {scene === "generate" && (
                                 <motion.div
                                     key="scene-generate"
-                                    className="absolute inset-0 z-20"
-                                    initial={{ opacity: 0, scale: 1.2, filter: "brightness(2) contrast(1.5) blur(20px)" }}
+                                    className="fixed inset-0 z-50 flex items-center justify-center"
+                                    initial={{ opacity: 0, scale: 1.05, filter: "brightness(2) contrast(1.5) blur(20px)" }}
                                     animate={{ opacity: 1, scale: 1, filter: "brightness(1) contrast(1) blur(0px)" }}
-                                    exit={{ opacity: 0, scale: 0.9, filter: "blur(20px)" }}
+                                    exit={{ opacity: 0, scale: 0.95, filter: "blur(20px)" }}
                                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 >
                                     <div className="relative w-full h-full overflow-hidden bg-[#0A0A0C] flex">
                                         
                                         {/* Agentic Thinking HUD - Full Screen Split Layout */}
-                                        <div className="relative z-40 w-full h-full bg-[#05050C] flex overflow-hidden">
+                                        <div className="relative z-40 w-full h-full bg-[#05050C] flex flex-col sm:flex-row overflow-hidden">
                                             
                                             {/* Left Panel: Agentic Chat Logs */}
-                                            <div className="w-[300px] sm:w-[400px] shrink-0 border-r border-white/10 bg-black/60 shadow-[20px_0_50px_rgba(0,0,0,0.5)] flex flex-col p-4 sm:p-5 relative z-20">
-                                                {/* Header Box */}
-                                                <div className="flex items-center gap-2 px-3 py-2 border border-white/10 rounded-lg bg-white/5 mb-6 shrink-0 shadow-sm backdrop-blur-md">
+                                            <div className="w-full sm:w-[320px] md:w-[400px] lg:w-[450px] shrink-0 border-b sm:border-b-0 sm:border-r border-[#2A2A2A] bg-[#0A0A0C] flex flex-col p-4 sm:p-5 lg:p-6 relative z-20 max-h-[40vh] sm:max-h-none">
+                                                
+                                                {/* Header Box (Antigravity Style) */}
+                                                <div className="flex items-center gap-2 px-3 py-2 border border-white/80 rounded-[4px] bg-transparent mb-6 shrink-0">
                                                     <div className="flex items-center -space-x-1.5 cursor-default drop-shadow-md">
-                                                        <span className="text-[14px] sm:text-[16px] z-30">🧠</span>
-                                                        <span className="text-[14px] sm:text-[16px] z-20">🎨</span>
-                                                        <span className="text-[14px] sm:text-[16px] z-10">⚙️</span>
+                                                        <span className="text-[14px]">🟢</span>
+                                                        <span className="text-[14px]">🔴</span>
+                                                        <span className="text-[14px]">🟣</span>
                                                     </div>
-                                                    <span className="text-[13px] sm:text-[14px] font-bold text-gray-300 ml-2 tracking-wide">Lõi AI đang phối hợp <span className="opacity-50 px-1">•</span> {Math.floor(progress * 0.12)}s</span>
+                                                    <span className="text-[14px] font-normal text-gray-300 ml-1">Agent đang suy nghĩ <span className="opacity-50 px-1">•</span> {(progress * 0.12).toFixed(1)}s</span>
                                                 </div>
                                                 
                                                 {/* Body Logs */}
-                                                <div className="flex flex-col gap-6 overflow-hidden relative flex-1">
+                                                <div 
+                                                    ref={logsScrollRef}
+                                                    // CSS customized exactly like the user screenshot scrollbar
+                                                    className="flex flex-col gap-6 overflow-y-auto relative flex-1 pr-3 pb-10 [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-[#2A2A2A] [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-[#4A4A4A]"
+                                                >
                                                     <AnimatePresence mode="popLayout">
-                                                        {AGENT_LOGS.filter(log => progress >= log.atProgress).slice(-3).map((log) => (
+                                                        {AGENT_LOGS.filter(log => progress >= log.atProgress).map((log) => (
                                                             <motion.div 
                                                                 key={log.agent}
-                                                                initial={{ opacity: 0, x: -20, height: 0 }}
-                                                                animate={{ opacity: 1, x: 0, height: "auto" }}
+                                                                initial={{ opacity: 0, x: -20 }}
+                                                                animate={{ opacity: 1, x: 0 }}
                                                                 exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
-                                                                className="flex flex-col gap-2.5"
+                                                                className="flex flex-col gap-2"
                                                             >
-                                                                <div className="flex items-center gap-2.5 px-0.5">
-                                                                    <span className="text-[16px] sm:text-[18px] leading-none drop-shadow-md">{log.avatar}</span>
-                                                                    <span className="text-[14px] font-bold text-gray-200">{log.agent}</span>
+                                                                <div className="flex items-center gap-2 px-0.5">
+                                                                    <span className="text-[16px] leading-none">{log.avatar}</span>
+                                                                    <span className="text-[13px] font-semibold text-gray-400">{log.agent}</span>
                                                                 </div>
-                                                                <div className="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-xl p-4 border border-white/5 shadow-inner">
-                                                                    <span className="text-[13px] sm:text-[14px] text-gray-300 leading-[1.65] font-medium block">{log.text}</span>
+                                                                <div className="bg-[#18181A] rounded-[10px] p-3.5 border border-transparent">
+                                                                    <span className="text-[14px] text-[#E2E2E2] leading-[1.6] block">{log.text}</span>
                                                                 </div>
                                                             </motion.div>
                                                         ))}
