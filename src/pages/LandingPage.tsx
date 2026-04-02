@@ -25,7 +25,7 @@ import {
     ZapIcon,
     ChevronUp,
     Menu,
-    Trophy,
+
     Download,
     ArrowRight,
     ArrowUp,
@@ -185,12 +185,7 @@ const FAQS = [
 ]
 
 
-const STATS = [
-    { label: "Tác Phẩm Ra Đời", value: 1200000, suffix: "+", display: "1.2M+", icon: WandSparkles },
-    { label: "Nhà Sáng Tạo", value: 50000, suffix: "+", display: "50K+", icon: Star },
-    { label: "Phong Cách Vẽ", value: 50, suffix: "+", display: "50+", icon: Palette },
-    { label: "Đánh Giá 5 Sao", value: 15000, suffix: "+", display: "15K+", icon: Gem },
-]
+
 
 const DEMO_PROMPT = "A cute fox wearing a spacesuit, floating in a colorful nebula, digital painting, ultra detailed, cinematic lighting"
 // Prompt lần 2 — prompt KHÁC khi đã có ảnh tham chiếu
@@ -249,59 +244,7 @@ const scaleUp = {
 // HOOKS
 // ============================================================
 
-function useAnimatedCounter(end: number, duration = 2000, startOnView = true) {
-    const [count, setCount] = useState(0)
-    const ref = useRef<HTMLSpanElement>(null)
-    const inView = useInView(ref, { once: true, margin: "-50px" })
-    const hasRun = useRef(false)
 
-    useEffect(() => {
-        if (!startOnView || !inView || hasRun.current) return
-        hasRun.current = true
-
-        const startTime = Date.now()
-        const tick = () => {
-            const elapsed = Date.now() - startTime
-            const progress = Math.min(elapsed / duration, 1)
-            // Ease-out cubic
-            const eased = 1 - Math.pow(1 - progress, 3)
-            setCount(eased * end)
-            if (progress < 1) requestAnimationFrame(tick)
-        }
-        requestAnimationFrame(tick)
-    }, [inView, end, duration, startOnView])
-
-    return { count, ref }
-}
-
-function formatStatNumber(value: number, target: number): string {
-    if (target >= 1000000) return (value / 1000000).toFixed(1) + "M"
-    if (target >= 1000) return (value / 1000).toFixed(0) + "K"
-    if (target < 10) return value.toFixed(1)
-    return Math.floor(value).toString()
-}
-
-// ============================================================
-// SUBCOMPONENTS
-// ============================================================
-
-function AnimatedStat({ stat }: { stat: typeof STATS[0] }) {
-    const { count, ref } = useAnimatedCounter(stat.value, 2000)
-    return (
-        <motion.div variants={scaleUp}>
-            <div className="glass-card p-6 flex flex-col items-center justify-center text-center space-y-3 group hover:bg-white/[0.05] transition-colors duration-500">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 flex items-center justify-center group-hover:from-violet-500/25 group-hover:to-fuchsia-500/25 transition-colors duration-500 ring-1 ring-white/5">
-                    <stat.icon className="h-4 w-4 text-violet-400" />
-                </div>
-                <h3 className="text-3xl md:text-4xl font-extrabold tracking-tighter text-glow">
-                    <span ref={ref}>{formatStatNumber(count, stat.value)}</span>
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-fuchsia-400">{stat.suffix}</span>
-                </h3>
-                <p className="text-[11px] font-semibold text-muted-foreground/60 uppercase tracking-[0.2em]">{stat.label}</p>
-            </div>
-        </motion.div>
-    )
-}
 
 // Phases: idle → typing → selecting → generating → results → dragging → dropped → retyping → regenerating → newResults → lightbox → pause → reset
 type DemoPhase = "idle" | "typing" | "selecting" | "generating" | "results" | "dragging" | "dropped" | "retyping" | "regenerating" | "newResults" | "lightbox" | "pause"
@@ -2525,46 +2468,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* ==================== STATS ==================== */}
-            <section className="w-full py-20 relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_50%,rgba(139,92,246,0.06),transparent)] pointer-events-none" />
-                {/* Glow orbs */}
-                <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-violet-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
-                <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[250px] h-[250px] rounded-full bg-fuchsia-600/[0.03] blur-[60px] pointer-events-none animate-float-delayed" />
-                {/* SVG abstract ring decoration */}
-                <svg className="absolute top-8 right-[10%] w-32 h-32 opacity-[0.04] pointer-events-none animate-float-delayed" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="64" cy="64" r="50" stroke="url(#stats-ring)" strokeWidth="2"/>
-                    <circle cx="64" cy="64" r="30" stroke="url(#stats-ring)" strokeWidth="1" strokeDasharray="4 4"/>
-                    <defs><linearGradient id="stats-ring" x1="0" y1="0" x2="128" y2="128"><stop stopColor="#8B5CF6"/><stop offset="1" stopColor="#D946EF"/></linearGradient></defs>
-                </svg>
-                <svg className="absolute bottom-8 left-[8%] w-24 h-24 opacity-[0.04] pointer-events-none animate-float-slow" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="8" y="8" width="80" height="80" rx="16" stroke="white" strokeWidth="1.5" strokeDasharray="6 6"/>
-                    <rect x="24" y="24" width="48" height="48" rx="8" stroke="white" strokeWidth="1"/>
-                </svg>
-                <div className="container mx-auto px-4 md:px-8 max-w-7xl relative">
-                    <motion.div
-                        className="text-center mb-10"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={fadeUp}
-                    >
-                        <Badge variant="outline" className="mb-4 border-violet-500/30 bg-violet-500/10 text-violet-300">
-                            <Trophy className="mr-2 h-3.5 w-3.5" /> Sức mạnh từ cộng đồng
-                        </Badge>
-                        <h2 className="text-2xl font-bold tracking-tighter sm:text-3xl md:text-4xl">Đồng Hành Cùng Hàng Nghìn Nhà Sáng Tạo</h2>
-                        <p className="mt-3 max-w-xl mx-auto text-muted-foreground text-sm text-balance">Hàng triệu ý tưởng điên rồ nhất đã được chuyển hóa thành hiện thực.</p>
-                    </motion.div>
-                    <motion.div
-                        className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
-                        initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}
-                        variants={staggerContainer}
-                    >
-                        {STATS.map((stat) => (
-                            <AnimatedStat key={stat.label} stat={stat} />
-                        ))}
-                    </motion.div>
-                </div>
-            </section>
+
 
             {/* ==================== TESTIMONIALS ==================== */}
             <section className="w-full py-20 relative overflow-hidden">
