@@ -1760,7 +1760,7 @@ const BentoCard = ({ feat }: { feat: typeof FEATURES[0] }) => {
 // ============================================================
 // TEMPLATE CARD COMPONENT (3D Tilt Effect)
 // ============================================================
-const TemplateCard = ({ tpl, index }: { tpl: any; index: number }) => {
+const TemplateCard = ({ tpl, index }: { tpl: {img: string, name: string, cat: string}; index: number }) => {
     const cardRef = useRef<HTMLDivElement>(null)
     const x = useMotionValue(0)
     const y = useMotionValue(0)
@@ -1775,7 +1775,7 @@ const TemplateCard = ({ tpl, index }: { tpl: any; index: number }) => {
     const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ["0%", "100%"])
     const glareBackground = useMotionTemplate`radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.25) 0%, transparent 60%)`
 
-    const handleMouseMove = (e: any) => {
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!cardRef.current) return
         const rect = cardRef.current.getBoundingClientRect()
         const width = rect.width
@@ -1815,7 +1815,7 @@ const TemplateCard = ({ tpl, index }: { tpl: any; index: number }) => {
                         
                         <motion.div 
                             className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 mix-blend-overlay transition-opacity duration-500"
-                            style={{ background: glareBackground as any }}
+                            style={{ background: glareBackground as unknown as string }}
                         />
 
                         {/* Top shimmer */}
