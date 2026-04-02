@@ -16,6 +16,14 @@ import {
 // DATA & CONSTANTS
 // ============================================================
 
+const AGENT_LOGS = [
+    { atProgress: 0, agent: "Agent 1", avatar: "🟢", text: "User yêu cầu tạo ảnh. Đang phân tích prompt: '@Ảnh 1 hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển'. Mình sẽ chuẩn bị trích xuất khuôn mặt." },
+    { atProgress: 25, agent: "Agent 3", avatar: "🟣", text: "Đã nhận diện phong cách Cyberpunk và Y2K. Đang thiết lập lưới Volumetric và dải màu Neon tương phản." },
+    { atProgress: 55, agent: "Agent 2", avatar: "🔴", text: "Mâu thuẫn môi trường: Bãi biển đêm. Đang xử lý sự giao thoa ánh sáng đại dương và luồng điện từ Cyberpunk." },
+    { atProgress: 75, agent: "Agent 4", avatar: "🔵", text: "Đang kết xuất đa lớp ánh sáng (Multi-pass render). Đồng bộ dung mạo thành công đạt 99.8%." }
+]
+
+
 const PROMPT_TEXT = "@Ảnh 1 hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển"
 const PROMPT_AFTER_MENTION = "hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển"
 const REF_IMAGE = "/assets/ref_person.png"
@@ -41,31 +49,6 @@ function CursorSVG({ className }: { className?: string }) {
         <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 3L19 12L12 13L9 20L5 3Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
         </svg>
-    )
-}
-
-// Generate random matrix numbers for the background effect
-function MatrixBackground({ progress }: { progress: number }) {
-    const [matrix, setMatrix] = useState("")
-    const isActive = progress <= 98
-    
-    useEffect(() => {
-        if (!isActive) return
-        const interval = setInterval(() => {
-            let str = ""
-            const chars = "01VXZAXY&%#@!<>{}[]" 
-            for (let i = 0; i < 200; i++) {
-                str += chars[Math.floor(Math.random() * chars.length)] + " "
-            }
-            setMatrix(str)
-        }, 100)
-        return () => clearInterval(interval)
-    }, [isActive])
-
-    return (
-        <div className="absolute inset-0 overflow-hidden opacity-[0.03] select-none pointer-events-none break-all text-[8px] font-mono leading-none tracking-widest text-[#a855f7] z-0">
-            {matrix}
-        </div>
     )
 }
 
@@ -277,7 +260,7 @@ export default function CinematicShowcase() {
     useEffect(() => {
         if (scene !== "generate") return
         setProgress(0)
-        const totalDuration = 4200
+        const totalDuration = 6000
         const intervalMs = 40
         const steps = totalDuration / intervalMs
         const increment = 100 / steps
@@ -737,101 +720,41 @@ export default function CinematicShowcase() {
                                     exit={{ opacity: 0, scale: 0.9, filter: "blur(20px)" }}
                                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 >
-                                    <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-[#020203] border border-white/[0.08] shadow-[0_0_100px_rgba(139,92,246,0.3)] inset-ring">
+                                    <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-[#0A0A0C] border border-white/[0.08] shadow-[0_0_100px_rgba(139,92,246,0.3)] inset-ring flex items-center justify-center">
                                         
-                                        {/* Matrix Data Rain Background */}
-                                        <MatrixBackground progress={progress} />
-
-                                        {/* Base Image resolving from chaos */}
-                                        <div className="absolute inset-0 z-0">
-                                            <motion.img
-                                                src={RESULT_IMAGE}
-                                                alt="rendering..."
-                                                className="w-full h-full object-cover mix-blend-luminosity"
-                                                style={{
-                                                    // Resolves from violent blur and super saturation
-                                                    filter: `blur(${Math.max(60 - progress, 0)}px) contrast(${1 + (100 - progress)*0.02})`,
-                                                    scale: 1.2 - (progress * 0.002),
-                                                    opacity: progress * 0.01 // slowly fades in
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Violent Scanning Ray */}
-                                        <motion.div
-                                            className="absolute top-0 bottom-0 w-[4px] z-20 mix-blend-screen"
-                                            style={{
-                                                left: `${progress}%`,
-                                                background: 'linear-gradient(to bottom, transparent, #fff, transparent)',
-                                                boxShadow: '0 0 40px 10px rgba(217,70,239,0.8), 0 0 100px 20px rgba(139,92,246,0.4), -20px 0 30px rgba(255,255,255,0.2)'
-                                            }}
-                                            animate={{ opacity: [0.8, 1, 0.8], x: [0, 5, 0, -2, 0] }}
-                                            transition={{ duration: 0.1, repeat: Infinity }}
-                                        />
-
-                                        {/* Core Ring Hologram */}
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
-                                            <div className="relative flex items-center justify-center">
-                                                {/* Pulsing Energy Aura */}
-                                                <motion.div
-                                                    className="absolute rounded-full pointer-events-none mix-blend-screen"
-                                                    style={{ width: 220, height: 220 }}
-                                                    animate={{ scale: [1, 1.2, 1], rotate: 360, opacity: progress > 90 ? 0 : [0.3, 0.6, 0.3] }}
-                                                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-                                                >
-                                                    <div className="w-full h-full rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(217,70,239,0.8),transparent)] blur-xl" />
-                                                </motion.div>
-
-                                                {/* Precision SVG Ring */}
-                                                <svg width="140" height="140" viewBox="0 0 140 140" className="absolute" style={{ transform: 'rotate(-90deg)' }}>
-                                                    <circle cx="70" cy="70" r="64" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
-                                                    <circle cx="70" cy="70" r="54" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="2 6" />
-                                                    <motion.circle
-                                                        cx="70" cy="70" r="64"
-                                                        fill="none" strokeWidth="4" strokeLinecap="round"
-                                                        stroke="url(#progressTech)"
-                                                        strokeDasharray={`${2 * Math.PI * 64}`}
-                                                        style={{ strokeDashoffset: 2 * Math.PI * 64 * (1 - progress / 100) }}
-                                                        filter="url(#glowTech)"
-                                                    />
-                                                    <defs>
-                                                        <linearGradient id="progressTech" x1="0%" y1="0%" x2="100%" y2="100%">
-                                                            <stop offset="0%" stopColor="#fff" />
-                                                            <stop offset="50%" stopColor="#d946ef" />
-                                                            <stop offset="100%" stopColor="#8b5cf6" />
-                                                        </linearGradient>
-                                                        <filter id="glowTech" x="-50%" y="-50%" width="200%" height="200%">
-                                                            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur1" />
-                                                            <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur2" />
-                                                            <feMerge><feMergeNode in="blur2" /><feMergeNode in="blur1" /><feMergeNode in="SourceGraphic" /></feMerge>
-                                                        </filter>
-                                                    </defs>
-                                                </svg>
-
-                                                {/* Digital Percentage Display */}
-                                                <div className="relative w-28 h-28 rounded-full bg-black/60 backdrop-blur-2xl border border-white/20 flex flex-col items-center justify-center shadow-[inset_0_0_30px_rgba(217,70,239,0.3)]">
-                                                    <span className="text-4xl font-black text-white tracking-tighter tabular-nums" style={{ textShadow: "0 0 20px rgba(255,255,255,0.8)" }}>
-                                                        {Math.floor(progress)}
-                                                    </span>
-                                                    <span className="text-[10px] text-fuchsia-300 font-black tracking-[0.3em] uppercase mt-1">%</span>
+                                        {/* Agentic Thinking HUD (Exact Screenshot Match) Centered */}
+                                        <div className="relative z-40 w-full max-w-[420px] sm:max-w-[600px] bg-black rounded-lg border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.9)] flex flex-col p-3 sm:p-5 font-sans font-medium">
+                                            {/* Header Box */}
+                                            <div className="flex items-center gap-2 px-3 py-2 border border-white/20 rounded-md bg-black mb-5 shrink-0">
+                                                <div className="flex items-center -space-x-1.5 cursor-default drop-shadow-md">
+                                                    <span className="text-[14px] sm:text-[16px] z-30">🟢</span>
+                                                    <span className="text-[14px] sm:text-[16px] z-20">🔴</span>
+                                                    <span className="text-[14px] sm:text-[16px] z-10">🟣</span>
                                                 </div>
+                                                <span className="text-[13px] sm:text-[14px] font-semibold text-gray-300 ml-2 tracking-wide">Agent đang suy nghĩ <span className="opacity-50 px-1">•</span> {Math.floor(progress * 0.06)}s</span>
                                             </div>
-
-                                            {/* Technical Status Badges */}
-                                            <div className="mt-8 flex flex-col items-center gap-3">
-                                                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-xl border border-white/10 rounded-sm px-4 py-2 shadow-[0_0_20px_rgba(0,0,0,0.8)]">
-                                                    <motion.div
-                                                        className="w-2 h-2 bg-fuchsia-500 shadow-[0_0_10px_#d946ef]"
-                                                        animate={{ opacity: [1, 0, 1] }}
-                                                        transition={{ duration: 0.1, repeat: Infinity }} // rapid blink
-                                                    />
-                                                    <span className="text-[11px] font-mono text-white/80 tracking-widest uppercase">
-                                                        {progress < 25 ? "INITIATING_CORE..." : progress < 60 ? "NEURAL_RENDERING" : progress < 90 ? "UPSCALE_PASS_01" : "FINAL_COMPOSITE"}
-                                                    </span>
-                                                </div>
-                                                <div className="w-48 h-[1px] bg-white/20 relative overflow-hidden">
-                                                    <motion.div className="absolute inset-y-0 left-0 bg-white" style={{ width: `${progress}%`, boxShadow: "0 0 10px #fff" }} />
-                                                </div>
+                                            
+                                            {/* Body */}
+                                            <div className="flex flex-col gap-6 overflow-hidden relative">
+                                                <AnimatePresence mode="popLayout">
+                                                    {AGENT_LOGS.filter(log => progress >= log.atProgress).slice(-3).map((log) => (
+                                                        <motion.div 
+                                                            key={log.agent}
+                                                            initial={{ opacity: 0, y: 15, height: 0 }}
+                                                            animate={{ opacity: 1, y: 0, height: "auto" }}
+                                                            exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                                                            className="flex flex-col gap-2.5"
+                                                        >
+                                                            <div className="flex items-center gap-2.5 px-0.5">
+                                                                <span className="text-[16px] sm:text-[18px] leading-none drop-shadow-md">{log.avatar}</span>
+                                                                <span className="text-[14px] font-bold text-gray-200">{log.agent}</span>
+                                                            </div>
+                                                            <div className="bg-[#1A1A1A] rounded-xl p-4 border border-white/5 shadow-inner">
+                                                                <span className="text-[13px] sm:text-[14px] text-gray-300 leading-[1.65] font-medium block">{log.text}</span>
+                                                            </div>
+                                                        </motion.div>
+                                                    ))}
+                                                </AnimatePresence>
                                             </div>
                                         </div>
 
