@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useRef, useCallback, useMemo } from "react"
 import { Link } from "react-router-dom"
 import { motion, useInView, useScroll, useTransform, AnimatePresence, useMotionValueEvent, useMotionValue, useSpring, useMotionTemplate } from "framer-motion"
 import Lenis from "lenis"
@@ -1849,6 +1849,74 @@ const TemplateCard = ({ tpl, index }: { tpl: any; index: number }) => {
 }
 
 // ============================================================
+// FIREFLIES COMPONENT (Magical Glowing Particles)
+// ============================================================
+const Fireflies = ({ count = 40 }) => {
+    const fireflies = useMemo(() => {
+        return [...Array(count)].map((_, i) => {
+            const size = Math.random() * 4 + 2.5; 
+            const left = Math.random() * 100; 
+            const top = Math.random() * 100 + 10; // Start across the screen
+            const animationDuration = Math.random() * 15 + 10; 
+            const delay = Math.random() * 5; 
+            const yMovement = -(Math.random() * 300 + 200);
+            const xMovement1 = Math.random() * 100 - 50;
+            const xMovement2 = Math.random() * 100 - 50;
+            
+            const glowStyles = [
+                {
+                    background: 'linear-gradient(to right, #8b5cf6, #d946ef)', // from-violet-500 to-fuchsia-500
+                    boxShadow: '0 0 12px 2px rgba(139, 92, 246, 0.8), 0 0 25px 4px rgba(217, 70, 239, 0.6)'
+                },
+                {
+                    background: 'linear-gradient(to right, #a855f7, #ec4899)', // from-purple-500 to-pink-500
+                    boxShadow: '0 0 12px 2px rgba(168, 85, 247, 0.8), 0 0 25px 4px rgba(236, 72, 153, 0.6)'
+                },
+                {
+                    background: '#fff',
+                    boxShadow: '0 0 10px 2px rgba(139, 92, 246, 0.9), 0 0 20px 4px rgba(217, 70, 239, 0.7)'
+                }
+            ];
+            const style = glowStyles[Math.floor(Math.random() * glowStyles.length)];
+            
+            return { id: i, size, left, top, animationDuration, delay, style, yMovement, xMovement1, xMovement2 };
+        });
+    }, [count]);
+
+    return (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-[15] mix-blend-screen w-full h-full">
+            {fireflies.map((f) => (
+                <motion.div
+                    key={f.id}
+                    className="absolute rounded-full"
+                    style={{
+                        width: f.size,
+                        height: f.size,
+                        left: `${f.left}%`,
+                        top: `${f.top}%`,
+                        background: f.style.background,
+                        boxShadow: f.style.boxShadow,
+                    }}
+                    initial={{ opacity: 0, y: 0, x: 0, scale: 0.5 }}
+                    animate={{
+                        opacity: [0, 1, 0.4, 1, 0],
+                        y: f.yMovement,
+                        x: [0, f.xMovement1, f.xMovement2, 0],
+                        scale: [0.5, 1.4, 0.8, 1.4, 0.5]
+                    }}
+                    transition={{
+                        duration: f.animationDuration,
+                        repeat: Infinity,
+                        delay: f.delay,
+                        ease: "easeInOut"
+                    }}
+                />
+            ))}
+        </div>
+    )
+}
+
+// ============================================================
 // LANDING PAGE
 // ============================================================
 export default function LandingPage() {
@@ -2057,6 +2125,8 @@ export default function LandingPage() {
                 <div className="hidden sm:block absolute top-[30%] right-[15%] w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] rounded-full bg-fuchsia-600/[0.06] blur-[100px] pointer-events-none animate-float-delayed" />
                 <div className="hidden sm:block absolute bottom-[20%] left-[40%] w-[200px] sm:w-[300px] h-[200px] sm:h-[300px] rounded-full bg-pink-600/[0.04] blur-[80px] pointer-events-none animate-float-slow" />
 
+                {/* Flying Fireflies Effect */}
+                <Fireflies count={45} />
 
                 {/* Content center */}
                 <motion.div
