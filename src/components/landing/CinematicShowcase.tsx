@@ -8,7 +8,8 @@ import {
     ZapIcon,
     MonitorPlay,
     History,
-    Settings2
+    Settings2,
+    Upload
 } from "lucide-react"
 
 // ============================================================
@@ -516,14 +517,18 @@ export default function CinematicShowcase() {
                                                 <motion.div
                                                     initial={{ scale: 0.5, y: 0 }}
                                                     animate={refDragging ? {
-                                                        // Thu nhỏ và bay xuống prompt box
-                                                        scale: [1, 0.6, 0.25],
-                                                        y: [0, 60, 180],
+                                                        // Thu nhỏ, nghiêng nhẹ và bay sang bên phải khung prompt
+                                                        scale: [1, 0.6, 0.45],
+                                                        x: [0, 100, 280],
+                                                        y: [0, 60, 175],
+                                                        rotate: [0, 4, 8],
                                                         opacity: [1, 1, 0],
                                                     } : {
                                                         // Hiện to rõ ràng ở giữa màn hình
                                                         scale: 1,
+                                                        x: 0,
                                                         y: [0, -6, 0],
+                                                        rotate: 0,
                                                         opacity: 1,
                                                     }}
                                                     transition={refDragging ? {
@@ -535,7 +540,7 @@ export default function CinematicShowcase() {
                                                     }}
                                                     className="flex flex-col items-center relative"
                                                 >
-                                                    <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-[2rem] overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(139,92,246,0.3),_0_0_20px_rgba(217,70,239,0.2)] bg-black/40 backdrop-blur-xl">
+                                                    <div className={`relative w-56 h-56 sm:w-64 sm:h-64 rounded-[2rem] overflow-hidden border ${refDragging ? 'border-primary/50 shadow-2xl' : 'border-white/20 shadow-[0_20px_50px_rgba(139,92,246,0.3),_0_0_20px_rgba(217,70,239,0.2)] bg-black/40 backdrop-blur-xl'}`}>
                                                         {/* Top Glare for 3D glass effect */}
                                                         <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
                                                         
@@ -544,6 +549,16 @@ export default function CinematicShowcase() {
                                                         {/* Cinematic inner shadow */}
                                                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/30 pointer-events-none" />
                                                     </div>
+
+                                                    {/* Authentic '+' badge shown only when dragging */}
+                                                    <motion.div 
+                                                        className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg"
+                                                        initial={{ opacity: 0, scale: 0 }}
+                                                        animate={{ opacity: refDragging ? 1 : 0, scale: refDragging ? 1 : 0 }}
+                                                        transition={{ duration: 0.3, delay: refDragging ? 0.3 : 0 }}
+                                                    >
+                                                        <span className="text-black font-bold text-xl leading-none -mt-0.5">+</span>
+                                                    </motion.div>
 
                                                     {/* Fake Mouse Cursor for Advertising feel */}
                                                     <motion.div
@@ -605,19 +620,26 @@ export default function CinematicShowcase() {
                                             </h2>
                                         </motion.div>
 
-                                        {/* Drop zone border (pulses when dragging) */}
-                                        {refDragging && (
-                                            <motion.div
-                                                className="absolute -inset-1 rounded-[30px] border-2 border-dashed z-40 pointer-events-none"
-                                                animate={{ 
-                                                    borderColor: ['rgba(139,92,246,0.3)', 'rgba(217,70,239,0.7)', 'rgba(139,92,246,0.3)'],
-                                                    boxShadow: ['inset 0 0 20px rgba(139,92,246,0.1)', 'inset 0 0 40px rgba(217,70,239,0.2)', 'inset 0 0 20px rgba(139,92,246,0.1)']
-                                                }}
-                                                transition={{ duration: 1, repeat: Infinity }}
-                                            />
-                                        )}
+                                        <div className="relative flex flex-col w-full transition-all duration-300 border rounded-[28px] backdrop-blur-xl border-border/30 bg-[#37393b]/85 shadow-[0_30px_60px_rgba(0,0,0,0.8)] pointer-events-auto overflow-hidden">
+                                            
+                                            {/* Authentic Drop Zone Overlay */}
+                                            <AnimatePresence>
+                                                {refDragging && (
+                                                    <motion.div
+                                                        className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md rounded-[28px]"
+                                                        initial={{ opacity: 0 }}
+                                                        animate={{ opacity: 1 }}
+                                                        exit={{ opacity: 0 }}
+                                                        transition={{ duration: 0.3 }}
+                                                    >
+                                                        <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mb-3">
+                                                            <Upload className="w-6 h-6 text-white/90" strokeWidth={2.5} />
+                                                        </div>
+                                                        <span className="text-white font-bold text-lg tracking-wide">Thả ảnh tham chiếu vào đây</span>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
 
-                                        <div className="relative flex flex-col w-full transition-all duration-300 border rounded-[28px] backdrop-blur-xl border-border/30 bg-[#37393b]/85 shadow-[0_30px_60px_rgba(0,0,0,0.8)] pointer-events-auto">
                                             {/* Top Glare */}
                                             <div className="absolute top-0 inset-x-6 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
                                             
