@@ -432,7 +432,7 @@ export default function CinematicShowcase() {
                                 >
                                     {/* ─── 3D COVERFLOW STYLES CAROUSEL ─── */}
                                     <motion.div
-                                        className="w-full flex justify-center z-20 pointer-events-none"
+                                        className="w-full flex justify-center relative z-40 pointer-events-none"
                                         initial={false}
                                         animate={{
                                             height: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 250 : 0,
@@ -442,7 +442,7 @@ export default function CinematicShowcase() {
                                         transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
                                         style={{ transformStyle: 'preserve-3d' }}
                                     >
-                                        <div className="flex items-center justify-center relative w-full h-[250px] overflow-hidden">
+                                        <div className="flex items-center justify-center relative w-full h-[250px] overflow-visible">
                                             <motion.div className="flex gap-4 items-center absolute left-1/2" style={{ x: scrollX, transformStyle: 'preserve-3d' }}>
                                                 {STYLES.map((style, i) => {
                                                     const isActive = activeStyle === i
@@ -651,7 +651,6 @@ export default function CinematicShowcase() {
                                                             animate={{ opacity: 1, scale: 1 }}
                                                             transition={{ type: 'spring', bounce: 0.4 }}
                                                         >
-                                                            <img src={REF_IMAGE} alt="" className="w-5 h-5 rounded object-cover" />
                                                             @Ảnh 1
                                                         </motion.span>
                                                     )}
