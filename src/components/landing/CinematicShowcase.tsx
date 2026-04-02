@@ -783,13 +783,9 @@ export default function CinematicShowcase() {
                                             </div>
 
                                             {/* Right Panel: Live Media Preview */}
-                                            <div className="flex-1 relative bg-[#08080C] overflow-hidden flex items-center justify-center p-6 sm:p-10">
-                                                {/* Background Blur */}
-                                                <div className="absolute inset-0 bg-fuchsia-900/10 blur-3xl opacity-50" />
-                                                
-                                                {/* TV Scanlines and Matrix Grid overlay */}
-                                                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_1px,transparent_1px)] bg-[size:100%_4px] mix-blend-overlay pointer-events-none z-50" />
-                                                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
+                                            <div className="flex-1 relative bg-[#050508] overflow-hidden flex items-center justify-center p-6 sm:p-10">
+                                                {/* Soft Ambient Background Glow */}
+                                                <div className="absolute inset-0 bg-fuchsia-900/5 blur-3xl opacity-50" />
 
                                                 {/* Compute the current large frame to show */}
                                                 {(() => {
@@ -803,26 +799,31 @@ export default function CinematicShowcase() {
                                                             {activeImagePreview && (
                                                                 <motion.div
                                                                     key={activeImagePreview} // Triggers animation on change
-                                                                    initial={{ opacity: 0, scale: 0.9, filter: "brightness(0)" }}
-                                                                    animate={{ opacity: 1, scale: 1, filter: "brightness(1.1) contrast(1.15)" }}
-                                                                    exit={{ opacity: 0, scale: 1.05, filter: "blur(10px) brightness(2)" }}
-                                                                    transition={{ duration: 0.8, ease: "easeOut" }}
-                                                                    className="relative w-full max-w-lg aspect-[4/5] sm:aspect-square rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.8)] border border-white/10 z-10"
+                                                                    initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                                                                    animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                                                    exit={{ opacity: 0, scale: 1.02, filter: "blur(10px)" }}
+                                                                    transition={{ duration: 1.2, ease: "easeInOut" }}
+                                                                    className="relative w-full max-w-lg aspect-[4/5] sm:aspect-square rounded-[24px] overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/[0.05] z-10"
                                                                 >
-                                                                    <img src={activeImagePreview} alt="Live Preview" className="w-full h-full object-cover mix-blend-luminosity opacity-90 transition-all duration-1000" />
-                                                                    <div className="absolute inset-0 mix-blend-overlay bg-black/30" />
+                                                                    {/* Original Image completely intact, full color */}
+                                                                    <img src={activeImagePreview} alt="Live Preview" className="w-full h-full object-cover transition-transform duration-[10s] ease-linear hover:scale-105" />
                                                                     
-                                                                    {/* Giant Scanner Bar over the image */}
+                                                                    {/* Subtle sweeping light layer instead of a laser */}
                                                                     <motion.div 
-                                                                        className={`absolute left-0 right-0 h-[3px] sm:h-[4px] ${progress >= 75 ? 'bg-emerald-400 shadow-[0_0_30px_#34d399]' : 'bg-fuchsia-500 shadow-[0_0_30px_#d946ef]'}`}
-                                                                        animate={{ top: ["0%", "100%", "0%"] }}
-                                                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                                                        className="absolute inset-0 bg-gradient-to-b from-transparent via-white/10 to-transparent skew-y-12"
+                                                                        animate={{ top: ["-100%", "200%"] }}
+                                                                        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
                                                                     />
                                                                     
-                                                                    {/* Tech UI overlays inside the frame */}
-                                                                    <div className="absolute top-4 left-4 flex gap-2 z-20">
-                                                                        <div className="w-2 h-2 bg-red-500 animate-pulse rounded-full" />
-                                                                        <span className="text-[10px] font-mono text-white/70 uppercase">Rendering...</span>
+                                                                    {/* Very faint noise overlay (premium texture) */}
+                                                                    <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] pointer-events-none mix-blend-overlay" />
+
+                                                                    {/* Premium Tech UI overlays inside the frame */}
+                                                                    <div className="absolute top-5 left-5 flex items-center gap-3 z-20 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                                                                        <div className="w-1.5 h-1.5 bg-[#E2E2E2] animate-pulse rounded-full shadow-[0_0_10px_white]" />
+                                                                        <span className="text-[11px] font-medium text-white/90 tracking-widest uppercase">
+                                                                            {progress < 55 ? "Analyzing Data" : progress < 75 ? "Building Environment" : "Final Rendering"}
+                                                                        </span>
                                                                     </div>
                                                                 </motion.div>
                                                             )}
