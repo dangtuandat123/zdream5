@@ -437,7 +437,8 @@ export default function CinematicShowcase() {
                                         animate={{
                                             height: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 250 : 0,
                                             opacity: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 1 : 0,
-                                            marginBottom: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 40 : 0
+                                            marginBottom: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? (activeStyle !== -1 ? 0 : 40) : 0,
+                                            marginTop: (activeStyle !== -1) ? 40 : 0,
                                         }}
                                         transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
                                         style={{ transformStyle: 'preserve-3d' }}
@@ -459,7 +460,7 @@ export default function CinematicShowcase() {
                                                                 transformOrigin: '50% 100%'
                                                             }}
                                                             animate={{
-                                                                scale: isActive ? 1.15 : (activeStyle >= 0 ? Math.max(0.75, 0.9 - dist * 0.05) : 0.9),
+                                                                scale: isActive ? 1.08 : (activeStyle >= 0 ? Math.max(0.75, 0.9 - dist * 0.05) : 0.9),
                                                                 opacity: isActive ? 1 : (activeStyle >= 0 ? Math.max(0.1, 0.5 - dist * 0.1) : 0.6),
                                                                 rotateY: isActive ? 0 : (activeStyle === -1 ? 0 : (i < activeStyle ? 25 : -25)),
                                                                 z: isActive ? 50 : -dist * 60,
@@ -560,7 +561,7 @@ export default function CinematicShowcase() {
                                         animate={{
                                             y: (composePhase === 'drag-ref' && !refDragging && !refInPrompt) ? 120 : 0,
                                             opacity: (composePhase === 'drag-ref' && !refDragging && !refInPrompt) ? 0 : 1,
-                                            scale: refInPrompt ? [0.97, 1.02, 1] : 1, // Impact bounce
+                                            scale: (activeStyle !== -1) ? 0.95 : (refInPrompt ? [0.97, 1.02, 1] : 1),
                                         }}
                                         transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                     >
