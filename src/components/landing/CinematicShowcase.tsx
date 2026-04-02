@@ -505,42 +505,39 @@ export default function CinematicShowcase() {
                                             >
                                                 <motion.div
                                                     className="w-full text-center absolute top-[-100px]"
-                                                    animate={{ opacity: refDragging ? 0 : 1, y: refDragging ? -20 : 0, filter: refDragging ? 'blur(10px)' : 'blur(0px)' }}
+                                                    animate={{ opacity: 0 }} // Hidden for now based on feedback
                                                     transition={{ duration: 0.5 }}
                                                 >
-                                                    <h3 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight drop-shadow-lg">
-                                                        Bắt đầu từ bức ảnh của bạn
-                                                    </h3>
-                                                    <p className="text-white/50 text-sm mt-2 font-medium tracking-wide uppercase">Kéo thả để làm nét chủ đạo</p>
                                                 </motion.div>
 
                                                 <motion.div
-                                                    initial={{ scale: 0.5, y: 0 }}
+                                                    initial={{ scale: 0.5, y: -80 }}
                                                     animate={refDragging ? {
-                                                        // Thu nhỏ, nghiêng nhẹ và bay sang bên phải khung prompt
-                                                        scale: [1, 0.6, 0.45],
-                                                        x: [0, 100, 280],
-                                                        y: [0, 60, 175],
-                                                        rotate: [0, 4, 8],
+                                                        // Thu nhỏ và rơi thẳng xuống chính giữa prompt box (ở vị trí y: 0)
+                                                        scale: [1, 0.7, 0.25],
+                                                        y: [-80, -30, 0],
+                                                        rotate: [0, -2, 5],
                                                         opacity: [1, 1, 0],
                                                     } : {
-                                                        // Hiện to rõ ràng ở giữa màn hình
+                                                        // Hiện to rõ ràng ở giữa màn hình (nhích lên 80px để nhường chỗ)
                                                         scale: 1,
                                                         x: 0,
-                                                        y: [0, -6, 0],
+                                                        y: [-80, -86, -80],
                                                         rotate: 0,
                                                         opacity: 1,
                                                     }}
                                                     transition={refDragging ? {
-                                                        duration: 1.3,
-                                                        ease: [0.16, 1, 0.3, 1],
+                                                        duration: 1.1,
+                                                        ease: [0.25, 1, 0.5, 1], // Smooth deceleration
+                                                        opacity: { duration: 0.4, delay: 0.7 } // Fade out only at the very end
                                                     } : {
                                                         scale: { duration: 0.6, type: 'spring', bounce: 0.5 },
                                                         y: { repeat: Infinity, duration: 3, ease: 'easeInOut' },
                                                     }}
                                                     className="flex flex-col items-center relative"
                                                 >
-                                                    <div className={`relative w-56 h-56 sm:w-64 sm:h-64 rounded-[2rem] overflow-hidden border ${refDragging ? 'border-primary/50 shadow-2xl' : 'border-white/20 shadow-[0_20px_50px_rgba(139,92,246,0.3),_0_0_20px_rgba(217,70,239,0.2)] bg-black/40 backdrop-blur-xl'}`}>
+                                                    {/* Giữ nguyên khung kính cao cấp, không switch class đột ngột để tránh giật lag */}
+                                                    <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-[2rem] overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(139,92,246,0.3),_0_0_20px_rgba(217,70,239,0.2)] bg-black/40 backdrop-blur-xl">
                                                         {/* Top Glare for 3D glass effect */}
                                                         <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
                                                         
@@ -550,46 +547,7 @@ export default function CinematicShowcase() {
                                                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/30 pointer-events-none" />
                                                     </div>
 
-                                                    {/* Authentic '+' badge shown only when dragging */}
-                                                    <motion.div 
-                                                        className="absolute bottom-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg"
-                                                        initial={{ opacity: 0, scale: 0 }}
-                                                        animate={{ opacity: refDragging ? 1 : 0, scale: refDragging ? 1 : 0 }}
-                                                        transition={{ duration: 0.3, delay: refDragging ? 0.3 : 0 }}
-                                                    >
-                                                        <span className="text-black font-bold text-xl leading-none -mt-0.5">+</span>
-                                                    </motion.div>
-
-                                                    {/* Fake Mouse Cursor for Advertising feel */}
-                                                    <motion.div
-                                                        className="absolute z-[60] pointer-events-none drop-shadow-xl"
-                                                        initial={{ x: 150, y: 200, opacity: 0 }}
-                                                        animate={refDragging ? {
-                                                            // Cursor drags down with the image
-                                                            x: [20, 0, 0],
-                                                            y: [20, 80, 200],
-                                                            scale: [0.8, 0.8, 0.9], // clicks (0.8) then releases (0.9)
-                                                            opacity: [1, 1, 0]
-                                                        } : {
-                                                            // Cursor flies in and hovers over image
-                                                            x: [150, 40, 20],
-                                                            y: [200, 80, 20],
-                                                            scale: [1, 1, 1],
-                                                            opacity: [0, 1, 1]
-                                                        }}
-                                                        transition={refDragging ? {
-                                                            duration: 1.3,
-                                                            ease: [0.16, 1, 0.3, 1],
-                                                        } : {
-                                                            duration: 1.2,
-                                                            ease: "backOut",
-                                                            times: [0, 0.6, 1]
-                                                        }}
-                                                    >
-                                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                            <path d="M5.5 3.21V20.8C5.5 21.45 6.27 21.78 6.74 21.34L11.44 16.92L15.42 24.04C15.68 24.49 16.27 24.66 16.74 24.4L19.46 22.88C19.92 22.62 20.1 22.03 19.84 21.57L15.86 14.45H22C22.64 14.45 22.98 13.68 22.54 13.23L6.96 2.68C6.51 2.38 5.5 2.7 5.5 3.21Z" fill="black" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
-                                                        </svg>
-                                                    </motion.div>
+                                                    {/* Fake Cursor Removed for cleaner look */}
                                                 </motion.div>
                                             </motion.div>
                                         )}
@@ -600,11 +558,21 @@ export default function CinematicShowcase() {
                                         className="w-full max-w-4xl relative z-30"
                                         initial={false}
                                         animate={{
-                                            y: (composePhase === 'drag-ref' && !refDragging) ? 120 : 0,
-                                            opacity: (composePhase === 'drag-ref' && !refDragging) ? 0 : 1,
+                                            y: (composePhase === 'drag-ref' && !refDragging && !refInPrompt) ? 120 : 0,
+                                            opacity: (composePhase === 'drag-ref' && !refDragging && !refInPrompt) ? 0 : 1,
+                                            scale: refInPrompt ? [0.97, 1.02, 1] : 1, // Impact bounce
                                         }}
-                                        transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
+                                        transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                     >
+                                        {/* Impact Neon Glow Explosion */}
+                                        <motion.div
+                                            className="absolute -inset-8 bg-primary/40 rounded-[40px] blur-3xl pointer-events-none z-[-1]"
+                                            animate={{ 
+                                                opacity: refInPrompt ? [0, 0.8, 0] : 0,
+                                                scale: refInPrompt ? [0.9, 1.1, 1.2] : 0.9
+                                            }}
+                                            transition={{ duration: 0.8, ease: "easeOut" }}
+                                        />
                                         <motion.div
                                             className="absolute bottom-full mb-8 left-0 right-0 text-center pointer-events-none"
                                             initial={false}
@@ -628,13 +596,17 @@ export default function CinematicShowcase() {
                                                     <motion.div
                                                         className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md rounded-[28px]"
                                                         initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
-                                                        exit={{ opacity: 0 }}
+                                                        animate={{ opacity: 1, scale: 1, filter: "brightness(1)" }}
+                                                        exit={{ opacity: 0, scale: 1.1, filter: "brightness(2)" }}
                                                         transition={{ duration: 0.3 }}
                                                     >
-                                                        <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mb-3">
+                                                        <motion.div 
+                                                            className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center mb-3"
+                                                            animate={{ scale: [1, 1.1, 1] }} 
+                                                            transition={{ repeat: Infinity, duration: 1.5 }}
+                                                        >
                                                             <Upload className="w-6 h-6 text-white/90" strokeWidth={2.5} />
-                                                        </div>
+                                                        </motion.div>
                                                         <span className="text-white font-bold text-lg tracking-wide">Thả ảnh tham chiếu vào đây</span>
                                                     </motion.div>
                                                 )}
