@@ -16,17 +16,17 @@ import {
 // DATA & CONSTANTS
 // ============================================================
 
-const AGENT_LOGS = [
-    { atProgress: 0, agent: "Agent 1", avatar: "🟢", text: "User yêu cầu tạo ảnh. Đang phân tích prompt: '@Ảnh 1 hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển'. Mình sẽ chuẩn bị trích xuất khuôn mặt." },
-    { atProgress: 25, agent: "Agent 3", avatar: "🟣", text: "Đã nhận diện phong cách Cyberpunk và Y2K. Đang thiết lập lưới Volumetric và dải màu Neon tương phản." },
-    { atProgress: 55, agent: "Agent 2", avatar: "🔴", text: "Mâu thuẫn môi trường: Bãi biển đêm. Đang xử lý sự giao thoa ánh sáng đại dương và luồng điện từ Cyberpunk." },
-    { atProgress: 75, agent: "Agent 4", avatar: "🔵", text: "Đang kết xuất đa lớp ánh sáng (Multi-pass render). Đồng bộ dung mạo thành công đạt 99.8%." }
-]
-
-
 const PROMPT_TEXT = "@Ảnh 1 hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển"
 const PROMPT_AFTER_MENTION = "hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển"
 const REF_IMAGE = "/assets/ref_person.png"
+
+const AGENT_LOGS = [
+    { atProgress: 0, image: REF_IMAGE, agent: "AI Dữ Liệu Gốc", avatar: "🖼️", text: "Đang dò quét hình ảnh đính kèm. Tiến hành nhận diện và bóc tách các đặc điểm sinh trắc học trên khuôn mặt..." },
+    { atProgress: 25, agent: "AI Phân Tích Ý Tưởng", avatar: "📝", text: "Đang đọc yêu cầu của bạn: 'Tiệc bãi biển Y2K pha trộn Cyberpunk'. Bắt đầu tính toán các tham số cho bối cảnh..." },
+    { atProgress: 55, agent: "AI Môi Trường", avatar: "🌌", text: "Đang thiết kế Background... Dựng lưới 3D bãi biển đêm, đổ màu Neon và tạo các hạt bụi sương mờ (Volumetric Fog)." },
+    { atProgress: 75, agent: "AI Tổng Hòa", avatar: "✨", text: "Đang ghép nét mặt của bạn vào bối cảnh. Khử nhiễu đa lớp (Multi-pass) và hoàn thiện chất liệu da... Bức ảnh sắp hoàn thành!" }
+]
+const BEACH_BG_IMAGE = "/assets/beach_bg_environment.png"
 const STYLES = [
     { name: "Digital Art", image: "/assets/style_digital_art.png", glow: "rgba(139,92,246,0.8)" },
     { name: "Anime", image: "/assets/style_anime.png", glow: "rgba(236,72,153,0.8)" },
@@ -260,7 +260,7 @@ export default function CinematicShowcase() {
     useEffect(() => {
         if (scene !== "generate") return
         setProgress(0)
-        const totalDuration = 6000
+        const totalDuration = 12000
         const intervalMs = 40
         const steps = totalDuration / intervalMs
         const increment = 100 / steps
@@ -714,47 +714,100 @@ export default function CinematicShowcase() {
                             {scene === "generate" && (
                                 <motion.div
                                     key="scene-generate"
-                                    className="w-full max-w-4xl mx-auto flex items-center justify-center p-2 sm:p-4 z-20"
+                                    className="absolute inset-0 z-20"
                                     initial={{ opacity: 0, scale: 1.2, filter: "brightness(2) contrast(1.5) blur(20px)" }}
                                     animate={{ opacity: 1, scale: 1, filter: "brightness(1) contrast(1) blur(0px)" }}
                                     exit={{ opacity: 0, scale: 0.9, filter: "blur(20px)" }}
                                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 >
-                                    <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-[#0A0A0C] border border-white/[0.08] shadow-[0_0_100px_rgba(139,92,246,0.3)] inset-ring flex items-center justify-center">
+                                    <div className="relative w-full h-full overflow-hidden bg-[#0A0A0C] flex">
                                         
-                                        {/* Agentic Thinking HUD (Exact Screenshot Match) Centered */}
-                                        <div className="relative z-40 w-full max-w-[420px] sm:max-w-[600px] bg-black rounded-lg border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.9)] flex flex-col p-3 sm:p-5 font-sans font-medium">
-                                            {/* Header Box */}
-                                            <div className="flex items-center gap-2 px-3 py-2 border border-white/20 rounded-md bg-black mb-5 shrink-0">
-                                                <div className="flex items-center -space-x-1.5 cursor-default drop-shadow-md">
-                                                    <span className="text-[14px] sm:text-[16px] z-30">🟢</span>
-                                                    <span className="text-[14px] sm:text-[16px] z-20">🔴</span>
-                                                    <span className="text-[14px] sm:text-[16px] z-10">🟣</span>
-                                                </div>
-                                                <span className="text-[13px] sm:text-[14px] font-semibold text-gray-300 ml-2 tracking-wide">Agent đang suy nghĩ <span className="opacity-50 px-1">•</span> {Math.floor(progress * 0.06)}s</span>
-                                            </div>
+                                        {/* Agentic Thinking HUD - Full Screen Split Layout */}
+                                        <div className="relative z-40 w-full h-full bg-[#05050C] flex overflow-hidden">
                                             
-                                            {/* Body */}
-                                            <div className="flex flex-col gap-6 overflow-hidden relative">
-                                                <AnimatePresence mode="popLayout">
-                                                    {AGENT_LOGS.filter(log => progress >= log.atProgress).slice(-3).map((log) => (
-                                                        <motion.div 
-                                                            key={log.agent}
-                                                            initial={{ opacity: 0, y: 15, height: 0 }}
-                                                            animate={{ opacity: 1, y: 0, height: "auto" }}
-                                                            exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
-                                                            className="flex flex-col gap-2.5"
-                                                        >
-                                                            <div className="flex items-center gap-2.5 px-0.5">
-                                                                <span className="text-[16px] sm:text-[18px] leading-none drop-shadow-md">{log.avatar}</span>
-                                                                <span className="text-[14px] font-bold text-gray-200">{log.agent}</span>
-                                                            </div>
-                                                            <div className="bg-[#1A1A1A] rounded-xl p-4 border border-white/5 shadow-inner">
-                                                                <span className="text-[13px] sm:text-[14px] text-gray-300 leading-[1.65] font-medium block">{log.text}</span>
-                                                            </div>
-                                                        </motion.div>
-                                                    ))}
-                                                </AnimatePresence>
+                                            {/* Left Panel: Agentic Chat Logs */}
+                                            <div className="w-[300px] sm:w-[400px] shrink-0 border-r border-white/10 bg-black/60 shadow-[20px_0_50px_rgba(0,0,0,0.5)] flex flex-col p-4 sm:p-5 relative z-20">
+                                                {/* Header Box */}
+                                                <div className="flex items-center gap-2 px-3 py-2 border border-white/10 rounded-lg bg-white/5 mb-6 shrink-0 shadow-sm backdrop-blur-md">
+                                                    <div className="flex items-center -space-x-1.5 cursor-default drop-shadow-md">
+                                                        <span className="text-[14px] sm:text-[16px] z-30">🧠</span>
+                                                        <span className="text-[14px] sm:text-[16px] z-20">🎨</span>
+                                                        <span className="text-[14px] sm:text-[16px] z-10">⚙️</span>
+                                                    </div>
+                                                    <span className="text-[13px] sm:text-[14px] font-bold text-gray-300 ml-2 tracking-wide">Lõi AI đang phối hợp <span className="opacity-50 px-1">•</span> {Math.floor(progress * 0.12)}s</span>
+                                                </div>
+                                                
+                                                {/* Body Logs */}
+                                                <div className="flex flex-col gap-6 overflow-hidden relative flex-1">
+                                                    <AnimatePresence mode="popLayout">
+                                                        {AGENT_LOGS.filter(log => progress >= log.atProgress).slice(-3).map((log) => (
+                                                            <motion.div 
+                                                                key={log.agent}
+                                                                initial={{ opacity: 0, x: -20, height: 0 }}
+                                                                animate={{ opacity: 1, x: 0, height: "auto" }}
+                                                                exit={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
+                                                                className="flex flex-col gap-2.5"
+                                                            >
+                                                                <div className="flex items-center gap-2.5 px-0.5">
+                                                                    <span className="text-[16px] sm:text-[18px] leading-none drop-shadow-md">{log.avatar}</span>
+                                                                    <span className="text-[14px] font-bold text-gray-200">{log.agent}</span>
+                                                                </div>
+                                                                <div className="bg-[#1A1A1A]/80 backdrop-blur-xl rounded-xl p-4 border border-white/5 shadow-inner">
+                                                                    <span className="text-[13px] sm:text-[14px] text-gray-300 leading-[1.65] font-medium block">{log.text}</span>
+                                                                </div>
+                                                            </motion.div>
+                                                        ))}
+                                                    </AnimatePresence>
+                                                </div>
+                                            </div>
+
+                                            {/* Right Panel: Live Media Preview */}
+                                            <div className="flex-1 relative bg-[#08080C] overflow-hidden flex items-center justify-center p-6 sm:p-10">
+                                                {/* Background Blur */}
+                                                <div className="absolute inset-0 bg-fuchsia-900/10 blur-3xl opacity-50" />
+                                                
+                                                {/* TV Scanlines and Matrix Grid overlay */}
+                                                <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_1px,transparent_1px)] bg-[size:100%_4px] mix-blend-overlay pointer-events-none z-50" />
+                                                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none z-0" />
+
+                                                {/* Compute the current large frame to show */}
+                                                {(() => {
+                                                    let activeImagePreview = null
+                                                    if (progress < 55) activeImagePreview = REF_IMAGE
+                                                    else if (progress >= 55 && progress < 75) activeImagePreview = BEACH_BG_IMAGE
+                                                    else activeImagePreview = RESULT_IMAGE
+                                                    
+                                                    return (
+                                                        <AnimatePresence mode="wait">
+                                                            {activeImagePreview && (
+                                                                <motion.div
+                                                                    key={activeImagePreview} // Triggers animation on change
+                                                                    initial={{ opacity: 0, scale: 0.9, filter: "brightness(0)" }}
+                                                                    animate={{ opacity: 1, scale: 1, filter: "brightness(1.1) contrast(1.15)" }}
+                                                                    exit={{ opacity: 0, scale: 1.05, filter: "blur(10px) brightness(2)" }}
+                                                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                                                    className="relative w-full max-w-lg aspect-[4/5] sm:aspect-square rounded-2xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.8)] border border-white/10 z-10"
+                                                                >
+                                                                    <img src={activeImagePreview} alt="Live Preview" className="w-full h-full object-cover mix-blend-luminosity opacity-90 transition-all duration-1000" />
+                                                                    <div className="absolute inset-0 mix-blend-overlay bg-black/30" />
+                                                                    
+                                                                    {/* Giant Scanner Bar over the image */}
+                                                                    <motion.div 
+                                                                        className={`absolute left-0 right-0 h-[3px] sm:h-[4px] ${progress >= 75 ? 'bg-emerald-400 shadow-[0_0_30px_#34d399]' : 'bg-fuchsia-500 shadow-[0_0_30px_#d946ef]'}`}
+                                                                        animate={{ top: ["0%", "100%", "0%"] }}
+                                                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                                                                    />
+                                                                    
+                                                                    {/* Tech UI overlays inside the frame */}
+                                                                    <div className="absolute top-4 left-4 flex gap-2 z-20">
+                                                                        <div className="w-2 h-2 bg-red-500 animate-pulse rounded-full" />
+                                                                        <span className="text-[10px] font-mono text-white/70 uppercase">Rendering...</span>
+                                                                    </div>
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    )
+                                                })()}
                                             </div>
                                         </div>
 
