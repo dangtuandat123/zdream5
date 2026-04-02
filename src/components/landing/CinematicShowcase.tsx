@@ -3,31 +3,68 @@ import { motion, useInView, AnimatePresence, useMotionValue, useSpring, useMotio
 import { Badge } from "@/components/ui/badge"
 import {
     Sparkles,
-    WandSparkles,
-    Palette,
-    ZapIcon,
     ArrowUp,
     ImageIcon,
-    RectangleHorizontal,
-    MonitorPlay
+    ZapIcon,
+    MonitorPlay,
+    History,
+    Settings2
 } from "lucide-react"
 
 // ============================================================
 // DATA & CONSTANTS
 // ============================================================
 
-const PROMPT_TEXT = "Một bé cáo nhỏ mặc bộ đồ phi hành gia lơ lửng trong dải ngân hà kỳ ảo"
-const STYLES = ["Digital Art", "Anime", "Chân thực", "3D Render", "Sơn dầu", "Cyberpunk"]
-const RATIOS = ["1:1", "3:4", "4:3", "16:9", "9:16"]
-const RESULT_IMAGE = "/assets/space_fox_nana.png"
+const PROMPT_TEXT = "@Ảnh 1 hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển"
+const PROMPT_AFTER_MENTION = "hãy đưa cô ấy đến một buổi tiệc bãi biển phong cách Y2K cổ điển"
+const REF_IMAGE = "/assets/ref_person.png"
+const STYLES = [
+    { name: "Digital Art", image: "/assets/style_digital_art.png", glow: "rgba(139,92,246,0.8)" },
+    { name: "Anime", image: "/assets/style_anime.png", glow: "rgba(236,72,153,0.8)" },
+    { name: "Chân thực", image: "/assets/style_realistic.png", glow: "rgba(16,185,129,0.7)" },
+    { name: "3D Render", image: "/assets/style_3d_render.png", glow: "rgba(56,189,248,0.7)" },
+    { name: "Sơn dầu", image: "/assets/style_oil_painting.png", glow: "rgba(251,146,60,0.7)" },
+    { name: "Cyberpunk", image: "/assets/style_cyberpunk.png", glow: "rgba(234,179,8,0.8)" },
+    { name: "Watercolor", image: "/assets/style_watercolor.png", glow: "rgba(147,197,253,0.7)" },
+    { name: "Pixel Art", image: "/assets/style_pixel_art.png", glow: "rgba(52,211,153,0.7)" },
+    { name: "Phác hoạ", image: "/assets/style_sketch.png", glow: "rgba(209,213,219,0.5)" },
+    { name: "Fantasy", image: "/assets/style_fantasy.png", glow: "rgba(167,139,250,0.8)" },
+]
+const RESULT_IMAGE = "/assets/result_beach_party.png"
 
-type Scene = "idle" | "prompt" | "style" | "generate" | "result" | "pause"
+type Scene = "idle" | "compose" | "generate" | "result" | "pause"
+type ComposePhase = "drag-ref" | "show-mention" | "typing" | "reveal-styles" | "pick-style" | "click-generate" | "flash"
 
 function CursorSVG({ className }: { className?: string }) {
     return (
         <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M5 3L19 12L12 13L9 20L5 3Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
         </svg>
+    )
+}
+
+// Generate random matrix numbers for the background effect
+function MatrixBackground({ progress }: { progress: number }) {
+    const [matrix, setMatrix] = useState("")
+    const isActive = progress <= 98
+    
+    useEffect(() => {
+        if (!isActive) return
+        const interval = setInterval(() => {
+            let str = ""
+            const chars = "01VXZAXY&%#@!<>{}[]" 
+            for (let i = 0; i < 200; i++) {
+                str += chars[Math.floor(Math.random() * chars.length)] + " "
+            }
+            setMatrix(str)
+        }, 100)
+        return () => clearInterval(interval)
+    }, [isActive])
+
+    return (
+        <div className="absolute inset-0 overflow-hidden opacity-[0.03] select-none pointer-events-none break-all text-[8px] font-mono leading-none tracking-widest text-[#a855f7] z-0">
+            {matrix}
+        </div>
     )
 }
 
@@ -40,35 +77,30 @@ export default function CinematicShowcase() {
     const sceneContainerRef = useRef<HTMLDivElement>(null)
     const promptInputRef = useRef<HTMLDivElement>(null)
     const generateBtnRef = useRef<HTMLDivElement>(null)
-    const firstStyleRef = useRef<HTMLDivElement>(null)
-    const targetRatioRef = useRef<HTMLDivElement>(null)
+    const targetStyleRef = useRef<HTMLDivElement>(null)
     const isInView = useInView(containerRef, { once: false, margin: "-100px" })
-    
-    // Status state
+
+    // Scene & Flow State
     const [scene, setScene] = useState<Scene>("idle")
+    const [composePhase, setComposePhase] = useState<ComposePhase>("typing")
     const [typedLength, setTypedLength] = useState(0)
     const [activeStyle, setActiveStyle] = useState(-1)
-    const [activeRatio, setActiveRatio] = useState(-1)
     const [progress, setProgress] = useState(0)
+    const [refInPrompt, setRefInPrompt] = useState(false) // ảnh ref đã "bay" vào prompt chưa
+    const [refDragging, setRefDragging] = useState(false) // đang kéo ảnh ref
     
-    // Fake cursor state
+    // Smooth Coverflow Scroll
+    const scrollTarget = useMotionValue(0)
+    const scrollX = useSpring(scrollTarget, { stiffness: 60, damping: 15, mass: 1.2 })
+
+    // Fake Cursor State
     const [showCursor, setShowCursor] = useState(false)
     const [cursorClick, setCursorClick] = useState(0)
-    const [cursorTarget, setCursorTarget] = useState(0)
     const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
-    
-    // Spot light state for Mac Window
+
+    // Spotlight & 3D Tilt for Result Window
     const mouseX = useMotionValue(0)
     const mouseY = useMotionValue(0)
-
-    function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-        const { currentTarget, clientX, clientY } = e
-        const { left, top } = currentTarget.getBoundingClientRect()
-        mouseX.set(clientX - left)
-        mouseY.set(clientY - top)
-    }
-
-    // 3D Parallax Tilt state for Result Card
     const cardX = useMotionValue(0)
     const cardY = useMotionValue(0)
     const springX = useSpring(cardX, { stiffness: 150, damping: 20 })
@@ -76,20 +108,21 @@ export default function CinematicShowcase() {
     const rotateX = useMotionTemplate`${springY}deg`
     const rotateY = useMotionTemplate`${springX}deg`
 
-    function handleCardMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-        if (scene !== "result") return
-        const rect = e.currentTarget.getBoundingClientRect()
-        const width = rect.width
-        const height = rect.height
-        const mouseX = e.clientX - rect.left
-        const mouseY = e.clientY - rect.top
-        const xPct = (mouseX / width) - 0.5
-        const yPct = (mouseY / height) - 0.5
-        cardX.set(xPct * 15) // Max 15 degree tilt
-        cardY.set(yPct * -15)
+    function handleWindowMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+        const { currentTarget, clientX, clientY } = e
+        const { left, top, width, height } = currentTarget.getBoundingClientRect()
+        mouseX.set(clientX - left)
+        mouseY.set(clientY - top)
+        
+        if (scene === "result") {
+            const xPct = ((clientX - left) / width) - 0.5
+            const yPct = ((clientY - top) / height) - 0.5
+            cardX.set(xPct * 15)
+            cardY.set(yPct * -15)
+        }
     }
 
-    function handleCardMouseLeave() {
+    function handleWindowMouseLeave() {
         cardX.set(0)
         cardY.set(0)
     }
@@ -99,551 +132,774 @@ export default function CinematicShowcase() {
         timeoutsRef.current.forEach(t => clearTimeout(t))
         timeoutsRef.current = []
     }, [])
-    
+
     const addTimeout = useCallback((fn: () => void, ms: number) => {
         const t = setTimeout(fn, ms)
         timeoutsRef.current.push(t)
         return t
     }, [])
-    
+
     useEffect(() => () => clearAllTimeouts(), [clearAllTimeouts])
 
-    // Calculate Fake Cursor exact coordinates cleanly
+    // Cursor Follow Logic
     useEffect(() => {
         const container = sceneContainerRef.current
         if (!container || !showCursor) return
-        
-        const getRelPos = (el: HTMLElement | null): { x: number; y: number } => {
+
+        const getPos = (el: HTMLElement | null, offsetX = 0.5, offsetY = 0.5) => {
             if (!el) return { x: 0, y: 0 }
             const cRect = container.getBoundingClientRect()
             const eRect = el.getBoundingClientRect()
             return {
-                x: eRect.left - cRect.left + eRect.width * 0.7,
-                y: eRect.top - cRect.top + eRect.height * 0.5
+                x: eRect.left - cRect.left + eRect.width * offsetX,
+                y: eRect.top - cRect.top + eRect.height * offsetY
             }
         }
-        
-        let targetEl: HTMLElement | null = null
-        if (scene === 'prompt') {
-            targetEl = cursorTarget === 1 ? generateBtnRef.current : promptInputRef.current
-        } else if (scene === 'style') {
-            targetEl = cursorTarget >= 3 ? targetRatioRef.current : firstStyleRef.current
-        }
-        
-        const pos = getRelPos(targetEl)
-        setCursorPos(pos)
-    }, [showCursor, cursorTarget, scene])
 
-    // Start Demo Cycle when in view
+        let target: HTMLElement | null = null
+        if (composePhase === 'typing') target = promptInputRef.current
+        else if (composePhase === 'pick-style') target = targetStyleRef.current
+        else if (composePhase === 'click-generate') target = generateBtnRef.current
+
+        // Delay getting the position slightly to allow camera shift to settle
+        requestAnimationFrame(() => {
+            setCursorPos(getPos(target, 0.7, 0.5))
+        })
+    }, [showCursor, composePhase, activeStyle, typedLength])
+
+    // Start Demo Cycle
     useEffect(() => {
-        if (isInView && scene === "idle") setScene("prompt")
+        if (isInView && scene === "idle") setScene("compose")
     }, [isInView, scene])
 
     // ============================================
-    // SCENE TIMELINES
+    // THE MASTER TIMELINE (Extreme Version)
     // ============================================
-
-    // 1. PROMPT
     useEffect(() => {
-        if (scene !== "prompt") return
+        if (scene !== "compose") return
+        
+        // Dọn dẹp mọi timeout cũ trước khi bắt đầu timeline mới
+        clearAllTimeouts()
+        
         setTypedLength(0)
+        setActiveStyle(-1)
+        scrollTarget.set(-(5 * 166 + 75))
         setShowCursor(false)
         setCursorClick(0)
-        setCursorTarget(0)
-        
-        addTimeout(() => setShowCursor(true), 800)
-        addTimeout(() => setCursorClick(c => c + 1), 1600)
-        
-        const typingDuration = PROMPT_TEXT.length * 60
-        let typingInterval: ReturnType<typeof setInterval>
+        setRefInPrompt(false)
+        setRefDragging(false)
+        setComposePhase("drag-ref")
+
+        // 0. Floating ref image appears visibly, pauses to let user see it, then drags into prompt
+        addTimeout(() => setRefDragging(true), 2200) // start drag animation after 1.5s of floating
+        addTimeout(() => {
+            setRefDragging(false)
+            setRefInPrompt(true) // ảnh đã vào trong prompt (xuất hiện chip @Ảnh 1)
+            setComposePhase("show-mention")
+        }, 3600)
+
+        // 1. Start typing after mention settled
+        addTimeout(() => {
+            setComposePhase("typing")
+            setShowCursor(true)
+        }, 4400)
+        addTimeout(() => setCursorClick(c => c + 1), 4600)
+
+        const baseCharMs = 50
+        let typingInterval: ReturnType<typeof setInterval> | null = null
         addTimeout(() => {
             typingInterval = setInterval(() => {
                 setTypedLength(prev => {
-                    if (prev >= PROMPT_TEXT.length) {
-                        clearInterval(typingInterval)
+                    if (prev >= PROMPT_AFTER_MENTION.length) {
+                        if (typingInterval) clearInterval(typingInterval)
+                        typingInterval = null
                         return prev
                     }
                     return prev + 1
                 })
-            }, 60)
-        }, 1800)
+            }, baseCharMs)
+        }, 4800)
+
+        // 2. Camera snap back & Reveal Styles
+        const typingDuration = PROMPT_AFTER_MENTION.length * baseCharMs
+        const revealTime = 4800 + typingDuration + 800
+        addTimeout(() => {
+            setShowCursor(false)
+            setComposePhase("reveal-styles")
+        }, revealTime)
+
+        // 3. Cinematic Coverflow Pan
+        const scrollStartTime = revealTime + 900
+        addTimeout(() => {
+            // Smoothly pan through the gallery to show off the 3D
+            scrollTarget.set(-75) // Pan to card 0 to show variety
+        }, scrollStartTime)
+
+        // Return scroll and Pick Focus Target
+        const returnScrollTime = scrollStartTime + 2200
+        addTimeout(() => {
+            scrollTarget.set(-(5 * 166 + 75)) // Return to card 5 (Cyberpunk)
+        }, returnScrollTime)
+
+        const pickTime = returnScrollTime + 800
+        addTimeout(() => {
+            setComposePhase("pick-style")
+            setShowCursor(true)
+        }, pickTime)
+        addTimeout(() => setCursorClick(c => c + 1), pickTime + 700)
         
-        const postTypingDelay = 1800 + typingDuration
-        addTimeout(() => setCursorTarget(1), postTypingDelay + 500)
-        addTimeout(() => setCursorClick(c => c + 1), postTypingDelay + 1300)
-        addTimeout(() => { setShowCursor(false); setScene("style") }, postTypingDelay + 1700)
+        // Impact selection!
+        addTimeout(() => setActiveStyle(5), pickTime + 850)
+
+        // 4. Dive to Generate Key
+        const genTime = pickTime + 1800
+        addTimeout(() => {
+            setComposePhase("click-generate")
+        }, genTime)
+        addTimeout(() => setCursorClick(c => c + 1), genTime + 800)
         
+        // FLASH BANG & Execute
+        addTimeout(() => {
+            setShowCursor(false)
+            setComposePhase("flash") // the explosion state
+        }, genTime + 1100)
+
+        addTimeout(() => {
+            setScene("generate")
+            setComposePhase("typing") // Reset phase early to avoid stuck state
+        }, genTime + 1300)
+
         return () => { if (typingInterval) clearInterval(typingInterval) }
-    }, [scene, addTimeout])
+    }, [scene, addTimeout, clearAllTimeouts, scrollTarget])
 
-    // 2. STYLE
-    useEffect(() => {
-        if (scene !== "style") return
-        setActiveStyle(-1)
-        setActiveRatio(-1)
-        setCursorTarget(0)
-        setShowCursor(false)
-        setCursorClick(0)
-        
-        addTimeout(() => { setShowCursor(true); setCursorTarget(1) }, 800)
-        addTimeout(() => setCursorClick(c => c + 1), 1800)
-        addTimeout(() => setActiveStyle(0), 1950)
-        addTimeout(() => setCursorTarget(3), 2800)
-        addTimeout(() => setCursorClick(c => c + 1), 3600)
-        addTimeout(() => setActiveRatio(3), 3750)
-        addTimeout(() => { setShowCursor(false); setScene("generate") }, 4600)
-    }, [scene, addTimeout])
-
-    // 3. GENERATE
+    // Generate Forge Logic
     useEffect(() => {
         if (scene !== "generate") return
         setProgress(0)
+        const totalDuration = 4200
+        const intervalMs = 40
+        const steps = totalDuration / intervalMs
+        const increment = 100 / steps
+        let current = 0
+        
         const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) { clearInterval(interval); return 100 }
-                return prev + 1.2
-            })
-        }, 40)
-        addTimeout(() => setScene("result"), 3800)
+            current += increment
+            // Add slight random stutter for "processing" feel
+            const jitter = Math.random() > 0.8 ? (Math.random() * 2 - 1) : 0
+            setProgress(Math.min(100, current + jitter))
+            
+            if (current >= 100) clearInterval(interval)
+        }, intervalMs)
+        
+        addTimeout(() => setScene("result"), totalDuration + 200)
         return () => clearInterval(interval)
     }, [scene, addTimeout])
 
-    // 4. RESULT
+    // Result Showoff
     useEffect(() => {
         if (scene !== "result") return
         addTimeout(() => setScene("pause"), 6000)
     }, [scene, addTimeout])
 
-    // 5. PAUSE
+    // Loop
     useEffect(() => {
         if (scene !== "pause") return
-        addTimeout(() => {
-            setTypedLength(0)
-            setActiveStyle(-1)
-            setActiveRatio(-1)
-            setProgress(0)
-            setScene("prompt")
-        }, 1200)
+        addTimeout(() => setScene("compose"), 1200)
     }, [scene, addTimeout])
 
+    // --- Virtual Camera Computations ---
+    // When typing, the camera tracks the text cursor (x-axis pan).
+    const isTyping = scene === "compose" && composePhase === "typing"
+    const cameraScale = isTyping ? 1.4 : scene === "compose" ? 1 : 1
+    // Estimate typing width pan to keep text centered. Max offset ~160px.
+    const cameraPanX = isTyping ? -Math.min(typedLength * 2.2, 160) : 0
+    const cameraPanY = isTyping ? 30 : 0 // Focus lower initially
+    
+    // Determine screen shake for the click
+    const isExploding = composePhase === "flash"
 
     return (
-        <div ref={containerRef} className="relative w-full max-w-5xl mx-auto z-10">
-            {/* === UPPER MAGICAL FLORA / BACKGROUND EFFECTS FOR FULL CONTAINER === */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(139,92,246,0.08),transparent)] pointer-events-none" />
+        <div ref={containerRef} className="relative w-full max-w-5xl mx-auto z-10 perspective-1000">
+            {/* Extremely dramatic ambient lighting layer */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[700px] overflow-hidden rounded-full opacity-[0.15] blur-[120px] pointer-events-none z-0 flex items-center justify-center mix-blend-screen">
+                <motion.div animate={{ rotate: 360, scale: [1, 1.2, 1] }} transition={{ duration: 25, repeat: Infinity, ease: 'linear' }} className="absolute w-[600px] h-[600px] bg-fuchsia-600 rounded-full" />
+                <motion.div animate={{ rotate: -360, scale: [1, 1.3, 1] }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }} className="absolute w-[500px] h-[500px] bg-violet-600 rounded-full mix-blend-color-dodge translate-x-20" />
+                <motion.div animate={{ scale: [1.2, 1, 1.2] }} transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }} className="absolute w-[700px] h-[400px] bg-blue-600 rounded-full mix-blend-overlay -translate-y-20" />
+            </div>
 
-            {/* === MAIN SHOWCASE CONTAINER (Fake Browser Window) === */}
-            <div 
-                onMouseMove={handleMouseMove}
-                className="group/window relative rounded-2xl overflow-hidden border border-white/[0.08] shadow-[0_30px_80px_-20px_rgba(0,0,0,1)] bg-black/60 backdrop-blur-3xl"
+            {/* === MAIN UI WINDOW === */}
+            <div
+                onMouseMove={handleWindowMouseMove}
+                onMouseLeave={handleWindowMouseLeave}
+                className="group/window relative rounded-3xl overflow-hidden border border-white/[0.12] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8),inset_0_1px_1px_rgba(255,255,255,0.2)] bg-[#050508]/80 backdrop-blur-3xl z-10"
             >
-                {/* Dynamic Spotlight following cursor */}
+                {/* Glare line on window top */}
+                <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-50 z-50 pointer-events-none" />
+
+                {/* Spotlight hover effect */}
                 <motion.div
-                    className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 transition duration-300 group-hover/window:opacity-100"
+                    className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-500 group-hover/window:opacity-100 z-50 mix-blend-screen"
                     style={{
-                        background: useMotionTemplate`
-                            radial-gradient(
-                                600px circle at ${mouseX}px ${mouseY}px,
-                                rgba(139, 92, 246, 0.15),
-                                transparent 80%
-                            )
-                        `,
+                        background: useMotionTemplate`radial-gradient(400px circle at ${mouseX}px ${mouseY}px, rgba(167, 139, 250, 0.15), transparent 80%)`,
                     }}
                 />
 
-                {/* === DECORATIONS (Floating background shapes inside window) === */}
-                <motion.div className="absolute z-0 top-[18%] right-[8%] pointer-events-none opacity-40 text-violet-400"
-                    animate={{ y: [0, -15, 0], rotate: [0, 15, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
-                    <WandSparkles className="w-10 h-10 drop-shadow-[0_0_15px_rgba(139,92,246,0.6)]" />
-                </motion.div>
-                <motion.div className="absolute z-0 top-[45%] left-[8%] pointer-events-none opacity-40 text-fuchsia-400 hidden lg:block"
-                    animate={{ y: [0, 20, 0], rotate: [0, -15, 8, 0], scale: [1, 1.2, 1] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}>
-                    <Sparkles className="w-12 h-12 drop-shadow-[0_0_15px_rgba(217,70,239,0.5)]" />
-                </motion.div>
-
-                {/* Animated Glass Grid Background */}
-                <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_20%,transparent_100%)] pointer-events-none" />
+                {/* Cyber Matrix Layout Base */}
+                <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_10%,transparent_100%)] pointer-events-none" />
 
                 {/* Window Header */}
-                <div className="h-[42px] border-b border-white/[0.08] bg-white/[0.02] flex items-center px-4 justify-between relative z-20 backdrop-blur-xl">
+                <div className="h-[46px] border-b border-white/[0.08] bg-white/[0.03] flex items-center px-5 justify-between relative z-40 backdrop-blur-2xl">
                     <div className="flex gap-2.5 items-center">
-                        <div className="w-3 h-3 rounded-full bg-[#ff5f56] shadow-[0_0_8px_rgba(255,95,86,0.4)]" />
-                        <div className="w-3 h-3 rounded-full bg-[#ffbd2e] shadow-[0_0_8px_rgba(255,189,46,0.4)]" />
-                        <div className="w-3 h-3 rounded-full bg-[#27c93f] shadow-[0_0_8px_rgba(39,201,63,0.4)]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#ff5f56] border border-[#e0443e] shadow-[0_0_10px_rgba(255,95,86,0.3)]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#ffbd2e] border border-[#dea123] shadow-[0_0_10px_rgba(255,189,46,0.3)]" />
+                        <div className="w-3.5 h-3.5 rounded-full bg-[#27c93f] border border-[#1aab29] shadow-[0_0_10px_rgba(39,201,63,0.3)]" />
                     </div>
-                    <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/40 rounded-full px-5 py-1.5 text-[10px] sm:text-[11px] font-medium text-white/50 border border-white/5 ring-1 ring-white/5 shadow-inner">
-                        <MonitorPlay className="h-3 w-3 text-violet-400" />
+                    <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 bg-black/60 rounded-xl px-6 py-1.5 text-[11px] font-medium text-white/50 border border-white/5 shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+                        <MonitorPlay className="h-3.5 w-3.5 text-violet-400" />
                         zdream.vn/app/generate
                     </div>
                 </div>
 
-                {/* === SCENE CONTENT (Global Wrapper) === */}
-                <div ref={sceneContainerRef} className="relative flex items-center justify-center h-[460px] sm:h-[480px] lg:h-[500px] p-3 sm:p-6 z-10 w-full">
+                {/* === SCENE CONTAINER === */}
+                <div ref={sceneContainerRef} className="relative flex items-center justify-center p-6 h-[480px] sm:h-[500px] lg:h-[540px] w-full overflow-hidden">
                     
-                    {/* Fake Cursor (Global) */}
+                    {/* The White Flash Bang Overlay */}
                     <AnimatePresence>
-                        {showCursor && (scene === 'prompt' || scene === 'style') && (
+                        {isExploding && (
                             <motion.div
-                                className="absolute text-white pointer-events-none z-[100] hidden md:block"
-                                style={{ left: 0, top: 0 }}
-                                initial={{ x: cursorPos.x + 30, y: cursorPos.y + 40, opacity: 0 }}
-                                animate={{ x: cursorPos.x, y: cursorPos.y, opacity: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                transition={{ type: 'spring', stiffness: 60, damping: 15 }}
-                            >
-                                <CursorSVG className="w-6 h-6 drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]" />
-                                {cursorClick > 0 && (
-                                    <motion.div
-                                        key={`global-click-${cursorClick}`}
-                                        className="absolute top-0 left-0 w-6 h-6 rounded-full border-2 border-fuchsia-400/80"
-                                        initial={{ scale: 0.2, opacity: 1 }}
-                                        animate={{ scale: [0.2, 3], opacity: [1, 0] }}
-                                        transition={{ duration: 0.6, ease: 'easeOut' }}
-                                    />
-                                )}
-                            </motion.div>
+                                key="flash-bang"
+                                className="absolute inset-0 bg-white z-[150] pointer-events-none"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0, 1, 0], scale: [1, 1.1, 1.2] }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.5, times: [0, 0.2, 1], ease: "easeOut" }}
+                            />
                         )}
                     </AnimatePresence>
 
-                    <AnimatePresence mode="wait">
-                        
-                        {/* ─── SCENE 1: PROMPT ─── */}
-                        {scene === "prompt" && (
-                            <motion.div
-                                key="scene-prompt"
-                                className="w-full max-w-2xl mx-auto flex flex-col items-center"
-                                initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)", y: 20 }}
-                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)", y: -20 }}
-                                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                            >
-                                {/* Glowing Headings */}
-                                <motion.div className="mb-8 text-center" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                                    <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter">
-                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-300 via-fuchsia-200 to-pink-300">
-                                            Bạn muốn vẽ gì
-                                        </span>{" "}
-                                        <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">
-                                            hôm nay?
-                                        </span>
-                                    </h3>
-                                    <motion.div
-                                        className="mx-auto mt-3 h-[2px] bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent rounded-full"
-                                        initial={{ width: 0 }} animate={{ width: '40%' }} transition={{ duration: 1, delay: 0.4 }}
-                                    />
-                                </motion.div>
-
-                                {/* Prompt Glass Input Box */}
-                                <div className="w-full relative group/input">
-                                    <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-r from-violet-600 to-fuchsia-600 blur-xl opacity-20 group-hover/input:opacity-50 transition duration-1000 group-hover/input:duration-200" />
-                                    <div className="relative w-full border border-white/10 rounded-[2rem] bg-[#0c0c0e]/80 backdrop-blur-2xl shadow-2xl overflow-hidden ring-1 ring-white/5">
-                                        
-                                        <div ref={promptInputRef} className="px-6 py-6 sm:py-7">
-                                            <p className="text-lg sm:text-xl lg:text-2xl text-white/90 font-medium leading-relaxed min-h-[40px] font-sans">
-                                                {PROMPT_TEXT.substring(0, typedLength)}
-                                                <motion.span
-                                                    className="inline-block w-[3px] h-[1.1em] rounded-sm bg-fuchsia-400 ml-1 align-middle shadow-[0_0_10px_rgba(232,121,249,0.8)]"
-                                                    animate={{ opacity: [1, 0, 1] }}
-                                                    transition={{ duration: 0.8, repeat: Infinity }}
-                                                />
-                                            </p>
-                                        </div>
-
-                                        <div className="flex items-center justify-between px-5 pb-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/40 drop-shadow-md">
-                                                    <ImageIcon className="h-4 w-4" />
-                                                </div>
-                                                <Badge variant="secondary" className="h-6 rounded-full px-3 bg-white/5 text-white/50 border border-white/10">16:9</Badge>
-                                                <Badge variant="secondary" className="h-6 rounded-full px-3 bg-white/5 text-white/50 border border-white/10">×2</Badge>
-                                            </div>
-                                            <motion.div
-                                                ref={generateBtnRef}
-                                                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] cursor-pointer ring-2 ring-violet-400/30"
-                                                animate={typedLength > 10 ? { scale: [1, 1.05, 1], boxShadow: ["0 0 20px rgba(139,92,246,0.6)", "0 0 40px rgba(217,70,239,0.8)", "0 0 20px rgba(139,92,246,0.6)"] } : {}}
-                                                transition={{ duration: 1.5, repeat: Infinity }}
-                                            >
-                                                <ArrowUp className="h-5 w-5 sm:h-6 sm:w-6" />
-                                            </motion.div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* ─── SCENE 2: STYLE ─── */}
-                        {scene === "style" && (
-                            <motion.div
-                                key="scene-style"
-                                className="w-full max-w-xl mx-auto flex flex-col items-center gap-6 sm:gap-10"
-                                initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)", y: 20 }}
-                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)", y: -20 }}
-                                transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-                            >
-                                <motion.div className="text-center">
-                                    <h3 className="text-2xl sm:text-4xl font-black tracking-tighter">
-                                        <span className="text-white/80">Tùy chỉnh </span>
-                                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-fuchsia-400 to-violet-400 drop-shadow-[0_0_10px_rgba(217,70,239,0.5)]">
-                                            phong cách
-                                        </span>
-                                    </h3>
-                                </motion.div>
-
-                                <div className="w-full space-y-4">
-                                    <div className="flex items-center gap-2 mb-2 justify-center">
-                                        <Palette className="h-5 w-5 text-fuchsia-400" />
-                                        <span className="text-xs sm:text-sm uppercase tracking-[0.2em] text-white/50 font-bold">Menu Phong Cách</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 justify-center w-full max-w-[500px] mx-auto px-4">
-                                        {STYLES.map((style, i) => (
-                                            <motion.div
-                                                key={style}
-                                                ref={i === 0 ? firstStyleRef : undefined}
-                                                initial={{ opacity: 0, scale: 0.8, y: 15 }}
-                                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                                transition={{ delay: i * 0.08, duration: 0.5, type: "spring" }}
-                                            >
-                                                <Badge
-                                                    variant={activeStyle === i ? "default" : "outline"}
-                                                    className={`w-full flex justify-center cursor-default text-[11px] sm:text-[14px] py-2 sm:py-2.5 transition-all duration-500 rounded-xl font-medium ${activeStyle === i
-                                                        ? "bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white border-transparent shadow-[0_0_20px_rgba(217,70,239,0.6)] scale-110 ring-2 ring-white/20"
-                                                        : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
-                                                        }`}
-                                                >
-                                                    {style}
-                                                </Badge>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Divider */}
-                                <div className="mt-2 mb-4 sm:my-8 h-px w-3/4 mx-auto bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-
-                                <div className="w-full space-y-3 sm:space-y-4">
-                                    <div className="flex items-center gap-2 justify-center">
-                                        <RectangleHorizontal className="h-4 w-4 sm:h-5 sm:w-5 text-violet-400" />
-                                        <span className="text-[10px] sm:text-sm uppercase tracking-[0.2em] text-white/50 font-bold">Tỷ lệ khung hình</span>
-                                    </div>
-                                    <div className="flex gap-2 sm:gap-3 justify-center flex-wrap">
-                                        {RATIOS.map((ratio, i) => (
-                                            <motion.div
-                                                key={ratio}
-                                                ref={i === 3 ? targetRatioRef : undefined}
-                                                className={`px-3 py-2 sm:px-5 sm:py-3 rounded-xl text-xs sm:text-base font-bold transition-all duration-500 flex items-center justify-center min-w-[48px] sm:min-w-[64px] ${activeRatio === i
-                                                    ? "bg-gradient-to-b from-fuchsia-500 to-violet-600 text-white shadow-[0_0_20px_rgba(139,92,246,0.6)] scale-110 ring-2 ring-white/20"
-                                                    : "bg-white/[0.03] text-white/40 border border-white/10"
-                                                    }`}
-                                                initial={{ opacity: 0, y: 15 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: 0.3 + i * 0.08, duration: 0.5, type: "spring" }}
-                                            >
-                                                {ratio}
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* ─── SCENE 3: GENERATE (Ultra-Premium Fluid Aurora Glassmorphism) ─── */}
-                        {scene === "generate" && (
-                            <motion.div
-                                key="scene-generate"
-                                className="w-full max-w-2xl mx-auto flex items-center justify-center p-2 sm:p-4"
-                                initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                                exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
-                                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            >
-                                {/* Aurora Render Canvas */}
-                                <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-[#0a0a0c] border border-white/[0.08] shadow-[0_40px_100px_-20px_rgba(232,121,249,0.3)] ring-1 ring-white/5">
-                                    
-                                {/* 1. Base Image heavily blurred and progressively sharpening */}
-                                    <div className="absolute inset-0 z-0 bg-black">
-                                        <motion.img 
-                                            src={RESULT_IMAGE}
-                                            alt="rendering..."
-                                            className="w-full h-full object-cover"
-                                            style={{
-                                                filter: `blur(${Math.max(100 - progress, 0)}px) contrast(${0.5 + progress * 0.005}) brightness(${0.4 + progress * 0.006})`,
-                                                scale: 1.2 - (progress * 0.001)
-                                            }}
+                    {/* VIRTUAL CAMERA LENS */}
+                    <motion.div 
+                        className="relative w-full h-full flex items-center justify-center z-10"
+                        animate={{ 
+                            scale: isExploding ? 1.5 : cameraScale, 
+                            x: cameraPanX, 
+                            y: cameraPanY,
+                            filter: isExploding ? "brightness(3) contrast(2)" : "brightness(1) contrast(1)"
+                        }}
+                        transition={{ 
+                            type: 'spring', 
+                            stiffness: isTyping ? 120 : 60, // follow faster during typing, drift smoothly when zooming out
+                            damping: isTyping ? 25 : 15,
+                            mass: 1.2
+                        }}
+                    >
+                        {/* Cursor overlays camera so it shrinks/grows relative to screen, not scene */}
+                        <AnimatePresence>
+                            {showCursor && scene === 'compose' && !isExploding && (
+                                <motion.div
+                                    className="absolute text-white pointer-events-none z-[100] hidden md:block"
+                                    style={{ left: 0, top: 0, x: cursorPos.x, y: cursorPos.y }}
+                                    initial={{ opacity: 0, scale: 1.5 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.5 }}
+                                    transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+                                >
+                                    <CursorSVG className="w-7 h-7 text-white drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)] filter contrast-125" />
+                                    {cursorClick > 0 && (
+                                        <motion.div
+                                            key={`click-${cursorClick}`}
+                                            className="absolute top-0 left-0 w-7 h-7 rounded-full border-[3px] border-fuchsia-300 shadow-[0_0_20px_rgba(217,70,239,0.8)]"
+                                            initial={{ scale: 0.1, opacity: 1 }}
+                                            animate={{ scale: [0.1, 4], opacity: [1, 0] }}
+                                            transition={{ duration: 0.5, ease: 'easeOut' }}
                                         />
-                                    </div>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                                    {/* 2. Abstract Shifting Gradient Layer multiplying over it to simulate "AI processing colors" */}
-                                    <motion.div 
-                                        className="absolute inset-0 mix-blend-color z-10"
-                                        style={{ opacity: (100 - progress) / 100 }}
-                                        animate={{ backgroundPosition: ["0% 0%", "200% 200%", "0% 0%"] }}
-                                        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                        <AnimatePresence mode="wait">
+                            {/* ═══ COMPOSE SCENE (Extreme 3D Version) ═══ */}
+                            {scene === "compose" && (
+                                <motion.div
+                                    key="scene-compose"
+                                    className="w-full max-w-4xl flex flex-col items-center justify-center relative perspective-2000"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                >
+                                    {/* ─── 3D COVERFLOW STYLES CAROUSEL ─── */}
+                                    <motion.div
+                                        className="w-full flex justify-center z-20 pointer-events-none"
+                                        initial={false}
+                                        animate={{
+                                            height: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 250 : 0,
+                                            opacity: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 1 : 0,
+                                            marginBottom: (composePhase === 'reveal-styles' || composePhase === 'pick-style' || composePhase === 'click-generate' || composePhase === 'flash') ? 40 : 0
+                                        }}
+                                        transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
+                                        style={{ transformStyle: 'preserve-3d' }}
                                     >
-                                        <div className="w-full h-full bg-gradient-to-tr from-fuchsia-600/60 via-violet-600/60 to-blue-500/60" style={{ backgroundSize: "200% 200%" }} />
+                                        <div className="flex items-center justify-center relative w-full h-[250px] overflow-hidden">
+                                            <motion.div className="flex gap-4 items-center absolute left-1/2" style={{ x: scrollX, transformStyle: 'preserve-3d' }}>
+                                                {STYLES.map((style, i) => {
+                                                    const isActive = activeStyle === i
+                                                    // Calculate roughly distance for inactive perspective
+                                                    const dist = isActive ? 0 : (activeStyle >= 0 ? Math.abs(activeStyle - i) : 1)
+                                                    
+                                                    return (
+                                                        <motion.div
+                                                            key={style.name}
+                                                            ref={i === 5 ? targetStyleRef : undefined}
+                                                            className={`relative flex-shrink-0 w-[150px] rounded-2xl overflow-hidden shadow-2xl transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pointer-events-auto cursor-pointer border ${isActive ? 'border-white/40' : 'border-white/10'}`}
+                                                            style={{
+                                                                aspectRatio: '3/4',
+                                                                transformOrigin: '50% 100%'
+                                                            }}
+                                                            animate={{
+                                                                scale: isActive ? 1.15 : (activeStyle >= 0 ? Math.max(0.75, 0.9 - dist * 0.05) : 0.9),
+                                                                opacity: isActive ? 1 : (activeStyle >= 0 ? Math.max(0.1, 0.5 - dist * 0.1) : 0.6),
+                                                                rotateY: isActive ? 0 : (activeStyle === -1 ? 0 : (i < activeStyle ? 25 : -25)),
+                                                                z: isActive ? 50 : -dist * 60,
+                                                                y: isActive ? -15 : 0,
+                                                                boxShadow: isActive ? `0 20px 50px -10px ${style.glow}, 0 0 0 2px rgba(255,255,255,0.4)` : '0 10px 30px -10px rgba(0,0,0,0.5)'
+                                                            }}
+                                                        >
+                                                            <img 
+                                                                src={style.image} 
+                                                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000"
+                                                                style={{ transform: isActive ? 'scale(1.1) translateY(-5%)' : 'scale(1)' }}
+                                                                alt="" 
+                                                            />
+                                                            {/* High-end vignette & label gradient */}
+                                                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,transparent_30%,rgba(0,0,0,0.6)_100%)] pointer-events-none" />
+                                                            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none flex items-end px-3 pb-3">
+                                                                <div className="w-full flex items-center justify-between">
+                                                                    <span className={`text-xs font-black tracking-wide ${isActive ? 'text-white' : 'text-white/60'} drop-shadow-md uppercase`}>{style.name}</span>
+                                                                    {isActive && (
+                                                                        <motion.div initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', bounce: 0.6 }} className="w-4 h-4 rounded-full bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,255,255,1)]">
+                                                                            <Sparkles className="w-2.5 h-2.5 text-black" />
+                                                                        </motion.div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </motion.div>
+                                                    )
+                                                })}
+                                            </motion.div>
+                                        </div>
                                     </motion.div>
 
-                                    {/* 3. Magic Generative Dust (Deterministic pseudo-random) */}
-                                    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay" />
-                                    {[...Array(20)].map((_, i) => {
-                                        const r1 = (Math.sin(i * 12.34) + 1) / 2
-                                        const r2 = (Math.cos(i * 43.21) + 1) / 2
-                                        const r3 = (Math.sin(i * 76.54) + 1) / 2
-                                        return (
+                                    {/* ─── CENTERED FLOATING REF IMAGE (scene level) ─── */}
+                                    <AnimatePresence>
+                                        {(composePhase === 'drag-ref') && !refInPrompt && (
                                             <motion.div
-                                                key={`dust-${i}`}
-                                                className="absolute w-1 h-1 bg-white rounded-full z-10"
-                                                style={{
-                                                    left: `${r1 * 100}%`,
-                                                    top: `${r2 * 100}%`,
-                                                    opacity: r3 * 0.5 + 0.1,
-                                                    transform: `scale(${r1 * 0.5 + 0.5})`
-                                                }}
-                                                animate={{
-                                                    y: [0, r2 * -50 - 20],
-                                                    x: [0, r3 * 30 - 15],
-                                                    opacity: [0, (r1 * 0.8 + 0.2), 0]
-                                                }}
-                                                transition={{
-                                                    duration: r2 * 3 + 2,
-                                                    repeat: Infinity,
-                                                    delay: r3 * 2,
-                                                    ease: "linear"
-                                                }}
-                                            />
-                                        )
-                                    })}
+                                                key="floating-ref-center"
+                                                className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
+                                                <motion.div
+                                                    className="w-full text-center absolute top-[-100px]"
+                                                    animate={{ opacity: refDragging ? 0 : 1, y: refDragging ? -20 : 0, filter: refDragging ? 'blur(10px)' : 'blur(0px)' }}
+                                                    transition={{ duration: 0.5 }}
+                                                >
+                                                    <h3 className="text-2xl sm:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 tracking-tight drop-shadow-lg">
+                                                        Bắt đầu từ bức ảnh của bạn
+                                                    </h3>
+                                                    <p className="text-white/50 text-sm mt-2 font-medium tracking-wide uppercase">Kéo thả để làm nét chủ đạo</p>
+                                                </motion.div>
 
-                                    {/* 4. Scanning Render Line */}
+                                                <motion.div
+                                                    initial={{ scale: 0.5, y: 0 }}
+                                                    animate={refDragging ? {
+                                                        // Thu nhỏ và bay xuống prompt box
+                                                        scale: [1, 0.6, 0.25],
+                                                        y: [0, 60, 180],
+                                                        opacity: [1, 1, 0],
+                                                    } : {
+                                                        // Hiện to rõ ràng ở giữa màn hình
+                                                        scale: 1,
+                                                        y: [0, -6, 0],
+                                                        opacity: 1,
+                                                    }}
+                                                    transition={refDragging ? {
+                                                        duration: 1.3,
+                                                        ease: [0.16, 1, 0.3, 1],
+                                                    } : {
+                                                        scale: { duration: 0.6, type: 'spring', bounce: 0.5 },
+                                                        y: { repeat: Infinity, duration: 3, ease: 'easeInOut' },
+                                                    }}
+                                                    className="flex flex-col items-center relative"
+                                                >
+                                                    <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-[2rem] overflow-hidden border border-white/20 shadow-[0_20px_50px_rgba(139,92,246,0.3),_0_0_20px_rgba(217,70,239,0.2)] bg-black/40 backdrop-blur-xl">
+                                                        {/* Top Glare for 3D glass effect */}
+                                                        <div className="absolute top-0 inset-x-8 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+                                                        
+                                                        <img src={REF_IMAGE} alt="Reference" className="w-full h-full object-cover scale-[1.02]" />
+                                                        
+                                                        {/* Cinematic inner shadow */}
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-black/30 pointer-events-none" />
+                                                    </div>
+
+                                                    {/* Fake Mouse Cursor for Advertising feel */}
+                                                    <motion.div
+                                                        className="absolute z-[60] pointer-events-none drop-shadow-xl"
+                                                        initial={{ x: 150, y: 200, opacity: 0 }}
+                                                        animate={refDragging ? {
+                                                            // Cursor drags down with the image
+                                                            x: [20, 0, 0],
+                                                            y: [20, 80, 200],
+                                                            scale: [0.8, 0.8, 0.9], // clicks (0.8) then releases (0.9)
+                                                            opacity: [1, 1, 0]
+                                                        } : {
+                                                            // Cursor flies in and hovers over image
+                                                            x: [150, 40, 20],
+                                                            y: [200, 80, 20],
+                                                            scale: [1, 1, 1],
+                                                            opacity: [0, 1, 1]
+                                                        }}
+                                                        transition={refDragging ? {
+                                                            duration: 1.3,
+                                                            ease: [0.16, 1, 0.3, 1],
+                                                        } : {
+                                                            duration: 1.2,
+                                                            ease: "backOut",
+                                                            times: [0, 0.6, 1]
+                                                        }}
+                                                    >
+                                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M5.5 3.21V20.8C5.5 21.45 6.27 21.78 6.74 21.34L11.44 16.92L15.42 24.04C15.68 24.49 16.27 24.66 16.74 24.4L19.46 22.88C19.92 22.62 20.1 22.03 19.84 21.57L15.86 14.45H22C22.64 14.45 22.98 13.68 22.54 13.23L6.96 2.68C6.51 2.38 5.5 2.7 5.5 3.21Z" fill="black" stroke="white" strokeWidth="2" strokeLinejoin="round"/>
+                                                        </svg>
+                                                    </motion.div>
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* ─── DYNAMIC PROMPT BOX (slides up from below) ─── */}
                                     <motion.div 
-                                        className="absolute top-0 bottom-0 w-1 bg-white/[0.15] shadow-[0_0_20px_2px_rgba(255,255,255,0.8)] z-20 mix-blend-screen"
-                                        style={{ left: `${progress}%` }}
-                                        animate={{ opacity: [0.8, 1, 0.8] }}
-                                        transition={{ duration: 0.5, repeat: Infinity }}
-                                    />
-                                    {/* Progress Highlight block behind scanner */}
-                                    <div 
-                                        className="absolute top-0 bottom-0 left-0 bg-white/[0.03] backdrop-blur-md z-10"
-                                        style={{ width: `${progress}%` }}
-                                    />
-
-                                    {/* 5. Central Sleek Progress Indicator */}
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center z-30 scale-75 sm:scale-100">
-                                        <motion.div 
-                                            className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border border-white/20 bg-black/40 backdrop-blur-2xl flex items-center justify-center shadow-[0_0_50px_rgba(0,0,0,0.6)] ring-1 ring-white/10"
-                                            animate={{ boxShadow: ["0 0 20px rgba(139,92,246,0.3)", "0 0 50px rgba(217,70,239,0.5)", "0 0 20px rgba(139,92,246,0.3)"] }}
-                                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                        className="w-full max-w-4xl relative z-30"
+                                        initial={false}
+                                        animate={{
+                                            y: (composePhase === 'drag-ref' && !refDragging) ? 120 : 0,
+                                            opacity: (composePhase === 'drag-ref' && !refDragging) ? 0 : 1,
+                                        }}
+                                        transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
+                                    >
+                                        <motion.div
+                                            className="absolute bottom-full mb-8 left-0 right-0 text-center pointer-events-none"
+                                            initial={false}
+                                            animate={{ 
+                                                opacity: isTyping ? 1 : 0,
+                                                y: isTyping ? 0 : -20,
+                                                scale: isTyping ? 1 : 0.95
+                                            }}
+                                            transition={{ duration: 0.8, ease: "easeOut" }}
                                         >
-                                            <span className="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60 tracking-tighter mix-blend-screen drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
-                                                {Math.round(progress)}<span className="text-xl sm:text-2xl text-white/40">%</span>
-                                            </span>
-                                            {/* Rotating dashed ring inside */}
-                                            <motion.svg className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)]" viewBox="0 0 100 100"
-                                                animate={{ rotate: 360 }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }}>
-                                                <circle cx="50" cy="50" r="48" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" strokeDasharray="4 8" />
-                                            </motion.svg>
+                                            <h2 className="text-white text-3xl sm:text-4xl font-black tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                                                Nhập ý tưởng của bạn!
+                                            </h2>
                                         </motion.div>
 
-                                        <div className="mt-4 sm:mt-6 flex flex-col items-center">
-                                            <Badge className="bg-white/10 text-white/90 border-white/20 px-3 py-1 sm:px-4 sm:py-1.5 mb-1.5 sm:mb-2 font-semibold tracking-wider text-[9px] sm:text-xs">
-                                                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1 sm:mr-1.5 text-fuchsia-300" /> AI Rendering Engine
-                                            </Badge>
-                                            <motion.p 
-                                                className="text-white/80 font-medium tracking-[0.1em] text-[10px] sm:text-sm drop-shadow-md uppercase text-center px-4"
-                                                animate={{ opacity: [0.4, 1, 0.4] }}
-                                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                                            >
-                                                {progress < 30 ? "Đang phân tích ngữ nghĩa..." : progress < 70 ? "Đang kết xuất không gian 3D..." : "Đang hoàn thiện chi tiết cuối..."}
-                                            </motion.p>
+                                        {/* Drop zone border (pulses when dragging) */}
+                                        {refDragging && (
+                                            <motion.div
+                                                className="absolute -inset-1 rounded-[30px] border-2 border-dashed z-40 pointer-events-none"
+                                                animate={{ 
+                                                    borderColor: ['rgba(139,92,246,0.3)', 'rgba(217,70,239,0.7)', 'rgba(139,92,246,0.3)'],
+                                                    boxShadow: ['inset 0 0 20px rgba(139,92,246,0.1)', 'inset 0 0 40px rgba(217,70,239,0.2)', 'inset 0 0 20px rgba(139,92,246,0.1)']
+                                                }}
+                                                transition={{ duration: 1, repeat: Infinity }}
+                                            />
+                                        )}
+
+                                        <div className="relative flex flex-col w-full transition-all duration-300 border rounded-[28px] backdrop-blur-xl border-border/30 bg-[#37393b]/85 shadow-[0_30px_60px_rgba(0,0,0,0.8)] pointer-events-auto">
+                                            {/* Top Glare */}
+                                            <div className="absolute top-0 inset-x-6 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+                                            
+                                            {/* Reference image thumbnail row (inside prompt, appears after drag-in) */}
+                                            <AnimatePresence>
+                                                {refInPrompt && (
+                                                    <motion.div
+                                                        className="flex items-center gap-2 px-5 pt-4 pb-1 sm:px-6"
+                                                        initial={{ opacity: 0, height: 0 }}
+                                                        animate={{ opacity: 1, height: 'auto' }}
+                                                        exit={{ opacity: 0, height: 0 }}
+                                                        transition={{ duration: 0.5, type: 'spring', bounce: 0.3 }}
+                                                    >
+                                                        <div className="relative w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 border-primary/40 shadow-[0_0_20px_rgba(139,92,246,0.3)] flex-shrink-0">
+                                                            <img src={REF_IMAGE} alt="Reference" className="w-full h-full object-cover" />
+                                                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                                                            <div className="absolute top-0.5 right-0.5 w-4 h-4 bg-black/60 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                                                <span className="text-[8px] text-white font-bold">✕</span>
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                )}
+                                            </AnimatePresence>
+                                            
+                                            {/* Text Input Area */}
+                                            <div ref={promptInputRef} className="relative px-3 py-3 sm:px-4 sm:py-4">
+                                                <div className="w-full border-0 bg-transparent px-3 text-lg sm:text-xl font-medium focus:ring-0 outline-none leading-[28px] sm:leading-[32px] pt-[8px] pb-[8px] sm:pt-[12px] sm:pb-[12px] text-foreground min-h-[56px] flex items-center flex-wrap gap-1">
+                                                    {/* @Ảnh 1 mention chip (appears after ref lands in prompt) */}
+                                                    {refInPrompt && (
+                                                        <motion.span
+                                                            className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-base sm:text-lg font-medium whitespace-nowrap"
+                                                            style={{ 
+                                                                color: 'hsl(var(--primary))', 
+                                                                background: 'hsl(var(--primary) / 0.15)',
+                                                            }}
+                                                            initial={{ opacity: 0, scale: 0.8 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            transition={{ type: 'spring', bounce: 0.4 }}
+                                                        >
+                                                            <img src={REF_IMAGE} alt="" className="w-5 h-5 rounded object-cover" />
+                                                            @Ảnh 1
+                                                        </motion.span>
+                                                    )}
+
+                                                    {/* Typed text (after the mention) */}
+                                                    <span className="text-white/90">
+                                                        {PROMPT_AFTER_MENTION.substring(0, typedLength)}
+                                                    </span>
+                                                    
+                                                    {/* Extreme Pulsing Neon Cursor */}
+                                                    {composePhase === 'typing' && (
+                                                        <motion.span
+                                                            className="inline-block w-[3.5px] h-[1.1em] rounded-full bg-white ml-2 align-text-bottom relative"
+                                                            animate={{ opacity: [1, 0.4, 1], scaleY: [1, 1.05, 1] }}
+                                                            transition={{ duration: 0.6, repeat: Infinity, ease: 'easeInOut' }}
+                                                        >
+                                                            {/* Cursor glow bleed */}
+                                                            <div className="absolute inset-0 bg-fuchsia-400 blur-sm mix-blend-screen scale-x-150 scale-y-125" />
+                                                            <div className="absolute inset-0 bg-fuchsia-500 blur-md scale-[3]" />
+                                                        </motion.span>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Tools & Send Button (Bottom) */}
+                                            <div className="flex items-center justify-between px-4 pb-3 sm:px-5 sm:pb-4">
+                                                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-none pr-2">
+                                                    <div className="h-10 w-10 sm:h-11 sm:w-11 flex items-center justify-center rounded-full text-muted-foreground cursor-pointer hover:bg-muted/40 hover:text-foreground transition-colors">
+                                                        <History className="size-5 sm:size-[22px]" />
+                                                    </div>
+                                                    <div className="h-10 w-10 sm:h-11 sm:w-11 flex items-center justify-center rounded-full text-muted-foreground cursor-pointer hover:bg-muted/40 hover:text-foreground transition-colors">
+                                                        <ImageIcon className="size-5 sm:size-[22px]" />
+                                                    </div>
+                                                    <div className="h-10 w-10 sm:h-11 sm:w-11 flex items-center justify-center rounded-full text-muted-foreground cursor-pointer hover:bg-muted/40 hover:text-foreground transition-colors">
+                                                        <Settings2 className="size-5 sm:size-[22px]" />
+                                                    </div>
+                                                    
+                                                    <div className="hidden sm:flex items-center gap-2.5 ml-2 border-l border-border/50 pl-4">
+                                                        <span className="text-sm font-medium text-muted-foreground tracking-wide">Flux.1 Pro</span>
+                                                        <Badge variant="secondary" className="hidden lg:inline-flex text-[11px] h-7 rounded-full font-bold px-3 bg-background/50 border-border/50">
+                                                            16:9
+                                                        </Badge>
+                                                        <Badge variant="secondary" className="hidden lg:inline-flex text-[11px] h-7 rounded-full font-bold px-2.5 bg-background/50 border-border/50">
+                                                            ×2
+                                                        </Badge>
+                                                        {activeStyle >= 0 && (
+                                                            <Badge className="h-7 rounded-full px-3 text-[11px] font-black bg-gradient-to-r from-violet-600/30 to-fuchsia-600/30 text-fuchsia-200 border border-fuchsia-500/40 uppercase tracking-widest">
+                                                                <Sparkles className="w-3 h-3 mr-1.5 inline" />
+                                                                {STYLES[activeStyle].name}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Send Action */}
+                                                <motion.div
+                                                    ref={generateBtnRef}
+                                                    className={`rounded-full shrink-0 flex items-center justify-center size-11 sm:size-12 ${typedLength > 0 ? "bg-primary text-primary-foreground shadow-md" : "bg-muted text-muted-foreground"}`}
+                                                    animate={
+                                                        composePhase === 'click-generate'
+                                                            ? { scale: [1, 1.25, 0.9], background: "#fff", color: "#000" } // Click anticipation
+                                                            : typedLength >= PROMPT_TEXT.length
+                                                                ? { scale: [1, 1.08, 1], boxShadow: "0 0 40px rgba(217,70,239,0.5)" }
+                                                                : {}
+                                                    }
+                                                    transition={{ duration: composePhase === 'click-generate' ? 0.3 : 1.5, repeat: composePhase === 'click-generate' ? 0 : Infinity }}
+                                                >
+                                                    <ArrowUp className="size-5 sm:size-6 stroke-[3]" />
+                                                </motion.div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    
-                                    {/* Scanline overlay for that premium screen effect */}
-                                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:100%_4px] mix-blend-overlay pointer-events-none z-40 opacity-50" />
-                                </div>
-                            </motion.div>
-                        )}
+                                    </motion.div>
+                                </motion.div>
+                            )}
 
-                        {/* ─── SCENE 4: RESULT (Tilt & Laser Scanner) ─── */}
-                        {scene === "result" && (
-                            <motion.div
-                                key="scene-result"
-                                className="w-full h-full absolute inset-0 flex items-center justify-center p-4 sm:p-6 perspective-1000"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-                                transition={{ duration: 0.7 }}
-                            >
-                                {/* Immersive White Flash */}
+                            {/* ═══ GENERATE SCENE (Matrix Core Forge) ═══ */}
+                            {scene === "generate" && (
                                 <motion.div
-                                    className="absolute inset-0 bg-white z-50 rounded-2xl pointer-events-none"
-                                    initial={{ opacity: 1 }}
-                                    animate={{ opacity: 0 }}
-                                    transition={{ duration: 1, ease: 'easeOut' }}
-                                />
-
-                                <motion.div
-                                    onMouseMove={handleCardMouseMove}
-                                    onMouseLeave={handleCardMouseLeave}
-                                    style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-                                    className="relative w-full max-w-2xl aspect-video rounded-2xl overflow-hidden shadow-[0_40px_100px_-20px_rgba(139,92,246,0.5)] ring-1 ring-white/20 transition-all duration-300 ease-out z-30"
-                                    initial={{ scale: 0.8, filter: "blur(20px)" }}
-                                    animate={{ scale: 1, filter: "blur(0px)" }}
+                                    key="scene-generate"
+                                    className="w-full max-w-4xl mx-auto flex items-center justify-center p-2 sm:p-4 z-20"
+                                    initial={{ opacity: 0, scale: 1.2, filter: "brightness(2) contrast(1.5) blur(20px)" }}
+                                    animate={{ opacity: 1, scale: 1, filter: "brightness(1) contrast(1) blur(0px)" }}
+                                    exit={{ opacity: 0, scale: 0.9, filter: "blur(20px)" }}
                                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
                                 >
-                                    {/* The Single Target Artwork */}
-                                    <div className="absolute inset-0 z-0 bg-black pointer-events-auto group/img cursor-pointer">
-                                        <div className="relative w-full h-full overflow-hidden bg-[#0a0a0c]">
+                                    <div className="relative w-full aspect-video rounded-3xl overflow-hidden bg-[#020203] border border-white/[0.08] shadow-[0_0_100px_rgba(139,92,246,0.3)] inset-ring">
+                                        
+                                        {/* Matrix Data Rain Background */}
+                                        <MatrixBackground progress={progress} />
+
+                                        {/* Base Image resolving from chaos */}
+                                        <div className="absolute inset-0 z-0">
                                             <motion.img
                                                 src={RESULT_IMAGE}
-                                                alt="Generated AI Art"
-                                                className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-700 ease-out"
-                                                initial={{ scale: 1 }}
-                                                animate={{ scale: 1.08 }}
-                                                transition={{ duration: 5, ease: "easeOut" }}
+                                                alt="rendering..."
+                                                className="w-full h-full object-cover mix-blend-luminosity"
+                                                style={{
+                                                    // Resolves from violent blur and super saturation
+                                                    filter: `blur(${Math.max(60 - progress, 0)}px) contrast(${1 + (100 - progress)*0.02})`,
+                                                    scale: 1.2 - (progress * 0.002),
+                                                    opacity: progress * 0.01 // slowly fades in
+                                                }}
                                             />
-                                            <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/20 transition-colors duration-300 pointer-events-none" />
-                                            
-                                            {/* Simulate Interactive Badges appearing on hover */}
-                                            <div className="absolute top-4 right-4 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex flex-wrap justify-end gap-2">
-                                                <div className="backdrop-blur-md bg-black/40 border border-white/20 text-white/90 text-xs sm:text-sm px-3 py-1.5 rounded-lg shadow-lg hover:bg-white/20 hover:text-white transition-colors">
-                                                    Upscale
+                                        </div>
+
+                                        {/* Violent Scanning Ray */}
+                                        <motion.div
+                                            className="absolute top-0 bottom-0 w-[4px] z-20 mix-blend-screen"
+                                            style={{
+                                                left: `${progress}%`,
+                                                background: 'linear-gradient(to bottom, transparent, #fff, transparent)',
+                                                boxShadow: '0 0 40px 10px rgba(217,70,239,0.8), 0 0 100px 20px rgba(139,92,246,0.4), -20px 0 30px rgba(255,255,255,0.2)'
+                                            }}
+                                            animate={{ opacity: [0.8, 1, 0.8], x: [0, 5, 0, -2, 0] }}
+                                            transition={{ duration: 0.1, repeat: Infinity }}
+                                        />
+
+                                        {/* Core Ring Hologram */}
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center z-30">
+                                            <div className="relative flex items-center justify-center">
+                                                {/* Pulsing Energy Aura */}
+                                                <motion.div
+                                                    className="absolute rounded-full pointer-events-none mix-blend-screen"
+                                                    style={{ width: 220, height: 220 }}
+                                                    animate={{ scale: [1, 1.2, 1], rotate: 360, opacity: progress > 90 ? 0 : [0.3, 0.6, 0.3] }}
+                                                    transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                                                >
+                                                    <div className="w-full h-full rounded-full bg-[conic-gradient(from_0deg,transparent,rgba(217,70,239,0.8),transparent)] blur-xl" />
+                                                </motion.div>
+
+                                                {/* Precision SVG Ring */}
+                                                <svg width="140" height="140" viewBox="0 0 140 140" className="absolute" style={{ transform: 'rotate(-90deg)' }}>
+                                                    <circle cx="70" cy="70" r="64" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="1" />
+                                                    <circle cx="70" cy="70" r="54" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" strokeDasharray="2 6" />
+                                                    <motion.circle
+                                                        cx="70" cy="70" r="64"
+                                                        fill="none" strokeWidth="4" strokeLinecap="round"
+                                                        stroke="url(#progressTech)"
+                                                        strokeDasharray={`${2 * Math.PI * 64}`}
+                                                        style={{ strokeDashoffset: 2 * Math.PI * 64 * (1 - progress / 100) }}
+                                                        filter="url(#glowTech)"
+                                                    />
+                                                    <defs>
+                                                        <linearGradient id="progressTech" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                            <stop offset="0%" stopColor="#fff" />
+                                                            <stop offset="50%" stopColor="#d946ef" />
+                                                            <stop offset="100%" stopColor="#8b5cf6" />
+                                                        </linearGradient>
+                                                        <filter id="glowTech" x="-50%" y="-50%" width="200%" height="200%">
+                                                            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur1" />
+                                                            <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur2" />
+                                                            <feMerge><feMergeNode in="blur2" /><feMergeNode in="blur1" /><feMergeNode in="SourceGraphic" /></feMerge>
+                                                        </filter>
+                                                    </defs>
+                                                </svg>
+
+                                                {/* Digital Percentage Display */}
+                                                <div className="relative w-28 h-28 rounded-full bg-black/60 backdrop-blur-2xl border border-white/20 flex flex-col items-center justify-center shadow-[inset_0_0_30px_rgba(217,70,239,0.3)]">
+                                                    <span className="text-4xl font-black text-white tracking-tighter tabular-nums" style={{ textShadow: "0 0 20px rgba(255,255,255,0.8)" }}>
+                                                        {Math.floor(progress)}
+                                                    </span>
+                                                    <span className="text-[10px] text-fuchsia-300 font-black tracking-[0.3em] uppercase mt-1">%</span>
                                                 </div>
-                                                <div className="backdrop-blur-md bg-black/40 border border-white/20 text-white/90 text-xs sm:text-sm px-3 py-1.5 rounded-lg shadow-lg hover:bg-white/20 hover:text-white transition-colors">
-                                                    Variation
+                                            </div>
+
+                                            {/* Technical Status Badges */}
+                                            <div className="mt-8 flex flex-col items-center gap-3">
+                                                <div className="flex items-center gap-2 bg-black/50 backdrop-blur-xl border border-white/10 rounded-sm px-4 py-2 shadow-[0_0_20px_rgba(0,0,0,0.8)]">
+                                                    <motion.div
+                                                        className="w-2 h-2 bg-fuchsia-500 shadow-[0_0_10px_#d946ef]"
+                                                        animate={{ opacity: [1, 0, 1] }}
+                                                        transition={{ duration: 0.1, repeat: Infinity }} // rapid blink
+                                                    />
+                                                    <span className="text-[11px] font-mono text-white/80 tracking-widest uppercase">
+                                                        {progress < 25 ? "INITIATING_CORE..." : progress < 60 ? "NEURAL_RENDERING" : progress < 90 ? "UPSCALE_PASS_01" : "FINAL_COMPOSITE"}
+                                                    </span>
+                                                </div>
+                                                <div className="w-48 h-[1px] bg-white/20 relative overflow-hidden">
+                                                    <motion.div className="absolute inset-y-0 left-0 bg-white" style={{ width: `${progress}%`, boxShadow: "0 0 10px #fff" }} />
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    
-                                    {/* Laser Scanner Line matching the image width */}
-                                    <motion.div 
-                                        className="absolute left-0 right-0 h-[2px] bg-white shadow-[0_0_20px_4px_rgba(217,70,239,0.8)] z-40"
-                                        initial={{ top: "0%", opacity: 0 }}
-                                        animate={{ top: ["0%", "100%", "200%"], opacity: [0, 1, 1, 0] }}
-                                        transition={{ duration: 2.5, ease: "linear", times: [0, 0.1, 0.9, 1] }}
-                                    />
 
-                                    {/* Dark overlay at bottom for text readability (Flexible padding instead of height to prevent squishing) */}
-                                    <div className="absolute inset-x-0 bottom-0 pt-16 pb-3 px-3 sm:pt-24 sm:pb-8 sm:px-8 bg-gradient-to-t from-black/95 via-black/60 to-transparent flex flex-col justify-end pointer-events-none rounded-b-2xl" style={{ transform: "translateZ(30px)" }}>
-                                        <Badge className="w-fit mb-2 sm:mb-3 bg-black/40 backdrop-blur-md text-white/90 border border-white/20 shadow-xl px-2 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-xs">
-                                            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-fuchsia-300" /> Studio AI Render
-                                        </Badge>
-                                        <h2 className="text-white font-bold text-sm sm:text-xl lg:text-2xl leading-snug drop-shadow-xl line-clamp-2 md:line-clamp-3">
-                                            {PROMPT_TEXT}
-                                        </h2>
-                                    </div>
-                                    
-                                    {/* Top Left Specs */}
-                                    <div className="absolute top-4 left-4 sm:top-5 sm:left-5 flex gap-2" style={{ transform: "translateZ(20px)" }}>
-                                        <div className="bg-black/40 backdrop-blur-md text-white/90 text-xs font-bold px-2 py-1 sm:px-3 sm:py-1.5 rounded-full border border-white/10 flex items-center gap-1.5">
-                                            <ZapIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-amber-400" /> ~10s
-                                        </div>
+                                        {/* TV Scanlines */}
+                                        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.2)_1px,transparent_1px)] bg-[size:100%_4px] mix-blend-overlay pointer-events-none z-50" />
                                     </div>
                                 </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                            )}
+
+                            {/* ═══ RESULT SCENE (Showcase Art) ═══ */}
+                            {scene === "result" && (
+                                <motion.div
+                                    key="scene-result"
+                                    className="w-full max-w-4xl absolute inset-0 flex items-center justify-center p-4 sm:p-6 mx-auto perspective-2000"
+                                    initial={{ opacity: 0, scale: 0.8, filter: "brightness(3) contrast(1.5)" }}
+                                    animate={{ opacity: 1, scale: 1, filter: "brightness(1) contrast(1)" }}
+                                    exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+                                    transition={{ duration: 0.8, ease: "easeOut" }}
+                                >
+                                    <motion.div
+                                        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+                                        className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-[0_50px_150px_-20px_rgba(139,92,246,0.6)] ring-2 ring-white/10 z-30"
+                                    >
+                                        <div className="absolute inset-0 z-0 bg-black pointer-events-auto group/img cursor-auto">
+                                            <div className="relative w-full h-full overflow-hidden">
+                                                <motion.img
+                                                    src={RESULT_IMAGE}
+                                                    alt="Generated AI Art"
+                                                    className="w-full h-full object-cover"
+                                                    initial={{ scale: 1 }}
+                                                    animate={{ scale: 1.05 }}
+                                                    transition={{ duration: 6, ease: "easeOut" }}
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none flex flex-col justify-end p-8" style={{ transform: "translateZ(30px)" }}>
+                                                    <Badge className="w-fit mb-4 bg-white/10 backdrop-blur-xl text-white border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider backdrop-saturate-200">
+                                                        <Sparkles className="w-4 h-4 mr-2" /> Studio Render
+                                                    </Badge>
+                                                    <h2 className="text-white font-black text-2xl sm:text-3xl lg:text-4xl leading-tight drop-shadow-2xl">
+                                                        {PROMPT_TEXT}
+                                                    </h2>
+                                                </div>
+
+                                                <div className="absolute top-6 left-6 flex gap-2" style={{ transform: "translateZ(20px)" }}>
+                                                    <div className="bg-black/60 backdrop-blur-xl text-white font-mono text-xs px-4 py-2 rounded-lg border border-white/20 flex items-center gap-2">
+                                                        <ZapIcon className="w-4 h-4 text-[#d946ef]" /> 4K_UPSCALE
+                                                    </div>
+                                                </div>
+
+                                                {/* Refined Laser Scanner Reveal */}
+                                                <motion.div 
+                                                    className="absolute left-0 right-0 h-[3px] bg-white shadow-[0_0_40px_10px_rgba(217,70,239,1)] z-40"
+                                                    initial={{ top: "-10%", opacity: 0 }}
+                                                    animate={{ top: ["-10%", "110%"], opacity: [0, 1, 1, 0] }}
+                                                    transition={{ duration: 2, ease: "easeInOut", delay: 0.2 }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
                 </div>
             </div>
         </div>
