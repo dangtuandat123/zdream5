@@ -933,10 +933,12 @@ export function GeneratePage() {
 
     // Hàm tiện ích: đảm bảo chiều cao contenteditable luôn khớp với nội dung
     const adjustHeight = (el: HTMLDivElement) => {
+        const savedScrollTop = el.scrollTop
         // Reset height để đo lại scrollHeight chính xác
         el.style.height = 'auto'
         const newHeight = Math.min(el.scrollHeight, 120)
         el.style.height = newHeight + 'px'
+        el.scrollTop = savedScrollTop // Phục hồi scroll position sau khi reset chiều cao
 
         // Cuộn xuống để cursor luôn nằm trong vùng nhìn thấy
         const sel = window.getSelection()
