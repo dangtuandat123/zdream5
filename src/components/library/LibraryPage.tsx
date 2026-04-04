@@ -747,6 +747,28 @@ export function LibraryPage() {
                             </div>
                         )}
 
+                        {/* Reference Images */}
+                        {selectedItem.referenceImages && selectedItem.referenceImages.length > 0 && (
+                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
+                                <div className="flex items-center gap-1.5">
+                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
+                                    <span className="text-[9px] font-bold bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{selectedItem.referenceImages.length}</span>
+                                </div>
+                                <div className="grid grid-cols-5 gap-2">
+                                    {selectedItem.referenceImages.map((refImg, i) => (
+                                        <div key={i} className="aspect-square relative">
+                                            <a href={refImg} target="_blank" rel="noreferrer" className="block w-full h-full relative cursor-pointer hover:opacity-80 transition-opacity">
+                                                <img src={refImg} className="absolute inset-0 w-full h-full rounded-lg object-cover border border-white/10" alt="ref" />
+                                                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
+                                                    {i + 1}
+                                                </div>
+                                            </a>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
                         {/* Metadata grid */}
                         <div className="px-5 py-3 border-t border-white/5">
                             <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
@@ -807,28 +829,6 @@ export function LibraryPage() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Reference Images */}
-                        {selectedItem.referenceImages && selectedItem.referenceImages.length > 0 && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <div className="flex items-center gap-1.5">
-                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
-                                    <span className="text-[9px] font-bold bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{selectedItem.referenceImages.length}</span>
-                                </div>
-                                <div className="grid grid-cols-5 gap-2">
-                                    {selectedItem.referenceImages.map((refImg, i) => (
-                                        <div key={i} className="aspect-square relative">
-                                            <a href={refImg} target="_blank" rel="noreferrer" className="block w-full h-full relative cursor-pointer hover:opacity-80 transition-opacity">
-                                                <img src={refImg} className="absolute inset-0 w-full h-full rounded-lg object-cover border border-white/10" alt="ref" />
-                                                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
-                                                    {i + 1}
-                                                </div>
-                                            </a>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </> : undefined}
                 />
 
