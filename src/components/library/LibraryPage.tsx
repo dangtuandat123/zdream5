@@ -89,6 +89,7 @@ interface MediaItem {
     gemsCost?: number
     seed?: number
     numericId?: number // for API delete
+    referenceImages?: string[]
 }
 
 // === Cấu hình tabs — flat, mỗi tab = 1 loại, không sub-filter ===
@@ -134,6 +135,7 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
         aspectRatio: img.aspect_ratio,
         gemsCost: img.gems_cost,
         seed: img.seed,
+        referenceImages: img.reference_images && img.reference_images.length > 0 ? img.reference_images : undefined,
     }
 }
 
@@ -805,6 +807,23 @@ export function LibraryPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Reference Images */}
+                        {selectedItem.referenceImages && selectedItem.referenceImages.length > 0 && (
+                            <div className="px-5 py-3 border-t border-white/5">
+                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                                    <ImageIcon className="size-3" />
+                                    Ảnh tham chiếu
+                                </p>
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                                    {selectedItem.referenceImages.map((refImg, idx) => (
+                                        <a key={idx} href={refImg} target="_blank" rel="noreferrer" className="shrink-0 block">
+                                            <img src={refImg} alt="Reference" className="size-16 sm:size-20 object-cover rounded-xl border border-white/10 hover:border-primary/40 transition-colors" />
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </> : undefined}
                 />
 

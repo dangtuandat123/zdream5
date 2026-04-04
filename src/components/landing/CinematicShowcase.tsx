@@ -5,7 +5,6 @@ import {
     Sparkles,
     ArrowUp,
     ImageIcon,
-    ZapIcon,
     MonitorPlay,
     History,
     Settings2,
@@ -860,31 +859,26 @@ export default function CinematicShowcase() {
                                                     alt="Generated AI Art"
                                                     className="w-full h-full object-cover"
                                                     initial={{ scale: 1 }}
-                                                    animate={{ scale: 1.05 }}
-                                                    transition={{ duration: 6, ease: "easeOut" }}
+                                                    animate={{ scale: 1.03 }}
+                                                    transition={{ duration: 8, ease: "easeOut" }}
                                                 />
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none flex flex-col justify-end p-8" style={{ transform: "translateZ(30px)" }}>
-                                                    <Badge className="w-fit mb-4 bg-white/10 backdrop-blur-xl text-white border border-white/20 px-3 py-1.5 text-xs font-bold uppercase tracking-wider backdrop-saturate-200">
-                                                        <Sparkles className="w-4 h-4 mr-2" /> Studio Render
-                                                    </Badge>
-                                                    <h2 className="text-white font-black text-2xl sm:text-3xl lg:text-4xl leading-tight drop-shadow-2xl">
-                                                        {PROMPT_TEXT}
-                                                    </h2>
+                                                
+                                                {/* Minimalist Floating Prompt Pill */}
+                                                <div className="absolute inset-x-0 bottom-8 pointer-events-none flex justify-center w-full px-4" style={{ transform: "translateZ(30px)" }}>
+                                                    <motion.div 
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.8, duration: 1, ease: "easeOut" }}
+                                                        className="bg-black/40 backdrop-blur-2xl px-5 sm:px-8 py-3.5 rounded-full border border-white/10 flex items-center justify-center gap-3 sm:gap-4 shadow-[0_30px_60px_rgba(0,0,0,0.6)] w-auto max-w-[90%]"
+                                                    >
+                                                        <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400 shrink-0" />
+                                                        <span className="text-white/95 text-[13px] sm:text-[15px] font-medium truncate tracking-wide">
+                                                            {PROMPT_AFTER_MENTION}
+                                                        </span>
+                                                        <div className="w-px h-4 bg-white/20 shrink-0 mx-1" />
+                                                        <span className="text-[10px] sm:text-[11px] text-white/40 font-mono tracking-widest uppercase shrink-0 mt-0.5">ZDream V5</span>
+                                                    </motion.div>
                                                 </div>
-
-                                                <div className="absolute top-6 left-6 flex gap-2" style={{ transform: "translateZ(20px)" }}>
-                                                    <div className="bg-black/60 backdrop-blur-xl text-white font-mono text-xs px-4 py-2 rounded-lg border border-white/20 flex items-center gap-2">
-                                                        <ZapIcon className="w-4 h-4 text-[#d946ef]" /> 4K_UPSCALE
-                                                    </div>
-                                                </div>
-
-                                                {/* Refined Laser Scanner Reveal */}
-                                                <motion.div 
-                                                    className="absolute left-0 right-0 h-[3px] bg-white shadow-[0_0_40px_10px_rgba(217,70,239,1)] z-40"
-                                                    initial={{ top: "-10%", opacity: 0 }}
-                                                    animate={{ top: ["-10%", "110%"], opacity: [0, 1, 1, 0] }}
-                                                    transition={{ duration: 2, ease: "easeInOut", delay: 0.2 }}
-                                                />
                                             </div>
                                         </div>
                                     </motion.div>
