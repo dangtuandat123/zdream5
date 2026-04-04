@@ -944,10 +944,14 @@ export function GeneratePage() {
         const sel = window.getSelection()
         if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
             const rect = sel.getRangeAt(0).getBoundingClientRect()
+            
+            // FIX BUG: Tránh Range lấy toạ độ 0,0 chưa kích hoạt làm giật cuộn lên trên cùng
+            if (rect.top === 0 && rect.bottom === 0 && rect.height === 0) return;
+
             const elRect = el.getBoundingClientRect()
             if (rect.bottom > elRect.bottom) {
                 el.scrollTop += rect.bottom - elRect.bottom + 4
-            } else if (rect.top < elRect.top) {
+            } else if (rect.top > 0 && rect.top < elRect.top) {
                 el.scrollTop -= elRect.top - rect.top + 4
             }
         }
