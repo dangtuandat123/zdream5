@@ -2336,18 +2336,30 @@ export function GeneratePage() {
                                                             // Ngăn button cướp focus → bàn phím không bị đóng/mở lại
                                                             onPointerDown={(e) => e.preventDefault()}
                                                             onClick={() => {
+                                                                const el = textareaRef.current;
+                                                                const savedScrollTop = el ? el.scrollTop : 0;
+
                                                                 const mention = `@Ảnh ${idx + 1} `
                                                                 const pos = mentionInsertPosRef.current
                                                                 const before = prompt.slice(0, pos)
                                                                 const after = prompt.slice(pos + 1)
                                                                 const newPrompt = before + mention + after
+                                                                
                                                                 setPrompt(newPrompt)
                                                                 setShowMentionPopover(false)
-                                                                // Không cần re-focus vì contenteditable vẫn giữ focus
+
                                                                 requestAnimationFrame(() => {
                                                                     if (textareaRef.current) {
-                                                                        const el = textareaRef.current
-                                                                        setCursorPosition(el, pos + mention.length)
+                                                                        const currentEl = textareaRef.current
+                                                                        currentEl.scrollTop = savedScrollTop
+                                                                        setCursorPosition(currentEl, pos + mention.length)
+                                                                        
+                                                                        // Ép cứng vị trí ngặn chặn trình duyệt tự động scroll khi focus range
+                                                                        setTimeout(() => {
+                                                                            if (textareaRef.current) {
+                                                                                textareaRef.current.scrollTop = savedScrollTop
+                                                                            }
+                                                                        }, 0)
                                                                     }
                                                                 })
                                                             }}
