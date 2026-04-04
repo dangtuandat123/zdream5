@@ -851,6 +851,8 @@ export function GeneratePage() {
     const textareaRef = useRef<HTMLDivElement>(null)
     const promptContainerRef = useRef<HTMLDivElement>(null)
     const isComposingRef = useRef(false)
+    const forcedCursorRef = useRef<number | null>(null)
+    const forcedScrollRef = useRef<number | null>(null)
 
     // Hàm tiện ích: render prompt thành HTML với mention highlight
     const renderPromptHTML = (text: string): string => {
@@ -973,17 +975,35 @@ export function GeneratePage() {
             cursorOffset = preRange.toString().length
         }
 
+        // Ghi đè nếu có ép buộc từ thao tác chọn ảnh
+        if (forcedCursorRef.current !== null) {
+            cursorOffset = forcedCursorRef.current
+            forcedCursorRef.current = null
+        }
+
         // Chỉ update innerHTML nếu text thực sự khác
         const currentText = (el.innerText || '').replace(/\n$/, '')
         if (currentText !== prompt) {
-            // Lưu scroll position trước khi re-render
-            const savedScrollTop = el.scrollTop
+            // Lấy scroll position từ cache (phòng trường hợp trình duyệt reset) hoặc từ el
+            const savedScrollTop = forcedScrollRef.current !== null ? forcedScrollRef.current : el.scrollTop
             el.innerHTML = renderPromptHTML(prompt)
-            // Phục hồi scroll position
+            
+            // Ép browser khoá chặt scroll bar trong mọi hoàn cảnh
             el.scrollTop = savedScrollTop
-            // Phục hồi cursor
-            if (document.activeElement === el) {
+            if (forcedScrollRef.current !== null) {
+                // Đóng băng scroll trong chuỗi frame liên tiếp để kháng cự native jumping
+                for (let i = 0; i <= 5; i++) {
+                    setTimeout(() => { if (textareaRef.current) textareaRef.current.scrollTop = savedScrollTop }, i * 15)
+                }
+                forcedScrollRef.current = null
+            }
+
+            // Phục hồi cursor nếu form đang focus HOẶC vừa bấm nút chèn ảnh
+            if (document.activeElement === el || document.activeElement?.tagName === 'BUTTON') {
+                if (document.activeElement !== el) el.focus()
                 setCursorPosition(el, cursorOffset)
+                // Khoá scroll một lần nữa sau khi tạo Range (nguyên nhân gây scroll)
+                el.scrollTop = savedScrollTop
             }
         }
 
@@ -2340,32 +2360,22 @@ export function GeneratePage() {
                                                             // Ngăn button cướp focus → bàn phím không bị đóng/mở lại
                                                             onPointerDown={(e) => e.preventDefault()}
                                                             onClick={() => {
-                                                                const el = textareaRef.current;
-                                                                const savedScrollTop = el ? el.scrollTop : 0;
+                                                                if (textareaRef.current) {
+                                                                    forcedScrollRef.current = textareaRef.current.scrollTop
+                                                                }
 
                                                                 const mention = `@Ảnh ${idx + 1} `
                                                                 const pos = mentionInsertPosRef.current
+                                                                
+                                                                // KHOÁ OFFSET CURSOR CHO USEEFFECT
+                                                                forcedCursorRef.current = pos + mention.length
+
                                                                 const before = prompt.slice(0, pos)
                                                                 const after = prompt.slice(pos + 1)
                                                                 const newPrompt = before + mention + after
                                                                 
                                                                 setPrompt(newPrompt)
                                                                 setShowMentionPopover(false)
-
-                                                                requestAnimationFrame(() => {
-                                                                    if (textareaRef.current) {
-                                                                        const currentEl = textareaRef.current
-                                                                        currentEl.scrollTop = savedScrollTop
-                                                                        setCursorPosition(currentEl, pos + mention.length)
-                                                                        
-                                                                        // Ép cứng vị trí ngặn chặn trình duyệt tự động scroll khi focus range
-                                                                        setTimeout(() => {
-                                                                            if (textareaRef.current) {
-                                                                                textareaRef.current.scrollTop = savedScrollTop
-                                                                            }
-                                                                        }, 0)
-                                                                    }
-                                                                })
                                                             }}
                                                         >
                                                             <div className="relative shrink-0">
