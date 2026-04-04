@@ -2346,16 +2346,6 @@ export function GeneratePage() {
                                                                     if (textareaRef.current) {
                                                                         const el = textareaRef.current
                                                                         setCursorPosition(el, pos + mention.length)
-                                                                        const sel = window.getSelection()
-                                                                        if (sel && sel.rangeCount > 0) {
-                                                                            const rect = sel.getRangeAt(0).getBoundingClientRect()
-                                                                            const elRect = el.getBoundingClientRect()
-                                                                            if (rect.bottom > elRect.bottom) {
-                                                                                el.scrollTop += rect.bottom - elRect.bottom + 8
-                                                                            } else if (rect.top < elRect.top) {
-                                                                                el.scrollTop -= elRect.top - rect.top + 8
-                                                                            }
-                                                                        }
                                                                     }
                                                                 })
                                                             }}
