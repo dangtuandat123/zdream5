@@ -341,7 +341,7 @@ export function ImageLightbox({
                                     onClick={() => setShowInfo(!showInfo)}
                                 >
                                     <Info className="size-3.5" />
-                                    <span className="hidden sm:inline">Chi tiết ảnh</span>
+                                    <span>Chi tiết ảnh</span>
                                 </Button>
                             )}
                             <Button
