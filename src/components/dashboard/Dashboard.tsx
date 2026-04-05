@@ -19,14 +19,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useAuth } from "@/contexts/AuthContext"
-import { imageApi, templateApi, walletApi } from "@/lib/api"
-import type { GeneratedImageData, TemplateData } from "@/lib/api"
+import { imageApi, walletApi } from "@/lib/api"
+import type { GeneratedImageData } from "@/lib/api"
 
 export function Dashboard() {
     const { user, gems } = useAuth()
 
     const [recentImages, setRecentImages] = useState<GeneratedImageData[]>([])
-    const [templates, setTemplates] = useState<TemplateData[]>([])
     const [totalImages, setTotalImages] = useState(0)
     const [totalSpent, setTotalSpent] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -35,15 +34,11 @@ export function Dashboard() {
         setLoading(true)
         Promise.allSettled([
             imageApi.list(1, 8),
-            templateApi.list(),
             walletApi.show(),
-        ]).then(([imgRes, tplRes, walRes]) => {
+        ]).then(([imgRes, walRes]) => {
             if (imgRes.status === "fulfilled") {
                 setRecentImages(imgRes.value.data)
                 setTotalImages(imgRes.value.total)
-            }
-            if (tplRes.status === "fulfilled") {
-                setTemplates(tplRes.value.data.slice(0, 6))
             }
             if (walRes.status === "fulfilled") {
                 const spent = walRes.value.transactions
@@ -246,59 +241,21 @@ export function Dashboard() {
                 )}
             </section>
 
-            {/* ===== KIỂU MẪU NỔI BẬT ===== */}
-            <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-sm sm:text-base font-semibold tracking-tight flex items-center gap-2">
-                        <Zap className="size-4 text-muted-foreground" />
-                        Kiểu mẫu nổi bật
-                    </h2>
-                    <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                        Xem tất cả <ArrowRight className="size-3" />
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-2.5">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <Skeleton key={i} className="aspect-[3/4] rounded-xl sm:rounded-2xl" />
-                        ))}
-                    </div>
-                ) : templates.length === 0 ? (
-                    <Card className="border-dashed">
-                        <CardContent className="flex flex-col items-center justify-center gap-2 py-10 text-center">
-                            <Sparkles className="size-6 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5">
-                        {templates.map((tpl) => (
-                            <Link key={tpl.id} to={`/app/templates/${tpl.slug}`} className="group">
-                                <div className="relative aspect-[3/4] rounded-xl sm:rounded-2xl overflow-hidden bg-muted">
-                                    {tpl.thumbnail ? (
-                                        <img
-                                            src={tpl.thumbnail}
-                                            alt={tpl.name}
-                                            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                                            <Sparkles className="size-8 sm:size-10 text-muted-foreground/30" />
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                                    <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3">
-                                        <p className="text-xs sm:text-sm font-semibold text-white truncate drop-shadow-md mb-0.5 sm:mb-1">{tpl.name}</p>
-                                        <Badge className="bg-white/15 text-white/80 border-0 text-[10px] backdrop-blur-md">{tpl.category}</Badge>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-            </section>
+            {/* ===== KHÁM PHÁ CÔNG CỤ AI ===== */}
+            <Link to="/app/tools" className="group">
+                <Card className="border-border/50 hover:border-primary/30 transition-all overflow-hidden">
+                    <CardContent className="flex items-center gap-4 p-4 sm:p-5">
+                        <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 shrink-0 group-hover:scale-110 transition-transform">
+                            <Sparkles className="size-6 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-semibold mb-0.5">Khám phá Công cụ AI</h3>
+                            <p className="text-xs text-muted-foreground">Upscale, xóa nền, chuyển phong cách, nhân vật AI và nhiều hơn nữa</p>
+                        </div>
+                        <ArrowRight className="size-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
     )
 }
