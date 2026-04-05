@@ -41,27 +41,27 @@ const banners = [
         title: "Nhân vật AI",
         subtitle: "Tạo nhân vật riêng, giữ nhất quán qua mọi bối cảnh",
         badge: "Sắp ra mắt",
-        gradient: "from-emerald-600/80 via-teal-600/60 to-cyan-700/80",
+        gradient: "from-black/50 via-black/30 to-transparent",
         img: "/images/tools/consistent-character.jpg",
     },
     {
         title: "Ảnh quảng cáo AI",
         subtitle: "Tạo ảnh sản phẩm chuyên nghiệp cho mọi nền tảng",
         badge: "Sắp ra mắt",
-        gradient: "from-violet-600/80 via-purple-600/60 to-fuchsia-700/80",
+        gradient: "from-black/50 via-black/30 to-transparent",
         img: "/images/tools/ad-image.jpg",
     },
 ]
 
 /* ── Feature nav cards ── */
 const featureCards = [
-    { name: "Tạo ảnh AI", icon: WandSparkles, path: "/app/generate", color: "text-violet-400", bg: "bg-violet-500/15", available: true },
-    { name: "Kiểu mẫu", icon: LayoutTemplate, path: "/app/templates", color: "text-pink-400", bg: "bg-pink-500/15", available: true },
-    { name: "Nhân vật AI", icon: UserCheck, path: "/app/tools", color: "text-emerald-400", bg: "bg-emerald-500/15", badge: "Mới", available: false },
-    { name: "Xóa nền", icon: Eraser, path: "/app/tools", color: "text-rose-400", bg: "bg-rose-500/15", available: false },
-    { name: "Upscale", icon: ZoomIn, path: "/app/tools", color: "text-sky-400", bg: "bg-sky-500/15", available: false },
-    { name: "Style Transfer", icon: Wand2, path: "/app/tools", color: "text-orange-400", bg: "bg-orange-500/15", available: false },
-    { name: "Ảnh quảng cáo", icon: Megaphone, path: "/app/tools", color: "text-amber-400", bg: "bg-amber-500/15", available: false },
+    { name: "Tạo ảnh AI", icon: WandSparkles, path: "/app/generate", color: "text-violet-300", bg: "bg-violet-500/20", available: true },
+    { name: "Kiểu mẫu", icon: LayoutTemplate, path: "/app/templates", color: "text-pink-300", bg: "bg-pink-500/20", available: true },
+    { name: "Nhân vật AI", icon: UserCheck, path: "/app/tools", color: "text-emerald-300", bg: "bg-emerald-500/20", badge: "Mới", available: false },
+    { name: "Xóa nền", icon: Eraser, path: "/app/tools", color: "text-rose-300", bg: "bg-rose-500/20", available: false },
+    { name: "Upscale", icon: ZoomIn, path: "/app/tools", color: "text-sky-300", bg: "bg-sky-500/20", available: false },
+    { name: "Style Transfer", icon: Wand2, path: "/app/tools", color: "text-orange-300", bg: "bg-orange-500/20", available: false },
+    { name: "Ảnh quảng cáo", icon: Megaphone, path: "/app/tools", color: "text-amber-300", bg: "bg-amber-500/20", available: false },
 ]
 
 export function Dashboard() {
@@ -143,11 +143,11 @@ export function Dashboard() {
                             className={`absolute inset-0 rounded-xl overflow-hidden transition-opacity duration-700 ${i === bannerIdx ? "opacity-100 visible" : "opacity-0 invisible"}`}
                         >
                             <img src={b.img} alt="" className="absolute inset-0 w-full h-full object-cover" />
-                            <div className={`absolute inset-0 bg-gradient-to-r ${b.gradient}`} />
+                            <div className={`absolute inset-0 bg-gradient-to-t ${b.gradient}`} />
                             <div className="relative z-10 flex flex-col justify-end h-full p-5 sm:p-6">
-                                <Badge className="w-fit mb-2 bg-white/15 text-white border-white/20 text-[10px]">{b.badge}</Badge>
-                                <h2 className="text-xl sm:text-2xl font-bold text-white">{b.title}</h2>
-                                <p className="text-sm text-white/70 mt-1">{b.subtitle}</p>
+                                <Badge className="w-fit mb-2 bg-white/20 text-white border-white/30 text-[10px] backdrop-blur-sm">{b.badge}</Badge>
+                                <h2 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">{b.title}</h2>
+                                <p className="text-sm text-white/80 mt-1 drop-shadow-md">{b.subtitle}</p>
                             </div>
                         </div>
                     ))}
@@ -157,7 +157,7 @@ export function Dashboard() {
                             <button
                                 key={i}
                                 onClick={() => setBannerIdx(i)}
-                                className={`h-1 rounded-full transition-all ${i === bannerIdx ? "w-5 bg-white" : "w-1.5 bg-white/40"}`}
+                                className={`h-1.5 rounded-full transition-all ${i === bannerIdx ? "w-6 bg-white" : "w-1.5 bg-white/50"}`}
                             />
                         ))}
                     </div>
@@ -195,7 +195,6 @@ export function Dashboard() {
                             </Card>
                         </Link>
                     ))}
-                    {/* Show more models if > 2 */}
                     {models.length > 2 && (
                         <Link to="/app/generate" className="text-xs text-center text-muted-foreground hover:text-foreground transition-colors">
                             +{models.length - 2} models khác
@@ -204,38 +203,36 @@ export function Dashboard() {
                 </div>
             </div>
 
-            {/* ===== FEATURE NAV (horizontal scroll like Kling) ===== */}
+            {/* ===== FEATURE NAV (horizontal scroll) ===== */}
             <div className="relative group/nav">
                 <button
                     onClick={() => scrollFeatures("left")}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-background/80 border shadow-md flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-background/90 border shadow-md flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
                 >
                     <ChevronLeft className="size-4" />
                 </button>
                 <div
                     ref={featureScrollRef}
-                    className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1"
+                    className="flex gap-2 overflow-x-auto pb-1"
                     style={{ scrollbarWidth: "none" }}
                 >
                     {featureCards.map((f) => (
-                        <Link key={f.name} to={f.path} className="contents">
-                            <Card className="shrink-0 cursor-pointer hover:border-border/80 transition-colors group/card w-[150px]">
-                                <CardContent className="p-3.5 flex flex-col items-center gap-2 text-center relative">
-                                    {f.badge && (
-                                        <Badge className="absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0 bg-emerald-500 text-white border-0">{f.badge}</Badge>
-                                    )}
-                                    <div className={`flex size-10 items-center justify-center rounded-lg ${f.bg}`}>
-                                        <f.icon className={`size-5 ${f.color}`} />
-                                    </div>
-                                    <p className="text-xs font-medium leading-tight">{f.name}</p>
-                                </CardContent>
-                            </Card>
+                        <Link key={f.name} to={f.path}>
+                            <div className="shrink-0 flex flex-col items-center gap-2 w-[100px] py-3 px-2 rounded-xl border border-border/50 hover:border-border hover:bg-muted/50 transition-colors cursor-pointer relative">
+                                {f.badge && (
+                                    <Badge className="absolute -top-2 -right-2 text-[9px] px-1.5 py-0 bg-emerald-500 text-white border-0 shadow-sm">{f.badge}</Badge>
+                                )}
+                                <div className={`flex size-10 items-center justify-center rounded-lg ${f.bg}`}>
+                                    <f.icon className={`size-5 ${f.color}`} />
+                                </div>
+                                <p className="text-[11px] font-medium leading-tight text-center text-foreground/80">{f.name}</p>
+                            </div>
                         </Link>
                     ))}
                 </div>
                 <button
                     onClick={() => scrollFeatures("right")}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-background/80 border shadow-md flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-background/90 border shadow-md flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
                 >
                     <ChevronRight className="size-4" />
                 </button>
@@ -245,8 +242,8 @@ export function Dashboard() {
             <div className="grid grid-cols-3 gap-3">
                 <Card>
                     <CardContent className="p-4 flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
-                            <ImageIcon className="size-4 text-violet-400" />
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/15">
+                            <ImageIcon className="size-4 text-violet-300" />
                         </div>
                         <div className="min-w-0">
                             {loading ? <Skeleton className="h-6 w-10" /> : (
@@ -258,8 +255,8 @@ export function Dashboard() {
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                            <Zap className="size-4 text-amber-400" />
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/15">
+                            <Zap className="size-4 text-amber-300" />
                         </div>
                         <div className="min-w-0">
                             {loading ? <Skeleton className="h-6 w-10" /> : (
@@ -271,8 +268,8 @@ export function Dashboard() {
                 </Card>
                 <Card>
                     <CardContent className="p-4 flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
-                            <Gem className="size-4 text-emerald-400" />
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+                            <Gem className="size-4 text-emerald-300" />
                         </div>
                         <div className="min-w-0">
                             <p className="text-xl font-bold tabular-nums leading-none">{gems.toLocaleString()}</p>
