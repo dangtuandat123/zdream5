@@ -281,7 +281,7 @@ export function AppSidebar() {
       )}
 
       {/* Desktop sidebar — cố định bên trái, chỉ hiện trên md+ */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-30 w-[72px] flex-col items-center bg-sidebar border-r border-sidebar-border py-4">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-30 w-[84px] flex-col items-center bg-sidebar border-r border-sidebar-border py-4">
 
         {/* Logo */}
         <Link

@@ -8,7 +8,7 @@ export function AppShell() {
             <AppSidebar />
 
             {/* Main content — offset bởi sidebar width trên desktop */}
-            <main className="flex flex-1 flex-col min-w-0 md:ml-[72px]">
+            <main className="flex flex-1 flex-col min-w-0 md:ml-[84px]">
                 <Outlet />
             </main>
         </div>
