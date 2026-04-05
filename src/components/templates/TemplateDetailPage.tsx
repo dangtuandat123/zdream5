@@ -18,6 +18,7 @@ import {
     AlertCircle,
     Settings2,
     ChevronDown,
+    ChevronRight,
     Ban,
     Pencil,
     ZoomIn,
@@ -731,7 +732,7 @@ export function TemplateDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
                 <p className="text-muted-foreground">Không tìm thấy template</p>
-                <Link to="/app/templates" className="text-sm text-primary underline">← Quay lại</Link>
+                <Link to="/app/tools" className="text-sm text-primary underline">← Quay lại Công cụ AI</Link>
             </div>
         )
     }
@@ -748,8 +749,12 @@ export function TemplateDetailPage() {
                         <Link to="/app/templates"><ArrowLeft className="size-4" /></Link>
                     </Button>
                     <div className="min-w-0 flex-1">
+                        <nav className="flex items-center gap-1 text-[11px] text-muted-foreground mb-0.5">
+                            <Link to="/app/tools" className="hover:text-foreground transition-colors">Công cụ AI</Link>
+                            <ChevronRight className="size-3" />
+                            <Link to="/app/templates" className="hover:text-foreground transition-colors">Mẫu</Link>
+                        </nav>
                         <h1 className="text-sm font-semibold truncate">{template?.name}</h1>
-                        <p className="text-xs text-muted-foreground truncate">{template?.description}</p>
                     </div>
                     <Badge variant="secondary" className="shrink-0 text-[10px]">{template?.category}</Badge>
                 </div>
@@ -870,8 +875,14 @@ export function TemplateDetailPage() {
                     <Link to="/app/templates"><ArrowLeft className="size-4" /></Link>
                 </Button>
                 <div className="min-w-0 flex-1">
+                    <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
+                        <Link to="/app/tools" className="hover:text-foreground transition-colors">Công cụ AI</Link>
+                        <ChevronRight className="size-3" />
+                        <Link to="/app/templates" className="hover:text-foreground transition-colors">Mẫu thiết kế</Link>
+                        <ChevronRight className="size-3" />
+                        <span className="text-foreground font-medium truncate">{template?.name}</span>
+                    </nav>
                     <h1 className="text-base font-semibold truncate">{template?.name}</h1>
-                    <p className="text-xs text-muted-foreground truncate">{template?.description}</p>
                 </div>
                 <Badge variant="secondary" className="shrink-0">{template?.category}</Badge>
             </div>

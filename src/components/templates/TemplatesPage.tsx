@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { SearchIcon, SparklesIcon, ArrowRightIcon, RefreshCw } from "lucide-react"
+import { SearchIcon, SparklesIcon, ArrowRightIcon, RefreshCw, ChevronRight } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -82,6 +82,13 @@ export function TemplatesPage() {
 
     return (
         <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
+            {/* Breadcrumb */}
+            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground -mb-2">
+                <Link to="/app/tools" className="hover:text-foreground transition-colors">Công cụ AI</Link>
+                <ChevronRight className="size-3.5" />
+                <span className="text-foreground font-medium">Mẫu thiết kế</span>
+            </nav>
+
             {/* Header */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div className="space-y-1">
