@@ -6,7 +6,27 @@ import {
   ArrowRightIcon,
   Lock,
   Zap,
+  LayoutTemplate,
+  ZoomIn,
+  Megaphone,
+  Eraser,
+  Palette,
+  Wand2,
+  Users,
+  Expand,
+  Type,
+  Layers,
+  Copy,
+  PenTool,
+  Pencil,
+  Box,
+  UserCircle,
+  Trash2,
+  FileText,
+  Move,
+  Sticker,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -204,7 +224,30 @@ const gradientMap: Record<string, string> = {
   "ai-sticker": "from-orange-600 via-pink-500 to-rose-400",
 }
 
+const iconMap: Record<string, LucideIcon> = {
+  templates: LayoutTemplate,
+  upscale: ZoomIn,
+  "ad-image": Megaphone,
+  "remove-bg": Eraser,
+  colorize: Palette,
+  "style-transfer": Wand2,
+  "face-swap": Users,
+  extend: Expand,
+  "text-to-logo": Type,
+  "batch-generate": Layers,
+  "image-variation": Copy,
+  inpainting: PenTool,
+  "sketch-to-image": Pencil,
+  "product-mockup": Box,
+  "ai-avatar": UserCircle,
+  "remove-object": Trash2,
+  "image-to-prompt": FileText,
+  "smart-resize": Move,
+  "ai-sticker": Sticker,
+}
+
 function ToolCard({ tool }: { tool: AITool }) {
+  const Icon = iconMap[tool.id]
   const card = (
     <div
       className={cn(
@@ -223,6 +266,11 @@ function ToolCard({ tool }: { tool: AITool }) {
           "absolute inset-0 bg-gradient-to-br",
           gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
         )} />
+        {Icon && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Icon className="size-8 sm:size-10 text-white/80" strokeWidth={1.5} />
+          </div>
+        )}
         <img
           src={tool.thumbnail}
           alt={tool.name}
