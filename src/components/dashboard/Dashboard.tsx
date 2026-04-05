@@ -136,7 +136,7 @@ export function Dashboard() {
             {/* ===== BANNER CAROUSEL + MODEL CARDS ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {/* Banner */}
-                <div className="lg:col-span-2 relative overflow-hidden rounded-xl h-[180px] sm:h-[200px]">
+                <div className="lg:col-span-2 relative isolate overflow-hidden rounded-xl h-[180px] sm:h-[200px]">
                     {banners.map((b, i) => (
                         <div
                             key={i}
