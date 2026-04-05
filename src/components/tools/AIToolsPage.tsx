@@ -132,68 +132,21 @@ const gradientMap: Record<string, string> = {
   "image-variation": "from-lime-600 via-green-500 to-emerald-400",
 }
 
-/* ========== AVAILABLE TOOL — card dọc, thumbnail lớn ========== */
-function AvailableToolCard({ tool }: { tool: AITool }) {
-  return (
-    <Link to={tool.path ?? "#"} className="group">
-      <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 active:scale-[0.98]">
-        {/* Thumbnail lớn */}
-        <div className="relative aspect-[16/9] overflow-hidden">
-          <div className={cn(
-            "absolute inset-0 bg-gradient-to-br",
-            gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
-          )} />
-          <img
-            src={tool.thumbnail}
-            alt={tool.name}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-          />
-          {/* Overlay gradient phía dưới */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          {/* Badge góc trên */}
-          <div className="absolute top-3 left-3">
-            <Badge className="bg-primary/90 text-primary-foreground border-0 text-[10px] px-2 py-0.5 font-semibold backdrop-blur-sm shadow-md">
-              <Zap className="size-3 mr-1" />
-              Sẵn sàng
-            </Badge>
-          </div>
-          {/* CTA hover */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/90 text-black text-sm font-semibold shadow-xl backdrop-blur-sm scale-90 group-hover:scale-100 transition-transform duration-300">
-              <SparklesIcon className="size-4" />
-              Sử dụng ngay
-            </span>
-          </div>
-        </div>
-
-        {/* Info */}
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <h3 className="text-sm sm:text-base font-semibold truncate mb-1">{tool.name}</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{tool.description}</p>
-            </div>
-            <div className="shrink-0 flex items-center justify-center size-9 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors mt-0.5">
-              <ArrowRightIcon className="size-4 text-primary group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <Badge variant="secondary" className="text-[10px] font-medium">{tool.category}</Badge>
-          </div>
-        </div>
-      </div>
-    </Link>
-  )
-}
-
-/* ========== COMING SOON TOOL — card dọc, nhỏ gọn hơn ========== */
-function ComingSoonToolCard({ tool }: { tool: AITool }) {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card/60">
+function ToolCard({ tool }: { tool: AITool }) {
+  const card = (
+    <div
+      className={cn(
+        "group relative flex items-center gap-4 sm:gap-5 p-3 sm:p-4 rounded-2xl border transition-all duration-200",
+        tool.available
+          ? "border-primary/20 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.99]"
+          : "border-border/40 bg-card/60"
+      )}
+    >
       {/* Thumbnail */}
-      <div className="relative aspect-[16/9] overflow-hidden opacity-50 grayscale">
+      <div className={cn(
+        "relative shrink-0 size-20 sm:size-24 rounded-xl overflow-hidden",
+        !tool.available && "opacity-50 grayscale"
+      )}>
         <div className={cn(
           "absolute inset-0 bg-gradient-to-br",
           gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
@@ -207,24 +160,45 @@ function ComingSoonToolCard({ tool }: { tool: AITool }) {
         />
       </div>
 
-      {/* Lock overlay */}
-      <div className="absolute top-3 right-3">
-        <Badge variant="outline" className="bg-background/80 backdrop-blur-sm text-[10px] gap-1 border-border/60 text-muted-foreground font-medium">
-          <Lock className="size-2.5" />
-          Sắp ra mắt
-        </Badge>
+      {/* Content */}
+      <div className={cn("flex-1 min-w-0", !tool.available && "opacity-60")}>
+        <div className="flex items-center gap-2 mb-1">
+          <h3 className="text-sm sm:text-[15px] font-semibold truncate">{tool.name}</h3>
+          {tool.available ? (
+            <Badge className="shrink-0 text-[9px] px-1.5 py-0 h-[18px] bg-primary/15 text-primary border-0 font-semibold">
+              <Zap className="size-2.5 mr-0.5" />
+              Mở
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="shrink-0 text-[9px] px-1.5 py-0 h-[18px] gap-0.5 border-border/50 text-muted-foreground">
+              <Lock className="size-2" />
+              Sắp ra mắt
+            </Badge>
+          )}
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+          {tool.description}
+        </p>
       </div>
 
-      {/* Info */}
-      <div className="p-3.5 sm:p-4">
-        <h3 className="text-[13px] sm:text-sm font-semibold truncate mb-1 text-foreground/70">{tool.name}</h3>
-        <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{tool.description}</p>
-        <div className="mt-2.5">
-          <Badge variant="secondary" className="text-[10px] font-medium opacity-60">{tool.category}</Badge>
+      {/* Arrow */}
+      {tool.available && (
+        <div className="shrink-0 flex items-center justify-center size-9 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <ArrowRightIcon className="size-4 text-primary group-hover:translate-x-0.5 transition-transform" />
         </div>
-      </div>
+      )}
     </div>
   )
+
+  if (tool.available && tool.path) {
+    return (
+      <Link to={tool.path} className="group">
+        {card}
+      </Link>
+    )
+  }
+
+  return <div className="group">{card}</div>
 }
 
 export function AIToolsPage() {
@@ -273,7 +247,7 @@ export function AIToolsPage() {
   const totalCount = filteredAvailable.length + filteredTools.length
 
   return (
-    <div className="flex flex-1 flex-col gap-5 sm:gap-6 p-3.5 sm:p-4 lg:p-6 pb-8">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-5 p-3.5 sm:p-4 lg:p-6 pb-8">
 
       {/* ===== HERO BANNER ===== */}
       <div
@@ -281,12 +255,12 @@ export function AIToolsPage() {
         style={{ backgroundImage: "url(/images/gradient-blue.png?v=1)", backgroundSize: "cover", backgroundPosition: "center" }}
       >
         <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 p-5 sm:p-8 lg:p-10">
+        <div className="relative z-10 p-4 sm:p-8 lg:p-10">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-white/10 text-white/90 backdrop-blur-md shadow-lg mb-4 sm:mb-6">
             <SparklesIcon className="size-3" />
             Bộ công cụ AI
           </span>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-1.5 sm:mb-2">
+          <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-1 sm:mb-2">
             Công cụ AI
           </h1>
           <p className="text-xs sm:text-sm text-white/60 max-w-lg leading-relaxed">
@@ -296,12 +270,12 @@ export function AIToolsPage() {
       </div>
 
       {/* ===== SEARCH + FILTER ===== */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <ToggleGroup
           type="single"
           value={category}
           onValueChange={handleCategoryChange}
-          className="flex flex-wrap justify-start gap-1.5"
+          className="flex flex-wrap justify-start gap-1"
         >
           {categories.map((cat) => (
             <ToggleGroupItem
@@ -332,14 +306,14 @@ export function AIToolsPage() {
 
       {/* ===== AVAILABLE TOOLS ===== */}
       {filteredAvailable.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-sm sm:text-base font-semibold tracking-tight flex items-center gap-2">
-            <Zap className="size-4 text-primary" />
+        <section className="space-y-2.5">
+          <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2">
+            <Zap className="size-3.5 text-primary" />
             Sẵn sàng sử dụng
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             {filteredAvailable.map((tool) => (
-              <AvailableToolCard key={tool.id} tool={tool} />
+              <ToolCard key={tool.id} tool={tool} />
             ))}
           </div>
         </section>
@@ -351,14 +325,14 @@ export function AIToolsPage() {
 
       {/* ===== COMING SOON TOOLS ===== */}
       {filteredTools.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-sm sm:text-base font-semibold tracking-tight flex items-center gap-2 text-muted-foreground">
-            <Lock className="size-4" />
+        <section className="space-y-2.5">
+          <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2 text-muted-foreground">
+            <Lock className="size-3.5" />
             Sắp ra mắt
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
             {filteredTools.map((tool) => (
-              <ComingSoonToolCard key={tool.id} tool={tool} />
+              <ToolCard key={tool.id} tool={tool} />
             ))}
           </div>
         </section>
