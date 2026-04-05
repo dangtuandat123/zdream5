@@ -2,26 +2,28 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import {
     Sparkles,
-    SwatchBook,
     Images,
     ImageIcon,
     Gem,
     ArrowRight,
     Plus,
-    Library,
     Zap,
+    WandSparkles,
+    Library,
+    TrendingUp,
+    Clock,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Separator } from "@/components/ui/separator"
+import { Card, CardContent } from "@/components/ui/card"
 import { useAuth } from "@/contexts/AuthContext"
 import { imageApi, templateApi, walletApi } from "@/lib/api"
 import type { GeneratedImageData, TemplateData } from "@/lib/api"
 
 export function Dashboard() {
-    const { user, gems } = useAuth()
+    const { gems } = useAuth()
 
     const [recentImages, setRecentImages] = useState<GeneratedImageData[]>([])
     const [templates, setTemplates] = useState<TemplateData[]>([])
@@ -45,105 +47,135 @@ export function Dashboard() {
             }
             if (walRes.status === "fulfilled") {
                 const spent = walRes.value.transactions
-                    .filter(t => t.type === "spend")
-                    .reduce((sum, t) => sum + Math.abs(t.amount), 0)
+                    .filter((t: { type: string }) => t.type === "spend")
+                    .reduce((sum: number, t: { amount: number }) => sum + Math.abs(t.amount), 0)
                 setTotalSpent(spent)
             }
         }).finally(() => setLoading(false))
     }, [])
 
     return (
-        <div className="flex flex-1 flex-col gap-4 sm:gap-5 p-3.5 sm:p-4 lg:p-6 pb-8">
+        <div className="flex flex-1 flex-col gap-5 sm:gap-6 p-3.5 sm:p-4 lg:p-6 pb-8">
 
-            {/* ===== HERO BANNER — Giới thiệu model/tính năng ===== */}
+            {/* ===== HERO BANNER ===== */}
             <div
                 className="relative overflow-hidden rounded-2xl sm:rounded-3xl"
                 style={{ backgroundImage: "url(/images/gradient-purple.png?v=1)", backgroundSize: "cover", backgroundPosition: "center" }}
             >
                 <div className="absolute inset-0 bg-black/50" />
-
-                <div className="relative z-10 p-4 sm:p-8 lg:p-10">
-                    {/* Top row */}
-                    <div className="flex items-start justify-between mb-4 sm:mb-6">
-                        <Badge className="bg-white/10 text-white/90 border-0 backdrop-blur-md px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase shadow-lg">
+                <div className="relative z-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 p-4 sm:p-8 lg:p-10">
+                    <div>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-white/10 text-white/90 backdrop-blur-md shadow-lg mb-4 sm:mb-5">
+                            <Sparkles className="size-3" />
                             Mới
-                        </Badge>
-                        {/* Chỉ hiện gems badge trên sm+ vì mobile header đã có */}
-                        <Link to="/app/topup" className="hidden sm:block">
-                            <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/10 border border-white/15 backdrop-blur-md hover:bg-white/20 transition-all shadow-lg">
-                                <Gem className="size-4 text-violet-200" />
-                                <span className="text-sm font-bold text-white tabular-nums">{gems.toLocaleString()}</span>
-                            </div>
-                        </Link>
+                        </span>
+                        <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-0.5 sm:mb-1">
+                            Nano Banana 2
+                        </h1>
+                        <p className="text-[11px] text-white/40 font-medium mb-2 sm:mb-3">Gemini 3.1 Flash Image Preview</p>
+                        <p className="text-xs sm:text-sm text-white/60 max-w-md leading-relaxed">
+                            Mô hình tạo ảnh AI mới nhất từ Google — chất lượng hình ảnh cấp Pro với tốc độ Flash.
+                        </p>
                     </div>
-
-                    {/* Model highlight */}
-                    <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-0.5 sm:mb-1">
-                        Nano Banana 2
-                    </h1>
-                    <p className="text-[11px] text-white/40 font-medium mb-2 sm:mb-3">Gemini 3.1 Flash Image Preview</p>
-                    <p className="text-xs sm:text-sm text-white/60 mb-4 sm:mb-6 max-w-lg leading-relaxed">
-                        Mô hình tạo ảnh AI mới nhất từ Google — chất lượng hình ảnh cấp Pro với tốc độ Flash.
-                    </p>
-
-                    {/* CTA */}
-                    <Link to="/app/generate">
+                    <Link to="/app/generate" className="shrink-0">
                         <Button className="bg-white text-black hover:bg-white/90 font-semibold rounded-full px-5 h-9 shadow-lg shadow-white/10 gap-2 text-sm">
-                            <Sparkles className="size-4" /> Thử ngay
+                            <WandSparkles className="size-4" /> Tạo ảnh ngay
                         </Button>
                     </Link>
                 </div>
             </div>
 
-            {/* ===== USER SUMMARY ROW ===== */}
-            <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                    Xin chào, <span className="text-foreground font-medium">{user?.name?.split(" ").pop() ?? "bạn"}</span>
-                </p>
-                <div className="flex items-center gap-3 sm:gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                        <ImageIcon className="size-3.5" />
-                        {loading ? <Skeleton className="h-4 w-6 inline-block" /> : <span className="font-semibold text-foreground tabular-nums">{totalImages}</span>}
-                        <span className="text-[11px]">ảnh</span>
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <Zap className="size-3.5" />
-                        {loading ? <Skeleton className="h-4 w-6 inline-block" /> : <span className="font-semibold text-foreground tabular-nums">{totalSpent}</span>}
-                        <span className="text-[11px]">gems</span>
-                    </span>
-                </div>
+            {/* ===== STATS CARDS ===== */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+                <Card className="border-border/50 bg-card/80">
+                    <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+                        <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-violet-500/10">
+                            <Gem className="size-4 sm:size-[18px] text-violet-500" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[11px] text-muted-foreground">Gems</p>
+                            {loading ? <Skeleton className="h-5 w-10" /> : (
+                                <p className="text-base sm:text-lg font-bold tabular-nums">{gems.toLocaleString()}</p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/80">
+                    <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+                        <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-blue-500/10">
+                            <ImageIcon className="size-4 sm:size-[18px] text-blue-500" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[11px] text-muted-foreground">Ảnh đã tạo</p>
+                            {loading ? <Skeleton className="h-5 w-10" /> : (
+                                <p className="text-base sm:text-lg font-bold tabular-nums">{totalImages}</p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/80">
+                    <CardContent className="flex items-center gap-3 p-3 sm:p-4">
+                        <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-amber-500/10">
+                            <TrendingUp className="size-4 sm:size-[18px] text-amber-500" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[11px] text-muted-foreground">Đã dùng</p>
+                            {loading ? <Skeleton className="h-5 w-10" /> : (
+                                <p className="text-base sm:text-lg font-bold tabular-nums">{totalSpent} <span className="text-xs font-normal text-muted-foreground">gems</span></p>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+                <Link to="/app/topup" className="group">
+                    <Card className="border-primary/20 bg-primary/5 hover:bg-primary/10 transition-colors h-full">
+                        <CardContent className="flex items-center gap-3 p-3 sm:p-4 h-full">
+                            <div className="flex size-9 sm:size-10 items-center justify-center rounded-xl bg-primary/10">
+                                <Plus className="size-4 sm:size-[18px] text-primary" />
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-sm font-semibold text-primary">Nạp thêm</p>
+                                <p className="text-[11px] text-muted-foreground">Mua gems</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </Link>
             </div>
 
             {/* ===== QUICK ACTIONS ===== */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
                 {[
-                    { to: "/app/generate", label: "Tạo Ảnh", icon: Sparkles, bg: "/images/gradient-pink.png?v=1" },
-                    { to: "/app/templates", label: "Kiểu Mẫu", icon: SwatchBook, bg: "/images/gradient-blue.png?v=1" },
-                    { to: "/app/library", label: "Thư Viện", icon: Library, bg: "/images/gradient-purple.png?v=1" },
+                    { to: "/app/generate", label: "Tạo ảnh", desc: "Bằng AI", icon: WandSparkles, bg: "/images/gradient-pink.png?v=1" },
+                    { to: "/app/tools", label: "Công cụ AI", desc: "11 công cụ", icon: Sparkles, bg: "/images/gradient-blue.png?v=1" },
+                    { to: "/app/library", label: "Thư viện", desc: "Bộ sưu tập", icon: Library, bg: "/images/gradient-purple.png?v=1" },
                 ].map((item) => (
                     <Link key={item.to} to={item.to} className="group">
                         <div
-                            className="relative overflow-hidden rounded-xl sm:rounded-2xl aspect-[4/3] sm:aspect-[2.5/1]"
+                            className="relative overflow-hidden rounded-xl sm:rounded-2xl aspect-[2/1] sm:aspect-[2.5/1]"
                             style={{ backgroundImage: `url(${item.bg})`, backgroundSize: "cover", backgroundPosition: "center" }}
                         >
                             <div className="absolute inset-0 bg-black/50 group-hover:bg-black/35 transition-colors duration-300" />
-                            <div className="relative z-10 flex flex-col items-center justify-center h-full gap-1.5">
+                            <div className="relative z-10 flex items-center justify-center h-full gap-2.5 sm:gap-3">
                                 <div className="flex items-center justify-center size-9 sm:size-11 rounded-xl bg-white/15 backdrop-blur-sm text-white group-hover:scale-110 group-hover:bg-white/25 transition-all duration-300 shadow-lg">
                                     <item.icon className="size-[18px] sm:size-5" />
                                 </div>
-                                <span className="text-[11px] sm:text-sm font-semibold text-white drop-shadow-md">{item.label}</span>
+                                <div className="hidden sm:block">
+                                    <p className="text-sm font-semibold text-white drop-shadow-md">{item.label}</p>
+                                    <p className="text-[11px] text-white/50">{item.desc}</p>
+                                </div>
+                                <span className="sm:hidden text-xs font-semibold text-white drop-shadow-md">{item.label}</span>
                             </div>
                         </div>
                     </Link>
                 ))}
             </div>
 
-            <Separator className="opacity-50" />
-
             {/* ===== TÁC PHẨM GẦN ĐÂY ===== */}
-            <section className="space-y-2.5 sm:space-y-3">
+            <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm sm:text-base font-semibold tracking-tight">Tác phẩm gần đây</h2>
+                    <h2 className="text-sm sm:text-base font-semibold tracking-tight flex items-center gap-2">
+                        <Clock className="size-4 text-muted-foreground" />
+                        Tác phẩm gần đây
+                    </h2>
                     <Link to="/app/library" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                         Xem tất cả <ArrowRight className="size-3" />
                     </Link>
@@ -156,26 +188,22 @@ export function Dashboard() {
                         ))}
                     </div>
                 ) : recentImages.length === 0 ? (
-                    <div
-                        className="relative overflow-hidden rounded-xl sm:rounded-2xl"
-                        style={{ backgroundImage: "url(/images/gradient-pink.png?v=1)", backgroundSize: "cover", backgroundPosition: "center" }}
-                    >
-                        <div className="absolute inset-0 bg-background/85" />
-                        <div className="relative flex flex-col items-center justify-center gap-3 py-10 sm:py-14 text-center px-4">
-                            <div className="flex size-12 sm:size-14 items-center justify-center rounded-xl sm:rounded-2xl bg-muted/80 ring-1 ring-border/50">
+                    <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center gap-3 py-10 sm:py-14 text-center">
+                            <div className="flex size-12 sm:size-14 items-center justify-center rounded-2xl bg-muted">
                                 <Images className="size-5 sm:size-6 text-muted-foreground" />
                             </div>
                             <div className="space-y-0.5">
                                 <p className="text-sm font-medium">Chưa có tác phẩm nào</p>
-                                <p className="text-xs text-muted-foreground max-w-[220px]">Bắt đầu tạo tác phẩm đầu tiên của bạn!</p>
+                                <p className="text-xs text-muted-foreground">Bắt đầu tạo tác phẩm đầu tiên của bạn!</p>
                             </div>
                             <Link to="/app/generate">
                                 <Button size="sm" className="gap-1.5 rounded-full">
                                     <Plus className="size-3.5" /> Tạo ảnh ngay
                                 </Button>
                             </Link>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-2.5">
                         {recentImages.map((img) => (
@@ -199,9 +227,12 @@ export function Dashboard() {
             </section>
 
             {/* ===== KIỂU MẪU NỔI BẬT ===== */}
-            <section className="space-y-2.5 sm:space-y-3">
+            <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm sm:text-base font-semibold tracking-tight">Kiểu mẫu nổi bật</h2>
+                    <h2 className="text-sm sm:text-base font-semibold tracking-tight flex items-center gap-2">
+                        <Zap className="size-4 text-muted-foreground" />
+                        Kiểu mẫu nổi bật
+                    </h2>
                     <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                         Xem tất cả <ArrowRight className="size-3" />
                     </Link>
@@ -214,16 +245,12 @@ export function Dashboard() {
                         ))}
                     </div>
                 ) : templates.length === 0 ? (
-                    <div
-                        className="relative overflow-hidden rounded-xl sm:rounded-2xl"
-                        style={{ backgroundImage: "url(/images/gradient-blue.png?v=1)", backgroundSize: "cover", backgroundPosition: "center" }}
-                    >
-                        <div className="absolute inset-0 bg-background/85" />
-                        <div className="relative flex flex-col items-center justify-center gap-2 py-10 text-center">
-                            <SwatchBook className="size-6 text-muted-foreground" />
+                    <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+                            <Sparkles className="size-6 text-muted-foreground" />
                             <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
-                        </div>
-                    </div>
+                        </CardContent>
+                    </Card>
                 ) : (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-2.5">
                         {templates.map((tpl) => (
@@ -238,7 +265,7 @@ export function Dashboard() {
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                                            <SwatchBook className="size-8 sm:size-10 text-muted-foreground/30" />
+                                            <Sparkles className="size-8 sm:size-10 text-muted-foreground/30" />
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
