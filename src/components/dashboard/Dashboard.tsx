@@ -136,14 +136,14 @@ export function Dashboard() {
             {/* ===== BANNER CAROUSEL + MODEL CARDS ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {/* Banner */}
-                <div className="lg:col-span-2 relative isolate overflow-hidden rounded-xl h-[180px] sm:h-[200px]">
+                <Card className="lg:col-span-2 relative overflow-hidden h-[180px] sm:h-[200px] border-0">
                     {banners.map((b, i) => (
                         <div
                             key={i}
                             className={`absolute inset-0 transition-opacity duration-700 ${i === bannerIdx ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                         >
-                            <img src={b.img} alt="" className="absolute inset-0 w-full h-full object-cover rounded-xl" />
-                            <div className={`absolute inset-0 rounded-xl bg-gradient-to-r ${b.gradient}`} />
+                            <img src={b.img} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                            <div className={`absolute inset-0 bg-gradient-to-r ${b.gradient}`} />
                             <div className="relative z-10 flex flex-col justify-end h-full p-5 sm:p-6">
                                 <Badge className="w-fit mb-2 bg-white/15 text-white border-white/20 text-[10px]">{b.badge}</Badge>
                                 <h2 className="text-xl sm:text-2xl font-bold text-white">{b.title}</h2>
@@ -161,7 +161,7 @@ export function Dashboard() {
                             />
                         ))}
                     </div>
-                </div>
+                </Card>
 
                 {/* Model cards stack */}
                 <div className="flex flex-col gap-3">
