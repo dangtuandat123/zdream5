@@ -140,7 +140,7 @@ export function Dashboard() {
                     {banners.map((b, i) => (
                         <div
                             key={i}
-                            className={`absolute inset-0 rounded-xl overflow-hidden transition-opacity duration-700 ${i === bannerIdx ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                            className={`absolute inset-0 rounded-xl overflow-hidden transition-opacity duration-700 ${i === bannerIdx ? "opacity-100 visible" : "opacity-0 invisible"}`}
                         >
                             <img src={b.img} alt="" className="absolute inset-0 w-full h-full object-cover" />
                             <div className={`absolute inset-0 bg-gradient-to-r ${b.gradient}`} />
