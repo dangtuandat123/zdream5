@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
@@ -212,21 +213,27 @@ export function AIToolsPage() {
         {filteredTools.length} công cụ
       </p>
 
-      {/* ===== TOOLS GRID ===== */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      {/* ===== TOOLS LIST ===== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
         {filteredTools.map((tool) => {
-          const inner = (
+          const card = (
             <div
               className={cn(
-                "group relative block overflow-hidden rounded-2xl aspect-square focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                !tool.available && "opacity-50"
+                "group relative flex items-center gap-4 p-3 sm:p-4 rounded-2xl border transition-all duration-200",
+                tool.available
+                  ? "border-border/50 bg-card hover:bg-accent/50 hover:border-border hover:shadow-lg hover:shadow-black/5 active:scale-[0.99]"
+                  : "border-border/30 bg-card/50 cursor-not-allowed"
               )}
             >
-              {/* Thumbnail or gradient fallback */}
+              {/* Thumbnail */}
               <div className={cn(
-                "absolute inset-0 bg-gradient-to-br transition-transform duration-500 ease-out group-hover:scale-110",
-                gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
+                "relative shrink-0 size-16 sm:size-20 rounded-xl overflow-hidden",
+                !tool.available && "opacity-50"
               )}>
+                <div className={cn(
+                  "absolute inset-0 bg-gradient-to-br",
+                  gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
+                )} />
                 <img
                   src={tool.thumbnail}
                   alt={tool.name}
@@ -236,66 +243,43 @@ export function AIToolsPage() {
                 />
               </div>
 
-              {/* Category badge */}
-              <div className="absolute top-2.5 left-2.5 z-10">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/40 text-white backdrop-blur-md">
-                  {tool.category}
-                </span>
-              </div>
-
-              {/* Coming soon lock */}
-              {!tool.available && (
-                <div className="absolute top-2.5 right-2.5 z-10">
-                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium bg-black/50 text-white/80 backdrop-blur-md">
-                    <Lock className="size-2.5" />
-                    Sắp ra mắt
-                  </span>
+              {/* Content */}
+              <div className={cn("flex-1 min-w-0", !tool.available && "opacity-60")}>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-sm font-semibold truncate">{tool.name}</h3>
+                  {!tool.available && (
+                    <Badge variant="outline" className="shrink-0 text-[10px] px-1.5 py-0 h-5 gap-1 border-border/50 text-muted-foreground">
+                      <Lock className="size-2.5" />
+                      Sắp ra mắt
+                    </Badge>
+                  )}
                 </div>
-              )}
-
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-              {/* Hover CTA (only available) */}
-              {tool.available && (
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 text-black text-xs font-semibold shadow-lg backdrop-blur-sm">
-                    <SparklesIcon className="size-3.5" />
-                    Sử dụng
-                  </span>
-                </div>
-              )}
-
-              {/* Bottom info */}
-              <div className="absolute bottom-0 left-0 right-0 z-10 p-3 space-y-0.5">
-                <h3 className="text-sm font-semibold text-white truncate drop-shadow-md">
-                  {tool.name}
-                </h3>
-                <p className="text-[11px] text-white/70 line-clamp-2 drop-shadow-sm leading-relaxed">
+                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-1.5">
                   {tool.description}
                 </p>
-                {tool.available && (
-                  <div className="flex items-center gap-1 pt-1 text-white/50 group-hover:text-white/80 transition-colors">
-                    <span className="text-[10px] font-medium">Mở công cụ</span>
-                    <ArrowRightIcon className="size-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-                  </div>
-                )}
+                <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5">
+                  {tool.category}
+                </Badge>
               </div>
+
+              {/* Arrow (available only) */}
+              {tool.available && (
+                <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+              )}
             </div>
           )
 
           if (tool.available && tool.path) {
             return (
               <Link key={tool.id} to={tool.path} className="group">
-                {inner}
+                {card}
               </Link>
             )
           }
 
           return (
-            <div key={tool.id} className="cursor-not-allowed">
-              {inner}
+            <div key={tool.id} className="group">
+              {card}
             </div>
           )
         })}
