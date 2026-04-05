@@ -56,23 +56,23 @@ export function Dashboard() {
     const firstName = user?.name?.split(" ").pop() ?? "bạn"
 
     return (
-        <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6 pb-8 max-w-5xl">
+        <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6 pb-8">
 
             {/* ===== HEADER ROW ===== */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-xl font-semibold tracking-tight">
+                    <h1 className="text-2xl font-semibold tracking-tight">
                         {getGreeting()}, {firstName}
                     </h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-1">
                         Biến ý tưởng thành tác phẩm nghệ thuật với AI
                     </p>
                 </div>
                 <Link to="/app/topup">
-                    <Button variant="outline" size="sm" className="gap-1.5">
-                        <Gem className="size-3.5 text-violet-400" />
-                        <span className="font-semibold tabular-nums">{gems.toLocaleString()}</span>
-                        <span className="text-muted-foreground">gems</span>
+                    <Button variant="outline" className="gap-2 h-10 px-4">
+                        <Gem className="size-4 text-violet-400" />
+                        <span className="text-base font-semibold tabular-nums">{gems.toLocaleString()}</span>
+                        <span className="text-muted-foreground text-sm">gems</span>
                     </Button>
                 </Link>
             </div>
@@ -81,34 +81,34 @@ export function Dashboard() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {/* Stat: Images */}
                 <Card>
-                    <CardContent className="p-4 flex items-center gap-3">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
-                            <ImageIcon className="size-4 text-violet-400" />
+                    <CardContent className="p-5 flex items-center gap-4">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
+                            <ImageIcon className="size-5 text-violet-400" />
                         </div>
                         <div className="min-w-0">
                             {loading ? (
-                                <Skeleton className="h-5 w-10" />
+                                <Skeleton className="h-7 w-12" />
                             ) : (
-                                <p className="text-lg font-semibold tabular-nums leading-none">{totalImages.toLocaleString()}</p>
+                                <p className="text-2xl font-bold tabular-nums leading-none">{totalImages.toLocaleString()}</p>
                             )}
-                            <p className="text-[11px] text-muted-foreground mt-0.5">Ảnh đã tạo</p>
+                            <p className="text-xs text-muted-foreground mt-1">Ảnh đã tạo</p>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* Stat: Gems spent */}
                 <Card>
-                    <CardContent className="p-4 flex items-center gap-3">
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
-                            <Zap className="size-4 text-amber-400" />
+                    <CardContent className="p-5 flex items-center gap-4">
+                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+                            <Zap className="size-5 text-amber-400" />
                         </div>
                         <div className="min-w-0">
                             {loading ? (
-                                <Skeleton className="h-5 w-10" />
+                                <Skeleton className="h-7 w-12" />
                             ) : (
-                                <p className="text-lg font-semibold tabular-nums leading-none">{totalSpent.toLocaleString()}</p>
+                                <p className="text-2xl font-bold tabular-nums leading-none">{totalSpent.toLocaleString()}</p>
                             )}
-                            <p className="text-[11px] text-muted-foreground mt-0.5">Gems đã dùng</p>
+                            <p className="text-xs text-muted-foreground mt-1">Gems đã dùng</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -116,13 +116,13 @@ export function Dashboard() {
                 {/* CTA: Generate */}
                 <Link to="/app/generate" className="contents">
                     <Card className="cursor-pointer hover:border-violet-500/50 transition-colors group">
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 group-hover:bg-violet-500/25 transition-colors">
-                                <WandSparkles className="size-4 text-violet-400" />
+                        <CardContent className="p-5 flex items-center gap-4">
+                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 group-hover:bg-violet-500/25 transition-colors">
+                                <WandSparkles className="size-5 text-violet-400" />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-sm font-medium leading-none">Tạo ảnh</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">Bắt đầu sáng tạo</p>
+                                <p className="text-base font-semibold leading-none">Tạo ảnh</p>
+                                <p className="text-xs text-muted-foreground mt-1">Bắt đầu sáng tạo</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -131,13 +131,13 @@ export function Dashboard() {
                 {/* CTA: AI Tools */}
                 <Link to="/app/tools" className="contents">
                     <Card className="cursor-pointer hover:border-violet-500/50 transition-colors group">
-                        <CardContent className="p-4 flex items-center gap-3">
-                            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-fuchsia-500/15 group-hover:bg-fuchsia-500/25 transition-colors">
-                                <Sparkles className="size-4 text-fuchsia-400" />
+                        <CardContent className="p-5 flex items-center gap-4">
+                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-fuchsia-500/15 group-hover:bg-fuchsia-500/25 transition-colors">
+                                <Sparkles className="size-5 text-fuchsia-400" />
                             </div>
                             <div className="min-w-0">
-                                <p className="text-sm font-medium leading-none">Công cụ AI</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">Khám phá thêm</p>
+                                <p className="text-base font-semibold leading-none">Công cụ AI</p>
+                                <p className="text-xs text-muted-foreground mt-1">Khám phá thêm</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -147,7 +147,7 @@ export function Dashboard() {
             {/* ===== TÁC PHẨM GẦN ĐÂY ===== */}
             <section className="space-y-3">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold tracking-tight">Tác phẩm gần đây</h2>
+                    <h2 className="text-base font-semibold tracking-tight">Tác phẩm gần đây</h2>
                     <Link to="/app/library" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                         Xem tất cả <ArrowRight className="size-3" />
                     </Link>
