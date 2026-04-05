@@ -5,17 +5,6 @@ import {
   SparklesIcon,
   ArrowRightIcon,
   Lock,
-  SwatchBook,
-  ArrowUpFromLine,
-  Megaphone,
-  Eraser,
-  Palette,
-  PaintBucket,
-  ScanFace,
-  Frame,
-  Type,
-  Layers,
-  Replace,
   Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -31,7 +20,6 @@ interface AITool {
   description: string
   category: string
   thumbnail: string
-  icon: React.ElementType
   path?: string
   available: boolean
 }
@@ -43,7 +31,6 @@ const tools: AITool[] = [
     description: "Sử dụng mẫu thiết kế có sẵn để tạo ảnh nhanh và đẹp",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/templates.jpg",
-    icon: SwatchBook,
     path: "/app/templates",
     available: true,
   },
@@ -53,7 +40,6 @@ const tools: AITool[] = [
     description: "Phóng to và nâng cao chất lượng ảnh lên 2x, 4x với AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/upscale.jpg",
-    icon: ArrowUpFromLine,
     available: false,
   },
   {
@@ -62,7 +48,6 @@ const tools: AITool[] = [
     description: "Tạo ảnh quảng cáo sản phẩm chuyên nghiệp cho mạng xã hội",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/ad-image.jpg",
-    icon: Megaphone,
     available: false,
   },
   {
@@ -71,7 +56,6 @@ const tools: AITool[] = [
     description: "Tự động xóa phông nền, tách chủ thể chính xác bằng AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/remove-bg.jpg",
-    icon: Eraser,
     available: false,
   },
   {
@@ -80,7 +64,6 @@ const tools: AITool[] = [
     description: "Thêm màu sắc tự nhiên cho ảnh đen trắng bằng AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/colorize.jpg",
-    icon: Palette,
     available: false,
   },
   {
@@ -89,7 +72,6 @@ const tools: AITool[] = [
     description: "Biến ảnh thành phong cách anime, tranh sơn dầu, hoạt hình,...",
     category: "Sáng tạo",
     thumbnail: "/images/tools/style-transfer.jpg",
-    icon: PaintBucket,
     available: false,
   },
   {
@@ -98,7 +80,6 @@ const tools: AITool[] = [
     description: "Thay thế khuôn mặt trong ảnh một cách tự nhiên",
     category: "Sáng tạo",
     thumbnail: "/images/tools/face-swap.jpg",
-    icon: ScanFace,
     available: false,
   },
   {
@@ -107,7 +88,6 @@ const tools: AITool[] = [
     description: "Mở rộng viền ảnh ra ngoài khung hình gốc bằng AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/extend.jpg",
-    icon: Frame,
     available: false,
   },
   {
@@ -116,7 +96,6 @@ const tools: AITool[] = [
     description: "Thiết kế logo chuyên nghiệp từ tên thương hiệu",
     category: "Sáng tạo",
     thumbnail: "/images/tools/text-to-logo.jpg",
-    icon: Type,
     available: false,
   },
   {
@@ -125,7 +104,6 @@ const tools: AITool[] = [
     description: "Tạo nhiều biến thể ảnh cùng lúc từ một prompt",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/batch-generate.jpg",
-    icon: Layers,
     available: false,
   },
   {
@@ -134,7 +112,6 @@ const tools: AITool[] = [
     description: "Tạo các phiên bản tương tự từ ảnh gốc có sẵn",
     category: "Sáng tạo",
     thumbnail: "/images/tools/image-variation.jpg",
-    icon: Replace,
     available: false,
   },
 ]
@@ -156,26 +133,26 @@ const gradientMap: Record<string, string> = {
 }
 
 function ToolCard({ tool }: { tool: AITool }) {
-  const IconComp = tool.icon
-
   const card = (
     <div
       className={cn(
-        "group relative flex items-center gap-3.5 sm:gap-4 p-3 sm:p-4 rounded-2xl border transition-all duration-200",
+        "group relative flex items-center gap-3.5 sm:gap-4 p-2.5 sm:p-3 rounded-2xl border transition-all duration-200",
         tool.available
           ? "border-primary/20 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.99]"
-          : "border-border/30 bg-card/50 cursor-not-allowed"
+          : "border-border/40 bg-card/60"
       )}
     >
-      {/* Thumbnail with icon */}
+      {/* Thumbnail — chỉ ảnh, không icon */}
       <div className={cn(
-        "relative shrink-0 size-14 sm:size-[72px] rounded-xl overflow-hidden ring-1 ring-white/10",
-        !tool.available && "opacity-40 grayscale"
+        "relative shrink-0 size-16 sm:size-20 rounded-xl overflow-hidden",
+        !tool.available && "opacity-50 grayscale"
       )}>
+        {/* Gradient fallback — luôn hiển thị phía sau */}
         <div className={cn(
           "absolute inset-0 bg-gradient-to-br",
           gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
         )} />
+        {/* Ảnh thumbnail — đè lên gradient khi load được */}
         <img
           src={tool.thumbnail}
           alt={tool.name}
@@ -183,22 +160,22 @@ function ToolCard({ tool }: { tool: AITool }) {
           loading="lazy"
           onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-          <IconComp className="size-6 sm:size-7 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" />
-        </div>
+        {/* Shine effect khi hover (chỉ available) */}
+        {tool.available && (
+          <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-[-100%] group-hover:translate-x-[100%]" />
+        )}
       </div>
 
       {/* Content */}
-      <div className={cn("flex-1 min-w-0", !tool.available && "opacity-50")}>
-        <div className="flex items-center gap-2 mb-0.5">
+      <div className={cn("flex-1 min-w-0", !tool.available && "opacity-60")}>
+        <div className="flex items-center gap-2 mb-1">
           <h3 className="text-[13px] sm:text-sm font-semibold truncate">{tool.name}</h3>
-          {tool.available && (
+          {tool.available ? (
             <Badge className="shrink-0 text-[9px] px-1.5 py-0 h-[18px] bg-primary/15 text-primary border-0 font-semibold">
               <Zap className="size-2.5 mr-0.5" />
               Mở
             </Badge>
-          )}
-          {!tool.available && (
+          ) : (
             <Badge variant="outline" className="shrink-0 text-[9px] px-1.5 py-0 h-[18px] gap-0.5 border-border/50 text-muted-foreground">
               <Lock className="size-2" />
               Sắp ra mắt
@@ -212,7 +189,7 @@ function ToolCard({ tool }: { tool: AITool }) {
 
       {/* Arrow */}
       {tool.available && (
-        <div className="shrink-0 flex items-center justify-center size-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+        <div className="shrink-0 flex items-center justify-center size-8 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
           <ArrowRightIcon className="size-4 text-primary group-hover:translate-x-0.5 transition-transform" />
         </div>
       )}
@@ -252,7 +229,6 @@ export function AIToolsPage() {
     return result
   }, [search, category])
 
-  // When searching, also filter available tools
   const filteredAvailable = useMemo(() => {
     if (!search.trim() && category === "Tất cả") return availableTools
     let result = availableTools
