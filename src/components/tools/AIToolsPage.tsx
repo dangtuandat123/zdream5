@@ -16,6 +16,7 @@ import {
   PenTool,
   Trash2,
   FileText,
+  UserCheck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -44,6 +45,14 @@ const tools: AITool[] = [
     thumbnail: "/images/tools/templates.jpg",
     path: "/app/templates",
     available: true,
+  },
+  {
+    id: "consistent-character",
+    name: "Nhân vật AI",
+    description: "Tạo nhân vật riêng và giữ nhất quán qua mọi bối cảnh — avatar, truyện tranh, branding",
+    category: "Sáng tạo",
+    thumbnail: "/images/tools/consistent-character.jpg",
+    available: false,
   },
   {
     id: "ad-image",
@@ -131,11 +140,13 @@ const gradientMap: Record<string, string> = {
   inpainting: "from-violet-600 via-purple-500 to-fuchsia-400",
   extend: "from-sky-600 via-blue-500 to-indigo-400",
   "style-transfer": "from-indigo-600 via-violet-500 to-purple-400",
+  "consistent-character": "from-amber-600 via-orange-500 to-rose-400",
   "image-to-prompt": "from-emerald-600 via-teal-500 to-cyan-400",
 }
 
 const iconMap: Record<string, LucideIcon> = {
   templates: LayoutTemplate,
+  "consistent-character": UserCheck,
   "ad-image": Megaphone,
   "image-variation": Copy,
   upscale: ZoomIn,
