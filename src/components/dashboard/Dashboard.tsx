@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import {
-    Sparkles,
     Images,
     ImageIcon,
     Gem,
@@ -15,6 +14,10 @@ import {
     Eraser,
     ZoomIn,
     Wand2,
+    ChevronLeft,
+    ChevronRight,
+    LayoutTemplate,
+    Megaphone,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -32,39 +35,33 @@ function getGreeting(): string {
     return "Chào buổi tối"
 }
 
-const featuredTools = [
+/* ── Banner slides ── */
+const banners = [
     {
-        name: "Nhân vật AI",
-        description: "Giữ nhất quán nhân vật qua mọi bối cảnh",
-        icon: UserCheck,
-        color: "text-emerald-400",
-        bg: "bg-emerald-500/10",
+        title: "Nhân vật AI",
+        subtitle: "Tạo nhân vật riêng, giữ nhất quán qua mọi bối cảnh",
         badge: "Sắp ra mắt",
+        gradient: "from-emerald-600/80 via-teal-600/60 to-cyan-700/80",
+        img: "/images/tools/consistent-character.jpg",
     },
     {
-        name: "Xóa nền ảnh",
-        description: "Tách nền tự động chỉ trong vài giây",
-        icon: Eraser,
-        color: "text-rose-400",
-        bg: "bg-rose-500/10",
+        title: "Ảnh quảng cáo AI",
+        subtitle: "Tạo ảnh sản phẩm chuyên nghiệp cho mọi nền tảng",
         badge: "Sắp ra mắt",
+        gradient: "from-violet-600/80 via-purple-600/60 to-fuchsia-700/80",
+        img: "/images/tools/ad-image.jpg",
     },
-    {
-        name: "Upscale ảnh",
-        description: "Phóng to 2x–4x vẫn giữ chi tiết sắc nét",
-        icon: ZoomIn,
-        color: "text-sky-400",
-        bg: "bg-sky-500/10",
-        badge: "Sắp ra mắt",
-    },
-    {
-        name: "Style Transfer",
-        description: "Chuyển phong cách nghệ thuật cho ảnh bất kỳ",
-        icon: Wand2,
-        color: "text-orange-400",
-        bg: "bg-orange-500/10",
-        badge: "Sắp ra mắt",
-    },
+]
+
+/* ── Feature nav cards ── */
+const featureCards = [
+    { name: "Tạo ảnh AI", icon: WandSparkles, path: "/app/generate", color: "text-violet-400", bg: "bg-violet-500/15", available: true },
+    { name: "Kiểu mẫu", icon: LayoutTemplate, path: "/app/templates", color: "text-pink-400", bg: "bg-pink-500/15", available: true },
+    { name: "Nhân vật AI", icon: UserCheck, path: "/app/tools", color: "text-emerald-400", bg: "bg-emerald-500/15", badge: "Mới", available: false },
+    { name: "Xóa nền", icon: Eraser, path: "/app/tools", color: "text-rose-400", bg: "bg-rose-500/15", available: false },
+    { name: "Upscale", icon: ZoomIn, path: "/app/tools", color: "text-sky-400", bg: "bg-sky-500/15", available: false },
+    { name: "Style Transfer", icon: Wand2, path: "/app/tools", color: "text-orange-400", bg: "bg-orange-500/15", available: false },
+    { name: "Ảnh quảng cáo", icon: Megaphone, path: "/app/tools", color: "text-amber-400", bg: "bg-amber-500/15", available: false },
 ]
 
 export function Dashboard() {
@@ -75,11 +72,14 @@ export function Dashboard() {
     const [totalImages, setTotalImages] = useState(0)
     const [totalSpent, setTotalSpent] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [bannerIdx, setBannerIdx] = useState(0)
+
+    const featureScrollRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
         setLoading(true)
         Promise.allSettled([
-            imageApi.list(1, 8),
+            imageApi.list(1, 12),
             walletApi.show(),
             modelApi.listActive(),
         ]).then(([imgRes, walRes, modelRes]) => {
@@ -99,18 +99,28 @@ export function Dashboard() {
         }).finally(() => setLoading(false))
     }, [])
 
+    // Auto-rotate banners
+    useEffect(() => {
+        const timer = setInterval(() => setBannerIdx(i => (i + 1) % banners.length), 5000)
+        return () => clearInterval(timer)
+    }, [])
+
     const firstName = user?.name?.split(" ").pop() ?? "bạn"
 
-    return (
-        <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6 pb-8">
+    const scrollFeatures = (dir: "left" | "right") => {
+        featureScrollRef.current?.scrollBy({ left: dir === "left" ? -200 : 200, behavior: "smooth" })
+    }
 
-            {/* ===== HEADER ROW ===== */}
+    return (
+        <div className="flex flex-1 flex-col gap-5 p-4 lg:p-6 pb-8">
+
+            {/* ===== HEADER ===== */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-semibold tracking-tight">
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
                         {getGreeting()}, {firstName}
                     </h1>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                         Biến ý tưởng thành tác phẩm nghệ thuật với AI
                     </p>
                 </div>
@@ -123,150 +133,154 @@ export function Dashboard() {
                 </Link>
             </div>
 
-            {/* ===== STATS + CTA ROW ===== */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <Card>
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
-                            <ImageIcon className="size-5 text-violet-400" />
+            {/* ===== BANNER CAROUSEL + MODEL CARDS ===== */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                {/* Banner */}
+                <div className="lg:col-span-2 relative overflow-hidden rounded-xl h-[180px] sm:h-[200px]">
+                    {banners.map((b, i) => (
+                        <div
+                            key={i}
+                            className={`absolute inset-0 transition-opacity duration-700 ${i === bannerIdx ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                        >
+                            <img src={b.img} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                            <div className={`absolute inset-0 bg-gradient-to-r ${b.gradient}`} />
+                            <div className="relative z-10 flex flex-col justify-end h-full p-5 sm:p-6">
+                                <Badge className="w-fit mb-2 bg-white/15 text-white border-white/20 text-[10px]">{b.badge}</Badge>
+                                <h2 className="text-xl sm:text-2xl font-bold text-white">{b.title}</h2>
+                                <p className="text-sm text-white/70 mt-1">{b.subtitle}</p>
+                            </div>
                         </div>
-                        <div className="min-w-0">
-                            {loading ? <Skeleton className="h-7 w-12" /> : (
-                                <p className="text-2xl font-bold tabular-nums leading-none">{totalImages.toLocaleString()}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">Ảnh đã tạo</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                    ))}
+                    {/* Dots */}
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+                        {banners.map((_, i) => (
+                            <button
+                                key={i}
+                                onClick={() => setBannerIdx(i)}
+                                className={`h-1 rounded-full transition-all ${i === bannerIdx ? "w-5 bg-white" : "w-1.5 bg-white/40"}`}
+                            />
+                        ))}
+                    </div>
+                </div>
 
-                <Card>
-                    <CardContent className="p-5 flex items-center gap-4">
-                        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-                            <Zap className="size-5 text-amber-400" />
-                        </div>
-                        <div className="min-w-0">
-                            {loading ? <Skeleton className="h-7 w-12" /> : (
-                                <p className="text-2xl font-bold tabular-nums leading-none">{totalSpent.toLocaleString()}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">Gems đã dùng</p>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Link to="/app/generate" className="contents">
-                    <Card className="cursor-pointer hover:border-violet-500/50 transition-colors group">
-                        <CardContent className="p-5 flex items-center gap-4">
-                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/15 group-hover:bg-violet-500/25 transition-colors">
-                                <WandSparkles className="size-5 text-violet-400" />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-base font-semibold leading-none">Tạo ảnh</p>
-                                <p className="text-xs text-muted-foreground mt-1">Bắt đầu sáng tạo</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </Link>
-
-                <Link to="/app/tools" className="contents">
-                    <Card className="cursor-pointer hover:border-violet-500/50 transition-colors group">
-                        <CardContent className="p-5 flex items-center gap-4">
-                            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-fuchsia-500/15 group-hover:bg-fuchsia-500/25 transition-colors">
-                                <Sparkles className="size-5 text-fuchsia-400" />
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-base font-semibold leading-none">Công cụ AI</p>
-                                <p className="text-xs text-muted-foreground mt-1">Khám phá thêm</p>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </Link>
+                {/* Model cards stack */}
+                <div className="flex flex-col gap-3">
+                    {loading ? (
+                        <>
+                            <Skeleton className="h-[93px] rounded-xl" />
+                            <Skeleton className="h-[93px] rounded-xl" />
+                        </>
+                    ) : models.length === 0 ? (
+                        <Card className="flex-1">
+                            <CardContent className="flex items-center justify-center h-full p-5">
+                                <p className="text-sm text-muted-foreground">Chưa có model nào</p>
+                            </CardContent>
+                        </Card>
+                    ) : models.slice(0, 2).map((m, i) => (
+                        <Link key={m.id} to="/app/generate" className="contents">
+                            <Card className="flex-1 cursor-pointer hover:border-violet-500/40 transition-colors group">
+                                <CardContent className="p-4 flex items-center gap-3 h-full">
+                                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30 transition-colors">
+                                        {i === 0 ? <Crown className="size-5 text-amber-400" /> : <Cpu className="size-5 text-violet-400" />}
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-sm font-semibold truncate">{m.name}</p>
+                                            {i === 0 && <Badge className="text-[9px] px-1.5 py-0 bg-amber-500/15 text-amber-400 border-amber-500/30">Hot</Badge>}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-1">{m.gems_cost} gem / ảnh</p>
+                                    </div>
+                                    <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                </CardContent>
+                            </Card>
+                        </Link>
+                    ))}
+                    {/* Show more models if > 2 */}
+                    {models.length > 2 && (
+                        <Link to="/app/generate" className="text-xs text-center text-muted-foreground hover:text-foreground transition-colors">
+                            +{models.length - 2} models khác
+                        </Link>
+                    )}
+                </div>
             </div>
 
-            {/* ===== AI MODELS ===== */}
-            <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-base font-semibold tracking-tight">Model AI khả dụng</h2>
-                        <Badge variant="secondary" className="text-[10px]">
-                            <Cpu className="size-3 mr-1" />
-                            {models.length} models
-                        </Badge>
-                    </div>
-                    <Link to="/app/generate" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                        Dùng ngay <ArrowRight className="size-3" />
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <Skeleton key={i} className="h-20 rounded-xl" />
-                        ))}
-                    </div>
-                ) : models.length === 0 ? (
-                    <Card>
-                        <CardContent className="flex items-center justify-center gap-2 py-8">
-                            <Cpu className="size-5 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">Chưa có model nào</p>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {models.map((m, i) => (
-                            <Link key={m.id} to="/app/generate" className="contents">
-                                <Card className="cursor-pointer hover:border-violet-500/40 transition-colors group">
-                                    <CardContent className="p-4 flex items-center gap-3">
-                                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30 transition-colors">
-                                            {i === 0 ? <Crown className="size-4 text-amber-400" /> : <Cpu className="size-4 text-violet-400" />}
-                                        </div>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-sm font-medium truncate">{m.name}</p>
-                                                {i === 0 && <Badge className="text-[9px] px-1.5 py-0 bg-amber-500/15 text-amber-400 border-amber-500/30">Hot</Badge>}
-                                            </div>
-                                            <p className="text-xs text-muted-foreground mt-0.5">
-                                                {m.gems_cost} gem / ảnh
-                                            </p>
-                                        </div>
-                                        <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-            </section>
-
-            {/* ===== FEATURED TOOLS ===== */}
-            <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-base font-semibold tracking-tight">Công cụ nổi bật</h2>
-                    <Link to="/app/tools" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-                        Xem tất cả <ArrowRight className="size-3" />
-                    </Link>
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    {featuredTools.map((tool) => (
-                        <Link key={tool.name} to="/app/tools" className="contents">
-                            <Card className="cursor-pointer hover:border-border/80 transition-colors group">
-                                <CardContent className="p-4 flex flex-col gap-3">
-                                    <div className="flex items-center justify-between">
-                                        <div className={`flex size-10 items-center justify-center rounded-lg ${tool.bg}`}>
-                                            <tool.icon className={`size-5 ${tool.color}`} />
-                                        </div>
-                                        <Badge variant="outline" className="text-[10px] text-muted-foreground">{tool.badge}</Badge>
+            {/* ===== FEATURE NAV (horizontal scroll like Kling) ===== */}
+            <div className="relative group/nav">
+                <button
+                    onClick={() => scrollFeatures("left")}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-background/80 border shadow-md flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
+                >
+                    <ChevronLeft className="size-4" />
+                </button>
+                <div
+                    ref={featureScrollRef}
+                    className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-1"
+                    style={{ scrollbarWidth: "none" }}
+                >
+                    {featureCards.map((f) => (
+                        <Link key={f.name} to={f.path} className="contents">
+                            <Card className="shrink-0 cursor-pointer hover:border-border/80 transition-colors group/card w-[150px]">
+                                <CardContent className="p-3.5 flex flex-col items-center gap-2 text-center relative">
+                                    {f.badge && (
+                                        <Badge className="absolute -top-1.5 -right-1.5 text-[9px] px-1.5 py-0 bg-emerald-500 text-white border-0">{f.badge}</Badge>
+                                    )}
+                                    <div className={`flex size-10 items-center justify-center rounded-lg ${f.bg}`}>
+                                        <f.icon className={`size-5 ${f.color}`} />
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-medium">{tool.name}</p>
-                                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tool.description}</p>
-                                    </div>
+                                    <p className="text-xs font-medium leading-tight">{f.name}</p>
                                 </CardContent>
                             </Card>
                         </Link>
                     ))}
                 </div>
-            </section>
+                <button
+                    onClick={() => scrollFeatures("right")}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 size-8 rounded-full bg-background/80 border shadow-md flex items-center justify-center opacity-0 group-hover/nav:opacity-100 transition-opacity"
+                >
+                    <ChevronRight className="size-4" />
+                </button>
+            </div>
+
+            {/* ===== STATS ROW ===== */}
+            <div className="grid grid-cols-3 gap-3">
+                <Card>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-violet-500/10">
+                            <ImageIcon className="size-4 text-violet-400" />
+                        </div>
+                        <div className="min-w-0">
+                            {loading ? <Skeleton className="h-6 w-10" /> : (
+                                <p className="text-xl font-bold tabular-nums leading-none">{totalImages.toLocaleString()}</p>
+                            )}
+                            <p className="text-[11px] text-muted-foreground mt-0.5">Ảnh đã tạo</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                            <Zap className="size-4 text-amber-400" />
+                        </div>
+                        <div className="min-w-0">
+                            {loading ? <Skeleton className="h-6 w-10" /> : (
+                                <p className="text-xl font-bold tabular-nums leading-none">{totalSpent.toLocaleString()}</p>
+                            )}
+                            <p className="text-[11px] text-muted-foreground mt-0.5">Gems đã dùng</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="p-4 flex items-center gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                            <Gem className="size-4 text-emerald-400" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-xl font-bold tabular-nums leading-none">{gems.toLocaleString()}</p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">Gems hiện có</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
 
             {/* ===== TÁC PHẨM GẦN ĐÂY ===== */}
             <section className="space-y-3">
@@ -278,8 +292,8 @@ export function Dashboard() {
                 </div>
 
                 {loading ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                        {Array.from({ length: 4 }).map((_, i) => (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
                             <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
                         ))}
                     </div>
@@ -301,7 +315,7 @@ export function Dashboard() {
                         </CardContent>
                     </Card>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
                         {recentImages.map((img) => (
                             <Link key={img.id} to="/app/library" className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-muted">
                                 <img
