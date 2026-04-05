@@ -9,7 +9,7 @@ import {
   Eraser,
   Palette,
   Layers,
-  ImagePlus,
+
   Sparkles,
   ScanFace,
   PaintBucket,
