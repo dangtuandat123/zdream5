@@ -976,9 +976,11 @@ export function GeneratePage() {
         }
 
         // Ghi đè nếu có ép buộc từ thao tác chọn ảnh
+        let wasForced = false
         if (forcedCursorRef.current !== null) {
             cursorOffset = forcedCursorRef.current
             forcedCursorRef.current = null
+            wasForced = true
         }
 
         // Chỉ update innerHTML nếu text thực sự khác
@@ -998,8 +1000,8 @@ export function GeneratePage() {
                 forcedScrollRef.current = null
             }
 
-            // Phục hồi cursor nếu form đang focus HOẶC vừa bấm nút chèn ảnh
-            if (document.activeElement === el || document.activeElement?.tagName === 'BUTTON') {
+            // Phục hồi cursor nếu form đang focus HOẶC vừa bấm chèn ảnh
+            if (document.activeElement === el || document.activeElement?.tagName === 'BUTTON' || wasForced) {
                 if (document.activeElement !== el) el.focus()
                 setCursorPosition(el, cursorOffset)
                 // Khoá scroll một lần nữa sau khi tạo Range (nguyên nhân gây scroll)
@@ -2310,21 +2312,17 @@ export function GeneratePage() {
                                                 className="h-16 w-16 rounded-xl object-cover border border-border/40 bg-muted/30 cursor-pointer hover:ring-2 hover:ring-primary/60 transition-all"
                                                 title={`Nhấn để chèn @Ảnh ${idx + 1} vào prompt`}
                                                 onClick={() => {
-                                                    // Chèn @Ảnh X vào cuối prompt
+                                                    // KHOÁ TOẠ ĐỘ SCROLL VÀ CURSOR CHO USEEFFECT ĐỂ CHỐNG GIẬT
+                                                    if (textareaRef.current) {
+                                                        forcedScrollRef.current = textareaRef.current.scrollTop
+                                                    }
+                                                    
                                                     const mention = `@Ảnh ${idx + 1} `
-                                                    setPrompt(prev => {
-                                                        const trimmed = prev.trimEnd()
-                                                        return trimmed ? trimmed + ' ' + mention : mention
-                                                    })
-                                                    // Focus và đặt cursor cuối prompt
-                                                    requestAnimationFrame(() => {
-                                                        if (textareaRef.current) {
-                                                            const el = textareaRef.current
-                                                            el.focus()
-                                                            const newLen = (prompt.trimEnd() ? prompt.trimEnd() + ' ' + mention : mention).length
-                                                            setCursorPosition(el, newLen)
-                                                        }
-                                                    })
+                                                    const trimmed = prompt.trimEnd()
+                                                    const newPrompt = trimmed ? trimmed + ' ' + mention : mention
+                                                    
+                                                    forcedCursorRef.current = newPrompt.length
+                                                    setPrompt(newPrompt)
                                                 }}
                                             />
                                             <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
