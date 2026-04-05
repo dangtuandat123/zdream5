@@ -9,15 +9,21 @@ import {
     Plus,
     Zap,
     WandSparkles,
-
+    Crown,
+    Cpu,
+    UserCheck,
+    Eraser,
+    ZoomIn,
+    Wand2,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/contexts/AuthContext"
-import { imageApi, walletApi } from "@/lib/api"
-import type { GeneratedImageData } from "@/lib/api"
+import { imageApi, modelApi, walletApi } from "@/lib/api"
+import type { GeneratedImageData, AiModelData } from "@/lib/api"
 
 function getGreeting(): string {
     const h = new Date().getHours()
@@ -26,10 +32,46 @@ function getGreeting(): string {
     return "Chào buổi tối"
 }
 
+const featuredTools = [
+    {
+        name: "Nhân vật AI",
+        description: "Giữ nhất quán nhân vật qua mọi bối cảnh",
+        icon: UserCheck,
+        color: "text-emerald-400",
+        bg: "bg-emerald-500/10",
+        badge: "Sắp ra mắt",
+    },
+    {
+        name: "Xóa nền ảnh",
+        description: "Tách nền tự động chỉ trong vài giây",
+        icon: Eraser,
+        color: "text-rose-400",
+        bg: "bg-rose-500/10",
+        badge: "Sắp ra mắt",
+    },
+    {
+        name: "Upscale ảnh",
+        description: "Phóng to 2x–4x vẫn giữ chi tiết sắc nét",
+        icon: ZoomIn,
+        color: "text-sky-400",
+        bg: "bg-sky-500/10",
+        badge: "Sắp ra mắt",
+    },
+    {
+        name: "Style Transfer",
+        description: "Chuyển phong cách nghệ thuật cho ảnh bất kỳ",
+        icon: Wand2,
+        color: "text-orange-400",
+        bg: "bg-orange-500/10",
+        badge: "Sắp ra mắt",
+    },
+]
+
 export function Dashboard() {
     const { user, gems } = useAuth()
 
     const [recentImages, setRecentImages] = useState<GeneratedImageData[]>([])
+    const [models, setModels] = useState<AiModelData[]>([])
     const [totalImages, setTotalImages] = useState(0)
     const [totalSpent, setTotalSpent] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -39,7 +81,8 @@ export function Dashboard() {
         Promise.allSettled([
             imageApi.list(1, 8),
             walletApi.show(),
-        ]).then(([imgRes, walRes]) => {
+            modelApi.listActive(),
+        ]).then(([imgRes, walRes, modelRes]) => {
             if (imgRes.status === "fulfilled") {
                 setRecentImages(imgRes.value.data)
                 setTotalImages(imgRes.value.total)
@@ -49,6 +92,9 @@ export function Dashboard() {
                     .filter(t => t.type === "spend")
                     .reduce((sum, t) => sum + Math.abs(t.amount), 0)
                 setTotalSpent(spent)
+            }
+            if (modelRes.status === "fulfilled") {
+                setModels(modelRes.value.data)
             }
         }).finally(() => setLoading(false))
     }, [])
@@ -79,16 +125,13 @@ export function Dashboard() {
 
             {/* ===== STATS + CTA ROW ===== */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {/* Stat: Images */}
                 <Card>
                     <CardContent className="p-5 flex items-center gap-4">
                         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
                             <ImageIcon className="size-5 text-violet-400" />
                         </div>
                         <div className="min-w-0">
-                            {loading ? (
-                                <Skeleton className="h-7 w-12" />
-                            ) : (
+                            {loading ? <Skeleton className="h-7 w-12" /> : (
                                 <p className="text-2xl font-bold tabular-nums leading-none">{totalImages.toLocaleString()}</p>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">Ảnh đã tạo</p>
@@ -96,16 +139,13 @@ export function Dashboard() {
                     </CardContent>
                 </Card>
 
-                {/* Stat: Gems spent */}
                 <Card>
                     <CardContent className="p-5 flex items-center gap-4">
                         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
                             <Zap className="size-5 text-amber-400" />
                         </div>
                         <div className="min-w-0">
-                            {loading ? (
-                                <Skeleton className="h-7 w-12" />
-                            ) : (
+                            {loading ? <Skeleton className="h-7 w-12" /> : (
                                 <p className="text-2xl font-bold tabular-nums leading-none">{totalSpent.toLocaleString()}</p>
                             )}
                             <p className="text-xs text-muted-foreground mt-1">Gems đã dùng</p>
@@ -113,7 +153,6 @@ export function Dashboard() {
                     </CardContent>
                 </Card>
 
-                {/* CTA: Generate */}
                 <Link to="/app/generate" className="contents">
                     <Card className="cursor-pointer hover:border-violet-500/50 transition-colors group">
                         <CardContent className="p-5 flex items-center gap-4">
@@ -128,7 +167,6 @@ export function Dashboard() {
                     </Card>
                 </Link>
 
-                {/* CTA: AI Tools */}
                 <Link to="/app/tools" className="contents">
                     <Card className="cursor-pointer hover:border-violet-500/50 transition-colors group">
                         <CardContent className="p-5 flex items-center gap-4">
@@ -143,6 +181,92 @@ export function Dashboard() {
                     </Card>
                 </Link>
             </div>
+
+            {/* ===== AI MODELS ===== */}
+            <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-base font-semibold tracking-tight">Model AI khả dụng</h2>
+                        <Badge variant="secondary" className="text-[10px]">
+                            <Cpu className="size-3 mr-1" />
+                            {models.length} models
+                        </Badge>
+                    </div>
+                    <Link to="/app/generate" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                        Dùng ngay <ArrowRight className="size-3" />
+                    </Link>
+                </div>
+
+                {loading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <Skeleton key={i} className="h-20 rounded-xl" />
+                        ))}
+                    </div>
+                ) : models.length === 0 ? (
+                    <Card>
+                        <CardContent className="flex items-center justify-center gap-2 py-8">
+                            <Cpu className="size-5 text-muted-foreground" />
+                            <p className="text-sm text-muted-foreground">Chưa có model nào</p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {models.map((m, i) => (
+                            <Link key={m.id} to="/app/generate" className="contents">
+                                <Card className="cursor-pointer hover:border-violet-500/40 transition-colors group">
+                                    <CardContent className="p-4 flex items-center gap-3">
+                                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20 group-hover:from-violet-500/30 group-hover:to-fuchsia-500/30 transition-colors">
+                                            {i === 0 ? <Crown className="size-4 text-amber-400" /> : <Cpu className="size-4 text-violet-400" />}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-medium truncate">{m.name}</p>
+                                                {i === 0 && <Badge className="text-[9px] px-1.5 py-0 bg-amber-500/15 text-amber-400 border-amber-500/30">Hot</Badge>}
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-0.5">
+                                                {m.gems_cost} gem / ảnh
+                                            </p>
+                                        </div>
+                                        <ArrowRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </section>
+
+            {/* ===== FEATURED TOOLS ===== */}
+            <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-base font-semibold tracking-tight">Công cụ nổi bật</h2>
+                    <Link to="/app/tools" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                        Xem tất cả <ArrowRight className="size-3" />
+                    </Link>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {featuredTools.map((tool) => (
+                        <Link key={tool.name} to="/app/tools" className="contents">
+                            <Card className="cursor-pointer hover:border-border/80 transition-colors group">
+                                <CardContent className="p-4 flex flex-col gap-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className={`flex size-10 items-center justify-center rounded-lg ${tool.bg}`}>
+                                            <tool.icon className={`size-5 ${tool.color}`} />
+                                        </div>
+                                        <Badge variant="outline" className="text-[10px] text-muted-foreground">{tool.badge}</Badge>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium">{tool.name}</p>
+                                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tool.description}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </Link>
+                    ))}
+                </div>
+            </section>
 
             {/* ===== TÁC PHẨM GẦN ĐÂY ===== */}
             <section className="space-y-3">
