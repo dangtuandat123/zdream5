@@ -5,11 +5,24 @@ import {
   SparklesIcon,
   ArrowRightIcon,
   Lock,
+  SwatchBook,
+  ArrowUpFromLine,
+  Megaphone,
+  Eraser,
+  Palette,
+  PaintBucket,
+  ScanFace,
+  Frame,
+  Type,
+  Layers,
+  Replace,
+  Zap,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 interface AITool {
@@ -18,6 +31,7 @@ interface AITool {
   description: string
   category: string
   thumbnail: string
+  icon: React.ElementType
   path?: string
   available: boolean
 }
@@ -29,6 +43,7 @@ const tools: AITool[] = [
     description: "Sử dụng mẫu thiết kế có sẵn để tạo ảnh nhanh và đẹp",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/templates.jpg",
+    icon: SwatchBook,
     path: "/app/templates",
     available: true,
   },
@@ -38,6 +53,7 @@ const tools: AITool[] = [
     description: "Phóng to và nâng cao chất lượng ảnh lên 2x, 4x với AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/upscale.jpg",
+    icon: ArrowUpFromLine,
     available: false,
   },
   {
@@ -46,6 +62,7 @@ const tools: AITool[] = [
     description: "Tạo ảnh quảng cáo sản phẩm chuyên nghiệp cho mạng xã hội",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/ad-image.jpg",
+    icon: Megaphone,
     available: false,
   },
   {
@@ -54,6 +71,7 @@ const tools: AITool[] = [
     description: "Tự động xóa phông nền, tách chủ thể chính xác bằng AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/remove-bg.jpg",
+    icon: Eraser,
     available: false,
   },
   {
@@ -62,6 +80,7 @@ const tools: AITool[] = [
     description: "Thêm màu sắc tự nhiên cho ảnh đen trắng bằng AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/colorize.jpg",
+    icon: Palette,
     available: false,
   },
   {
@@ -70,6 +89,7 @@ const tools: AITool[] = [
     description: "Biến ảnh thành phong cách anime, tranh sơn dầu, hoạt hình,...",
     category: "Sáng tạo",
     thumbnail: "/images/tools/style-transfer.jpg",
+    icon: PaintBucket,
     available: false,
   },
   {
@@ -78,6 +98,7 @@ const tools: AITool[] = [
     description: "Thay thế khuôn mặt trong ảnh một cách tự nhiên",
     category: "Sáng tạo",
     thumbnail: "/images/tools/face-swap.jpg",
+    icon: ScanFace,
     available: false,
   },
   {
@@ -86,6 +107,7 @@ const tools: AITool[] = [
     description: "Mở rộng viền ảnh ra ngoài khung hình gốc bằng AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/extend.jpg",
+    icon: Frame,
     available: false,
   },
   {
@@ -94,6 +116,7 @@ const tools: AITool[] = [
     description: "Thiết kế logo chuyên nghiệp từ tên thương hiệu",
     category: "Sáng tạo",
     thumbnail: "/images/tools/text-to-logo.jpg",
+    icon: Type,
     available: false,
   },
   {
@@ -102,6 +125,7 @@ const tools: AITool[] = [
     description: "Tạo nhiều biến thể ảnh cùng lúc từ một prompt",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/batch-generate.jpg",
+    icon: Layers,
     available: false,
   },
   {
@@ -110,13 +134,13 @@ const tools: AITool[] = [
     description: "Tạo các phiên bản tương tự từ ảnh gốc có sẵn",
     category: "Sáng tạo",
     thumbnail: "/images/tools/image-variation.jpg",
+    icon: Replace,
     available: false,
   },
 ]
 
 const categories = ["Tất cả", ...Array.from(new Set(tools.map((t) => t.category)))]
 
-// Gradient fallbacks khi chưa có thumbnail
 const gradientMap: Record<string, string> = {
   templates: "from-pink-600 via-rose-500 to-orange-400",
   upscale: "from-blue-600 via-cyan-500 to-teal-400",
@@ -131,12 +155,89 @@ const gradientMap: Record<string, string> = {
   "image-variation": "from-lime-600 via-green-500 to-emerald-400",
 }
 
+function ToolCard({ tool }: { tool: AITool }) {
+  const IconComp = tool.icon
+
+  const card = (
+    <div
+      className={cn(
+        "group relative flex items-center gap-3.5 sm:gap-4 p-3 sm:p-4 rounded-2xl border transition-all duration-200",
+        tool.available
+          ? "border-primary/20 bg-card hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 active:scale-[0.99]"
+          : "border-border/30 bg-card/50 cursor-not-allowed"
+      )}
+    >
+      {/* Thumbnail with icon */}
+      <div className={cn(
+        "relative shrink-0 size-14 sm:size-[72px] rounded-xl overflow-hidden ring-1 ring-white/10",
+        !tool.available && "opacity-40 grayscale"
+      )}>
+        <div className={cn(
+          "absolute inset-0 bg-gradient-to-br",
+          gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
+        )} />
+        <img
+          src={tool.thumbnail}
+          alt={tool.name}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+          <IconComp className="size-6 sm:size-7 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]" />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className={cn("flex-1 min-w-0", !tool.available && "opacity-50")}>
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3 className="text-[13px] sm:text-sm font-semibold truncate">{tool.name}</h3>
+          {tool.available && (
+            <Badge className="shrink-0 text-[9px] px-1.5 py-0 h-[18px] bg-primary/15 text-primary border-0 font-semibold">
+              <Zap className="size-2.5 mr-0.5" />
+              Mở
+            </Badge>
+          )}
+          {!tool.available && (
+            <Badge variant="outline" className="shrink-0 text-[9px] px-1.5 py-0 h-[18px] gap-0.5 border-border/50 text-muted-foreground">
+              <Lock className="size-2" />
+              Sắp ra mắt
+            </Badge>
+          )}
+        </div>
+        <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+          {tool.description}
+        </p>
+      </div>
+
+      {/* Arrow */}
+      {tool.available && (
+        <div className="shrink-0 flex items-center justify-center size-8 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+          <ArrowRightIcon className="size-4 text-primary group-hover:translate-x-0.5 transition-transform" />
+        </div>
+      )}
+    </div>
+  )
+
+  if (tool.available && tool.path) {
+    return (
+      <Link to={tool.path} className="group">
+        {card}
+      </Link>
+    )
+  }
+
+  return <div className="group">{card}</div>
+}
+
 export function AIToolsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Tất cả")
 
+  const availableTools = useMemo(() => tools.filter((t) => t.available), [])
+
   const filteredTools = useMemo(() => {
-    let result = tools
+    let result = tools.filter((t) => !t.available)
     if (category !== "Tất cả") {
       result = result.filter((t) => t.category === category)
     }
@@ -148,12 +249,32 @@ export function AIToolsPage() {
           t.description.toLowerCase().includes(q)
       )
     }
-    return result.sort((a, b) => (a.available === b.available ? 0 : a.available ? -1 : 1))
+    return result
   }, [search, category])
+
+  // When searching, also filter available tools
+  const filteredAvailable = useMemo(() => {
+    if (!search.trim() && category === "Tất cả") return availableTools
+    let result = availableTools
+    if (category !== "Tất cả") {
+      result = result.filter((t) => t.category === category)
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase()
+      result = result.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          t.description.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [availableTools, search, category])
 
   const handleCategoryChange = (value: string) => {
     if (value) setCategory(value)
   }
+
+  const totalCount = filteredAvailable.length + filteredTools.length
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-5 p-3.5 sm:p-4 lg:p-6 pb-8">
@@ -210,83 +331,45 @@ export function AIToolsPage() {
 
       {/* Results count */}
       <p className="text-xs text-muted-foreground -mt-2">
-        {filteredTools.length} công cụ
+        {totalCount} công cụ
       </p>
 
-      {/* ===== TOOLS LIST ===== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
-        {filteredTools.map((tool) => {
-          const card = (
-            <div
-              className={cn(
-                "group relative flex items-center gap-4 p-3 sm:p-4 rounded-2xl border transition-all duration-200",
-                tool.available
-                  ? "border-border/50 bg-card hover:bg-accent/50 hover:border-border hover:shadow-lg hover:shadow-black/5 active:scale-[0.99]"
-                  : "border-border/30 bg-card/50 cursor-not-allowed"
-              )}
-            >
-              {/* Thumbnail */}
-              <div className={cn(
-                "relative shrink-0 size-16 sm:size-20 rounded-xl overflow-hidden",
-                !tool.available && "opacity-50"
-              )}>
-                <div className={cn(
-                  "absolute inset-0 bg-gradient-to-br",
-                  gradientMap[tool.id] ?? "from-gray-600 to-gray-800"
-                )} />
-                <img
-                  src={tool.thumbnail}
-                  alt={tool.name}
-                  className="absolute inset-0 w-full h-full object-cover"
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
-                />
-              </div>
+      {/* ===== AVAILABLE TOOLS ===== */}
+      {filteredAvailable.length > 0 && (
+        <section className="space-y-2.5">
+          <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2">
+            <Zap className="size-3.5 text-primary" />
+            Sẵn sàng sử dụng
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+            {filteredAvailable.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} />
+            ))}
+          </div>
+        </section>
+      )}
 
-              {/* Content */}
-              <div className={cn("flex-1 min-w-0", !tool.available && "opacity-60")}>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-sm font-semibold truncate">{tool.name}</h3>
-                  {!tool.available && (
-                    <Badge variant="outline" className="shrink-0 text-[10px] px-1.5 py-0 h-5 gap-1 border-border/50 text-muted-foreground">
-                      <Lock className="size-2.5" />
-                      Sắp ra mắt
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed line-clamp-2 mb-1.5">
-                  {tool.description}
-                </p>
-                <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5">
-                  {tool.category}
-                </Badge>
-              </div>
+      {filteredAvailable.length > 0 && filteredTools.length > 0 && (
+        <Separator className="opacity-50" />
+      )}
 
-              {/* Arrow (available only) */}
-              {tool.available && (
-                <ArrowRightIcon className="size-4 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
-              )}
-            </div>
-          )
-
-          if (tool.available && tool.path) {
-            return (
-              <Link key={tool.id} to={tool.path} className="group">
-                {card}
-              </Link>
-            )
-          }
-
-          return (
-            <div key={tool.id} className="group">
-              {card}
-            </div>
-          )
-        })}
-      </div>
+      {/* ===== COMING SOON TOOLS ===== */}
+      {filteredTools.length > 0 && (
+        <section className="space-y-2.5">
+          <h2 className="text-sm font-semibold tracking-tight flex items-center gap-2 text-muted-foreground">
+            <Lock className="size-3.5" />
+            Sắp ra mắt
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
+            {filteredTools.map((tool) => (
+              <ToolCard key={tool.id} tool={tool} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Empty state */}
-      {filteredTools.length === 0 && (
+      {totalCount === 0 && (
         <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
           <div className="flex size-16 items-center justify-center rounded-2xl bg-muted">
             <SearchIcon className="size-6 text-muted-foreground" />
