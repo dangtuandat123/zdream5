@@ -2425,6 +2425,25 @@ export function GeneratePage() {
                                         caretColor: 'white',
                                         boxSizing: 'border-box',
                                     }}
+                                    onMouseDown={(e) => {
+                                        const target = e.target as HTMLElement;
+                                        const mentionNode = target.closest('[data-mention="true"]');
+                                        if (mentionNode) {
+                                            // FIX JUMP BUG: Ngăn hành vi native của trình duyệt khi click vào non-editable 
+                                            // (Chromium thường giật cuộn lên top khi chọn thẻ contenteditable="false")
+                                            e.preventDefault();
+                                            
+                                            // Đưa con trỏ nháy ra phía sau thẻ mention thay vì chọn nó
+                                            const sel = window.getSelection();
+                                            if (sel) {
+                                                const range = document.createRange();
+                                                range.setStartAfter(mentionNode);
+                                                range.collapse(true);
+                                                sel.removeAllRanges();
+                                                sel.addRange(range);
+                                            }
+                                        }
+                                    }}
                                     onInput={(e) => {
                                         const el = e.currentTarget
                                         // Lấy plain text từ contenteditable
