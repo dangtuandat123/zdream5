@@ -123,14 +123,6 @@ const tools: AITool[] = [
     available: false,
   },
   {
-    id: "text-to-video",
-    name: "Tạo video AI",
-    description: "Biến mô tả văn bản hoặc ảnh tĩnh thành video ngắn sống động",
-    category: "Video AI",
-    thumbnail: "/images/tools/text-to-video.jpg",
-    available: false,
-  },
-  {
     id: "sketch-to-image",
     name: "Phác thảo thành ảnh",
     description: "Biến bản vẽ tay, sketch thành ảnh chân thực chất lượng cao",
@@ -203,7 +195,6 @@ const gradientMap: Record<string, string> = {
   "batch-generate": "from-rose-600 via-red-500 to-pink-400",
   "image-variation": "from-lime-600 via-green-500 to-emerald-400",
   inpainting: "from-violet-600 via-purple-500 to-fuchsia-400",
-  "text-to-video": "from-cyan-600 via-sky-500 to-blue-400",
   "sketch-to-image": "from-slate-600 via-gray-500 to-zinc-400",
   "product-mockup": "from-yellow-600 via-amber-500 to-orange-400",
   "ai-avatar": "from-pink-600 via-fuchsia-500 to-purple-400",
