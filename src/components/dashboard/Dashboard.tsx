@@ -136,7 +136,7 @@ export function Dashboard() {
             {/* ===== BANNER CAROUSEL + MODEL CARDS ===== */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 {/* Banner */}
-                <Card className="lg:col-span-2 relative overflow-hidden h-[180px] sm:h-[200px] border-0">
+                <div className="lg:col-span-2 relative h-[180px] sm:h-[200px] rounded-xl" style={{ overflow: "clip" }}>
                     {banners.map((b, i) => (
                         <div
                             key={i}
@@ -161,7 +161,7 @@ export function Dashboard() {
                             />
                         ))}
                     </div>
-                </Card>
+                </div>
 
                 {/* Model cards stack */}
                 <div className="flex flex-col gap-3">
