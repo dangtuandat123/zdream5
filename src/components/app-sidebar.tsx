@@ -5,6 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   LayoutDashboard,
   Sparkles,
+  WandSparkles,
   Images,
   Hexagon,
   LogOut,
@@ -36,6 +37,7 @@ import {
 // Menu items chính
 const navItems = [
   { icon: LayoutDashboard, label: "Home", desc: "Trang chủ", path: "/app/home" },
+  { icon: WandSparkles, label: "Tạo ảnh", desc: "Tạo ảnh bằng AI", path: "/app/generate" },
   { icon: Sparkles, label: "Công cụ AI", desc: "Bộ công cụ AI sáng tạo", path: "/app/tools" },
   { icon: Images, label: "Thư viện", desc: "Ảnh đã tạo và tải lên", path: "/app/library" },
 ]
@@ -65,7 +67,6 @@ export function AppSidebar() {
     if (path === "/app/admin") return location.pathname.startsWith("/app/admin")
     if (path === "/app/tools") {
       return location.pathname.startsWith("/app/tools") ||
-        location.pathname.startsWith("/app/generate") ||
         location.pathname.startsWith("/app/templates")
     }
     return location.pathname.startsWith(path)

@@ -2,7 +2,6 @@ import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import {
   Search,
-  WandSparkles,
   SwatchBook,
   ArrowUpFromLine,
   Megaphone,
@@ -35,17 +34,6 @@ interface AITool {
 }
 
 const tools: AITool[] = [
-  {
-    id: "generate",
-    name: "Tạo ảnh AI",
-    description: "Tạo ảnh nghệ thuật từ mô tả văn bản bằng các mô hình AI hàng đầu",
-    icon: WandSparkles,
-    category: "Tạo ảnh",
-    path: "/app/generate",
-    gradient: "from-violet-500/20 to-purple-500/20",
-    iconColor: "text-violet-400",
-    available: true,
-  },
   {
     id: "templates",
     name: "Tạo ảnh theo kiểu mẫu",
