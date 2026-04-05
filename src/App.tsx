@@ -10,6 +10,7 @@ import { TemplatesPage } from "@/components/templates/TemplatesPage";
 import { LibraryPage } from "@/components/library/LibraryPage";
 import { TemplateDetailPage } from "@/components/templates/TemplateDetailPage";
 import { TopUpPage } from "@/components/topup/TopUpPage";
+import { AIToolsPage } from "@/components/tools/AIToolsPage";
 import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute"
 import { GoogleCallback } from "@/components/auth/GoogleCallback";
 import AdminRoute from "@/components/auth/AdminRoute";
@@ -47,6 +48,7 @@ function App() {
           <Route path="/app" element={<AppShell />}>
             <Route index element={<Navigate to="/app/home" replace />} />
             <Route path="home" element={<Dashboard />} />
+            <Route path="tools" element={<AIToolsPage />} />
             <Route path="generate" element={<GeneratePage />} />
             <Route path="templates" element={<TemplatesPage />} />
             <Route path="templates/:slug" element={<TemplateDetailPage />} />
