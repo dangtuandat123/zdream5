@@ -148,9 +148,9 @@ export function Dashboard() {
                 setApi={setCarouselApi}
                 className="w-full"
             >
-                <CarouselContent className="-ml-3">
+                <CarouselContent className="-ml-4">
                     {bannerSlides.map((slide, i) => (
-                        <CarouselItem key={i} className="pl-3 basis-full sm:basis-[65%]">
+                        <CarouselItem key={i} className="pl-4 basis-[85%] sm:basis-[55%]">
                             <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${slide.gradient} h-[160px] sm:h-[180px]`}>
                                 {/* Decorative elements */}
                                 <div className="absolute -top-16 -right-16 size-48 rounded-full bg-white/10 blur-3xl" />
@@ -187,21 +187,22 @@ export function Dashboard() {
             </Carousel>
 
             {/* ===== FEATURE NAV ROW ===== */}
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="flex gap-2.5 overflow-x-auto pb-1 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
                 {featureNav.map((item) => (
                     <Link key={item.label} to={item.to} className="shrink-0">
-                        <div className={`relative flex items-center gap-2.5 px-4 py-3 rounded-xl border transition-all duration-300 hover:scale-[1.02] ${
+                        <div className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border transition-all duration-300 hover:scale-[1.02] ${
                             item.highlight
                                 ? "bg-violet-500/15 border-violet-500/30 hover:bg-violet-500/25"
                                 : "bg-card/50 border-border/50 hover:bg-accent hover:border-border"
                         }`}>
-                            <item.icon className={`size-4.5 shrink-0 ${item.highlight ? "text-violet-400" : "text-muted-foreground"}`} />
+                            <item.icon className={`size-4 shrink-0 ${item.highlight ? "text-violet-400" : "text-muted-foreground"}`} />
                             <span className={`text-sm font-medium whitespace-nowrap ${item.highlight ? "text-violet-300" : ""}`}>{item.label}</span>
-                            <ArrowRight className="size-3.5 text-muted-foreground/50" />
-                            {item.badge && (
-                                <Badge className="absolute -top-2 -right-1 bg-amber-500/90 text-[8px] px-1.5 py-0 h-4 border-0 text-white font-medium">
+                            {item.badge ? (
+                                <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-amber-500/50 text-amber-400 font-medium ml-0.5">
                                     {item.badge}
                                 </Badge>
+                            ) : (
+                                <ArrowRight className="size-3.5 text-muted-foreground/50" />
                             )}
                         </div>
                     </Link>
