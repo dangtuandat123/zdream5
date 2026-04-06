@@ -444,7 +444,7 @@ export function LibraryPage() {
                 <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
                     <TabsList className="w-full sm:w-auto">
                         {TABS.map((t) => (
-                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs flex-1 sm:flex-initial">
+                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs px-4 py-1.5">
                                 <t.icon className="size-3.5" />
                                 {t.label}
                             </TabsTrigger>
