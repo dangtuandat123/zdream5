@@ -94,7 +94,7 @@ export function Dashboard() {
                 setTotalImages(imgRes.value.total)
             }
             if (tplRes.status === "fulfilled") {
-                setTemplates(tplRes.value.data.slice(0, 6))
+                setTemplates(tplRes.value.data.slice(0, 15))
             }
             if (walRes.status === "fulfilled") {
                 const spent = walRes.value.transactions
@@ -256,13 +256,13 @@ export function Dashboard() {
                 ) : (
                     <div className="relative">
                         <Carousel
-                            opts={{ loop: true, align: "start", dragFree: true }}
+                            opts={{ loop: true, align: "start" }}
                             plugins={[Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })]}
                             className="w-full"
                         >
-                            <CarouselContent className="-ml-2.5">
+                            <CarouselContent className="-ml-3">
                                 {templates.map((tpl) => (
-                                    <CarouselItem key={tpl.id} className="pl-2.5 basis-[40%] sm:basis-[28%] md:basis-[22%] lg:basis-[18%]">
+                                    <CarouselItem key={tpl.id} className="pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
                                         <Link to={`/app/templates/${tpl.slug}`} className="group block">
                                             <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-muted ring-1 ring-white/5 hover:ring-violet-500/40 transition-all duration-300">
                                                 {tpl.thumbnail ? (
