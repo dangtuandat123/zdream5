@@ -21,7 +21,6 @@ import {
 } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -96,7 +95,6 @@ interface MediaItem {
 const TABS = [
     { value: "all", label: "Tất cả", icon: LayoutGridIcon },
     { value: "ai", label: "AI", icon: SparklesIcon },
-    { value: "template", label: "Mẫu", icon: PaletteIcon },
     { value: "upload", label: "Tải lên", icon: UploadIcon },
 ] as const
 
@@ -449,11 +447,6 @@ export function LibraryPage() {
                             <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs flex-1 sm:flex-initial">
                                 <t.icon className="size-3.5" />
                                 {t.label}
-                                {tab === t.value && (
-                                    <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-[10px] font-medium">
-                                        {filteredItems.length}
-                                    </Badge>
-                                )}
                             </TabsTrigger>
                         ))}
                     </TabsList>
