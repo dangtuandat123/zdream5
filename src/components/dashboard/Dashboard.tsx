@@ -148,9 +148,9 @@ export function Dashboard() {
                 setApi={setCarouselApi}
                 className="w-full"
             >
-                <CarouselContent className="-ml-4">
+                <CarouselContent className="-ml-3">
                     {bannerSlides.map((slide, i) => (
-                        <CarouselItem key={i} className="pl-4 basis-[85%] sm:basis-[48%]">
+                        <CarouselItem key={i} className="pl-3 basis-[85%] sm:basis-1/2">
                             <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${slide.gradient} h-[160px] sm:h-[180px]`}>
                                 {/* Decorative elements */}
                                 <div className="absolute -top-16 -right-16 size-48 rounded-full bg-white/10 blur-3xl" />
