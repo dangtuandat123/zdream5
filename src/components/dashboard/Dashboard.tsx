@@ -133,12 +133,6 @@ export function Dashboard() {
                         Biến ý tưởng thành tác phẩm nghệ thuật với AI
                     </p>
                 </div>
-                <Link to="/app/topup">
-                    <Badge variant="outline" className="px-3.5 py-2 rounded-full bg-violet-500/10 border-violet-500/20 hover:bg-violet-500/20 transition-all duration-300 hover:scale-105 cursor-pointer">
-                        <Gem data-icon="inline-start" className="text-violet-400" />
-                        <span className="text-sm font-bold tabular-nums">{gems.toLocaleString()}</span>
-                    </Badge>
-                </Link>
             </div>
 
             {/* ===== BANNER CAROUSEL ===== */}
