@@ -19,11 +19,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import {
     Carousel,
     CarouselContent,
     CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
     type CarouselApi,
 } from "@/components/ui/carousel"
 import { useAuth } from "@/contexts/AuthContext"
@@ -232,113 +233,123 @@ export function Dashboard() {
                 ))}
             </div>
 
-            {/* ===== CONTENT TABS ===== */}
-            <Tabs defaultValue="recent" className="space-y-4">
-                <div className="flex items-center justify-between gap-3">
-                    <TabsList className="bg-muted/50 h-9">
-                        <TabsTrigger value="recent" className="text-xs sm:text-sm px-3">Gần đây</TabsTrigger>
-                        <TabsTrigger value="templates" className="text-xs sm:text-sm px-3">Kiểu mẫu</TabsTrigger>
-                    </TabsList>
-
-                    <div className="flex items-center gap-2">
-                        <Link to="/app/library" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
-                            Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-                        </Link>
-                    </div>
+            {/* ===== TEMPLATES CAROUSEL ===== */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm sm:text-base font-semibold">Kiểu mẫu nổi bật</h2>
+                    <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                        Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
                 </div>
 
-                {/* --- Tab: Recent Images --- */}
-                <TabsContent value="recent" className="mt-0">
-                    {loading ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                            {Array.from({ length: 8 }).map((_, i) => (
-                                <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
-                            ))}
-                        </div>
-                    ) : recentImages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center gap-4 py-16 text-center rounded-xl border border-dashed border-border/50">
-                            <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/80 ring-1 ring-border/50">
-                                <Images className="size-6 text-muted-foreground" />
-                            </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium">Chưa có tác phẩm nào</p>
-                                <p className="text-xs text-muted-foreground max-w-[220px]">Bắt đầu tạo tác phẩm đầu tiên của bạn!</p>
-                            </div>
-                            <Link to="/app/generate">
-                                <Button size="sm" className="gap-1.5 rounded-full">
-                                    <Plus className="size-3.5" /> Tạo ảnh ngay
-                                </Button>
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
-                            {recentImages.map((img) => (
-                                <Link key={img.id} to="/app/library" className="group relative aspect-[3/4] rounded-xl overflow-hidden bg-muted ring-1 ring-white/5 hover:ring-white/15 transition-all duration-300">
-                                    <img
-                                        src={img.file_url}
-                                        alt={img.prompt ?? "AI Generated"}
-                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        loading="lazy"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                    {img.gems_cost != null && img.gems_cost > 0 && (
-                                        <div className="absolute top-2 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-[10px] text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Gem className="size-2.5" />{img.gems_cost}
-                                        </div>
-                                    )}
-                                    <div className="absolute bottom-0 left-0 right-0 p-2.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
-                                        <p className="text-[11px] text-white font-medium line-clamp-2 leading-tight drop-shadow-md">
-                                            {img.prompt}
-                                        </p>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </TabsContent>
-
-                {/* --- Tab: Templates --- */}
-                <TabsContent value="templates" className="mt-0">
-                    {loading ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-                            {Array.from({ length: 6 }).map((_, i) => (
-                                <Skeleton key={i} className="aspect-[3/4] rounded-xl" />
-                            ))}
-                        </div>
-                    ) : templates.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center rounded-xl border border-dashed border-border/50">
-                            <SwatchBook className="size-6 text-muted-foreground" />
-                            <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-                            {templates.map((tpl) => (
-                                <Link key={tpl.id} to={`/app/templates/${tpl.slug}`} className="group">
-                                    <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-muted ring-1 ring-white/5 hover:ring-white/15 transition-all duration-300">
-                                        {tpl.thumbnail ? (
-                                            <img
-                                                src={tpl.thumbnail}
-                                                alt={tpl.name}
-                                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                loading="lazy"
-                                            />
-                                        ) : (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-                                                <SwatchBook className="size-10 text-muted-foreground/30" />
+                {loading ? (
+                    <div className="flex gap-2.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                            <Skeleton key={i} className="shrink-0 w-36 sm:w-44 aspect-[4/5] rounded-xl" />
+                        ))}
+                    </div>
+                ) : templates.length === 0 ? (
+                    <div className="flex items-center justify-center gap-2 py-8 rounded-xl border border-dashed border-border/50">
+                        <SwatchBook className="size-5 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
+                    </div>
+                ) : (
+                    <div className="relative">
+                        <Carousel
+                            opts={{ loop: true, align: "start", dragFree: true }}
+                            plugins={[Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })]}
+                            className="w-full"
+                        >
+                            <CarouselContent className="-ml-2.5">
+                                {templates.map((tpl) => (
+                                    <CarouselItem key={tpl.id} className="pl-2.5 basis-[40%] sm:basis-[28%] md:basis-[22%] lg:basis-[18%]">
+                                        <Link to={`/app/templates/${tpl.slug}`} className="group block">
+                                            <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-muted ring-1 ring-white/5 hover:ring-violet-500/40 transition-all duration-300">
+                                                {tpl.thumbnail ? (
+                                                    <img
+                                                        src={tpl.thumbnail}
+                                                        alt={tpl.name}
+                                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        loading="lazy"
+                                                    />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                                                        <SwatchBook className="size-8 text-muted-foreground/30" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                                                <div className="absolute bottom-0 left-0 right-0 p-2.5">
+                                                    <p className="text-xs font-semibold text-white truncate drop-shadow-md">{tpl.name}</p>
+                                                    <Badge className="mt-1 bg-white/15 text-white/80 border-0 text-[9px] backdrop-blur-md font-medium">{tpl.category}</Badge>
+                                                </div>
                                             </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
-                                        <div className="absolute bottom-0 left-0 right-0 p-3">
-                                            <p className="text-sm font-semibold text-white truncate drop-shadow-md mb-1.5">{tpl.name}</p>
-                                            <Badge className="bg-white/15 text-white/90 border-0 text-[10px] backdrop-blur-md font-medium">{tpl.category}</Badge>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                        </Link>
+                                    </CarouselItem>
+                                ))}
+                            </CarouselContent>
+                            <CarouselPrevious className="hidden sm:flex -left-3 size-8 bg-background/80 backdrop-blur-sm border-border/50" />
+                            <CarouselNext className="hidden sm:flex -right-3 size-8 bg-background/80 backdrop-blur-sm border-border/50" />
+                        </Carousel>
+                    </div>
+                )}
+            </div>
+
+            {/* ===== RECENT IMAGES ===== */}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-sm sm:text-base font-semibold">Tác phẩm gần đây</h2>
+                    <Link to="/app/library" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                        Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
+                    </Link>
+                </div>
+
+                {loading ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+                        {Array.from({ length: 12 }).map((_, i) => (
+                            <Skeleton key={i} className="aspect-square rounded-lg" />
+                        ))}
+                    </div>
+                ) : recentImages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center gap-4 py-16 text-center rounded-xl border border-dashed border-border/50">
+                        <div className="flex size-14 items-center justify-center rounded-2xl bg-muted/80 ring-1 ring-border/50">
+                            <Images className="size-6 text-muted-foreground" />
                         </div>
-                    )}
-                </TabsContent>
-            </Tabs>
+                        <div className="space-y-1">
+                            <p className="text-sm font-medium">Chưa có tác phẩm nào</p>
+                            <p className="text-xs text-muted-foreground max-w-[220px]">Bắt đầu tạo tác phẩm đầu tiên của bạn!</p>
+                        </div>
+                        <Link to="/app/generate">
+                            <Button size="sm" className="gap-1.5 rounded-full">
+                                <Plus className="size-3.5" /> Tạo ảnh ngay
+                            </Button>
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2">
+                        {recentImages.map((img) => (
+                            <Link key={img.id} to="/app/library" className="group relative aspect-square rounded-lg overflow-hidden bg-muted ring-1 ring-white/5 hover:ring-violet-500/40 transition-all duration-300">
+                                <img
+                                    src={img.file_url}
+                                    alt={img.prompt ?? "AI Generated"}
+                                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    loading="lazy"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                {img.gems_cost != null && img.gems_cost > 0 && (
+                                    <div className="absolute top-1.5 right-1.5 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-[9px] text-white/80 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Gem className="size-2.5" />{img.gems_cost}
+                                    </div>
+                                )}
+                                <div className="absolute bottom-0 left-0 right-0 p-1.5 opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-300">
+                                    <p className="text-[10px] text-white font-medium line-clamp-1 leading-tight drop-shadow-md">
+                                        {img.prompt}
+                                    </p>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
