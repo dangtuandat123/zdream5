@@ -281,6 +281,14 @@ export function AIToolsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-5 p-3.5 sm:p-4 lg:p-6 pb-8">
 
+      {/* ===== HEADING ===== */}
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Công cụ AI</h1>
+        <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+          Bộ công cụ AI mạnh mẽ cho mọi nhu cầu sáng tạo.
+        </p>
+      </div>
+
       {/* ===== SEARCH + FILTER ===== */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <ToggleGroup
