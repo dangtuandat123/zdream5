@@ -282,19 +282,22 @@ export function AIToolsPage() {
     <div className="flex flex-1 flex-col gap-4 sm:gap-5 p-3.5 sm:p-4 lg:p-6 pb-8">
 
       {/* ===== HERO BANNER ===== */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-500">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.15),transparent_60%)]" />
-        <div className="relative z-10 p-5 sm:p-8 lg:p-10">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-white/15 text-white/90 backdrop-blur-md mb-4 sm:mb-5">
-            <SparklesIcon className="size-3" />
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-500">
+        <div className="absolute -top-20 -right-20 size-56 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-12 -left-12 size-40 rounded-full bg-black/10 blur-2xl" />
+        <div className="relative z-10 flex flex-col justify-between h-[160px] sm:h-[180px] p-5 sm:p-6">
+          <Badge className="w-fit bg-white/20 text-white border-0 text-[10px] backdrop-blur-sm">
+            <SparklesIcon className="size-3 mr-1" />
             Bộ công cụ AI
-          </span>
-          <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-tight mb-1.5 sm:mb-2">
-            Công cụ AI
-          </h1>
-          <p className="text-xs sm:text-sm text-white/70 max-w-lg leading-relaxed">
-            Khám phá bộ công cụ AI mạnh mẽ — từ tạo ảnh theo mẫu, upscale, xóa nền đến chuyển phong cách nghệ thuật.
-          </p>
+          </Badge>
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-white mb-1 leading-tight">
+              Công cụ AI
+            </h1>
+            <p className="text-xs sm:text-sm text-white/70 max-w-sm">
+              Khám phá bộ công cụ AI mạnh mẽ — từ tạo ảnh theo mẫu, upscale, xóa nền đến chuyển phong cách nghệ thuật.
+            </p>
+          </div>
         </div>
       </div>
 
