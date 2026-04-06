@@ -2,7 +2,7 @@ import { useState, useMemo } from "react"
 import { Link } from "react-router-dom"
 import {
   SearchIcon,
-  SparklesIcon,
+
   ArrowRightIcon,
   Lock,
   Zap,
@@ -280,26 +280,6 @@ export function AIToolsPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 sm:gap-5 p-3.5 sm:p-4 lg:p-6 pb-8">
-
-      {/* ===== HERO BANNER ===== */}
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-500">
-        <div className="absolute -top-20 -right-20 size-56 rounded-full bg-white/10 blur-3xl" />
-        <div className="absolute -bottom-12 -left-12 size-40 rounded-full bg-black/10 blur-2xl" />
-        <div className="relative z-10 flex flex-col justify-between h-[160px] sm:h-[180px] p-5 sm:p-6">
-          <Badge className="w-fit bg-white/20 text-white border-0 text-[10px] backdrop-blur-sm">
-            <SparklesIcon className="size-3 mr-1" />
-            Bộ công cụ AI
-          </Badge>
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold text-white mb-1 leading-tight">
-              Công cụ AI
-            </h1>
-            <p className="text-xs sm:text-sm text-white/70 max-w-sm">
-              Khám phá bộ công cụ AI mạnh mẽ — từ tạo ảnh theo mẫu, upscale, xóa nền đến chuyển phong cách nghệ thuật.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* ===== SEARCH + FILTER ===== */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
