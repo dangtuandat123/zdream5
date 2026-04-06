@@ -257,30 +257,35 @@ export function Dashboard() {
                     <div className="relative">
                         <Carousel
                             opts={{ loop: true, align: "start" }}
-                            plugins={[Autoplay({ delay: 3000, stopOnInteraction: true, stopOnMouseEnter: true })]}
+                            plugins={[Autoplay({ delay: 2000, stopOnInteraction: false })]}
+
                             className="w-full"
                         >
                             <CarouselContent className="-ml-3">
                                 {templates.map((tpl) => (
                                     <CarouselItem key={tpl.id} className="pl-3 basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                                        <Link to={`/app/templates/${tpl.slug}`} className="group block">
-                                            <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-muted ring-1 ring-white/5 hover:ring-violet-500/40 transition-all duration-300">
-                                                {tpl.thumbnail ? (
-                                                    <img
-                                                        src={tpl.thumbnail}
-                                                        alt={tpl.name}
-                                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                        loading="lazy"
-                                                    />
-                                                ) : (
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
-                                                        <SwatchBook className="size-8 text-muted-foreground/30" />
-                                                    </div>
-                                                )}
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                                                <div className="absolute bottom-0 left-0 right-0 p-2.5">
-                                                    <p className="text-xs font-semibold text-white truncate drop-shadow-md">{tpl.name}</p>
-                                                    <Badge className="mt-1 bg-white/15 text-white/80 border-0 text-[9px] backdrop-blur-md font-medium">{tpl.category}</Badge>
+                                        <Link to={`/app/templates/${tpl.slug}`} className="group relative block overflow-hidden rounded-2xl bg-muted aspect-[3/4]">
+                                            {tpl.thumbnail && (
+                                                <img
+                                                    src={tpl.thumbnail}
+                                                    alt={tpl.name}
+                                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+                                                    loading="lazy"
+                                                />
+                                            )}
+                                            <div className="absolute top-2.5 left-2.5 z-10">
+                                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-black/40 text-white backdrop-blur-md">
+                                                    {tpl.category}
+                                                </span>
+                                            </div>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                                            <div className="absolute bottom-0 left-0 right-0 z-10 p-3 space-y-0.5">
+                                                <h3 className="text-sm font-semibold text-white truncate drop-shadow-md">{tpl.name}</h3>
+                                                <p className="text-[11px] text-white/70 truncate drop-shadow-sm">{tpl.description}</p>
+                                                <div className="flex items-center gap-1 pt-1 text-white/50 group-hover:text-white/80 transition-colors">
+                                                    <span className="text-[10px] font-medium">Xem chi tiết</span>
+                                                    <ArrowRight className="size-3 transition-transform duration-300 group-hover:translate-x-0.5" />
                                                 </div>
                                             </div>
                                         </Link>
