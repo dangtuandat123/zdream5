@@ -1315,7 +1315,6 @@ export function GeneratePage() {
         if (files.length > 0) {
             const urls = files.map(file => URL.createObjectURL(file))
             addReferenceImages(urls)
-            setIsImagePopoverOpen(false) // Tự động đóng Popover khi chọn xong file từ máy
         }
         // Cho phép chọn lại file vừa xoá
         if (e.target) {
