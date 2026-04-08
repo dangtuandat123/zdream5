@@ -1367,7 +1367,7 @@ export function GeneratePage() {
                         <TabsTrigger value="library" className="text-xs"><LayoutGrid className="size-3 mr-1.5" /> Thư viện</TabsTrigger>
                     </TabsList>
                 </div>
-                <TabsContent value="upload" className="flex flex-col p-4 pt-0 m-0 min-h-[280px]">
+                <TabsContent value="upload" className="flex flex-col p-4 pt-0 m-0 min-h-[280px] data-[state=inactive]:hidden">
                     <div className="flex flex-col gap-3 flex-1">
                         {/* Lõi chọn file - Dùng flex-1 để lấp đầy khoảng sống khi chưa có ảnh */}
                         <label
