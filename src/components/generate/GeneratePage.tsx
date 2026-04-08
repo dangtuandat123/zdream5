@@ -2340,7 +2340,7 @@ export function GeneratePage() {
                             )}
 
                             {/* 2. Text Input (Middle) — contenteditable with inline @mention highlighting */}
-                            <div className="relative px-2 py-2">
+                            <div className={cn("relative px-2 pb-2", referenceImages.length > 0 ? "pt-2" : "pt-4")}>
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
                                     <div className="absolute bottom-full mb-1 left-0 right-0 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
@@ -2413,7 +2413,7 @@ export function GeneratePage() {
                                     role="textbox"
                                     aria-multiline="true"
                                     data-placeholder="Mô tả ý tưởng kiến tạo của bạn..."
-                                    className="w-full border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none leading-[24px] custom-scrollbar pt-[10px] pb-[10px] overflow-y-auto break-words relative m-0 text-foreground"
+                                    className="w-full border-0 bg-transparent px-3 text-[15px] focus:ring-0 outline-none leading-[24px] custom-scrollbar pt-[4px] pb-[10px] overflow-y-auto break-words relative m-0 text-foreground"
                                     style={{
                                         minHeight: '44px',
                                         maxHeight: '120px',
