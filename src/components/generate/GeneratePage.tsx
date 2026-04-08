@@ -2157,7 +2157,7 @@ export function GeneratePage() {
                     </> : undefined}
                 />
 
-                {/* === XÁC NHẬN XOÁ === */}
+{/* === XÁC NHẬN XOÁ === */}
                 <AlertDialog open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
                     <AlertDialogContent size="sm">
                         <AlertDialogHeader>
@@ -2281,7 +2281,7 @@ export function GeneratePage() {
 
                         {/* Pill Container — with Drag & Drop */}
                         <div
-                            className={`relative flex flex-col w-full transition-all duration-300 border rounded-[22px] backdrop-blur-xl ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border-border/30 bg-[#37393b]/85 shadow-lg'}`}
+                            className={`relative flex flex-col w-full transition-all duration-300 border rounded-[30px] backdrop-blur-xl ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border-border/30 bg-[#37393b]/85 shadow-lg'}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
@@ -2509,7 +2509,7 @@ export function GeneratePage() {
                             </div>
 
                             {/* 3. Tools & Send Button (Bottom) */}
-                            <div className="flex items-center justify-between px-3 pb-2.5" style={{ touchAction: 'manipulation' }}>
+                            <div className="flex items-center justify-between px-2.5 pb-2.5" style={{ touchAction: 'manipulation' }}>
                                 <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto scrollbar-none pr-2">
                                     {/* Prompt History */}
                                     {promptHistory.length > 0 && (
