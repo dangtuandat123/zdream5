@@ -2634,7 +2634,7 @@ export function GeneratePage() {
                                     {/* Model Select (Desktop) */}
                                     <div className="hidden sm:block ml-1">
                                         <Select value={model} onValueChange={setModel}>
-                                            <SelectTrigger className="h-8 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0">
+                                            <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0">
                                                 <SelectValue placeholder="Model" />
                                             </SelectTrigger>
                                             <SelectContent>
