@@ -2383,6 +2383,8 @@ export function GeneratePage() {
                                             </button>
                                         </div>
                                     ))}
+                                    {/* Spacer để giữ khoảng cách lề phải khi scroll ngang */}
+                                    <div className="shrink-0 w-2" aria-hidden="true" />
                                 </div>
                             )}
 
