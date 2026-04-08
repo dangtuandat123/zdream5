@@ -1357,7 +1357,8 @@ export function GeneratePage() {
     }, [])
 
     const renderReferenceImageContent = () => (
-        <div className="flex-1 overflow-y-auto custom-scrollbar pb-4 overscroll-contain">
+        <div className="flex flex-col h-full overflow-hidden">
+            <div className="flex-1 overflow-y-auto custom-scrollbar pb-4 overscroll-contain">
             <Tabs defaultValue="upload" className="w-full" onValueChange={(v) => {
                 if (v === 'library' && libraryRefImages.length === 0) fetchLibraryRefImages(1, false, libraryRefType)
             }}>
@@ -1413,37 +1414,7 @@ export function GeneratePage() {
                         </div>
                     </div>
 
-                    {/* Hiển thị ảnh tham chiếu đã thêm - Neo đáy */}
-                    {referenceImages.length > 0 && (
-                        <div className="mt-auto pt-5">
-                            <div className="flex items-center justify-between mb-2.5">
-                                <span className="text-[10px] uppercase tracking-wider text-foreground font-semibold flex items-center gap-1.5">
-                                    <ImageIcon className="size-3 text-primary" />
-                                    Ảnh đã chọn
-                                </span>
-                                <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-md">
-                                    {referenceImages.length} / {MAX_REFERENCE_IMAGES}
-                                </span>
-                            </div>
-                            <div className="grid grid-cols-4 gap-2">
-                                {referenceImages.map((src, idx) => (
-                                    <div key={idx} className="relative group/thumb aspect-square rounded-lg overflow-hidden border border-border/50 shadow-sm">
-                                        <img src={src} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
-                                        <button
-                                            type="button"
-                                            onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
-                                            className="absolute inset-0 bg-black/5 backdrop-blur-[1px] group-hover/thumb:bg-black/40 transition-all flex items-center justify-center"
-                                        >
-                                            <X className="size-4 text-white opacity-0 group-hover/thumb:opacity-100 group-hover/thumb:scale-110 transition-all drop-shadow-md" />
-                                        </button>
-                                        <div className="absolute top-1 left-1 bg-black/60 text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
-                                            {idx + 1}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+
                 </TabsContent>
                 <TabsContent value="library" className="px-4 pt-0 m-0 min-h-[280px]">
                     {/* Bộ lọc loại ảnh */}
@@ -1565,7 +1536,39 @@ export function GeneratePage() {
                     )}
                 </TabsContent>
             </Tabs>
+            </div>
 
+            {/* Global Selected Images */}
+            {referenceImages.length > 0 && (
+                <div className="shrink-0 p-4 border-t bg-card z-10 w-full mt-auto shadow-[0_-4px_10px_-4px_rgba(0,0,0,0.1)]">
+                    <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[10px] uppercase tracking-wider text-foreground font-semibold flex items-center gap-1.5">
+                            <ImageIcon className="size-3 text-primary" />
+                            Ảnh đã chọn
+                        </span>
+                        <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-md">
+                            {referenceImages.length} / {MAX_REFERENCE_IMAGES}
+                        </span>
+                    </div>
+                    <div className="flex gap-2.5 overflow-x-auto custom-scrollbar pb-1.5 pt-0.5 px-0.5 -mx-0.5">
+                        {referenceImages.map((src, idx) => (
+                            <div key={idx} className="relative group/thumb shrink-0 aspect-square h-[60px] rounded-lg overflow-hidden border border-border/50 shadow-sm ring-offset-background hover:ring-2 hover:ring-destructive/50 transition-all">
+                                <img src={src} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
+                                <button
+                                    type="button"
+                                    onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
+                                    className="absolute inset-0 bg-black/0 hover:bg-destructive/80 transition-all flex items-center justify-center backdrop-blur-[0px] hover:backdrop-blur-[1px]"
+                                >
+                                    <X className="size-4 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-md" />
+                                </button>
+                                <div className="absolute top-1 left-1 bg-black/60 text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
+                                    {idx + 1}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 
