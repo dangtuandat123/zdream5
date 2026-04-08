@@ -1368,11 +1368,11 @@ export function GeneratePage() {
                     </TabsList>
                 </div>
                 <TabsContent value="upload" className="flex flex-col p-4 pt-0 m-0 min-h-[280px]">
-                    <div className="flex flex-col gap-3">
-                        {/* Lõi chọn file */}
+                    <div className="flex flex-col gap-3 flex-1">
+                        {/* Lõi chọn file - Dùng flex-1 để lấp đầy khoảng sống khi chưa có ảnh */}
                         <label
                             htmlFor="ref-image-upload"
-                            className="group flex flex-col items-center justify-center w-full h-24 rounded-xl border-2 border-dashed border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-primary/50 cursor-pointer transition-all"
+                            className="group flex-1 flex flex-col items-center justify-center w-full min-h-[100px] rounded-xl border-2 border-dashed border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-primary/50 cursor-pointer transition-all"
                         >
                             <div className="p-2.5 rounded-full bg-background border border-border/50 group-hover:scale-110 transition-transform mb-2 shadow-sm">
                                 <Upload className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -1389,14 +1389,14 @@ export function GeneratePage() {
                         </label>
 
                         {/* Phân cách */}
-                        <div className="relative flex items-center py-1">
+                        <div className="relative flex items-center py-1 shrink-0">
                             <div className="flex-grow border-t border-border/40"></div>
                             <span className="shrink-0 px-2 text-[10px] text-muted-foreground uppercase tracking-wider">Hoặc nhập liên kết</span>
                             <div className="flex-grow border-t border-border/40"></div>
                         </div>
 
                         {/* Nhập URL */}
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 shrink-0">
                             <div className="relative flex-1">
                                 <Link className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                                 <Input
