@@ -1450,9 +1450,8 @@ export function GeneratePage() {
                     <div className="flex gap-1.5 mb-3">
                         {([
                             { value: null, label: 'Tất cả' },
-                            { value: 'ai', label: 'AI' },
-                            { value: 'template', label: 'Template' },
                             { value: 'upload', label: 'Upload' },
+                            { value: 'ai', label: 'AI' }
                         ] as const).map(({ value, label }) => (
                             <button
                                 key={label}
