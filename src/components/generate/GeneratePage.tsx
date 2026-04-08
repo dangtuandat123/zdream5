@@ -2350,7 +2350,7 @@ export function GeneratePage() {
 
                             {/* 1. Preview Ảnh Tham Chiếu (Top) — thu nhỏ khi compact */}
                             {referenceImages.length > 0 && (
-                                <div className="px-4 pb-1 pt-5 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30">
+                                <div className="mx-5 pb-1 pt-5 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30">
                                     {referenceImages.map((src, idx) => (
                                         <div key={idx} className="relative shrink-0 group/ref">
                                             <img
@@ -2383,8 +2383,6 @@ export function GeneratePage() {
                                             </button>
                                         </div>
                                     ))}
-                                    {/* Spacer để giữ khoảng cách lề phải khi scroll ngang */}
-                                    <div className="shrink-0 w-2" aria-hidden="true" />
                                 </div>
                             )}
 
