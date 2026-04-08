@@ -1760,17 +1760,16 @@ export function GeneratePage() {
                             initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
                             animate={{ 
                                 opacity: isHeaderHidden ? 0 : 1,
-                                backdropFilter: isHeaderHidden ? "blur(0px)" : "blur(12px)"
+                                backdropFilter: isHeaderHidden ? "blur(0px)" : "blur(5px)"
                             }}
                             transition={{ 
-                                duration: 0.3, 
-                                ease: "easeOut",
-                                delay: isHeaderHidden ? 0 : 0.4 
+                                duration: 0.2, 
+                                ease: "easeOut"
                             }}
-                            className="absolute inset-x-0 top-0 h-[150%] sm:h-[180%] -z-10 bg-background/50 pointer-events-none"
+                            className="absolute inset-0 -z-10 bg-background/20 pointer-events-none"
                             style={{ 
-                                maskImage: 'linear-gradient(to bottom, black 0%, black 65%, transparent 100%)', 
-                                WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 65%, transparent 100%)' 
+                                maskImage: 'linear-gradient(to bottom, black calc(100% - 25px), transparent 100%)', 
+                                WebkitMaskImage: 'linear-gradient(to bottom, black calc(100% - 25px), transparent 100%)' 
                             }}
                         />
 
@@ -1782,7 +1781,7 @@ export function GeneratePage() {
                                             variant="outline"
                                             role="combobox"
                                             aria-expanded={isProjectMenuOpen}
-                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 rounded-xl border-border/40 bg-background/50 backdrop-blur-md hover:bg-background/80 hover:border-border/60 transition-all"
+                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 border-muted-foreground/20 hover:border-muted-foreground/40 hover:bg-transparent"
                                         >
                                             <div className="flex items-center truncate">
                                                 <FolderOpen className="mr-2 h-4 w-4 shrink-0 text-primary" />
