@@ -2340,7 +2340,7 @@ export function GeneratePage() {
                             )}
 
                             {/* 2. Text Input (Middle) — contenteditable with inline @mention highlighting */}
-                            <div className="relative px-2 py-2">
+                            <div className="relative pt-1 pb-1">
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
                                     <div className="absolute bottom-full mb-1 left-0 right-0 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
@@ -2634,7 +2634,7 @@ export function GeneratePage() {
                                     {/* Model Select (Desktop) */}
                                     <div className="hidden sm:block ml-1">
                                         <Select value={model} onValueChange={setModel}>
-                                            <SelectTrigger className="h-8 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0">
+                                            <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3.5 shadow-none focus:ring-0">
                                                 <SelectValue placeholder="Model" />
                                             </SelectTrigger>
                                             <SelectContent>
