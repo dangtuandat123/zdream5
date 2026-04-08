@@ -2648,10 +2648,10 @@ export function GeneratePage() {
                                     </div>
 
                                     {/* Badges */}
-                                    <Badge variant="secondary" className="hidden lg:inline-flex text-[10px] h-6 rounded-full font-medium px-2.5 bg-background/50 border-border/50">
+                                    <Badge variant="secondary" className="hidden lg:inline-flex items-center justify-center text-[10px] h-6 rounded-full font-medium px-2.5 bg-background/50 border-border/50">
                                         {getAspectRatio(aspectRatioValue).label}
                                     </Badge>
-                                    <Badge variant="secondary" className="hidden lg:inline-flex text-[10px] h-6 rounded-full font-medium px-2 bg-background/50 border-border/50">
+                                    <Badge variant="secondary" className="hidden lg:inline-flex items-center justify-center text-[10px] h-6 rounded-full font-medium px-2 bg-background/50 border-border/50">
                                         ×{imageCount}
                                     </Badge>
                                 </div>
