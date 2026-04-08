@@ -1755,8 +1755,24 @@ export function GeneratePage() {
                         transition={{ duration: 0.35, ease: "easeInOut" }}
                         className="sticky top-[60px] md:top-0 z-30 py-3 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 mb-4 sm:mb-6"
                     >
-                        {/* Premium Glassmorphism Background Layer */}
-                        <div className="absolute inset-0 -z-10 bg-background/85 backdrop-blur-xl border-b border-white/5 shadow-sm pointer-events-none" />
+                        {/* Fading Blur Background Layer — Animated for smooth entry/exit */}
+                        <motion.div 
+                            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+                            animate={{ 
+                                opacity: isHeaderHidden ? 0 : 1,
+                                backdropFilter: isHeaderHidden ? "blur(0px)" : "blur(12px)"
+                            }}
+                            transition={{ 
+                                duration: 0.3, 
+                                ease: "easeOut",
+                                delay: isHeaderHidden ? 0 : 0.4 
+                            }}
+                            className="absolute inset-x-0 top-0 h-[150%] sm:h-[180%] -z-10 bg-background/50 pointer-events-none"
+                            style={{ 
+                                maskImage: 'linear-gradient(to bottom, black 0%, black 65%, transparent 100%)', 
+                                WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 65%, transparent 100%)' 
+                            }}
+                        />
 
                         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-0">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -1766,7 +1782,7 @@ export function GeneratePage() {
                                             variant="outline"
                                             role="combobox"
                                             aria-expanded={isProjectMenuOpen}
-                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 border-muted-foreground/20 hover:border-muted-foreground/40 hover:bg-transparent"
+                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 rounded-xl border-border/40 bg-background/50 backdrop-blur-md hover:bg-background/80 hover:border-border/60 transition-all"
                                         >
                                             <div className="flex items-center truncate">
                                                 <FolderOpen className="mr-2 h-4 w-4 shrink-0 text-primary" />
