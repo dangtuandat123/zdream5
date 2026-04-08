@@ -18,7 +18,6 @@ import {
 
     ImageIcon,
     X,
-    Link,
     Upload,
     Check,
     Plus,
@@ -1363,13 +1362,12 @@ export function GeneratePage() {
                 if (v === 'library' && libraryRefImages.length === 0) fetchLibraryRefImages(1, false, libraryRefType)
             }}>
                 <div className="px-4 pt-3 pb-2">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="upload" className="text-xs"><Upload className="size-3 mr-1.5" /> Tải lên</TabsTrigger>
                         <TabsTrigger value="library" className="text-xs"><LayoutGrid className="size-3 mr-1.5" /> Thư viện</TabsTrigger>
-                        <TabsTrigger value="url" className="text-xs"><Link className="size-3 mr-1.5" /> URL</TabsTrigger>
                     </TabsList>
                 </div>
-                <TabsContent value="upload" className="p-4 pt-0 m-0">
+                <TabsContent value="upload" className="p-4 pt-0 m-0 space-y-3">
                     <label
                         htmlFor="ref-image-upload"
                         className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
@@ -1385,6 +1383,18 @@ export function GeneratePage() {
                             onChange={handleFileUpload}
                         />
                     </label>
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="Hoặc dán ảnh từ URL..."
+                            className="h-8 text-xs"
+                            value={refImageUrlInput}
+                            onChange={(e) => setRefImageUrlInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                        />
+                        <Button size="icon" className="size-8 shrink-0" onClick={handleUrlSubmit}>
+                            <Check className="size-4" />
+                        </Button>
+                    </div>
                 </TabsContent>
                 <TabsContent value="library" className="px-4 pt-0 m-0">
                     {/* Bộ lọc loại ảnh */}
@@ -1475,21 +1485,8 @@ export function GeneratePage() {
                             </div>
                     )}
                 </TabsContent>
-                <TabsContent value="url" className="p-4 pt-0 m-0">
-                    <div className="flex gap-2">
-                        <Input
-                            placeholder="https://example.com/image.jpg"
-                            className="h-8 text-xs"
-                            value={refImageUrlInput}
-                            onChange={(e) => setRefImageUrlInput(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
-                        />
-                        <Button size="icon" className="size-8 shrink-0" onClick={handleUrlSubmit}>
-                            <Check className="size-4" />
-                        </Button>
-                    </div>
-                </TabsContent>
             </Tabs>
+
         </div>
     )
 
