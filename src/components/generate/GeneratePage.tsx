@@ -18,6 +18,7 @@ import {
 
     ImageIcon,
     X,
+    Link,
     Upload,
     Check,
     Plus,
@@ -1366,15 +1367,17 @@ export function GeneratePage() {
                         <TabsTrigger value="library" className="text-xs"><LayoutGrid className="size-3 mr-1.5" /> Thư viện</TabsTrigger>
                     </TabsList>
                 </div>
-                <TabsContent value="upload" className="p-4 pt-0 m-0 min-h-[280px]">
-                    <div className="flex flex-col gap-3 h-full">
-                        {/* Khu vực chọn file */}
+                <TabsContent value="upload" className="flex flex-col p-4 pt-0 m-0 min-h-[280px]">
+                    <div className="flex flex-col gap-3">
+                        {/* Lõi chọn file */}
                         <label
                             htmlFor="ref-image-upload"
-                            className="flex flex-col items-center justify-center w-full h-20 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors shrink-0"
+                            className="group flex flex-col items-center justify-center w-full h-24 rounded-xl border-2 border-dashed border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-primary/50 cursor-pointer transition-all"
                         >
-                            <Upload className="size-4 text-muted-foreground mb-1.5" />
-                            <span className="text-xs text-muted-foreground font-medium">Chọn ảnh từ máy</span>
+                            <div className="p-2.5 rounded-full bg-background border border-border/50 group-hover:scale-110 transition-transform mb-2 shadow-sm">
+                                <Upload className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                            </div>
+                            <span className="text-[11px] text-muted-foreground font-medium">Bấm hoặc kéo thả ảnh vào đây</span>
                             <input
                                 id="ref-image-upload"
                                 type="file"
@@ -1385,44 +1388,62 @@ export function GeneratePage() {
                             />
                         </label>
 
-                        {/* Hiển thị ảnh tham chiếu đã thêm */}
-                        {referenceImages.length > 0 && (
-                            <div className="space-y-1.5">
-                                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Đã thêm ({referenceImages.length}/{MAX_REFERENCE_IMAGES})</span>
-                                <div className="grid grid-cols-4 gap-1.5">
-                                    {referenceImages.map((src, idx) => (
-                                        <div key={idx} className="relative group/thumb aspect-square rounded-md overflow-hidden border border-border/40">
-                                            <img src={src} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
-                                            <button
-                                                type="button"
-                                                onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
-                                                className="absolute inset-0 bg-black/0 group-hover/thumb:bg-black/40 transition-colors flex items-center justify-center"
-                                            >
-                                                <X className="size-3.5 text-white opacity-0 group-hover/thumb:opacity-100 transition-opacity drop-shadow-lg" />
-                                            </button>
-                                            <div className="absolute top-0.5 left-0.5 bg-black/60 text-white text-[8px] font-bold h-3.5 w-3.5 rounded-full flex items-center justify-center">
-                                                {idx + 1}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        {/* Phân cách */}
+                        <div className="relative flex items-center py-1">
+                            <div className="flex-grow border-t border-border/40"></div>
+                            <span className="shrink-0 px-2 text-[10px] text-muted-foreground uppercase tracking-wider">Hoặc nhập liên kết</span>
+                            <div className="flex-grow border-t border-border/40"></div>
+                        </div>
 
                         {/* Nhập URL */}
-                        <div className="flex gap-2 mt-auto">
-                            <Input
-                                placeholder="Hoặc dán ảnh từ URL..."
-                                className="h-8 text-xs"
-                                value={refImageUrlInput}
-                                onChange={(e) => setRefImageUrlInput(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
-                            />
-                            <Button size="icon" className="size-8 shrink-0" onClick={handleUrlSubmit}>
+                        <div className="flex gap-2">
+                            <div className="relative flex-1">
+                                <Link className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                                <Input
+                                    placeholder="https://"
+                                    className="h-9 pl-8 text-xs bg-muted/20 border-border/50 focus-visible:ring-primary/30"
+                                    value={refImageUrlInput}
+                                    onChange={(e) => setRefImageUrlInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                                />
+                            </div>
+                            <Button size="icon" className="size-9 shrink-0 shadow-sm" onClick={handleUrlSubmit} disabled={!refImageUrlInput.trim()}>
                                 <Check className="size-4" />
                             </Button>
                         </div>
                     </div>
+
+                    {/* Hiển thị ảnh tham chiếu đã thêm - Neo đáy */}
+                    {referenceImages.length > 0 && (
+                        <div className="mt-auto pt-5">
+                            <div className="flex items-center justify-between mb-2.5">
+                                <span className="text-[10px] uppercase tracking-wider text-foreground font-semibold flex items-center gap-1.5">
+                                    <ImageIcon className="size-3 text-primary" />
+                                    Ảnh đã chọn
+                                </span>
+                                <span className="text-[10px] font-medium text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded-md">
+                                    {referenceImages.length} / {MAX_REFERENCE_IMAGES}
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                                {referenceImages.map((src, idx) => (
+                                    <div key={idx} className="relative group/thumb aspect-square rounded-lg overflow-hidden border border-border/50 shadow-sm">
+                                        <img src={src} alt={`Ref ${idx + 1}`} className="w-full h-full object-cover" />
+                                        <button
+                                            type="button"
+                                            onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
+                                            className="absolute inset-0 bg-black/5 backdrop-blur-[1px] group-hover/thumb:bg-black/40 transition-all flex items-center justify-center"
+                                        >
+                                            <X className="size-4 text-white opacity-0 group-hover/thumb:opacity-100 group-hover/thumb:scale-110 transition-all drop-shadow-md" />
+                                        </button>
+                                        <div className="absolute top-1 left-1 bg-black/60 text-white text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
+                                            {idx + 1}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </TabsContent>
                 <TabsContent value="library" className="px-4 pt-0 m-0 min-h-[280px]">
                     {/* Bộ lọc loại ảnh */}
