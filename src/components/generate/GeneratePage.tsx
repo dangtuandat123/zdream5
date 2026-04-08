@@ -1315,7 +1315,7 @@ export function GeneratePage() {
         if (files.length > 0) {
             const urls = files.map(file => URL.createObjectURL(file))
             addReferenceImages(urls)
-            setIsImagePopoverOpen(false) // Tự động đóng Popover khi chọn xong file từ máy
+            // Không tự động đóng Popover, để user nhìn thấy ảnh vừa chọn trong list
         }
         // Cho phép chọn lại file vừa xoá
         if (e.target) {
@@ -1367,10 +1367,10 @@ export function GeneratePage() {
                         <TabsTrigger value="library" className="text-xs"><LayoutGrid className="size-3 mr-1.5" /> Thư viện</TabsTrigger>
                     </TabsList>
                 </div>
-                <TabsContent value="upload" className="p-4 pt-0 m-0 space-y-3">
+                <TabsContent value="upload" className="h-[280px] flex flex-col p-4 pt-0 m-0">
                     <label
                         htmlFor="ref-image-upload"
-                        className="flex flex-col items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors"
+                        className="flex flex-col items-center justify-center w-full h-24 shrink-0 rounded-lg border-2 border-dashed border-border/50 bg-muted/30 hover:bg-muted/50 cursor-pointer transition-colors mb-3"
                     >
                         <Upload className="size-5 text-muted-foreground mb-2" />
                         <span className="text-xs text-muted-foreground font-medium">Chọn ảnh từ máy</span>
@@ -1383,7 +1383,32 @@ export function GeneratePage() {
                             onChange={handleFileUpload}
                         />
                     </label>
-                    <div className="flex gap-2">
+
+                    {/* Danh sách ảnh đã tải lên / chọn (Scrollable) */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 relative">
+                        {referenceImages.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 content-start pt-1 pb-2">
+                                {referenceImages.map((url, idx) => (
+                                    <div key={idx} className="relative shrink-0 size-[60px] rounded-md overflow-hidden border border-border/50 group">
+                                        <img src={url} alt="Ref" className="w-full h-full object-cover" />
+                                        <button 
+                                            type="button"
+                                            onClick={() => setReferenceImages(prev => prev.filter(u => u !== url))}
+                                            className="absolute top-1 right-1 bg-black/60 hover:bg-destructive text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        >
+                                            <X className="size-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-xs text-muted-foreground/50">
+                                Chưa có ảnh nào đính kèm
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="flex gap-2 shrink-0 mt-3">
                         <Input
                             placeholder="Hoặc dán ảnh từ URL..."
                             className="h-8 text-xs"
@@ -1396,9 +1421,9 @@ export function GeneratePage() {
                         </Button>
                     </div>
                 </TabsContent>
-                <TabsContent value="library" className="px-4 pt-0 m-0">
+                <TabsContent value="library" className="h-[280px] flex flex-col px-4 pt-0 m-0">
                     {/* Bộ lọc loại ảnh */}
-                    <div className="flex gap-1.5 mb-3">
+                    <div className="flex gap-1.5 mb-3 shrink-0">
                         {([
                             { value: null, label: 'Tất cả' },
                             { value: 'ai', label: 'AI' },
@@ -1409,10 +1434,10 @@ export function GeneratePage() {
                                 key={label}
                                 type="button"
                                 className={cn(
-                                    'px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors',
+                                    'px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors border',
                                     libraryRefType === value
-                                        ? 'bg-primary text-primary-foreground'
-                                        : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                                        ? 'bg-primary border-primary text-primary-foreground shadow-sm'
+                                        : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/60'
                                 )}
                                 onClick={() => {
                                     setLibraryRefType(value)
@@ -1424,18 +1449,18 @@ export function GeneratePage() {
                         ))}
                     </div>
                     {libraryRefLoading && libraryRefImages.length === 0 ? (
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-3 gap-2 flex-1 overflow-y-auto content-start custom-scrollbar">
                             {Array.from({ length: 6 }).map((_, i) => (
                                 <Skeleton key={i} className="aspect-square rounded-lg" />
                             ))}
                         </div>
                     ) : libraryRefImages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <div className="flex flex-col items-center justify-center flex-1 text-center">
                             <ImageIcon className="size-8 text-muted-foreground/40 mb-2" />
                             <span className="text-xs text-muted-foreground">Thư viện trống</span>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1 overscroll-contain">
+                        <div className="grid grid-cols-3 gap-2 flex-1 overflow-y-auto custom-scrollbar pr-1 overscroll-contain content-start pb-2">
                                 {libraryRefImages.map((img) => (
                                     <button
                                         key={img.id}
