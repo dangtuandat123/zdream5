@@ -1484,30 +1484,61 @@ export function GeneratePage() {
                         </div>
                     ) : (
                         <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto custom-scrollbar pr-1 overscroll-contain">
-                                {libraryRefImages.map((img) => (
-                                    <button
-                                        key={img.id}
-                                        type="button"
-                                        className="group relative aspect-square rounded-lg overflow-hidden border border-border/30 hover:border-primary/60 transition-all hover:ring-2 hover:ring-primary/30 focus-visible:ring-2 focus-visible:ring-primary"
-                                        onClick={() => {
-                                            setReferenceImages(prev => {
-                                                if (prev.includes(img.file_url)) return prev
-                                                return [...prev, img.file_url]
-                                            })
-                                            toast.success('Đã thêm ảnh tham chiếu', { id: 'ref-add' })
-                                        }}
-                                    >
-                                        <img
-                                            src={img.file_url}
-                                            alt={img.prompt}
-                                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                            loading="lazy"
-                                        />
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                                            <Plus className="size-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                                        </div>
-                                    </button>
-                                ))}
+                                {libraryRefImages.map((img) => {
+                                    const isSelected = referenceImages.includes(img.file_url)
+
+                                    return (
+                                        <button
+                                            key={img.id}
+                                            type="button"
+                                            className={cn(
+                                                "group relative aspect-square rounded-lg overflow-hidden border transition-all",
+                                                isSelected 
+                                                    ? "border-primary ring-2 ring-primary/50" 
+                                                    : "border-border/30 hover:border-primary/60 hover:ring-2 hover:ring-primary/30 focus-visible:ring-2 focus-visible:ring-primary"
+                                            )}
+                                            onClick={() => {
+                                                if (isSelected) {
+                                                    setReferenceImages(prev => prev.filter(url => url !== img.file_url))
+                                                } else {
+                                                    setReferenceImages(prev => {
+                                                        const remaining = MAX_REFERENCE_IMAGES - prev.length
+                                                        if (remaining <= 0) {
+                                                            toast.error(`Tối đa ${MAX_REFERENCE_IMAGES} ảnh tham chiếu.`, { id: 'ref-limit' })
+                                                            return prev
+                                                        }
+                                                        toast.success('Đã chọn thêm ảnh', { id: 'ref-add' })
+                                                        return [...prev, img.file_url]
+                                                    })
+                                                }
+                                            }}
+                                        >
+                                            <img
+                                                src={img.file_url}
+                                                alt={img.prompt}
+                                                className={cn(
+                                                    "w-full h-full object-cover transition-transform",
+                                                    isSelected ? "scale-105 opacity-90" : "group-hover:scale-105"
+                                                )}
+                                                loading="lazy"
+                                            />
+                                            <div className={cn(
+                                                "absolute inset-0 transition-all flex items-center justify-center",
+                                                isSelected 
+                                                    ? "bg-primary/20 backdrop-blur-[0.5px]" 
+                                                    : "bg-black/0 group-hover:bg-black/20"
+                                            )}>
+                                                {isSelected ? (
+                                                    <div className="bg-primary text-primary-foreground rounded-full p-1.5 shadow-md scale-110 drop-shadow-sm">
+                                                        <Check className="size-4" strokeWidth={3} />
+                                                    </div>
+                                                ) : (
+                                                    <Plus className="size-5 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                                                )}
+                                            </div>
+                                        </button>
+                                    )
+                                })}
                                 {/* Sentinel element — infinite scroll trigger */}
                                 {libraryRefHasMore && (
                                     <div
