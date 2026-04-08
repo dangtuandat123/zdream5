@@ -1763,8 +1763,9 @@ export function GeneratePage() {
                                 backdropFilter: isHeaderHidden ? "blur(0px)" : "blur(5px)"
                             }}
                             transition={{ 
-                                duration: 0.2, 
-                                ease: "easeOut"
+                                duration: 0.3, 
+                                ease: "easeOut",
+                                delay: isHeaderHidden ? 0 : 0.4 
                             }}
                             className="absolute inset-0 -z-10 bg-background/20 pointer-events-none"
                             style={{ 
