@@ -1588,7 +1588,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={ar.value}
                             value={ar.value}
-                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs border border-white/10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
+                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:border-white/20 data-[state=on]:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
                         >
                             <ar.icon className="size-4" />
                             {ar.label}
@@ -1610,7 +1610,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={n}
                             value={n}
-                            className="rounded-lg text-xs border border-white/10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
+                            className="rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:border-white/20 data-[state=on]:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
                         >
                             {n}
                         </ToggleGroupItem>
@@ -1649,7 +1649,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={s.value}
                             value={s.value}
-                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs border border-white/10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
+                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:border-white/20 data-[state=on]:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
                         >
                             <span className="font-semibold">{s.label}</span>
                             <span className="text-[9px] opacity-60">{s.desc}</span>
@@ -2239,7 +2239,7 @@ export function GeneratePage() {
                                     className="pointer-events-auto"
                                 >
                                     <button
-                                        className="h-8 md:h-9 px-3.5 md:px-4 rounded-full bg-[#1c1c1e] border border-[#303030] shadow-xl flex items-center justify-center gap-1.5 text-[#a1a1aa] hover:text-white hover:bg-[#2c2c2e] transition-all outline-none group"
+                                        className="h-8 md:h-9 px-3.5 md:px-4 rounded-full bg-[#2a2d31]/95 border border-white/10 shadow-xl backdrop-blur-xl flex items-center justify-center gap-1.5 text-white/70 hover:text-white hover:bg-white/10 transition-all outline-none group"
                                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                                         aria-label="Lên đầu trang"
                                     >
@@ -2259,18 +2259,18 @@ export function GeneratePage() {
                                     className="pointer-events-auto"
                                 >
                                     <button
-                                        className="h-8 md:h-9 px-3.5 md:px-4 rounded-full bg-[#1c1c1e] border border-[#303030] shadow-xl flex items-center justify-center gap-2 text-[#a1a1aa] hover:text-white hover:bg-[#2c2c2e] transition-all outline-none group"
+                                        className="h-8 md:h-9 px-3.5 md:px-4 rounded-full bg-[#2a2d31]/95 border border-white/10 shadow-xl backdrop-blur-xl flex items-center justify-center gap-2 text-white/70 hover:text-white hover:bg-white/10 transition-all outline-none group"
                                         onClick={(e) => {
                                             e.preventDefault()
                                             window.scrollTo({ top: 0, behavior: 'smooth' })
                                         }}
                                     >
-                                        <div className="size-3.5 border-[2px] border-[#a1a1aa]/30 border-t-[#a1a1aa] rounded-full animate-spin group-hover:border-t-white" />
-                                        <span className="text-[12px] md:text-[13px] font-semibold tracking-wide whitespace-nowrap">0/{imageCount} Đang tạo...</span>
+                                        <div className="size-3.5 border-[2px] border-white/20 border-t-white/80 rounded-full animate-spin group-hover:border-t-white" />
+                                        <span className="text-[12px] md:text-[13px] font-semibold tracking-wide whitespace-nowrap text-white/80">0/{imageCount} Đang tạo...</span>
                                         {isScrolledDown && (
                                             <>
-                                                <div className="w-px h-3.5 bg-[#303030] mx-0.5" />
-                                                <span className="text-[12px] md:text-[13px] font-semibold tracking-wide flex items-center gap-1.5">
+                                                <div className="w-px h-3.5 bg-white/10 mx-0.5" />
+                                                <span className="text-[12px] md:text-[13px] font-semibold tracking-wide flex items-center gap-1.5 text-white/80">
                                                     Lên trên cùng <ChevronUp className="size-3.5 md:size-4 opacity-70 group-hover:opacity-100" />
                                                 </span>
                                             </>
@@ -2305,8 +2305,8 @@ export function GeneratePage() {
                         {/* Prompt History Dropdown — floating above pill */}
                         {showHistory && promptHistory.length > 0 && (
                             <div ref={historyRef} className="bg-[#2a2d31]/95 backdrop-blur-xl text-popover-foreground border border-white/10 rounded-2xl shadow-2xl overflow-hidden mb-2 animate-in slide-in-from-bottom-2 fade-in duration-200 ring-1 ring-black/5">
-                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-2.5 pb-2 select-none flex items-center gap-1.5 border-b border-border/20">
-                                    <History className="size-3 text-primary" />
+                                <div className="text-[10px] uppercase tracking-wider text-white/40 font-bold px-4 pt-2.5 pb-2 select-none flex items-center gap-1.5 border-b border-white/10">
+                                    <History className="size-3 text-white/60" />
                                     Lịch sử prompt
                                     <span className="ml-auto text-muted-foreground/60 font-medium">({promptHistory.length})</span>
                                 </div>
@@ -2325,7 +2325,7 @@ export function GeneratePage() {
                                         {promptHistory.slice(0, historyDisplayCount).map((p, i) => (
                                             <button
                                                 key={i}
-                                                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors active:bg-accent outline-none text-[13px] text-foreground/90 truncate block"
+                                                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-white/10 text-white/90 hover:text-white transition-colors active:bg-white/15 outline-none text-[13px] truncate block"
                                                 onClick={() => { setPrompt(p); setShowHistory(false) }}
                                                 title={p}
                                             >

@@ -12,11 +12,11 @@ import {
   Menu,
   ChevronRight,
   Shield,
+  Gem,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   CommandDialog,
@@ -87,7 +87,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Mobile Header (chỉ hiện trên màn hình nhỏ) */}
-      <header className="md:hidden sticky top-0 z-40 flex items-center justify-between w-full h-[60px] px-4 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
+      <header className="md:hidden sticky top-0 z-40 flex items-center justify-between w-full h-[60px] px-4 bg-[#2a2d31]/95 backdrop-blur-xl border-b border-white/10 shadow-sm">
         <Link to="/" className="flex items-center gap-2 active:scale-95 transition-transform">
           <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 text-white">
             <Hexagon className="size-4 fill-white/20" />
@@ -97,8 +97,8 @@ export function AppSidebar() {
 
         <div className="flex items-center gap-3">
           <Link to="/app/topup">
-            <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-secondary active:scale-95 transition-all cursor-pointer">
-              <span className="text-sm">💎</span>
+            <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-white/10 hover:bg-white/20 text-white border-white/5 active:scale-95 transition-all cursor-pointer backdrop-blur-md">
+              <Gem className="size-3.5 text-[#60a5fa]" strokeWidth={2.5} />
               <span className="tabular-nums">{gems}</span>
             </Badge>
           </Link>
@@ -186,24 +186,33 @@ export function AppSidebar() {
               {/* Separator */}
               <div className="border-t my-3" />
 
-              {/* Nạp Kim Cương */}
-              <Button
-                variant="default"
+              {/* Nạp Kim Cương mobile */}
+              <button
                 onClick={() => runCommand(() => navigate('/app/topup'))}
                 className={cn(
-                  "w-full h-auto justify-start gap-3.5 rounded-xl px-4 py-3.5 text-left border shadow-[0_0_12px_rgba(59,130,246,0.15)]",
-                  isActive("/app/topup") 
-                    ? "bg-blue-500/20 border-blue-400/50 text-blue-300 ring-1 ring-blue-400/30"
-                    : "bg-blue-500/10 border-blue-400/25 text-blue-300/90 hover:bg-blue-500/20 hover:border-blue-400/40"
+                  "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left border border-transparent",
+                  isActive("/app/topup")
+                    ? "bg-white/10 border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                    : "hover:bg-white/10 active:bg-white/15"
                 )}
               >
-                <span className="text-lg shrink-0">💎</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold">Nạp Kim Cương</p>
-                  <p className="text-xs opacity-80">Hiện có <span className="font-bold">{gems}</span> 💎</p>
+                <div className={cn(
+                  "flex items-center justify-center size-10 rounded-xl shrink-0",
+                  isActive("/app/topup") ? "bg-blue-500/15" : "bg-white/5"
+                )}>
+                  <Gem className={cn(
+                    "size-[22px] transition-transform duration-300 ease-out text-[#60a5fa]", 
+                    isActive("/app/topup") ? "scale-110 drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]" : "text-[#60a5fa]/70"
+                  )} />
                 </div>
-                <ChevronRight className="size-4 opacity-60 shrink-0" />
-              </Button>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm", isActive("/app/topup") ? "font-bold text-white shadow-black" : "font-medium text-white/90")}>
+                    {gems} Kim Cương
+                  </p>
+                  <p className={cn("text-xs", isActive("/app/topup") ? "text-white/70" : "text-white/50")}>Nạp thêm</p>
+                </div>
+                <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+              </button>
 
               {/* Đăng xuất */}
               <button
@@ -271,8 +280,8 @@ export function AppSidebar() {
                 onSelect={() => runCommand(() => navigate('/app/topup'))}
                 className="cursor-pointer py-3"
               >
-                <span className="mr-2">💎</span>
-                <span className="font-medium">Nạp Kim Cương</span>
+                <Gem className="mr-2 size-4 text-[#60a5fa]" />
+                <span className="font-medium text-[#60a5fa]">Nạp Kim Cương</span>
                 <CommandShortcut>{gems} 💎</CommandShortcut>
               </CommandItem>
               <CommandItem
@@ -358,22 +367,32 @@ export function AppSidebar() {
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  asChild
+                <Link
+                  to="/app/topup"
                   className={cn(
-                    "group h-auto w-full flex-col gap-1 py-2.5 rounded-xl transition-all duration-200",
+                    "group flex flex-col items-center justify-center gap-1.5 w-full py-3 rounded-2xl transition-all duration-300 border border-transparent mb-1",
                     isActive("/app/topup")
-                      ? "bg-blue-500/20 border-blue-400/50 text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.2)] ring-1 ring-blue-400/30"
-                      : "bg-blue-500/10 border-blue-400/25 text-blue-300/90 hover:bg-blue-500/20 hover:border-blue-400/40 hover:shadow-[0_0_10px_rgba(59,130,246,0.15)] active:scale-95"
+                      ? "bg-white/10 text-white border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                      : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-white/5 active:bg-white/10"
                   )}
                 >
-                  <Link to="/app/topup">
-                    <span className="text-lg leading-none">💎</span>
-                    <span className="text-[11px] font-bold tabular-nums leading-none">{gems}</span>
-                    <span className="text-[9px] font-medium tracking-wide leading-none opacity-70">Nạp thêm</span>
-                  </Link>
-                </Button>
+                  <Gem className={cn(
+                    "size-[22px] transition-transform duration-300 ease-out text-[#60a5fa]",
+                    isActive("/app/topup") ? "scale-110 drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]" : "group-hover:scale-110 text-[#60a5fa]/70"
+                  )} />
+                  <div className="flex flex-col items-center">
+                    <span className={cn(
+                      "text-[11px] tabular-nums font-bold leading-none mb-1 mt-0.5",
+                      isActive("/app/topup") ? "text-white shadow-black" : "text-white/90"
+                    )}>{gems}</span>
+                    <span className={cn(
+                      "text-[9px] tracking-wide leading-none",
+                      isActive("/app/topup") ? "font-bold text-white shadow-black" : "font-medium opacity-70"
+                    )}>
+                      Nạp thêm
+                    </span>
+                  </div>
+                </Link>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-xs">
                 <p>Bạn có <strong>{gems}</strong> Kim Cương 💎</p>
