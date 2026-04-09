@@ -2352,7 +2352,7 @@ export function GeneratePage() {
                             {showMentionPopover ? (
                                 /* @Mention selector — thay thế vùng ảnh tham chiếu khi đang gõ @ */
                                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
-                                    <div className="mx-3 mt-3 mb-1 bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
+                                    <div className="mx-3 mt-3 mb-1 bg-[#2a2d31]/90 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
                                         <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-2.5 pb-2 select-none flex items-center gap-1.5 border-b border-border/20">
                                             <ImageIcon className="size-3 text-primary" />
                                             Chèn ảnh tham chiếu
