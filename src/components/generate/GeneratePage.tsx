@@ -1844,7 +1844,7 @@ export function GeneratePage() {
                                         </Button>
                                     </PopoverTrigger>
                                     <PopoverContent 
-                                        className="w-[calc(100vw-2rem)] sm:w-[320px] p-0 shadow-xl rounded-xl border-border/40" 
+                                        className="w-[calc(100vw-2rem)] sm:w-[320px] p-0 shadow-2xl rounded-2xl bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 ring-1 ring-black/5" 
                                         align="start"
                                         onOpenAutoFocus={(e) => {
                                             if (window.innerWidth < 768) {
@@ -1852,7 +1852,7 @@ export function GeneratePage() {
                                             }
                                         }}
                                     >
-                                        <Command value={commandValue} onValueChange={setCommandValue}>
+                                        <Command value={commandValue} onValueChange={setCommandValue} className="bg-transparent">
                                             <CommandInput placeholder="Tìm kiếm thư mục..." />
                                             <CommandList className="custom-scrollbar">
                                                 <CommandEmpty>Không tìm thấy thư mục nào.</CommandEmpty>
@@ -1871,7 +1871,7 @@ export function GeneratePage() {
                                                         />
                                                     </CommandItem>
                                                 </CommandGroup>
-                                                <CommandSeparator />
+                                                <CommandSeparator className="bg-white/10" />
                                                 <CommandGroup heading="Thư mục của bạn">
                                                     {projects.map((project) => (
                                                         <CommandItem
@@ -1891,7 +1891,7 @@ export function GeneratePage() {
                                                     ))}
                                                 </CommandGroup>
                                             </CommandList>
-                                            <CommandSeparator />
+                                            <CommandSeparator className="bg-white/10" />
                                             <div className="p-1.5 space-y-1">
                                                 <Dialog open={isCreatingProject} onOpenChange={setIsCreatingProject}>
                                                     <DialogTrigger asChild>
