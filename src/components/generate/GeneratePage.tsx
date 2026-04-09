@@ -2634,8 +2634,8 @@ export function GeneratePage() {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
                                             </Tooltip>
-                                            <PopoverContent side="top" align="start" className="w-80 p-0" onOpenAutoFocus={(e) => e.preventDefault()} onWheel={(e) => e.stopPropagation()}>
-                                                <div className="p-4 border-b border-border/50">
+                                            <PopoverContent side="top" align="start" className="w-80 p-0 bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5" onOpenAutoFocus={(e) => e.preventDefault()} onWheel={(e) => e.stopPropagation()}>
+                                                <div className="p-4 border-b border-border/20">
                                                     <div className="flex items-center gap-2 font-medium text-sm">
                                                         <ImageIcon className="size-4 text-primary" />
                                                         Cung cấp ảnh tham chiếu
@@ -2687,8 +2687,8 @@ export function GeneratePage() {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Cài đặt kiến tạo</TooltipContent>
                                             </Tooltip>
-                                            <PopoverContent side="top" align="start" className="w-[320px] p-0" onWheel={(e) => e.stopPropagation()}>
-                                                <div className="p-4 border-b border-border/50">
+                                            <PopoverContent side="top" align="start" className="w-[320px] p-0 bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5" onWheel={(e) => e.stopPropagation()}>
+                                                <div className="p-4 border-b border-border/20">
                                                     <div className="flex items-center gap-2 font-medium text-sm">
                                                         <Wand2 className="size-4 text-primary" />
                                                         Thông số kiến tạo
