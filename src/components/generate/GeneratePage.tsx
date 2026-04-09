@@ -23,7 +23,7 @@ import {
     Check,
     Plus,
     Copy,
-    ChevronDown,
+
     ChevronUp,
     History,
     CheckSquare,
@@ -491,16 +491,9 @@ export function GeneratePage() {
     
     // Header Scroll State (Headroom)
     const { scrollY } = useScroll()
-    const [isHeaderHidden, setIsHeaderHidden] = useState(false)
     const [isScrolledDown, setIsScrolledDown] = useState(false)
     useMotionValueEvent(scrollY, "change", (latest) => {
         setIsScrolledDown(latest > 200)
-        const previous = scrollY.getPrevious() ?? 0
-        if (latest > previous && latest > 150) {
-            setIsHeaderHidden(true)
-        } else {
-            setIsHeaderHidden(false)
-        }
     })
     const isMobile = useIsMobile()
     const [isGenerating, setIsGenerating] = useState(false)
@@ -1798,23 +1791,16 @@ export function GeneratePage() {
                 <div className="relative z-10 flex-1 flex flex-col p-3 sm:p-4 lg:p-6 min-w-0">
                     {/* Top Canvas Header: Smart Sticky Header (Headroom pattern) */}
                     <motion.div 
-                        variants={{ visible: { y: 0, opacity: 1 }, hidden: { y: "-110%", opacity: 0 } }}
-                        animate={isHeaderHidden ? "hidden" : "visible"}
-                        transition={{ duration: 0.35, ease: "easeInOut" }}
+                        initial={{ y: -50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.35, ease: "easeOut" }}
                         className="sticky top-[60px] md:top-0 z-30 py-3 -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 mb-4 sm:mb-6"
                     >
                         {/* Fading Blur Background Layer — Animated for smooth entry/exit */}
                         <motion.div 
                             initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-                            animate={{ 
-                                opacity: isHeaderHidden ? 0 : 1,
-                                backdropFilter: isHeaderHidden ? "blur(0px)" : "blur(5px)"
-                            }}
-                            transition={{ 
-                                duration: 0.3, 
-                                ease: "easeOut",
-                                delay: isHeaderHidden ? 0 : 0.4 
-                            }}
+                            animate={{ opacity: 1, backdropFilter: "blur(5px)" }}
+                            transition={{ duration: 0.3, ease: "easeOut", delay: 0.2 }}
                             className="absolute inset-0 -z-10 bg-background/20 pointer-events-none"
                             style={{ 
                                 maskImage: 'linear-gradient(to bottom, black calc(100% - 25px), transparent 100%)', 
@@ -1971,23 +1957,7 @@ export function GeneratePage() {
                         
                     </motion.div>
 
-                    {/* Floating Toggle Button (Sticky to stay centered in the exact canvas area) */}
-                    <div className="sticky top-[70px] md:top-6 z-40 w-full flex justify-center items-start pointer-events-none h-0">
-                        <AnimatePresence>
-                            {isHeaderHidden && (
-                                <motion.button
-                                    initial={{ y: -50, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -50, opacity: 0 }}
-                                    onClick={() => setIsHeaderHidden(false)}
-                                    className="pointer-events-auto bg-background/90 backdrop-blur-md border border-border shadow-md rounded-full px-4 py-2 flex items-center justify-center cursor-pointer hover:bg-muted/80 transition-shadow mt-1"
-                                >
-                                    <ChevronDown className="size-3.5 text-foreground mr-1.5" />
-                                    <span className="text-[12px] font-bold text-foreground">Hiện công cụ</span>
-                                </motion.button>
-                            )}
-                        </AnimatePresence>
-                    </div>
+
 
                     <div className="w-full flex flex-col flex-1 min-w-0">
                         {/* Empty State — Solid, Neo-brutalism flat design */}
