@@ -47,15 +47,16 @@ export function AppSidebar() {
   const navigate = useNavigate()
   const { gems, isAdmin, logout } = useAuth()
   const isMobile = useIsMobile()
-  const [open, setOpen] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [commandValue, setCommandValue] = useState("")
 
-  // Phím tắt ⌘K hoặc Ctrl+K để mở menu
+  // Phím tắt ⌘K hoặc Ctrl+K để mở menu search
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
-        setOpen((open) => !open)
+        setIsSearchOpen((open) => !open)
       }
     }
     document.addEventListener("keydown", down)
@@ -73,14 +74,15 @@ export function AppSidebar() {
   }
 
   useEffect(() => {
-    if (open) {
+    if (isSearchOpen || isDrawerOpen) {
       const activeItem = navItems.find((item) => isActive(item.path))
       setCommandValue(activeItem ? activeItem.label : "")
     }
-  }, [open, location.pathname])
+  }, [isSearchOpen, isDrawerOpen, location.pathname])
 
   const runCommand = (command: () => void) => {
-    setOpen(false)
+    setIsSearchOpen(false)
+    setIsDrawerOpen(false)
     command()
   }
 
@@ -104,7 +106,7 @@ export function AppSidebar() {
           </Link>
 
           <button
-            onClick={() => setOpen(true)}
+            onClick={() => setIsDrawerOpen(true)}
             className="flex items-center justify-center size-9 rounded-full bg-secondary/80 hover:bg-secondary active:scale-95 transition-all border border-border/50 text-foreground"
           >
             <Menu className="size-5" />
@@ -113,8 +115,8 @@ export function AppSidebar() {
       </header>
 
       {/* === Mobile: Drawer bottom sheet === */}
-      {isMobile ? (
-        <Drawer open={open} onOpenChange={setOpen}>
+      {isMobile && (
+        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-2xl">
             <div className="px-4 pt-2 pb-8">
               {/* Navigation items */}
@@ -221,9 +223,11 @@ export function AppSidebar() {
             </div>
           </DrawerContent>
         </Drawer>
-      ) : (
-        /* === Desktop: Command Palette === */
-        <CommandDialog open={open} onOpenChange={setOpen} commandProps={{ value: commandValue, onValueChange: setCommandValue }}>
+      )}
+
+      {/* === Desktop: Command Palette (Search Overlay) === */}
+      {(!isMobile || isSearchOpen) && (
+        <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} commandProps={{ value: commandValue, onValueChange: setCommandValue }}>
           <CommandInput placeholder="Tìm kiếm trang hoặc tính năng..." />
           <CommandList className="scrollbar-none custom-scrollbar pb-2 pt-1">
             <CommandEmpty>Không tìm thấy phần nào.</CommandEmpty>
