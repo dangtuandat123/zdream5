@@ -2390,8 +2390,8 @@ export function GeneratePage() {
                             <div className={cn("relative px-4 pb-3", referenceImages.length > 0 ? "pt-2" : "pt-3")}>
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
-                                    <div className="absolute bottom-full mb-3 left-3 z-[60] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                                        <div className="bg-popover/95 backdrop-blur-xl text-popover-foreground border border-border/60 rounded-2xl shadow-2xl overflow-hidden w-[280px] ring-1 ring-black/5">
+                                    <div className="absolute bottom-full mb-1 left-0 right-0 z-[60] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                        <div className="bg-popover/95 backdrop-blur-xl text-popover-foreground border border-border/60 rounded-2xl shadow-2xl overflow-hidden w-full ring-1 ring-black/5">
                                             <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-3 pb-2 select-none flex items-center gap-1.5 bg-muted/20 border-b border-border/30">
                                                 <ImageIcon className="size-3 text-primary" />
                                                 Chèn ảnh tham chiếu
