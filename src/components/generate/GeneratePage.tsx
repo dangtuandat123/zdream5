@@ -2765,11 +2765,24 @@ export function GeneratePage() {
             <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-[28px]">
                 <DrawerHeader className="text-left pb-2">
                     <DrawerTitle className="text-sm font-semibold">Tùy chọn ảnh</DrawerTitle>
-                    <DrawerDescription className="text-xs text-muted-foreground/80 line-clamp-2">
-                        {actionImage?.prompt || "Không có prompt"}
-                    </DrawerDescription>
                 </DrawerHeader>
                 <div className="flex flex-col gap-1 p-4 pt-0">
+                    {/* Thumbnail Preview */}
+                    {actionImage && (
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 mb-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+                            <img
+                                src={actionImage.url}
+                                alt=""
+                                className="size-14 rounded-xl object-cover shrink-0 bg-black/20"
+                            />
+                            <div className="min-w-0 flex-1">
+                                <p className="text-xs font-medium text-white/90 line-clamp-2 leading-snug">
+                                    {actionImage.prompt || "Không có nội dung mô tả"}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     <Button
                         variant="ghost"
                         className="justify-start hover:bg-white/10 rounded-xl"
