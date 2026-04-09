@@ -405,27 +405,28 @@ export function LibraryPage() {
                         Tất cả kết quả hình ảnh và tài nguyên của bạn.
                     </p>
                 </div>
-                <div className="flex flex-col sm:flex-row w-full sm:w-auto items-stretch sm:items-center gap-3">
-                    <div className="relative w-full sm:w-[240px]">
+                <div className="flex w-full sm:w-auto items-center gap-2">
+                    <div className="relative flex-1 sm:w-[240px]">
                         <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             placeholder="Tìm theo prompt, mẫu..."
-                            className="pl-9 h-9"
+                            className="pl-9 h-9 border-white/10 bg-white/5 focus-visible:ring-1 focus-visible:ring-primary/50 transition-colors"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
                     <Button
+                        variant="secondary"
                         onClick={handleUploadClick}
-                        className="h-9 whitespace-nowrap px-4 w-full sm:w-auto"
+                        className="h-9 px-3 sm:px-4 shrink-0 transition-transform active:scale-95 bg-white/10 hover:bg-white/15 text-white border border-white/10"
                         disabled={isUploading}
                     >
                         {isUploading ? (
-                            <div className="size-4 mr-2 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                            <div className="size-4 sm:mr-2 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            <UploadIcon className="size-4 mr-2" />
+                            <UploadIcon className="size-4 sm:mr-2" />
                         )}
-                        Tải ảnh lên
+                        <span className="hidden sm:inline">Tải ảnh lên</span>
                     </Button>
                     {/* Hidden file input (hỗ trợ multiple) */}
                     <input
@@ -440,11 +441,11 @@ export function LibraryPage() {
             </div>
 
             {/* Tabs filter + Sort */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3">
-                <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
-                    <TabsList className="grid w-full grid-cols-3 sm:w-[360px]">
+            <div className="flex items-center gap-2 border-b border-border pb-3 w-full">
+                <Tabs value={tab} onValueChange={setTab} className="flex-1">
+                    <TabsList className="grid w-full grid-cols-3 sm:w-[360px] bg-[#1a1c20] border border-white/5 p-1 rounded-lg">
                         {TABS.map((t) => (
-                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs px-4 py-1.5">
+                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs py-1.5 data-[state=active]:bg-[#2a2d31] data-[state=active]:text-white">
                                 <t.icon className="size-3.5" />
                                 {t.label}
                             </TabsTrigger>
@@ -453,9 +454,9 @@ export function LibraryPage() {
                 </Tabs>
 
                 <Select value={sort} onValueChange={setSort}>
-                    <SelectTrigger className="w-full sm:w-[120px] h-8 text-xs shrink-0">
-                        <CalendarIcon className="size-3 mr-1.5 text-muted-foreground" />
-                        <SelectValue />
+                    <SelectTrigger className="w-10 h-10 sm:w-[130px] sm:h-9 shrink-0 flex items-center justify-center sm:justify-start px-0 sm:px-3 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 transition-colors [&>svg:last-child]:hidden sm:[&>svg:last-child]:block">
+                        <CalendarIcon className="size-4 sm:size-3 sm:mr-1.5 text-muted-foreground" />
+                        <span className="hidden sm:inline"><SelectValue /></span>
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="newest">Mới nhất</SelectItem>
