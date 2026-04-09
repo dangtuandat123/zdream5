@@ -1808,7 +1808,7 @@ export function GeneratePage() {
                             }}
                         />
 
-                        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1 sm:px-0">
+                        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 sm:px-0">
                             <div className="flex items-center gap-3 w-full sm:w-auto">
                                 <Popover open={isProjectMenuOpen} onOpenChange={setIsProjectMenuOpen}>
                                     <PopoverTrigger asChild>
@@ -1938,7 +1938,7 @@ export function GeneratePage() {
 
                             {/* Stats & Actions (Moved to same row on desktop) */}
                             {images.length > 0 && !isHistoryLoading && (
-                                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end mt-3 sm:mt-0">
+                                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                                     <Badge variant="default" className="font-semibold bg-[#2a2d31]/80 text-foreground/80 hover:bg-[#2a2d31] pointer-events-none rounded-xl px-2.5 border border-white/10">
                                         {images.length} ảnh đã tạo
                                     </Badge>
