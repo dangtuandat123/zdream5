@@ -2325,7 +2325,7 @@ export function GeneratePage() {
 
                         {/* Pill Container — with Drag & Drop */}
                         <div
-                            className={`relative flex flex-col w-full transition-all duration-300 border rounded-[30px] backdrop-blur-xl ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border-border/30 bg-[#37393b]/85 shadow-lg'}`}
+                            className={`relative flex flex-col w-full transition-all duration-300 rounded-[30px] backdrop-blur-xl ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border border-white/10 bg-[#2a2d31]/95 shadow-xl ring-1 ring-black/5'}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
