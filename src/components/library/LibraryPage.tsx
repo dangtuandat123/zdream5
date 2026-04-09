@@ -36,7 +36,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -524,23 +523,29 @@ export function LibraryPage() {
                                                         <MoreHorizontalIcon className="size-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="w-44">
-                                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDownload(item) }}>
-                                                        <DownloadIcon className="size-4 mr-2" />
+                                                <DropdownMenuContent align="end" className="w-48 bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5 text-white p-1.5">
+                                                    <DropdownMenuItem
+                                                        onClick={(e) => { e.stopPropagation(); handleDownload(item) }}
+                                                        className="rounded-xl px-3 py-2.5 text-white/90 focus:bg-white/10 focus:text-white cursor-pointer gap-3"
+                                                    >
+                                                        <DownloadIcon className="size-4 text-white/60" />
                                                         Tải xuống
                                                     </DropdownMenuItem>
                                                     {item.type === "ai" && item.prompt && (
-                                                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.location.href = `/app/generate?prompt=${encodeURIComponent(item.prompt || "")}` }}>
-                                                            <WandIcon className="size-4 mr-2" />
+                                                        <DropdownMenuItem
+                                                            onClick={(e) => { e.stopPropagation(); window.location.href = `/app/generate?prompt=${encodeURIComponent(item.prompt || "")}` }}
+                                                            className="rounded-xl px-3 py-2.5 text-white/90 focus:bg-white/10 focus:text-white cursor-pointer gap-3"
+                                                        >
+                                                            <WandIcon className="size-4 text-white/60" />
                                                             Tạo tương tự
                                                         </DropdownMenuItem>
                                                     )}
-                                                    <DropdownMenuSeparator />
+                                                    <div className="border-t border-white/10 my-1 mx-1" />
                                                     <DropdownMenuItem
-                                                        className="text-destructive focus:text-destructive"
+                                                        className="rounded-xl px-3 py-2.5 text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer gap-3"
                                                         onClick={(e) => confirmDelete(item, e)}
                                                     >
-                                                        <Trash2Icon className="size-4 mr-2" />
+                                                        <Trash2Icon className="size-4" />
                                                         Xóa ảnh
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
