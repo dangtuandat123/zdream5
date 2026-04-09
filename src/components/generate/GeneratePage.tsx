@@ -1621,29 +1621,19 @@ export function GeneratePage() {
             {/* Style */}
             <div className="space-y-2">
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Phong cách</Label>
-                <ToggleGroup
-                    type="single"
-                    value={style}
-                    onValueChange={(v) => v && setStyle(v)}
-                    className="grid grid-cols-3 gap-1.5"
-                >
-                    {[
-                        { value: "photorealistic", label: "Chân thực" },
-                        { value: "anime", label: "Anime" },
-                        { value: "digital-art", label: "Digital Art" },
-                        { value: "3d-render", label: "3D Render" },
-                        { value: "watercolor", label: "Màu nước" },
-                        { value: "oil-painting", label: "Sơn dầu" },
-                    ].map((s) => (
-                        <ToggleGroupItem
-                            key={s.value}
-                            value={s.value}
-                            className="rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
-                        >
-                            {s.label}
-                        </ToggleGroupItem>
-                    ))}
-                </ToggleGroup>
+                <Select value={style} onValueChange={setStyle}>
+                    <SelectTrigger className="h-8 border-white/15 bg-white/5">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="photorealistic">Chân thực</SelectItem>
+                        <SelectItem value="anime">Anime</SelectItem>
+                        <SelectItem value="digital-art">Digital Art</SelectItem>
+                        <SelectItem value="3d-render">3D Render</SelectItem>
+                        <SelectItem value="watercolor">Màu nước</SelectItem>
+                        <SelectItem value="oil-painting">Sơn dầu</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Độ phân giải (Image Size) — theo OpenRouter image_config */}
