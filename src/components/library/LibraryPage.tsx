@@ -22,6 +22,7 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -98,11 +99,11 @@ const TABS = [
     { value: "upload", label: "Tải lên", icon: UploadIcon },
 ] as const
 
-// === Badge config theo loại — icon + backdrop cho dễ nhìn trên mọi nền ===
-const TYPE_CONFIG: Record<MediaType, { label: string; icon: typeof SparklesIcon; className: string }> = {
-    ai: { label: "AI", icon: SparklesIcon, className: "bg-blue-500/80 text-white" },
-    template: { label: "Mẫu", icon: PaletteIcon, className: "bg-purple-500/80 text-white" },
-    upload: { label: "Upload", icon: UploadIcon, className: "bg-emerald-500/80 text-white" },
+// === Badge config theo loại — dùng chuẩn Shadcn UI ===
+const TYPE_CONFIG: Record<MediaType, { label: string; icon: typeof SparklesIcon; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+    ai: { label: "AI", icon: SparklesIcon, variant: "default" },
+    template: { label: "Mẫu", icon: PaletteIcon, variant: "secondary" },
+    upload: { label: "Tải lên", icon: UploadIcon, variant: "secondary" },
 }
 
 // === Map API data → MediaItem ===
@@ -492,11 +493,11 @@ export function LibraryPage() {
                                             loading="lazy"
                                         />
 
-                                        {/* Type badge — pill nhỏ gọn, backdrop-blur dễ đọc trên mọi nền */}
-                                        <div className={`absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-md shadow-sm ${typeConfig.className}`}>
+                                        {/* Type badge — pill nhỏ gọn, chuẩn Shadcn UI */}
+                                        <Badge variant={typeConfig.variant} className="absolute top-2 left-2 flex items-center gap-1.5 px-2.5 py-1 shadow-sm text-[10px] pointer-events-none">
                                             <TypeIcon className="size-3" />
                                             {typeConfig.label}
-                                        </div>
+                                        </Badge>
 
                                         {/* Nút ⋯ .— luôn hiện trên mobile, hover hiện trên desktop */}
                                         {isMobile ? (
@@ -661,10 +662,10 @@ export function LibraryPage() {
                     maxZoom={3}
                     badge={selectedItem ? (() => {
                         const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
-                            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm ${cfg.className}`}>
+                            <Badge variant={cfg.variant} className="flex flex-row items-center gap-1.5 px-2.5 py-1 text-xs shadow-sm">
                                 <Icon className="size-3.5" />
                                 {cfg.label}
-                            </div>
+                            </Badge>
                         )
                     })() : undefined}
                     actions={selectedItem ? <>
@@ -848,9 +849,10 @@ export function LibraryPage() {
                                     <div className="flex items-center gap-2 mt-1">
                                         {(() => {
                                             const cfg = TYPE_CONFIG[actionItem.type]; const Icon = cfg.icon; return (
-                                                <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${cfg.className}`}>
-                                                    <Icon className="size-2.5" />{cfg.label}
-                                                </span>
+                                                <Badge variant={cfg.variant} className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px]">
+                                                    <Icon className="size-3" />
+                                                    {cfg.label}
+                                                </Badge>
                                             )
                                         })()}
                                         <span className="text-[11px] text-muted-foreground">{actionItem.createdAt}</span>
