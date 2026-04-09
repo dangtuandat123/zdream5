@@ -87,7 +87,7 @@ export function AppSidebar() {
   return (
     <>
       {/* Mobile Header (chỉ hiện trên màn hình nhỏ) */}
-      <header className="md:hidden sticky top-0 z-40 flex items-center justify-between w-full h-[60px] px-4 bg-[#2a2d31]/95 backdrop-blur-xl border-b border-white/10 shadow-sm">
+      <header className="md:hidden sticky top-0 z-40 flex items-center justify-between w-full h-[60px] px-4 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
         <Link to="/" className="flex items-center gap-2 active:scale-95 transition-transform">
           <div className="flex items-center justify-center size-8 rounded-lg bg-gradient-to-br from-pink-500 via-rose-500 to-orange-400 text-white">
             <Hexagon className="size-4 fill-white/20" />
