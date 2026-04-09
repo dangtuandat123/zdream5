@@ -38,7 +38,8 @@ import {
     Ruler,
     Hash,
     Clock,
-    Sparkles
+    Sparkles,
+    MoreHorizontal
 } from "lucide-react"
 
 import {
@@ -282,6 +283,7 @@ const GalleryImage = React.memo(({
     onSetReferenceImage,
     onImageDragStart,
     onImageTouchStart,
+    onOpenActionDrawer,
     selectionMode,
     isSelected,
     onToggleSelection,
@@ -294,6 +296,7 @@ const GalleryImage = React.memo(({
     onSetReferenceImage: (url: string) => void
     onImageDragStart: (e: React.DragEvent, url: string) => void
     onImageTouchStart: (url: string, x: number, y: number) => void
+    onOpenActionDrawer: (img: GeneratedImage) => void
     selectionMode: boolean
     isSelected: boolean
     onToggleSelection: (id: string) => void
@@ -338,7 +341,8 @@ const GalleryImage = React.memo(({
                     {/* Hover overlay content */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 pointer-events-none" />
                     
-                    <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-100 sm:opacity-0 sm:group-hover/img:opacity-100 transition-opacity duration-300">
+                    {/* Desktop Hover Actions */}
+                    <div className="absolute top-2 right-2 hidden sm:flex flex-col gap-1.5 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onSetReferenceImage(img.url) }}>
@@ -366,6 +370,16 @@ const GalleryImage = React.memo(({
                             <TooltipContent side="left" className="text-xs">Xoá</TooltipContent>
                         </Tooltip>
                     </div>
+
+                    {/* Mobile Menu Action */}
+                    <Button 
+                        variant="secondary"
+                        size="icon"
+                        className="absolute top-1.5 right-1.5 flex sm:hidden size-8 rounded-full bg-black/40 text-white backdrop-blur-md border-0"
+                        onClick={(e) => { e.stopPropagation(); onOpenActionDrawer(img) }}
+                    >
+                        <MoreHorizontal className="size-4" />
+                    </Button>
                 </>
             )}
         </div>
@@ -383,6 +397,7 @@ function JustifiedGallery({
     onSetReferenceImage,
     onImageDragStart,
     onImageTouchStart,
+    onOpenActionDrawer,
     selectionMode,
     selectedIds,
     onToggleSelection,
@@ -397,6 +412,7 @@ function JustifiedGallery({
     onSetReferenceImage: (url: string) => void
     onImageDragStart: (e: React.DragEvent, url: string) => void
     onImageTouchStart: (url: string, x: number, y: number) => void
+    onOpenActionDrawer: (img: GeneratedImage) => void
     selectionMode: boolean
     selectedIds: Set<string>
     onToggleSelection: (id: string) => void
@@ -456,6 +472,7 @@ function JustifiedGallery({
                                 onSetReferenceImage={onSetReferenceImage}
                                 onDownloadImage={onDownloadImage}
                                 onDeleteImage={onDeleteImage}
+                                onOpenActionDrawer={onOpenActionDrawer}
                             />
                         )
                     })}
@@ -501,6 +518,7 @@ export function GeneratePage() {
     const [prompt, setPrompt] = useState("")
     const [images, setImages] = useState<GeneratedImage[]>([])
     const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null)
+    const [actionImage, setActionImage] = useState<GeneratedImage | null>(null)
     const [referenceImages, setReferenceImages] = useState<string[]>([])
     const MAX_REFERENCE_IMAGES = 6
 
@@ -1724,6 +1742,7 @@ export function GeneratePage() {
                     onSetReferenceImage={(url) => {
                         addReferenceImages([url])
                     }}
+                    onOpenActionDrawer={setActionImage}
                     onImageDragStart={(e, url) => {
                         e.dataTransfer.setData('text/plain', url)
                         // Ẩn native ghost
@@ -2740,6 +2759,41 @@ export function GeneratePage() {
                 </div>
             </div>
         </TooltipProvider>
+
+        {/* Mobile Action Drawer */}
+        <Drawer open={!!actionImage} onOpenChange={(open) => !open && setActionImage(null)}>
+            <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-[28px]">
+                <DrawerHeader className="text-left pb-2">
+                    <DrawerTitle className="text-sm font-semibold">Tùy chọn ảnh</DrawerTitle>
+                    <DrawerDescription className="text-xs text-muted-foreground/80 line-clamp-2">
+                        {actionImage?.prompt || "Không có prompt"}
+                    </DrawerDescription>
+                </DrawerHeader>
+                <div className="flex flex-col gap-1 p-4 pt-0">
+                    <Button
+                        variant="ghost"
+                        className="justify-start hover:bg-white/10 rounded-xl"
+                        onClick={() => { if (actionImage) { addReferenceImages([actionImage.url]) }; setActionImage(null) }}
+                    >
+                        <Wand2 className="size-4 mr-3" /> Dùng làm tham chiếu
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className="justify-start hover:bg-white/10 rounded-xl"
+                        onClick={() => { if (actionImage) { downloadImage(actionImage.url, `zdream-${actionImage.id}.jpg`) }; setActionImage(null) }}
+                    >
+                        <Download className="size-4 mr-3" /> Tải xuống
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        className="justify-start hover:bg-destructive/20 text-destructive rounded-xl"
+                        onClick={() => { if (actionImage) { handleDelete(actionImage.id) }; setActionImage(null) }}
+                    >
+                        <Trash2 className="size-4 mr-3" /> Xoá ảnh
+                    </Button>
+                </div>
+            </DrawerContent>
+        </Drawer>
 
         {/* === CUSTOM DRAG AVATAR PORTAL === */}
         {dragState && typeof document !== 'undefined' && createPortal(
