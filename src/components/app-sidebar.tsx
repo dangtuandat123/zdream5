@@ -115,7 +115,7 @@ export function AppSidebar() {
       {/* === Mobile: Drawer bottom sheet === */}
       {isMobile ? (
         <Drawer open={open} onOpenChange={setOpen}>
-          <DrawerContent>
+          <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-2xl">
             <div className="px-4 pt-2 pb-8">
               {/* Navigation items */}
               <div className="space-y-1">
@@ -129,18 +129,18 @@ export function AppSidebar() {
                         "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left",
                         active
                           ? "bg-primary/10 text-primary"
-                          : "hover:bg-muted active:bg-muted"
+                          : "hover:bg-white/10 active:bg-white/15"
                       )}
                     >
                       <div className={cn(
                         "flex items-center justify-center size-10 rounded-xl shrink-0",
-                        active ? "bg-primary/15" : "bg-muted"
+                        active ? "bg-primary/15" : "bg-white/5"
                       )}>
                         <item.icon className={cn("size-5", active ? "text-primary" : "text-muted-foreground")} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={cn("text-sm", active ? "font-semibold" : "font-medium")}>{item.label}</p>
-                        <p className="text-xs text-muted-foreground">{item.desc}</p>
+                        <p className={cn("text-sm", active ? "font-semibold" : "font-medium text-white/90")}>{item.label}</p>
+                        <p className="text-xs text-white/50">{item.desc}</p>
                       </div>
                       {active && (
                         <div className="size-2 rounded-full bg-primary shrink-0" />
@@ -153,25 +153,25 @@ export function AppSidebar() {
               {/* Admin — 1 nút duy nhất */}
               {isAdmin && (
                 <>
-                  <div className="border-t my-3" />
+              <div className="border-t border-white/10 my-3" />
                   <button
                     onClick={() => runCommand(() => navigate("/app/admin"))}
                     className={cn(
                       "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left",
                       isActive("/app/admin")
                         ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted active:bg-muted"
+                        : "hover:bg-white/10 active:bg-white/15"
                     )}
                   >
                     <div className={cn(
                       "flex items-center justify-center size-10 rounded-xl shrink-0",
-                      isActive("/app/admin") ? "bg-primary/15" : "bg-muted"
+                      isActive("/app/admin") ? "bg-primary/15" : "bg-white/5"
                     )}>
                       <Shield className={cn("size-5", isActive("/app/admin") ? "text-primary" : "text-muted-foreground")} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn("text-sm", isActive("/app/admin") ? "font-semibold" : "font-medium")}>Admin</p>
-                      <p className="text-xs text-muted-foreground">Quản lý hệ thống</p>
+                      <p className={cn("text-sm", isActive("/app/admin") ? "font-semibold" : "font-medium text-white/90")}>Admin</p>
+                      <p className="text-xs text-white/50">Quản lý hệ thống</p>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground shrink-0" />
                   </button>
@@ -186,8 +186,8 @@ export function AppSidebar() {
                 variant="default"
                 onClick={() => runCommand(() => navigate('/app/topup'))}
                 className={cn(
-                  "w-full h-auto justify-start gap-3.5 rounded-xl px-4 py-3.5 text-left",
-                  isActive("/app/topup") && "ring-2 ring-primary/30 shadow-lg"
+                  "w-full h-auto justify-start gap-3.5 rounded-xl px-4 py-3.5 text-left border border-white/10 bg-white/5 hover:bg-white/10 text-white shadow-none",
+                  isActive("/app/topup") && "ring-2 ring-primary/30 shadow-lg border-primary/50"
                 )}
               >
                 <span className="text-lg shrink-0">💎</span>
