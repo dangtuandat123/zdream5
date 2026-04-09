@@ -2763,47 +2763,57 @@ export function GeneratePage() {
         {/* Mobile Action Drawer */}
         <Drawer open={!!actionImage} onOpenChange={(open) => !open && setActionImage(null)}>
             <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-[28px]">
-                <DrawerHeader className="text-left pb-2">
-                    <DrawerTitle className="text-sm font-semibold">Tùy chọn ảnh</DrawerTitle>
+                <DrawerHeader className="pb-3 border-b border-white/5 mb-3">
+                    <DrawerTitle className="text-sm font-medium truncate text-white/90 text-center">
+                        Tùy chọn ảnh
+                    </DrawerTitle>
                 </DrawerHeader>
-                <div className="flex flex-col gap-1 p-4 pt-0">
+                <div className="px-4 pb-6 space-y-1">
                     {/* Thumbnail Preview */}
                     {actionImage && (
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 mb-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
                             <img
                                 src={actionImage.url}
                                 alt=""
-                                className="size-14 rounded-xl object-cover shrink-0 bg-black/20"
+                                className="size-14 rounded-xl object-cover shrink-0"
                             />
                             <div className="min-w-0 flex-1">
-                                <p className="text-xs font-medium text-white/90 line-clamp-2 leading-snug">
-                                    {actionImage.prompt || "Không có nội dung mô tả"}
+                                <p className="text-xs font-medium text-white truncate text-left">
+                                    {actionImage.prompt || `zdream-${actionImage.id}.jpg`}
                                 </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] bg-white/10 hover:bg-white/10 text-white border-0">
+                                        <Wand2 className="size-3" />
+                                        {actionImage.model || "Tạo ảnh AI"}
+                                    </Badge>
+                                    <span className="text-[11px] text-white/50">{(() => { try { return new Date(actionImage.createdAt).toISOString().split('T')[0] } catch { return "Mới tạo" }})()}</span>
+                                </div>
                             </div>
                         </div>
                     )}
 
-                    <Button
-                        variant="ghost"
-                        className="justify-start hover:bg-white/10 rounded-xl"
+                    <button
+                        className="flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium hover:bg-white/10 active:bg-white/15 transition-colors"
                         onClick={() => { if (actionImage) { addReferenceImages([actionImage.url]) }; setActionImage(null) }}
                     >
-                        <Wand2 className="size-4 mr-3" /> Dùng làm tham chiếu
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        className="justify-start hover:bg-white/10 rounded-xl"
+                        <Wand2 className="size-5 text-white/70" />
+                        Dùng làm tham chiếu
+                    </button>
+                    <button
+                        className="flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium hover:bg-white/10 active:bg-white/15 transition-colors"
                         onClick={() => { if (actionImage) { downloadImage(actionImage.url, `zdream-${actionImage.id}.jpg`) }; setActionImage(null) }}
                     >
-                        <Download className="size-4 mr-3" /> Tải xuống
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        className="justify-start hover:bg-destructive/20 text-destructive rounded-xl"
+                        <Download className="size-5 text-white/70" />
+                        Tải xuống
+                    </button>
+                    <div className="border-t border-white/10 my-2" />
+                    <button
+                        className="flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
                         onClick={() => { if (actionImage) { handleDelete(actionImage.id) }; setActionImage(null) }}
                     >
-                        <Trash2 className="size-4 mr-3" /> Xoá ảnh
-                    </Button>
+                        <Trash2 className="size-5 text-red-400/70" />
+                        Xoá ảnh
+                    </button>
                 </div>
             </DrawerContent>
         </Drawer>
