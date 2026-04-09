@@ -442,7 +442,7 @@ export function LibraryPage() {
             {/* Tabs filter + Sort */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3">
                 <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto">
-                    <TabsList className="w-full sm:w-auto">
+                    <TabsList className="grid w-full grid-cols-3 sm:w-[360px]">
                         {TABS.map((t) => (
                             <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs px-4 py-1.5">
                                 <t.icon className="size-3.5" />
