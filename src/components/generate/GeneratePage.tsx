@@ -826,7 +826,9 @@ export function GeneratePage() {
     useEffect(() => {
         if (!showHistory) return
         const handler = (e: MouseEvent) => {
-            if (historyRef.current && !historyRef.current.contains(e.target as Node)) {
+            const target = e.target as Element;
+            if (target.closest('[data-history-toggle="true"]')) return;
+            if (historyRef.current && !historyRef.current.contains(target)) {
                 setShowHistory(false)
             }
         }
@@ -2556,7 +2558,8 @@ export function GeneratePage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className={`size-9 rounded-full text-muted-foreground hover:text-foreground ${showHistory ? 'bg-muted/40' : ''}`}
+                                                    data-history-toggle="true"
+                                                    className={`size-9 rounded-full text-muted-foreground hover:text-foreground ${showHistory ? 'bg-muted/40 text-foreground' : ''}`}
                                                     onClick={() => { if (!showHistory) setHistoryDisplayCount(20); setShowHistory(!showHistory) }}
                                                 >
                                                     <History className="size-[18px]" />
