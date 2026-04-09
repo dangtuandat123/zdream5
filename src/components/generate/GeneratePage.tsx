@@ -1959,7 +1959,7 @@ export function GeneratePage() {
 
 
 
-                    <div className="w-full flex flex-col flex-1 min-w-0">
+                    <div className="w-full flex flex-col flex-1 min-w-0 pb-[180px]">
                         {/* Empty State — Solid, Neo-brutalism flat design */}
                         {images.length === 0 && !isGenerating && !isHistoryLoading && (
                             <div className="flex-1 flex flex-col items-center justify-center w-full animate-in fade-in duration-700 px-4 -mt-12">
@@ -2201,8 +2201,8 @@ export function GeneratePage() {
                     </AlertDialogContent>
                 </AlertDialog>
 
-                {/* === PROMPT BAR — sticky dính đáy viewport === */}
-                <div ref={promptContainerRef} className="sticky bottom-0 z-50 mx-auto w-full max-w-2xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background to-[40%] sm:bg-none">
+                {/* === PROMPT BAR — fixed viewport === */}
+                <div ref={promptContainerRef} className="fixed bottom-0 inset-x-0 z-50 mx-auto w-full max-w-2xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background to-[40%] sm:bg-none">
                     {/* Floating Indicators Container */}
                     <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
                         <AnimatePresence>
