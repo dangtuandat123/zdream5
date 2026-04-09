@@ -131,7 +131,7 @@ interface GeneratedImage {
 
 // === Prompt History (localStorage) ===
 const HISTORY_KEY = 'zdream-prompt-history'
-const MAX_HISTORY = 10
+const MAX_HISTORY = 200
 function getPromptHistory(): string[] {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]') } catch { return [] }
 }
@@ -538,6 +538,7 @@ export function GeneratePage() {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
     const [promptHistory, setPromptHistory] = useState<string[]>(getPromptHistory)
     const [showHistory, setShowHistory] = useState(false)
+    const [historyDisplayCount, setHistoryDisplayCount] = useState(20)
     const [isHistoryLoading, setIsHistoryLoading] = useState(true)
     const [isLoadingMore, setIsLoadingMore] = useState(false)
     const [currentPage, setCurrentPage] = useState(1)
@@ -2316,19 +2317,34 @@ export function GeneratePage() {
                                     Lịch sử prompt
                                     <span className="ml-auto text-muted-foreground/60 font-medium">({promptHistory.length})</span>
                                 </div>
-                                <div className="p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-                                    {promptHistory.map((p, i) => (
-                                        <button
-                                            key={i}
-                                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors text-left active:bg-accent outline-none group"
-                                            onClick={() => { setPrompt(p); setShowHistory(false) }}
-                                        >
-                                            <div className="size-7 rounded-lg bg-muted/40 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                                                <span className="text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors">{i + 1}</span>
+                                <div
+                                    className="max-h-[280px] overflow-y-auto custom-scrollbar overscroll-contain"
+                                    onWheel={(e) => e.stopPropagation()}
+                                    onScroll={(e) => {
+                                        const el = e.currentTarget
+                                        // Load thêm khi cuộn gần tới đáy (còn 40px)
+                                        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+                                            setHistoryDisplayCount(prev => Math.min(prev + 20, promptHistory.length))
+                                        }
+                                    }}
+                                >
+                                    <div className="p-1">
+                                        {promptHistory.slice(0, historyDisplayCount).map((p, i) => (
+                                            <button
+                                                key={i}
+                                                className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors active:bg-accent outline-none text-[13px] text-foreground/90 truncate block"
+                                                onClick={() => { setPrompt(p); setShowHistory(false) }}
+                                                title={p}
+                                            >
+                                                {p}
+                                            </button>
+                                        ))}
+                                        {historyDisplayCount < promptHistory.length && (
+                                            <div className="text-center py-2 text-[11px] text-muted-foreground/50">
+                                                Cuộn để xem thêm...
                                             </div>
-                                            <span className="text-[13px] leading-snug line-clamp-2 text-foreground/90">{p}</span>
-                                        </button>
-                                    ))}
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -2571,7 +2587,7 @@ export function GeneratePage() {
                                                     variant="ghost"
                                                     size="icon"
                                                     className={`size-9 rounded-full text-muted-foreground hover:text-foreground ${showHistory ? 'bg-muted/40' : ''}`}
-                                                    onClick={() => setShowHistory(!showHistory)}
+                                                    onClick={() => { if (!showHistory) setHistoryDisplayCount(20); setShowHistory(!showHistory) }}
                                                 >
                                                     <History className="size-[18px]" />
                                                 </Button>
