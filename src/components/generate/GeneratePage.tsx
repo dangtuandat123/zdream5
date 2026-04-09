@@ -1544,13 +1544,13 @@ export function GeneratePage() {
             <div className="space-y-2 sm:hidden">
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Model</Label>
                 <Select value={model} onValueChange={setModel}>
-                    <SelectTrigger className="h-8 border-white/15 bg-white/5">
+                    <SelectTrigger className="h-9 border-white/10 bg-white/5 data-[state=open]:bg-white/10 text-xs font-medium rounded-xl transition-colors">
                         <SelectValue placeholder="Chọn model" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5 text-white">
                         {availableModels.map((m) => (
-                            <SelectItem key={m.model_id} value={m.model_id}>
-                                {m.name} <span className="text-muted-foreground">({m.gems_cost} xu)</span>
+                            <SelectItem key={m.model_id} value={m.model_id} className="rounded-xl focus:bg-white/10 focus:text-white cursor-pointer py-2 text-[13px]">
+                                {m.name} <span className="text-white/40 text-[11px] ml-1">({m.gems_cost} xu)</span>
                             </SelectItem>
                         ))}
                     </SelectContent>
