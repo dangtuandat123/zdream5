@@ -2537,9 +2537,37 @@ export function GeneratePage() {
                                         adjustHeight(el as HTMLDivElement)
                                     }}
                                     onPaste={(e) => {
-                                        // Chỉ cho phép paste plain text, loại bỏ mọi HTML/rich formatting
-                                        e.preventDefault()
+                                        // 1. Kiểm tra clipboard có chứa file ảnh không (screenshot, copy ảnh từ browser/explorer)
+                                        const items = Array.from(e.clipboardData.items)
+                                        const imageItems = items.filter(item => item.type.startsWith('image/'))
+                                        
+                                        if (imageItems.length > 0) {
+                                            e.preventDefault()
+                                            const imageUrls: string[] = []
+                                            for (const item of imageItems) {
+                                                const file = item.getAsFile()
+                                                if (file) {
+                                                    imageUrls.push(URL.createObjectURL(file))
+                                                }
+                                            }
+                                            if (imageUrls.length > 0) {
+                                                addReferenceImages(imageUrls)
+                                                toast.success(`Đã thêm ${imageUrls.length} ảnh tham chiếu từ clipboard`, { id: 'paste-ref' })
+                                            }
+                                            return
+                                        }
+
+                                        // 2. Kiểm tra clipboard text có phải URL ảnh không
                                         const text = e.clipboardData.getData('text/plain')
+                                        if (text && /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|bmp|svg)(\?.*)?$/i.test(text.trim())) {
+                                            e.preventDefault()
+                                            addReferenceImages([text.trim()])
+                                            toast.success('Đã thêm ảnh tham chiếu từ URL', { id: 'paste-ref-url' })
+                                            return
+                                        }
+
+                                        // 3. Fallback: paste plain text bình thường, loại bỏ HTML/rich formatting
+                                        e.preventDefault()
                                         document.execCommand('insertText', false, text)
                                     }}
                                     onCompositionStart={() => { isComposingRef.current = true }}
