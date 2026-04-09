@@ -2227,7 +2227,7 @@ export function GeneratePage() {
                 {/* === PROMPT BAR — fixed viewport === */}
                 <div ref={promptContainerRef} className="fixed bottom-0 left-0 right-0 md:left-[84px] z-50 mx-auto w-full max-w-2xl px-3 sm:px-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-6 pt-10 sm:pt-6 pointer-events-none bg-gradient-to-b from-transparent to-background to-[40%] sm:bg-none">
                     {/* Floating Indicators Container */}
-                    <div className="absolute bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
+                    <div className="absolute bottom-[calc(100%-2.5rem)] sm:bottom-[calc(100%-1.5rem)] mb-2 sm:mb-2.5 right-3 sm:right-4 z-50 flex flex-col items-end gap-2 pointer-events-none">
                         <AnimatePresence>
                             {/* Scroll to Top Handle (when scrolled down but NOT generating) */}
                             {isScrolledDown && !isGenerating && (
