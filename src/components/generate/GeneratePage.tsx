@@ -1588,7 +1588,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={ar.value}
                             value={ar.value}
-                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:border-white/20 data-[state=on]:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
                         >
                             <ar.icon className="size-4" />
                             {ar.label}
@@ -1610,7 +1610,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={n}
                             value={n}
-                            className="rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:border-white/20 data-[state=on]:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                            className="rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
                         >
                             {n}
                         </ToggleGroupItem>
@@ -1649,7 +1649,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={s.value}
                             value={s.value}
-                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:border-white/20 data-[state=on]:shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
+                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs border border-white/10 bg-white/5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
                         >
                             <span className="font-semibold">{s.label}</span>
                             <span className="text-[9px] opacity-60">{s.desc}</span>
