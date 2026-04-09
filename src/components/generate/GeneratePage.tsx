@@ -1374,7 +1374,7 @@ export function GeneratePage() {
                         {/* Lõi chọn file - Dùng flex-1 để lấp đầy khoảng sống khi chưa có ảnh */}
                         <label
                             htmlFor="ref-image-upload"
-                            className="group flex-1 flex flex-col items-center justify-center w-full min-h-[100px] rounded-xl border-2 border-dashed border-border/40 bg-muted/20 hover:bg-muted/40 hover:border-primary/50 cursor-pointer transition-all"
+                            className="group flex-1 flex flex-col items-center justify-center w-full min-h-[100px] rounded-xl border-2 border-dashed border-white/15 bg-white/5 hover:bg-white/10 hover:border-primary/50 cursor-pointer transition-all"
                         >
                             <div className="p-2.5 rounded-full bg-background border border-border/50 group-hover:scale-110 transition-transform mb-2 shadow-sm">
                                 <Upload className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -1392,9 +1392,9 @@ export function GeneratePage() {
 
                         {/* Phân cách */}
                         <div className="relative flex items-center py-1 shrink-0">
-                            <div className="flex-grow border-t border-border/40"></div>
+                            <div className="flex-grow border-t border-white/10"></div>
                             <span className="shrink-0 px-2 text-[10px] text-muted-foreground uppercase tracking-wider">Hoặc nhập liên kết</span>
-                            <div className="flex-grow border-t border-border/40"></div>
+                            <div className="flex-grow border-t border-white/10"></div>
                         </div>
 
                         {/* Nhập URL */}
@@ -1403,7 +1403,7 @@ export function GeneratePage() {
                                 <Link className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                                 <Input
                                     placeholder="https://"
-                                    className="h-9 pl-8 text-xs bg-muted/20 border-border/50 focus-visible:ring-primary/30"
+                                    className="h-9 pl-8 text-xs bg-white/5 border-white/15 focus-visible:ring-primary/30"
                                     value={refImageUrlInput}
                                     onChange={(e) => setRefImageUrlInput(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
@@ -1547,7 +1547,7 @@ export function GeneratePage() {
             <div className="space-y-2 sm:hidden">
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Model</Label>
                 <Select value={model} onValueChange={setModel}>
-                    <SelectTrigger className="h-8">
+                    <SelectTrigger className="h-8 border-white/15 bg-white/5">
                         <SelectValue placeholder="Chọn model" />
                     </SelectTrigger>
                     <SelectContent>
@@ -1573,7 +1573,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={ar.value}
                             value={ar.value}
-                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                            className="flex flex-col gap-1 h-auto py-2 rounded-lg text-xs border border-white/10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
                         >
                             <ar.icon className="size-4" />
                             {ar.label}
@@ -1595,7 +1595,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={n}
                             value={n}
-                            className="rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                            className="rounded-lg text-xs border border-white/10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
                         >
                             {n}
                         </ToggleGroupItem>
@@ -1607,7 +1607,7 @@ export function GeneratePage() {
             <div className="space-y-2">
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Phong cách</Label>
                 <Select value={style} onValueChange={setStyle}>
-                    <SelectTrigger className="h-8">
+                    <SelectTrigger className="h-8 border-white/15 bg-white/5">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1634,7 +1634,7 @@ export function GeneratePage() {
                         <ToggleGroupItem
                             key={s.value}
                             value={s.value}
-                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                            className="flex flex-col gap-0.5 h-auto py-2 rounded-lg text-xs border border-white/10 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground data-[state=on]:border-primary"
                         >
                             <span className="font-semibold">{s.label}</span>
                             <span className="text-[9px] opacity-60">{s.desc}</span>
@@ -1650,7 +1650,7 @@ export function GeneratePage() {
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Negative Prompt</Label>
                 <textarea
                     placeholder="mờ, nhòe, chữ, watermark, chất lượng thấp..."
-                    className="w-full resize-none border border-border/50 bg-muted/20 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/40 min-h-[60px] max-h-[100px] overflow-y-auto custom-scrollbar"
+                    className="w-full resize-none border border-white/15 bg-white/5 rounded-lg px-3 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground/40 min-h-[60px] max-h-[100px] overflow-y-auto custom-scrollbar"
                     value={negativePrompt}
                     onChange={(e) => setNegativePrompt(e.target.value)}
                 />
@@ -1663,7 +1663,7 @@ export function GeneratePage() {
                 <div className="flex gap-2">
                     <Input
                         type="number"
-                        className="h-8 text-sm text-foreground flex-1"
+                        className="h-8 text-sm text-foreground flex-1 border-white/15 bg-white/5"
                         value={seed}
                         onChange={(e) => setSeed(parseInt(e.target.value) || 0)}
                     />
@@ -2609,7 +2609,7 @@ export function GeneratePage() {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Ảnh tham chiếu</TooltipContent>
                                             </Tooltip>
-                                            <DrawerContent>
+                                            <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-white/10">
                                                 <DrawerHeader className="text-left px-4">
                                                     <DrawerTitle className="text-sm flex items-center gap-2">
                                                         <ImageIcon className="size-4 text-primary" />
@@ -2662,7 +2662,7 @@ export function GeneratePage() {
                                                 </TooltipTrigger>
                                                 <TooltipContent side="top">Cài đặt kiến tạo</TooltipContent>
                                             </Tooltip>
-                                            <DrawerContent>
+                                            <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-white/10">
                                                 <DrawerHeader className="text-left px-4">
                                                     <DrawerTitle className="text-sm flex items-center gap-2">
                                                         <Wand2 className="size-4 text-primary" />
