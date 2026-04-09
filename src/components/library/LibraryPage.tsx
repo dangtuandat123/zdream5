@@ -422,11 +422,11 @@ export function LibraryPage() {
                         disabled={isUploading}
                     >
                         {isUploading ? (
-                            <div className="size-4 sm:mr-2 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                            <div className="size-4 mr-1.5 sm:mr-2 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
                         ) : (
-                            <UploadIcon className="size-4 sm:mr-2" />
+                            <UploadIcon className="size-4 mr-1.5 sm:mr-2" />
                         )}
-                        <span className="hidden sm:inline">Tải ảnh lên</span>
+                        <span className="text-xs sm:text-sm font-medium">Tải lên</span>
                     </Button>
                     {/* Hidden file input (hỗ trợ multiple) */}
                     <input
@@ -454,9 +454,9 @@ export function LibraryPage() {
                 </Tabs>
 
                 <Select value={sort} onValueChange={setSort}>
-                    <SelectTrigger className="w-10 h-10 sm:w-[130px] sm:h-9 shrink-0 flex items-center justify-center sm:justify-start px-0 sm:px-3 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 transition-colors [&>svg:last-child]:hidden sm:[&>svg:last-child]:block">
+                    <SelectTrigger className="w-10 h-10 sm:w-[130px] sm:h-9 shrink-0 flex items-center justify-center sm:justify-start px-0 sm:px-3 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 transition-colors [&>svg:last-child]:hidden sm:[&>svg:last-child]:block [&>span]:hidden sm:[&>span]:block">
                         <CalendarIcon className="size-4 sm:size-3 sm:mr-1.5 text-muted-foreground" />
-                        <span className="hidden sm:inline"><SelectValue /></span>
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="newest">Mới nhất</SelectItem>
