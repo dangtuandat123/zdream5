@@ -338,7 +338,7 @@ const GalleryImage = React.memo(({
                     {/* Hover overlay content */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 pointer-events-none" />
                     
-                    <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300">
+                    <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-100 sm:opacity-0 sm:group-hover/img:opacity-100 transition-opacity duration-300">
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button size="icon" variant="secondary" className="size-6 rounded-full bg-black/50 hover:bg-black/70 border-0 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); onSetReferenceImage(img.url) }}>
