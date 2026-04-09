@@ -2454,7 +2454,7 @@ export function GeneratePage() {
                                     spellCheck={false}
                                     role="textbox"
                                     aria-multiline="true"
-                                    data-placeholder="Mô tả ý tưởng kiến tạo của bạn..."
+                                    data-placeholder="Nhập ý tưởng của bạn..."
                                     className="w-full border-0 bg-transparent px-1 text-[15px] focus:ring-0 outline-none leading-[24px] custom-scrollbar py-1.5 overflow-y-auto break-words relative m-0 text-foreground"
                                     style={{
                                         minHeight: '44px',
