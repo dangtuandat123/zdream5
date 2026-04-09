@@ -1830,7 +1830,7 @@ export function GeneratePage() {
                                             variant="outline"
                                             role="combobox"
                                             aria-expanded={isProjectMenuOpen}
-                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 border-muted-foreground/20 hover:border-muted-foreground/40 hover:bg-transparent"
+                                            className="w-full sm:w-[260px] justify-between font-semibold shadow-sm h-10 bg-[#2a2d31]/80 border-white/10 hover:border-white/20 hover:bg-[#2a2d31] rounded-2xl"
                                         >
                                             <div className="flex items-center truncate">
                                                 <FolderOpen className="mr-2 h-4 w-4 shrink-0 text-primary" />
@@ -1953,13 +1953,13 @@ export function GeneratePage() {
                             {/* Stats & Actions (Moved to same row on desktop) */}
                             {images.length > 0 && !isHistoryLoading && (
                                 <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end mt-3 sm:mt-0">
-                                    <Badge variant="default" className="font-semibold bg-black text-white hover:bg-black pointer-events-none rounded-md px-2.5">
+                                    <Badge variant="default" className="font-semibold bg-[#2a2d31]/80 text-foreground/80 hover:bg-[#2a2d31] pointer-events-none rounded-xl px-2.5 border border-white/10">
                                         {images.length} ảnh đã tạo
                                     </Badge>
                                     <Button
                                         variant={selectionMode ? "secondary" : "default"}
                                         size="sm"
-                                        className="h-7 text-xs rounded-full px-4"
+                                        className="h-7 text-xs rounded-xl px-4"
                                         onClick={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()) }}
                                     >
                                         <CheckSquare className="size-3.5 mr-1.5" />
