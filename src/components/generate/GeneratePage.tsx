@@ -2390,18 +2390,19 @@ export function GeneratePage() {
                             <div className={cn("relative px-4 pb-3", referenceImages.length > 0 ? "pt-2" : "pt-3")}>
                                 {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
                                 {showMentionPopover && (
-                                    <div className="absolute bottom-full mb-1 left-0 right-0 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                                        <div className="bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar">
-                                            <div className="p-1.5">
-                                                <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2.5 py-1.5 select-none flex items-center gap-1.5">
-                                                    <ImageIcon className="size-3" />
-                                                    Ảnh tham chiếu ({referenceImages.length}/{MAX_REFERENCE_IMAGES})
-                                                </div>
+                                    <div className="absolute bottom-full mb-3 left-3 z-[60] animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                        <div className="bg-popover/95 backdrop-blur-xl text-popover-foreground border border-border/60 rounded-2xl shadow-2xl overflow-hidden w-[280px] ring-1 ring-black/5">
+                                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-3 pb-2 select-none flex items-center gap-1.5 bg-muted/20 border-b border-border/30">
+                                                <ImageIcon className="size-3 text-primary" />
+                                                Chèn ảnh tham chiếu
+                                                <span className="ml-auto text-muted-foreground/60 font-medium">({referenceImages.length}/{MAX_REFERENCE_IMAGES})</span>
+                                            </div>
+                                            <div className="p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
                                                 {referenceImages.length > 0 ? (
                                                     referenceImages.map((src, idx) => (
                                                         <button
                                                             key={idx}
-                                                            className="flex items-center gap-3 w-full px-2.5 py-2 rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors text-left active:bg-accent/80"
+                                                            className="flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors text-left active:bg-accent focus-visible:bg-accent/80 outline-none"
                                                             // Ngăn button cướp focus → bàn phím không bị đóng/mở lại
                                                             onPointerDown={(e) => e.preventDefault()}
                                                             onClick={() => {
@@ -2424,26 +2425,24 @@ export function GeneratePage() {
                                                             }}
                                                         >
                                                             <div className="relative shrink-0">
-                                                                <img src={src} alt={`Ảnh ${idx + 1}`} className="size-10 rounded-lg object-cover border border-border/40" />
-                                                                <div className="absolute -top-1 -left-1 bg-primary text-primary-foreground text-[9px] font-bold h-4 w-4 rounded-full flex items-center justify-center shadow-sm">
+                                                                <img src={src} alt={`Ảnh ${idx + 1}`} className="size-9 rounded-lg object-cover border border-border/40 shadow-sm" />
+                                                                <div className="absolute -top-1 -right-1 bg-background text-foreground text-[9px] font-bold h-4 w-4 rounded-full border border-border flex items-center justify-center shadow-sm">
                                                                     {idx + 1}
                                                                 </div>
                                                             </div>
                                                             <div className="flex flex-col min-w-0">
-                                                                <span className="text-sm font-medium truncate">@Ảnh {idx + 1}</span>
-                                                                <span className="text-[11px] text-muted-foreground">Chèn tham chiếu vào prompt</span>
+                                                                <span className="text-[13px] font-semibold truncate leading-tight">@Ảnh {idx + 1}</span>
+                                                                <span className="text-[11px] text-muted-foreground leading-tight mt-0.5">Click để chèn vào Lệnh</span>
                                                             </div>
                                                         </button>
                                                     ))
                                                 ) : (
-                                                    <div className="flex items-center gap-3 px-2.5 py-3">
-                                                        <div className="size-10 rounded-lg border-2 border-dashed border-border flex items-center justify-center shrink-0">
+                                                    <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+                                                        <div className="size-10 rounded-full bg-muted/40 flex items-center justify-center mb-2">
                                                             <ImageIcon className="size-4 text-muted-foreground/50" />
                                                         </div>
-                                                        <div className="flex flex-col gap-0.5">
-                                                            <span className="text-xs text-muted-foreground">Chưa có ảnh tham chiếu</span>
-                                                            <span className="text-[11px] text-muted-foreground/60">Bấm nút + để thêm ảnh</span>
-                                                        </div>
+                                                        <span className="text-xs font-medium text-muted-foreground">Chưa có ảnh nào</span>
+                                                        <span className="text-[10px] text-muted-foreground/60 mt-1">Vui lòng tải ảnh lên trước</span>
                                                     </div>
                                                 )}
                                             </div>
