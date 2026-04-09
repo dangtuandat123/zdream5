@@ -829,23 +829,23 @@ export function LibraryPage() {
 
             {/* Mobile Action Drawer — bottom sheet dễ bấm trên điện thoại */}
             <Drawer open={!!actionItem} onOpenChange={(open) => !open && setActionItem(null)}>
-                <DrawerContent>
-                    <DrawerHeader className="pb-2">
-                        <DrawerTitle className="text-sm font-medium truncate">
+                <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-[28px]">
+                    <DrawerHeader className="pb-3 border-b border-white/5 mb-3">
+                        <DrawerTitle className="text-sm font-medium truncate text-white/90">
                             {actionItem?.prompt || actionItem?.templateName || "Tài nguyên tải lên"}
                         </DrawerTitle>
                     </DrawerHeader>
                     <div className="px-4 pb-6 space-y-1">
                         {/* Thumbnail preview nhỏ */}
                         {actionItem && (
-                            <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 mb-3">
+                            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 mb-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
                                 <img
                                     src={actionItem.thumbnail}
                                     alt=""
-                                    className="size-14 rounded-lg object-cover shrink-0"
+                                    className="size-14 rounded-xl object-cover shrink-0"
                                 />
                                 <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-medium truncate">{actionItem.prompt || actionItem.templateName || "Tài nguyên tải lên"}</p>
+                                    <p className="text-xs font-medium truncate text-white">{actionItem.prompt || actionItem.templateName || "Tài nguyên tải lên"}</p>
                                     <div className="flex items-center gap-2 mt-1">
                                         {(() => {
                                             const cfg = TYPE_CONFIG[actionItem.type]; const Icon = cfg.icon; return (
@@ -855,7 +855,7 @@ export function LibraryPage() {
                                                 </Badge>
                                             )
                                         })()}
-                                        <span className="text-[11px] text-muted-foreground">{actionItem.createdAt}</span>
+                                        <span className="text-[11px] text-white/50">{actionItem.createdAt}</span>
                                     </div>
                                 </div>
                             </div>
@@ -863,26 +863,26 @@ export function LibraryPage() {
 
                         {/* Actions — vùng bấm lớn, icon rõ ràng */}
                         <button
-                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
+                            className="flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium hover:bg-white/10 active:bg-white/15 transition-colors"
                             onClick={() => { if (actionItem) handleDownload(actionItem); setActionItem(null) }}
                         >
-                            <DownloadIcon className="size-5 text-muted-foreground" />
+                            <DownloadIcon className="size-5 text-white/70" />
                             Tải xuống
                         </button>
                         {actionItem?.type === "ai" && actionItem?.prompt && (
                             <button
-                                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium hover:bg-muted transition-colors"
+                                className="flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium hover:bg-white/10 active:bg-white/15 transition-colors"
                                 onClick={() => { setActionItem(null); window.location.href = `/app/generate?prompt=${encodeURIComponent(actionItem?.prompt || "")}` }}
                             >
-                                <WandIcon className="size-5 text-muted-foreground" />
+                                <WandIcon className="size-5 text-white/70" />
                                 Tạo tương tự
                             </button>
                         )}
 
                         {/* Separator + Delete */}
-                        <div className="border-t my-1" />
+                        <div className="border-t border-white/10 my-2" />
                         <button
-                            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                            className="flex w-full items-center gap-4 rounded-xl px-4 py-3.5 text-sm font-medium text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
                             onClick={() => {
                                 if (actionItem) confirmDelete(actionItem)
                                 setActionItem(null)
