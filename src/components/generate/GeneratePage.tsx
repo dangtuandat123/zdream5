@@ -25,6 +25,7 @@ import {
     Copy,
 
     ChevronUp,
+    ChevronDown,
     History,
     CheckSquare,
     Dices,
@@ -1025,6 +1026,7 @@ export function GeneratePage() {
 
     // Settings
     const [model, setModel] = useState("")
+    const [isModelPopoverOpen, setIsModelPopoverOpen] = useState(false)
     const [style, setStyle] = useState("photorealistic")
     const [aspectRatioValue, setAspectRatioValue] = useState("1")
     const [imageSize, setImageSize] = useState("1K")
@@ -2674,18 +2676,33 @@ export function GeneratePage() {
 
                                     {/* Model Select (Desktop) */}
                                     <div className="hidden sm:block ml-1">
-                                        <Select value={model} onValueChange={setModel}>
-                                            <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-white/10 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0 text-foreground transition-colors">
-                                                <SelectValue placeholder="Model" />
-                                            </SelectTrigger>
-                                            <SelectContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5 text-white">
+                                        <Popover open={isModelPopoverOpen} onOpenChange={setIsModelPopoverOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="ghost" className="h-9 border-transparent bg-transparent hover:bg-white/10 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0 text-foreground transition-colors gap-1.5 outline-none">
+                                                    {availableModels.find(m => m.model_id === model)?.name || "Model"}
+                                                    <ChevronDown className="size-3 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-[180px] p-1 bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5 text-white overflow-hidden" side="top" align="center">
                                                 {availableModels.map((m) => (
-                                                    <SelectItem key={m.model_id} value={m.model_id} className="rounded-xl focus:bg-white/10 focus:text-white cursor-pointer py-2">
-                                                        {m.name} <span className="text-white/50 ml-1">({m.gems_cost} xu)</span>
-                                                    </SelectItem>
+                                                    <button
+                                                        key={m.model_id}
+                                                        className={cn(
+                                                            "w-full flex items-center justify-between text-left text-[13px] px-3 py-2 rounded-xl transition-colors outline-none",
+                                                            model === m.model_id ? "bg-white/10 font-medium" : "hover:bg-white/5 active:bg-white/10"
+                                                        )}
+                                                        onClick={() => { setModel(m.model_id); setIsModelPopoverOpen(false); }}
+                                                    >
+                                                        <span>{m.name}</span>
+                                                        {model === m.model_id ? (
+                                                            <Check className="size-3.5" />
+                                                        ) : (
+                                                            <span className="text-white/40 text-[11px]">({m.gems_cost} xu)</span>
+                                                        )}
+                                                    </button>
                                                 ))}
-                                            </SelectContent>
-                                        </Select>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
 
                                     {/* Badges */}
