@@ -15,7 +15,6 @@ import {
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/AuthContext"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -46,7 +45,6 @@ export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
   const { gems, isAdmin, logout } = useAuth()
-  const isMobile = useIsMobile()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [commandValue, setCommandValue] = useState("")
@@ -115,8 +113,7 @@ export function AppSidebar() {
       </header>
 
       {/* === Mobile: Drawer bottom sheet === */}
-      {isMobile && (
-        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <DrawerContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-t border-white/10 text-white rounded-t-2xl">
             <div className="px-4 pt-2 pb-8">
               {/* Navigation items */}
@@ -223,11 +220,9 @@ export function AppSidebar() {
             </div>
           </DrawerContent>
         </Drawer>
-      )}
 
       {/* === Desktop: Command Palette (Search Overlay) === */}
-      {(!isMobile || isSearchOpen) && (
-        <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} commandProps={{ value: commandValue, onValueChange: setCommandValue }}>
+      <CommandDialog open={isSearchOpen} onOpenChange={setIsSearchOpen} commandProps={{ value: commandValue, onValueChange: setCommandValue }}>
           <CommandInput placeholder="Tìm kiếm trang hoặc tính năng..." />
           <CommandList className="scrollbar-none custom-scrollbar pb-2 pt-1">
             <CommandEmpty>Không tìm thấy phần nào.</CommandEmpty>
@@ -290,7 +285,6 @@ export function AppSidebar() {
             </CommandGroup>
           </CommandList>
         </CommandDialog>
-      )}
 
       {/* Desktop sidebar — cố định bên trái, chỉ hiện trên md+ */}
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-30 w-[84px] flex-col items-center bg-sidebar border-r border-sidebar-border py-4">
