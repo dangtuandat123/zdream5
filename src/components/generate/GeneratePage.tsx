@@ -2675,13 +2675,13 @@ export function GeneratePage() {
                                     {/* Model Select (Desktop) */}
                                     <div className="hidden sm:block ml-1">
                                         <Select value={model} onValueChange={setModel}>
-                                            <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-muted/60 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0">
+                                            <SelectTrigger className="h-9 border-transparent bg-transparent hover:bg-white/10 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0 text-foreground transition-colors">
                                                 <SelectValue placeholder="Model" />
                                             </SelectTrigger>
-                                            <SelectContent>
+                                            <SelectContent className="bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5 text-white">
                                                 {availableModels.map((m) => (
-                                                    <SelectItem key={m.model_id} value={m.model_id}>
-                                                        {m.name} <span className="text-muted-foreground">({m.gems_cost} xu)</span>
+                                                    <SelectItem key={m.model_id} value={m.model_id} className="rounded-xl focus:bg-white/10 focus:text-white cursor-pointer py-2">
+                                                        {m.name} <span className="text-white/50 ml-1">({m.gems_cost} xu)</span>
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
