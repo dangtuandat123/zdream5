@@ -2308,23 +2308,7 @@ export function GeneratePage() {
                             </div>
                         )}
 
-                        {/* Prompt History Dropdown */}
-                        {showHistory && promptHistory.length > 0 && (
-                            <div ref={historyRef} className="absolute bottom-full mb-1 left-0 right-0 bg-popover text-popover-foreground border border-border rounded-xl shadow-2xl max-h-48 overflow-y-auto custom-scrollbar z-50 animate-in slide-in-from-bottom-2 fade-in duration-200 overscroll-contain" onWheel={(e) => e.stopPropagation()}>
-                                <div className="p-1.5">
-                                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium px-2.5 py-1.5">Lịch sử prompt</div>
-                                    {promptHistory.map((p, i) => (
-                                        <button
-                                            key={i}
-                                            className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors truncate"
-                                            onClick={() => { setPrompt(p); setShowHistory(false) }}
-                                        >
-                                            {p}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+
 
                         {/* Pill Container — with Drag & Drop */}
                         <div
@@ -2348,8 +2332,33 @@ export function GeneratePage() {
                                 </div>
                             )}
 
-                            {/* 1. Preview Ảnh Tham Chiếu (Top) HOẶC @Mention Popover — chỉ hiện 1 trong 2 */}
-                            {showMentionPopover ? (
+                            {/* 1. Preview Ảnh Tham Chiếu (Top) / @Mention Popover / Prompt History — chỉ hiện 1 */}
+                            {showHistory && promptHistory.length > 0 ? (
+                                /* Prompt History — thay thế vùng ảnh tham chiếu khi mở lịch sử */
+                                <div ref={historyRef} className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                    <div className="mx-3 mt-3 mb-1 bg-[#2a2d31]/90 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+                                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-2.5 pb-2 select-none flex items-center gap-1.5 border-b border-border/20">
+                                            <History className="size-3 text-primary" />
+                                            Lịch sử prompt
+                                            <span className="ml-auto text-muted-foreground/60 font-medium">({promptHistory.length})</span>
+                                        </div>
+                                        <div className="p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar overscroll-contain" onWheel={(e) => e.stopPropagation()}>
+                                            {promptHistory.map((p, i) => (
+                                                <button
+                                                    key={i}
+                                                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors text-left active:bg-accent outline-none group"
+                                                    onClick={() => { setPrompt(p); setShowHistory(false) }}
+                                                >
+                                                    <div className="size-7 rounded-lg bg-muted/40 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                                                        <span className="text-[10px] font-bold text-muted-foreground group-hover:text-primary transition-colors">{i + 1}</span>
+                                                    </div>
+                                                    <span className="text-[13px] leading-snug line-clamp-2 text-foreground/90">{p}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : showMentionPopover ? (
                                 /* @Mention selector — thay thế vùng ảnh tham chiếu khi đang gõ @ */
                                 <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
                                     <div className="mx-3 mt-3 mb-1 bg-[#2a2d31]/90 backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
@@ -2447,7 +2456,7 @@ export function GeneratePage() {
                             )}
 
                             {/* 2. Text Input (Middle) — contenteditable with inline @mention highlighting */}
-                            <div className={cn("relative px-4 pb-3", referenceImages.length > 0 && !showMentionPopover ? "pt-2" : "pt-3")}>
+                            <div className={cn("relative px-4 pb-3", referenceImages.length > 0 && !showMentionPopover && !showHistory ? "pt-2" : "pt-3")}>
 
                                 {/* ContentEditable Prompt Input — single element, no overlay sync needed */}
                                 <div
