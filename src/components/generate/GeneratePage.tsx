@@ -2348,107 +2348,106 @@ export function GeneratePage() {
                                 </div>
                             )}
 
-                            {/* 1. Preview Ảnh Tham Chiếu (Top) — thu nhỏ khi compact */}
-                            {referenceImages.length > 0 && (
-                                <div className="mx-[18px] px-[2px] pb-1 pt-5 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30">
-                                    {referenceImages.map((src, idx) => (
-                                        <div key={idx} className="relative shrink-0 group/ref">
-                                            <img
-                                                src={src}
-                                                alt={`Reference ${idx + 1}`}
-                                                className="h-16 w-16 rounded-xl object-cover border border-border/40 bg-muted/30 cursor-pointer hover:ring-2 hover:ring-primary/60 transition-all"
-                                                title={`Nhấn để chèn @Ảnh ${idx + 1} vào prompt`}
-                                                onClick={() => {
-                                                    // KHOÁ TOẠ ĐỘ SCROLL VÀ CURSOR CHO USEEFFECT ĐỂ CHỐNG GIẬT
-                                                    if (textareaRef.current) {
-                                                        forcedScrollRef.current = textareaRef.current.scrollTop
-                                                    }
-                                                    
-                                                    const mention = `@Ảnh ${idx + 1} `
-                                                    const trimmed = prompt.trimEnd()
-                                                    const newPrompt = trimmed ? trimmed + ' ' + mention : mention
-                                                    
-                                                    forcedCursorRef.current = newPrompt.length
-                                                    setPrompt(newPrompt)
-                                                }}
-                                            />
-                                            <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
-                                                {idx + 1}
-                                            </div>
-                                            <button
-                                                onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
-                                                className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
-                                            >
-                                                <X className="size-3 text-muted-foreground" />
-                                            </button>
+                            {/* 1. Preview Ảnh Tham Chiếu (Top) HOẶC @Mention Popover — chỉ hiện 1 trong 2 */}
+                            {showMentionPopover ? (
+                                /* @Mention selector — thay thế vùng ảnh tham chiếu khi đang gõ @ */
+                                <div className="animate-in fade-in slide-in-from-bottom-2 duration-200">
+                                    <div className="mx-3 mt-3 mb-1 bg-muted/30 rounded-2xl border border-border/30 overflow-hidden">
+                                        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-2.5 pb-2 select-none flex items-center gap-1.5 border-b border-border/20">
+                                            <ImageIcon className="size-3 text-primary" />
+                                            Chèn ảnh tham chiếu
+                                            <span className="ml-auto text-muted-foreground/60 font-medium">({referenceImages.length}/{MAX_REFERENCE_IMAGES})</span>
                                         </div>
-                                    ))}
+                                        <div className="p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
+                                            {referenceImages.length > 0 ? (
+                                                referenceImages.map((src, idx) => (
+                                                    <button
+                                                        key={idx}
+                                                        className="flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors text-left active:bg-accent focus-visible:bg-accent/80 outline-none"
+                                                        onPointerDown={(e) => e.preventDefault()}
+                                                        onClick={() => {
+                                                            if (textareaRef.current) {
+                                                                forcedScrollRef.current = textareaRef.current.scrollTop
+                                                            }
+
+                                                            const mention = `@Ảnh ${idx + 1} `
+                                                            const pos = mentionInsertPosRef.current
+                                                            
+                                                            forcedCursorRef.current = pos + mention.length
+
+                                                            const before = prompt.slice(0, pos)
+                                                            const after = prompt.slice(pos + 1)
+                                                            const newPrompt = before + mention + after
+                                                            
+                                                            setPrompt(newPrompt)
+                                                            setShowMentionPopover(false)
+                                                        }}
+                                                    >
+                                                        <div className="relative shrink-0">
+                                                            <img src={src} alt={`Ảnh ${idx + 1}`} className="size-9 rounded-lg object-cover border border-border/40 shadow-sm" />
+                                                            <div className="absolute -top-1 -right-1 bg-background text-foreground text-[9px] font-bold h-4 w-4 rounded-full border border-border flex items-center justify-center shadow-sm">
+                                                                {idx + 1}
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex flex-col min-w-0">
+                                                            <span className="text-[13px] font-semibold truncate leading-tight">@Ảnh {idx + 1}</span>
+                                                            <span className="text-[11px] text-muted-foreground leading-tight mt-0.5">Click để chèn vào Lệnh</span>
+                                                        </div>
+                                                    </button>
+                                                ))
+                                            ) : (
+                                                <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
+                                                    <div className="size-10 rounded-full bg-muted/40 flex items-center justify-center mb-2">
+                                                        <ImageIcon className="size-4 text-muted-foreground/50" />
+                                                    </div>
+                                                    <span className="text-xs font-medium text-muted-foreground">Chưa có ảnh nào</span>
+                                                    <span className="text-[10px] text-muted-foreground/60 mt-1">Vui lòng tải ảnh lên trước</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
+                            ) : (
+                                /* Hiển thị ảnh tham chiếu bình thường khi KHÔNG gõ @ */
+                                referenceImages.length > 0 && (
+                                    <div className="mx-[18px] px-[2px] pb-1 pt-5 flex gap-2 overflow-x-auto [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30">
+                                        {referenceImages.map((src, idx) => (
+                                            <div key={idx} className="relative shrink-0 group/ref">
+                                                <img
+                                                    src={src}
+                                                    alt={`Reference ${idx + 1}`}
+                                                    className="h-16 w-16 rounded-xl object-cover border border-border/40 bg-muted/30 cursor-pointer hover:ring-2 hover:ring-primary/60 transition-all"
+                                                    title={`Nhấn để chèn @Ảnh ${idx + 1} vào prompt`}
+                                                    onClick={() => {
+                                                        if (textareaRef.current) {
+                                                            forcedScrollRef.current = textareaRef.current.scrollTop
+                                                        }
+                                                        
+                                                        const mention = `@Ảnh ${idx + 1} `
+                                                        const trimmed = prompt.trimEnd()
+                                                        const newPrompt = trimmed ? trimmed + ' ' + mention : mention
+                                                        
+                                                        forcedCursorRef.current = newPrompt.length
+                                                        setPrompt(newPrompt)
+                                                    }}
+                                                />
+                                                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
+                                                    {idx + 1}
+                                                </div>
+                                                <button
+                                                    onClick={() => setReferenceImages(prev => prev.filter((_, i) => i !== idx))}
+                                                    className="absolute -top-1.5 -right-1.5 bg-background border border-border rounded-full p-0.5 shadow-sm opacity-100 sm:opacity-0 sm:group-hover/ref:opacity-100 transition-opacity hover:bg-muted"
+                                                >
+                                                    <X className="size-3 text-muted-foreground" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
                             )}
 
                             {/* 2. Text Input (Middle) — contenteditable with inline @mention highlighting */}
-                            <div className={cn("relative px-4 pb-3", referenceImages.length > 0 ? "pt-2" : "pt-3")}>
-                                {/* @Mention popover — hiện khi gõ @ và có ảnh tham chiếu */}
-                                {showMentionPopover && (
-                                    <div className="absolute bottom-full mb-1 left-0 right-0 z-[60] animate-in fade-in slide-in-from-bottom-2 duration-200">
-                                        <div className="bg-popover/95 backdrop-blur-xl text-popover-foreground border border-border/60 rounded-2xl shadow-2xl overflow-hidden w-full ring-1 ring-black/5">
-                                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold px-4 pt-3 pb-2 select-none flex items-center gap-1.5 bg-muted/20 border-b border-border/30">
-                                                <ImageIcon className="size-3 text-primary" />
-                                                Chèn ảnh tham chiếu
-                                                <span className="ml-auto text-muted-foreground/60 font-medium">({referenceImages.length}/{MAX_REFERENCE_IMAGES})</span>
-                                            </div>
-                                            <div className="p-1.5 max-h-[220px] overflow-y-auto custom-scrollbar">
-                                                {referenceImages.length > 0 ? (
-                                                    referenceImages.map((src, idx) => (
-                                                        <button
-                                                            key={idx}
-                                                            className="flex items-center gap-3 w-full px-2.5 py-2 rounded-xl hover:bg-accent/80 hover:text-accent-foreground transition-colors text-left active:bg-accent focus-visible:bg-accent/80 outline-none"
-                                                            // Ngăn button cướp focus → bàn phím không bị đóng/mở lại
-                                                            onPointerDown={(e) => e.preventDefault()}
-                                                            onClick={() => {
-                                                                if (textareaRef.current) {
-                                                                    forcedScrollRef.current = textareaRef.current.scrollTop
-                                                                }
-
-                                                                const mention = `@Ảnh ${idx + 1} `
-                                                                const pos = mentionInsertPosRef.current
-                                                                
-                                                                // KHOÁ OFFSET CURSOR CHO USEEFFECT
-                                                                forcedCursorRef.current = pos + mention.length
-
-                                                                const before = prompt.slice(0, pos)
-                                                                const after = prompt.slice(pos + 1)
-                                                                const newPrompt = before + mention + after
-                                                                
-                                                                setPrompt(newPrompt)
-                                                                setShowMentionPopover(false)
-                                                            }}
-                                                        >
-                                                            <div className="relative shrink-0">
-                                                                <img src={src} alt={`Ảnh ${idx + 1}`} className="size-9 rounded-lg object-cover border border-border/40 shadow-sm" />
-                                                                <div className="absolute -top-1 -right-1 bg-background text-foreground text-[9px] font-bold h-4 w-4 rounded-full border border-border flex items-center justify-center shadow-sm">
-                                                                    {idx + 1}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex flex-col min-w-0">
-                                                                <span className="text-[13px] font-semibold truncate leading-tight">@Ảnh {idx + 1}</span>
-                                                                <span className="text-[11px] text-muted-foreground leading-tight mt-0.5">Click để chèn vào Lệnh</span>
-                                                            </div>
-                                                        </button>
-                                                    ))
-                                                ) : (
-                                                    <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
-                                                        <div className="size-10 rounded-full bg-muted/40 flex items-center justify-center mb-2">
-                                                            <ImageIcon className="size-4 text-muted-foreground/50" />
-                                                        </div>
-                                                        <span className="text-xs font-medium text-muted-foreground">Chưa có ảnh nào</span>
-                                                        <span className="text-[10px] text-muted-foreground/60 mt-1">Vui lòng tải ảnh lên trước</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+                            <div className={cn("relative px-4 pb-3", referenceImages.length > 0 && !showMentionPopover ? "pt-2" : "pt-3")}>
 
                                 {/* ContentEditable Prompt Input — single element, no overlay sync needed */}
                                 <div
