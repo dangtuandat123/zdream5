@@ -126,9 +126,9 @@ export function AppSidebar() {
                       key={item.path}
                       onClick={() => runCommand(() => navigate(item.path))}
                       className={cn(
-                        "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left",
+                        "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left border border-transparent",
                         active
-                          ? "bg-primary/10 text-primary"
+                          ? "bg-white/10 border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
                           : "hover:bg-white/10 active:bg-white/15"
                       )}
                     >
@@ -136,11 +136,14 @@ export function AppSidebar() {
                         "flex items-center justify-center size-10 rounded-xl shrink-0",
                         active ? "bg-primary/15" : "bg-white/5"
                       )}>
-                        <item.icon className={cn("size-5", active ? "text-primary" : "text-muted-foreground")} />
+                        <item.icon className={cn(
+                          "size-[22px] transition-transform duration-300 ease-out", 
+                          active ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "text-muted-foreground"
+                        )} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={cn("text-sm", active ? "font-semibold" : "font-medium text-white/90")}>{item.label}</p>
-                        <p className="text-xs text-white/50">{item.desc}</p>
+                        <p className={cn("text-sm", active ? "font-bold text-white shadow-black" : "font-medium text-white/90")}>{item.label}</p>
+                        <p className={cn("text-xs", active ? "text-white/70" : "text-white/50")}>{item.desc}</p>
                       </div>
                       {active && (
                         <div className="size-2 rounded-full bg-primary shrink-0" />
@@ -157,9 +160,9 @@ export function AppSidebar() {
                   <button
                     onClick={() => runCommand(() => navigate("/app/admin"))}
                     className={cn(
-                      "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left",
+                      "flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left border border-transparent",
                       isActive("/app/admin")
-                        ? "bg-primary/10 text-primary"
+                        ? "bg-white/10 border-white/20 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15)]"
                         : "hover:bg-white/10 active:bg-white/15"
                     )}
                   >
@@ -167,11 +170,14 @@ export function AppSidebar() {
                       "flex items-center justify-center size-10 rounded-xl shrink-0",
                       isActive("/app/admin") ? "bg-primary/15" : "bg-white/5"
                     )}>
-                      <Shield className={cn("size-5", isActive("/app/admin") ? "text-primary" : "text-muted-foreground")} />
+                      <Shield className={cn(
+                        "size-[22px] transition-transform duration-300 ease-out", 
+                        isActive("/app/admin") ? "text-white scale-110 drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" : "text-muted-foreground"
+                      )} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn("text-sm", isActive("/app/admin") ? "font-semibold" : "font-medium text-white/90")}>Admin</p>
-                      <p className="text-xs text-white/50">Quản lý hệ thống</p>
+                      <p className={cn("text-sm", isActive("/app/admin") ? "font-bold text-white shadow-black" : "font-medium text-white/90")}>Admin</p>
+                      <p className={cn("text-xs", isActive("/app/admin") ? "text-white/70" : "text-white/50")}>Quản lý hệ thống</p>
                     </div>
                     <ChevronRight className="size-4 text-muted-foreground shrink-0" />
                   </button>
@@ -186,8 +192,10 @@ export function AppSidebar() {
                 variant="default"
                 onClick={() => runCommand(() => navigate('/app/topup'))}
                 className={cn(
-                  "w-full h-auto justify-start gap-3.5 rounded-xl px-4 py-3.5 text-left border border-white/10 bg-white/5 hover:bg-white/10 text-white shadow-none",
-                  isActive("/app/topup") && "ring-2 ring-primary/30 shadow-lg border-primary/50"
+                  "w-full h-auto justify-start gap-3.5 rounded-xl px-4 py-3.5 text-left border shadow-[0_0_12px_rgba(59,130,246,0.15)]",
+                  isActive("/app/topup") 
+                    ? "bg-blue-500/20 border-blue-400/50 text-blue-300 ring-1 ring-blue-400/30"
+                    : "bg-blue-500/10 border-blue-400/25 text-blue-300/90 hover:bg-blue-500/20 hover:border-blue-400/40"
                 )}
               >
                 <span className="text-lg shrink-0">💎</span>
@@ -201,10 +209,10 @@ export function AppSidebar() {
               {/* Đăng xuất */}
               <button
                 onClick={() => runCommand(async () => { await logout(); navigate('/login'); })}
-                className="flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left text-destructive hover:bg-destructive/10 active:bg-destructive/15"
+                className="flex w-full items-center gap-3.5 rounded-xl px-4 py-3.5 transition-colors text-left text-red-400 hover:bg-red-500/10 active:bg-red-500/20"
               >
-                <div className="flex items-center justify-center size-10 rounded-xl bg-destructive/10 shrink-0">
-                  <LogOut className="size-5" />
+                <div className="flex items-center justify-center size-10 rounded-xl bg-red-500/10 shrink-0">
+                  <LogOut className="size-[22px]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">Đăng xuất</p>
