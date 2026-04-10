@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Ai\Agents\PromptDesignerAgent;
 use App\Models\Setting;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Laravel\Ai\Files\Base64Image;
+use Laravel\Ai\Files\RemoteImage;
 
 /**
  * AI Prompt Designer — Workflow thông minh tối ưu prompt trước khi sinh ảnh.
@@ -14,14 +16,10 @@ use Illuminate\Support\Facades\Log;
  * Flow: Nhận prompt thô + ảnh tham chiếu + context → Gọi LLM text (có vision)
  *       → Phân tích, hiểu, thiết kế → Trả về prompt chuyên nghiệp.
  *
- * Service này được dùng chung cho tất cả chức năng sinh ảnh:
- * GeneratePage, TemplateDetailPage, và bất kỳ flow nào trong tương lai.
+ * Sử dụng Laravel AI SDK (laravel/ai) với OpenRouter provider.
  */
 class PromptDesignerService
 {
-    private string $apiKey;
-    private string $baseUrl;
-
     /** System prompt mặc định — admin có thể tùy chỉnh qua Settings */
     private const DEFAULT_SYSTEM_PROMPT = <<<'PROMPT'
 You are an expert AI image prompt designer for ZDream. You receive a user request (text + optional reference images + optional style/template context) and output a single optimized prompt for an AI image generation model.
@@ -70,12 +68,6 @@ A creative template defines the art direction. Follow the template instructions 
 - When style is specified (e.g., anime, watercolor, oil painting): apply the style to the RENDERING TECHNIQUE, never change the subject's physical identity.
 PROMPT;
 
-    public function __construct()
-    {
-        $this->apiKey = config('services.openrouter.api_key', '');
-        $this->baseUrl = config('services.openrouter.base_url', 'https://openrouter.ai/api/v1');
-    }
-
     /**
      * Kiểm tra Prompt Designer có được bật không.
      */
@@ -93,7 +85,7 @@ PROMPT;
      * @param string|null $templateSystemPrompt System prompt từ template (nếu dùng template)
      * @param array|null $referenceImages Ảnh tham chiếu (base64 data URL hoặc HTTP URL)
      * @param string|null $aspectRatio Tỉ lệ ảnh
-     * @return array{prompt: string, negative_prompt: string|null}
+     * @return array{prompt: string, negative_prompt: string|null, designed: bool}
      */
     public function design(
         string $userPrompt,
@@ -104,7 +96,7 @@ PROMPT;
         ?string $aspectRatio = null,
     ): array {
         // Fallback nếu tắt hoặc không có API key
-        if (!$this->isEnabled() || empty($this->apiKey)) {
+        if (!$this->isEnabled() || empty(config('services.openrouter.api_key'))) {
             return $this->fallback($userPrompt, $negativePrompt);
         }
 
@@ -129,7 +121,7 @@ PROMPT;
     }
 
     /**
-     * Gọi LLM text model (có vision) để thiết kế prompt.
+     * Gọi LLM text model (có vision) qua Laravel AI SDK để thiết kế prompt.
      */
     private function callDesignerLLM(
         string $userPrompt,
@@ -142,7 +134,48 @@ PROMPT;
         $model = Setting::get('prompt_designer_model', 'google/gemini-2.5-flash');
         $systemPrompt = Setting::get('prompt_designer_system_prompt') ?: self::DEFAULT_SYSTEM_PROMPT;
 
-        // Xây dựng user message — cung cấp context rõ ràng để LLM classify đúng mode
+        // Xây dựng user message text
+        $userText = $this->buildUserText(
+            $userPrompt,
+            $style,
+            $negativePrompt,
+            $templateSystemPrompt,
+            $referenceImages,
+            $aspectRatio,
+        );
+
+        // Xây dựng attachments (ảnh tham chiếu) cho vision
+        $attachments = $this->buildAttachments($referenceImages);
+
+        // Tạo Agent instance và gọi prompt
+        $agent = new PromptDesignerAgent(
+            systemPrompt: $systemPrompt,
+            model: $model,
+        );
+
+        $response = $agent->prompt(
+            prompt: $userText,
+            attachments: $attachments,
+            provider: 'openrouter',
+            model: $model,
+        );
+
+        $llmText = (string) $response;
+
+        return $this->parseDesignResult($llmText, $userPrompt, $negativePrompt);
+    }
+
+    /**
+     * Xây dựng text phần user message với context đầy đủ.
+     */
+    private function buildUserText(
+        string $userPrompt,
+        ?string $style,
+        ?string $negativePrompt,
+        ?string $templateSystemPrompt,
+        ?array $referenceImages,
+        ?string $aspectRatio,
+    ): string {
         $hasRefs = !empty($referenceImages);
         $hasTemplate = !empty($templateSystemPrompt);
 
@@ -184,72 +217,53 @@ PROMPT;
             }
         }
 
-        // Xây dựng content array — text + images (nếu có)
-        if (!empty($referenceImages)) {
-            $content = [
-                ['type' => 'text', 'text' => $userText],
-            ];
+        return $userText;
+    }
 
-            $imageCount = 0;
-            foreach ($referenceImages as $imgRef) {
-                // Gửi tối đa 6 ảnh tham chiếu — khớp với giới hạn frontend/backend validation
-                if ($imageCount >= 6) {
-                    break;
-                }
+    /**
+     * Xây dựng attachments array từ reference images.
+     *
+     * Chuyển đổi URL và base64 data URL thành RemoteImage/Base64Image
+     * để Laravel AI SDK tự xử lý vision content.
+     *
+     * @return array<RemoteImage|Base64Image>
+     */
+    private function buildAttachments(?array $referenceImages): array
+    {
+        if (empty($referenceImages)) {
+            return [];
+        }
 
-                // Đảm bảo format data URL đúng
-                if (!str_starts_with($imgRef, 'data:image/') && !str_starts_with($imgRef, 'http')) {
-                    $imgRef = "data:image/jpeg;base64," . $imgRef;
-                }
+        $attachments = [];
+        $count = 0;
 
-                $content[] = [
-                    'type' => 'image_url',
-                    'image_url' => ['url' => $imgRef],
-                ];
-                $imageCount++;
+        foreach ($referenceImages as $imgRef) {
+            if ($count >= 6) {
+                break;
             }
-        } else {
-            $content = $userText;
+
+            if (str_starts_with($imgRef, 'http://') || str_starts_with($imgRef, 'https://')) {
+                // URL ảnh từ MinIO/S3
+                $attachments[] = new RemoteImage($imgRef);
+            } elseif (str_starts_with($imgRef, 'data:image/')) {
+                // Base64 data URL → tách mime và base64 data
+                $parts = explode(',', $imgRef, 2);
+                $base64Data = $parts[1] ?? $imgRef;
+                // Trích mime từ "data:image/jpeg;base64"
+                $mimeMatch = [];
+                preg_match('/^data:(image\/[^;]+);/', $imgRef, $mimeMatch);
+                $mime = $mimeMatch[1] ?? 'image/jpeg';
+
+                $attachments[] = new Base64Image($base64Data, $mime);
+            } else {
+                // Raw base64 không có prefix → mặc định jpeg
+                $attachments[] = new Base64Image($imgRef, 'image/jpeg');
+            }
+
+            $count++;
         }
 
-        // Gọi OpenRouter API — model text (có vision capability)
-        $response = Http::timeout(30)
-            ->withHeaders([
-                'Authorization' => "Bearer {$this->apiKey}",
-                'Content-Type' => 'application/json',
-                'HTTP-Referer' => 'https://zdream.vn',
-                'X-OpenRouter-Title' => 'ZDream - AI Image Generator',
-            ])
-            ->post("{$this->baseUrl}/chat/completions", [
-                'model' => $model,
-                'messages' => [
-                    ['role' => 'system', 'content' => $systemPrompt],
-                    ['role' => 'user', 'content' => $content],
-                ],
-                'temperature' => 0.7,
-                'max_tokens' => 1024,
-                'response_format' => ['type' => 'json_object'],
-            ]);
-
-        if ($response->failed()) {
-            throw new \RuntimeException(
-                "PromptDesigner API error: " . $response->status() . " - " . $response->body()
-            );
-        }
-
-        $data = $response->json();
-
-        // Kiểm tra lỗi trong response body
-        if (isset($data['error'])) {
-            throw new \RuntimeException(
-                "PromptDesigner API returned error: " . ($data['error']['message'] ?? 'Unknown')
-            );
-        }
-
-        // Parse LLM response
-        $llmText = data_get($data, 'choices.0.message.content', '');
-
-        return $this->parseDesignResult($llmText, $userPrompt, $negativePrompt);
+        return $attachments;
     }
 
     /**
@@ -267,7 +281,6 @@ PROMPT;
         $parsed = json_decode($cleaned, true);
 
         if (!is_array($parsed) || empty($parsed['prompt'])) {
-            // Nếu parse fail → fallback
             Log::warning('PromptDesigner: Failed to parse LLM JSON', [
                 'raw' => mb_substr($llmText, 0, 500),
             ]);
