@@ -65,8 +65,7 @@ export function AppSidebar() {
     if (path === "/app/home") return location.pathname.includes("home")
     if (path === "/app/admin") return location.pathname.startsWith("/app/admin")
     if (path === "/app/tools") {
-      return location.pathname.startsWith("/app/tools") ||
-        location.pathname.startsWith("/app/templates")
+      return location.pathname.startsWith("/app/tools")
     }
     return location.pathname.startsWith(path)
   }

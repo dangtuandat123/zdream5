@@ -49,9 +49,13 @@ function App() {
             <Route index element={<Navigate to="/app/home" replace />} />
             <Route path="home" element={<Dashboard />} />
             <Route path="tools" element={<AIToolsPage />} />
+            <Route path="tools/templates" element={<TemplatesPage />} />
+            <Route path="tools/templates/:slug" element={<TemplateDetailPage />} />
             <Route path="generate" element={<GeneratePage />} />
-            <Route path="templates" element={<TemplatesPage />} />
-            <Route path="templates/:slug" element={<TemplateDetailPage />} />
+
+            {/* Redirect old /app/templates → /app/tools/templates */}
+            <Route path="templates" element={<Navigate to="/app/tools/templates" replace />} />
+            <Route path="templates/:slug" element={<Navigate to="/app/tools/templates" replace />} />
             <Route path="library" element={<LibraryPage />} />
             <Route path="topup" element={<TopUpPage />} />
 

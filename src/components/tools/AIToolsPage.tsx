@@ -43,7 +43,7 @@ const tools: AITool[] = [
     description: "Chọn mẫu thiết kế có sẵn, điền nội dung và tạo ảnh chuyên nghiệp trong vài giây",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/templates.jpg",
-    path: "/app/templates",
+    path: "/app/tools/templates",
     available: true,
   },
   {

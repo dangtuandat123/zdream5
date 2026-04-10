@@ -141,7 +141,7 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
 const EMPTY_STATES: Record<string, { icon: typeof ImageIcon; title: string; desc: string; cta?: { label: string; to: string } }> = {
     all: { icon: ImageIcon, title: "Thư viện trống", desc: "Bắt đầu tạo ảnh AI hoặc tải ảnh lên để xây dựng bộ sưu tập của bạn.", cta: { label: "Tạo ảnh đầu tiên", to: "/app/generate" } },
     ai: { icon: SparklesIcon, title: "Chưa có ảnh AI nào", desc: "Hãy tạo ảnh bằng cách nhập prompt sáng tạo của bạn.", cta: { label: "Tạo ảnh ngay", to: "/app/generate" } },
-    template: { icon: PaletteIcon, title: "Chưa có ảnh từ mẫu", desc: "Khám phá các mẫu thiết kế để tạo ảnh nhanh chóng.", cta: { label: "Xem mẫu", to: "/app/templates" } },
+    template: { icon: PaletteIcon, title: "Chưa có ảnh từ mẫu", desc: "Khám phá các mẫu thiết kế để tạo ảnh nhanh chóng.", cta: { label: "Xem mẫu", to: "/app/tools/templates" } },
     upload: { icon: UploadIcon, title: "Chưa có ảnh tải lên", desc: "Tải ảnh lên để sử dụng làm tài liệu tham khảo." },
 }
 

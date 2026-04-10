@@ -136,7 +136,7 @@ export function TemplatesPage() {
                 {paginatedTemplates.map((template) => (
                     <Link
                         key={template.id}
-                        to={`/app/templates/${template.slug}`}
+                        to={`/app/tools/templates/${template.slug}`}
                         className="group relative block overflow-hidden rounded-2xl bg-muted aspect-[3/4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
                         {template.thumbnail && (

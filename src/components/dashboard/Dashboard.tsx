@@ -51,7 +51,7 @@ const bannerSlides = [
         subtitle: "Hàng trăm template sẵn có cho mọi phong cách sáng tạo",
         badge: "Nổi bật",
         gradient: "from-blue-600 via-cyan-600 to-teal-600",
-        cta: { label: "Xem kiểu mẫu", to: "/app/templates" },
+        cta: { label: "Xem kiểu mẫu", to: "/app/tools/templates" },
     },
     {
         title: "Nạp Gems - Sáng tạo không giới hạn",
@@ -64,7 +64,7 @@ const bannerSlides = [
 
 const featureNav = [
     { to: "/app/generate", label: "Tạo ảnh AI", icon: Sparkles, highlight: true },
-    { to: "/app/templates", label: "Kiểu mẫu", icon: SwatchBook },
+    { to: "/app/tools/templates", label: "Kiểu mẫu", icon: SwatchBook },
     { to: "/app/library", label: "Thư viện", icon: Library },
     { to: "/app/tools", label: "Xóa nền", icon: Eraser, badge: "Sắp ra mắt" },
     { to: "/app/tools", label: "Upscale", icon: ArrowUpFromLine, badge: "Sắp ra mắt" },
@@ -230,7 +230,7 @@ export function Dashboard() {
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm sm:text-base font-semibold">Kiểu mẫu nổi bật</h2>
-                    <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                    <Link to="/app/tools/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                         Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                 </div>
@@ -257,7 +257,7 @@ export function Dashboard() {
                             <CarouselContent className="-ml-3">
                                 {templates.map((tpl) => (
                                     <CarouselItem key={tpl.id} className="pl-3 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                                        <Link to={`/app/templates/${tpl.slug}`} className="group relative block overflow-hidden rounded-xl sm:rounded-2xl bg-muted aspect-[3/4]">
+                                        <Link to={`/app/tools/templates/${tpl.slug}`} className="group relative block overflow-hidden rounded-xl sm:rounded-2xl bg-muted aspect-[3/4]">
                                             {tpl.thumbnail && (
                                                 <img
                                                     src={tpl.thumbnail}
