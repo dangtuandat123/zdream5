@@ -312,6 +312,54 @@ export const modelApi = {
 };
 
 // ========================
+// Tools API
+// ========================
+
+export interface ToolImageResponse {
+    message: string;
+    image: GeneratedImageData;
+    gems_remaining: number;
+}
+
+export interface ToolTextResponse {
+    message: string;
+    result: { prompt: string };
+    gems_remaining: number;
+}
+
+export const toolsApi = {
+    styleTransfer: (data: { image: string; target_style: string }) =>
+        request<ToolImageResponse>('/tools/style-transfer', { method: 'POST', body: JSON.stringify(data) }),
+
+    imageVariation: (data: { image: string; strength?: number }) =>
+        request<ToolImageResponse>('/tools/image-variation', { method: 'POST', body: JSON.stringify(data) }),
+
+    adImage: (data: { image: string; description: string; platform?: string; aspect_ratio?: string }) =>
+        request<ToolImageResponse>('/tools/ad-image', { method: 'POST', body: JSON.stringify(data) }),
+
+    consistentCharacter: (data: { images: string[]; scene_description: string }) =>
+        request<ToolImageResponse>('/tools/consistent-character', { method: 'POST', body: JSON.stringify(data) }),
+
+    upscale: (data: { image: string; scale_factor?: string }) =>
+        request<ToolImageResponse>('/tools/upscale', { method: 'POST', body: JSON.stringify(data) }),
+
+    removeBg: (data: { image: string }) =>
+        request<ToolImageResponse>('/tools/remove-bg', { method: 'POST', body: JSON.stringify(data) }),
+
+    removeObject: (data: { image: string; description: string }) =>
+        request<ToolImageResponse>('/tools/remove-object', { method: 'POST', body: JSON.stringify(data) }),
+
+    inpainting: (data: { image: string; mask: string; description: string }) =>
+        request<ToolImageResponse>('/tools/inpainting', { method: 'POST', body: JSON.stringify(data) }),
+
+    extend: (data: { image: string; directions: string[]; description?: string }) =>
+        request<ToolImageResponse>('/tools/extend', { method: 'POST', body: JSON.stringify(data) }),
+
+    imageToPrompt: (data: { image: string }) =>
+        request<ToolTextResponse>('/tools/image-to-prompt', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// ========================
 // Admin API
 // ========================
 

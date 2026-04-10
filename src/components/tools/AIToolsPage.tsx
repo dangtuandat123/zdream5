@@ -52,7 +52,8 @@ const tools: AITool[] = [
     description: "Tạo nhân vật riêng và giữ nhất quán qua mọi bối cảnh — avatar, truyện tranh, branding",
     category: "Sáng tạo",
     thumbnail: "/images/tools/consistent-character.jpg",
-    available: false,
+    path: "/app/tools/consistent-character",
+    available: true,
   },
   {
     id: "ad-image",
@@ -60,7 +61,8 @@ const tools: AITool[] = [
     description: "Tạo ảnh quảng cáo sản phẩm bắt mắt cho Facebook, Instagram, TikTok",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/ad-image.jpg",
-    available: false,
+    path: "/app/tools/ad-image",
+    available: true,
   },
   {
     id: "image-variation",
@@ -68,7 +70,8 @@ const tools: AITool[] = [
     description: "Upload ảnh gốc và tạo ra nhiều phiên bản tương tự với phong cách khác nhau",
     category: "Tạo ảnh",
     thumbnail: "/images/tools/image-variation.jpg",
-    available: false,
+    path: "/app/tools/image-variation",
+    available: true,
   },
   {
     id: "upscale",
@@ -76,7 +79,8 @@ const tools: AITool[] = [
     description: "Phóng to ảnh lên 2x–4x mà vẫn giữ chi tiết sắc nét nhờ AI",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/upscale.jpg",
-    available: false,
+    path: "/app/tools/upscale",
+    available: true,
   },
   {
     id: "remove-bg",
@@ -84,7 +88,8 @@ const tools: AITool[] = [
     description: "Tách chủ thể khỏi phông nền chỉ với một click, xuất ảnh nền trong suốt",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/remove-bg.jpg",
-    available: false,
+    path: "/app/tools/remove-bg",
+    available: true,
   },
   {
     id: "remove-object",
@@ -92,7 +97,8 @@ const tools: AITool[] = [
     description: "Tô chọn vùng chứa vật thể thừa và AI sẽ xóa sạch, lấp đầy tự nhiên",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/remove-object.jpg",
-    available: false,
+    path: "/app/tools/remove-object",
+    available: true,
   },
   {
     id: "inpainting",
@@ -100,7 +106,8 @@ const tools: AITool[] = [
     description: "Khoanh vùng bất kỳ trên ảnh và mô tả nội dung mới để AI vẽ lại",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/inpainting.jpg",
-    available: false,
+    path: "/app/tools/inpainting",
+    available: true,
   },
   {
     id: "extend",
@@ -108,7 +115,8 @@ const tools: AITool[] = [
     description: "Kéo dãn viền ảnh ra ngoài khung hình gốc, AI tự sinh nội dung phù hợp",
     category: "Chỉnh sửa",
     thumbnail: "/images/tools/extend.jpg",
-    available: false,
+    path: "/app/tools/extend",
+    available: true,
   },
   {
     id: "style-transfer",
@@ -116,7 +124,8 @@ const tools: AITool[] = [
     description: "Biến ảnh thường thành tranh anime, sơn dầu, hoạt hình, cyberpunk,...",
     category: "Sáng tạo",
     thumbnail: "/images/tools/style-transfer.jpg",
-    available: false,
+    path: "/app/tools/style-transfer",
+    available: true,
   },
   {
     id: "image-to-prompt",
@@ -124,7 +133,8 @@ const tools: AITool[] = [
     description: "AI phân tích ảnh và viết prompt chi tiết để bạn tái tạo hoặc cải tiến",
     category: "Sáng tạo",
     thumbnail: "/images/tools/image-to-prompt.jpg",
-    available: false,
+    path: "/app/tools/image-to-prompt",
+    available: true,
   },
 ]
 

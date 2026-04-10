@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from "react"
 import { Link } from "react-router-dom"
-import { SearchIcon, SparklesIcon, ArrowRightIcon, RefreshCw, ChevronRight } from "lucide-react"
+import { SearchIcon, SparklesIcon, ArrowRightIcon, RefreshCw } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { ToolPageLayout } from "@/components/tools/ToolPageLayout"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
     Pagination,
@@ -81,22 +82,10 @@ export function TemplatesPage() {
     }
 
     return (
-        <div className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
-            {/* Breadcrumb */}
-            <nav className="flex items-center gap-1.5 text-sm text-muted-foreground -mb-2">
-                <Link to="/app/tools" className="hover:text-foreground transition-colors">Công cụ AI</Link>
-                <ChevronRight className="size-3.5" />
-                <span className="text-foreground font-medium">Mẫu thiết kế</span>
-            </nav>
-
-            {/* Header */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="space-y-1">
-                    <h1 className="text-2xl font-semibold tracking-tight">Mẫu thiết kế</h1>
-                    <p className="text-sm text-muted-foreground">
-                        Chọn mẫu → Tải ảnh lên → Nhận ảnh mới theo phong cách mẫu
-                    </p>
-                </div>
+        <ToolPageLayout
+            title="Mẫu thiết kế"
+            description="Chọn mẫu → Tải ảnh lên → Nhận ảnh mới theo phong cách mẫu"
+            headerRight={
                 <div className="relative w-full sm:w-[280px]">
                     <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -106,8 +95,8 @@ export function TemplatesPage() {
                         onChange={(e) => handleSearchChange(e.target.value)}
                     />
                 </div>
-            </div>
-
+            }
+        >
             {/* Category Filter */}
             <ToggleGroup
                 type="single"
@@ -249,6 +238,6 @@ export function TemplatesPage() {
                     </Button>
                 </div>
             )}
-        </div>
+        </ToolPageLayout>
     )
 }

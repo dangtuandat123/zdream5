@@ -160,6 +160,52 @@ class OpenRouterService
     }
 
     /**
+     * Phân tích ảnh bằng AI, trả về text (không tạo ảnh).
+     */
+    public function analyzeImage(string $systemPrompt, array $referenceImages): string
+    {
+        $content = [];
+        foreach ($referenceImages as $imgBase64) {
+            if (!str_starts_with($imgBase64, 'data:image/')) {
+                $imgBase64 = "data:image/jpeg;base64," . $imgBase64;
+            }
+            $content[] = [
+                'type' => 'image_url',
+                'image_url' => ['url' => $imgBase64],
+            ];
+        }
+        $content[] = ['type' => 'text', 'text' => 'Analyze this image and write a detailed prompt.'];
+
+        $textModel = Setting::get('prompt_designer_model', 'google/gemini-2.5-flash');
+
+        $response = Http::timeout(60)
+            ->withHeaders([
+                'Authorization' => "Bearer {$this->apiKey}",
+                'Content-Type' => 'application/json',
+                'HTTP-Referer' => 'https://zdream.vn',
+                'X-OpenRouter-Title' => 'ZDream - AI Image Generator',
+            ])
+            ->post("{$this->baseUrl}/chat/completions", [
+                'model' => $textModel,
+                'messages' => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user', 'content' => $content],
+                ],
+            ]);
+
+        if ($response->failed()) {
+            throw new \RuntimeException("OpenRouter API lỗi: HTTP " . $response->status());
+        }
+
+        $data = $response->json();
+        if (isset($data['error'])) {
+            throw new \RuntimeException("OpenRouter: " . ($data['error']['message'] ?? 'Unknown error'));
+        }
+
+        return data_get($data, 'choices.0.message.content', '');
+    }
+
+    /**
      * Tải hoặc decode ảnh và lưu vào storage (MinIO).
      *
      * @param string $imageUrl Data URL hoặc HTTP URL
