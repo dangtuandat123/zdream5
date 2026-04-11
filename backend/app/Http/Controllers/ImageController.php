@@ -337,6 +337,10 @@ class ImageController extends Controller
             $query->whereNull('template_slug');
         }
 
+        if ($request->has('tool_name')) {
+            $query->where('tool_name', $request->input('tool_name'));
+        }
+
         $images = $query->paginate($perPage);
 
         return response()->json($images);

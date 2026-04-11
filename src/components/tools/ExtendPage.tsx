@@ -1,15 +1,20 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
+import { ToolTipsCard } from "./shared/ToolTipsCard"
+import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
+import { useToolHistory } from "@/hooks/use-tool-history"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react"
 
 const DIRECTIONS = [
     { id: "top", label: "Trên", icon: ArrowUp },
@@ -18,10 +23,18 @@ const DIRECTIONS = [
     { id: "right", label: "Phải", icon: ArrowRight },
 ] as const
 
+const EXTEND_RATIOS = [
+    { value: "25", label: "25%" },
+    { value: "50", label: "50%" },
+    { value: "100", label: "100%" },
+] as const
+
 export function ExtendPage() {
-    const { refreshUser } = useAuth()
+    const { refreshUser, gems } = useAuth()
+    const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("extend")
     const [images, setImages] = useState<string[]>([])
     const [directions, setDirections] = useState<string[]>([])
+    const [extendRatio, setExtendRatio] = useState("50")
     const [description, setDescription] = useState("")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
@@ -39,6 +52,7 @@ export function ExtendPage() {
             const res = await toolsApi.extend({ image: images[0], directions, description: description || undefined })
             setResult(res.image.file_url)
             refreshUser()
+            refreshHistory()
             toast.success(res.message)
         } catch (e: any) {
             toast.error(e.message)
@@ -69,6 +83,21 @@ export function ExtendPage() {
                                 </button>
                             ))}
                         </div>
+                        {directions.length > 0 && (
+                            <p className="text-[10px] text-muted-foreground">
+                                Đã chọn: {directions.map(d => DIRECTIONS.find(dir => dir.id === d)?.label).join(", ")}
+                            </p>
+                        )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Tỷ lệ mở rộng</Label>
+                        <ToggleGroup type="single" value={extendRatio} onValueChange={(v) => v && setExtendRatio(v)} className="justify-start">
+                            {EXTEND_RATIOS.map((r) => (
+                                <ToggleGroupItem key={r.value} value={r.value} className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                                    {r.label}
+                                </ToggleGroupItem>
+                            ))}
+                        </ToggleGroup>
                     </div>
                     <div className="space-y-2">
                         <Label>Mô tả nội dung mở rộng (tùy chọn)</Label>
@@ -80,9 +109,18 @@ export function ExtendPage() {
                             maxLength={1000}
                         />
                     </div>
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" />
+                    <ToolTipsCard tips={TOOL_TIPS['extend']} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
                 </div>
-                <ToolResultDisplay imageUrl={result} loading={loading} />
+                <div className="space-y-4">
+                    <ToolResultDisplay
+                        imageUrl={result}
+                        loading={loading}
+                        beforeImageUrl={images[0]}
+                        emptyHint="Tải ảnh lên và chọn hướng mở rộng"
+                    />
+                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
+                </div>
             </div>
         </ToolPageLayout>
     )

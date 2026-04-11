@@ -1,16 +1,32 @@
-import { Download, Copy, Check, ImageIcon } from "lucide-react"
+import { Download, Copy, Check, ImageIcon, ArrowRight, RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { BeforeAfterCompare } from "./BeforeAfterCompare"
 
 interface ToolResultDisplayProps {
     imageUrl?: string | null
     textResult?: string | null
     loading?: boolean
     prompt?: string | null
+    beforeImageUrl?: string | null
+    onUseAsInput?: (url: string) => void
+    emptyHint?: string
+    showGenerateFromPrompt?: boolean
 }
 
-export function ToolResultDisplay({ imageUrl, textResult, loading, prompt }: ToolResultDisplayProps) {
+export function ToolResultDisplay({
+    imageUrl,
+    textResult,
+    loading,
+    prompt,
+    beforeImageUrl,
+    onUseAsInput,
+    emptyHint,
+    showGenerateFromPrompt,
+}: ToolResultDisplayProps) {
     const [copied, setCopied] = useState(false)
+    const navigate = useNavigate()
 
     const handleDownload = async () => {
         if (!imageUrl) return
@@ -52,6 +68,16 @@ export function ToolResultDisplay({ imageUrl, textResult, loading, prompt }: Too
                     </Button>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{textResult}</p>
+                {showGenerateFromPrompt && (
+                    <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => navigate(`/app/generate?prompt=${encodeURIComponent(textResult)}`)}
+                    >
+                        <ArrowRight className="size-3.5" />
+                        Tạo ảnh từ prompt này
+                    </Button>
+                )}
             </div>
         )
     }
@@ -59,10 +85,14 @@ export function ToolResultDisplay({ imageUrl, textResult, loading, prompt }: Too
     if (imageUrl) {
         return (
             <div className="space-y-3">
-                <div className="relative rounded-xl overflow-hidden border bg-muted">
-                    <img src={imageUrl} alt="Result" className="w-full max-h-[500px] object-contain" />
-                </div>
-                <div className="flex gap-2">
+                {beforeImageUrl ? (
+                    <BeforeAfterCompare beforeUrl={beforeImageUrl} afterUrl={imageUrl} />
+                ) : (
+                    <div className="relative rounded-xl overflow-hidden border bg-muted">
+                        <img src={imageUrl} alt="Result" className="w-full max-h-[500px] object-contain" />
+                    </div>
+                )}
+                <div className="flex gap-2 flex-wrap">
                     <Button size="sm" variant="outline" className="gap-1.5" onClick={handleDownload}>
                         <Download className="size-3.5" />
                         Tải về
@@ -71,6 +101,12 @@ export function ToolResultDisplay({ imageUrl, textResult, loading, prompt }: Too
                         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleCopy(prompt)}>
                             {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                             Prompt
+                        </Button>
+                    )}
+                    {onUseAsInput && (
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onUseAsInput(imageUrl)}>
+                            <RotateCcw className="size-3.5" />
+                            Dùng làm đầu vào
                         </Button>
                     )}
                 </div>
@@ -83,7 +119,7 @@ export function ToolResultDisplay({ imageUrl, textResult, loading, prompt }: Too
             <div className="flex items-center justify-center size-12 rounded-xl bg-muted">
                 <ImageIcon className="size-6 text-muted-foreground" />
             </div>
-            <p className="text-sm text-muted-foreground">Kết quả sẽ hiển thị ở đây</p>
+            <p className="text-sm text-muted-foreground text-center">{emptyHint || "Kết quả sẽ hiển thị ở đây"}</p>
         </div>
     )
 }

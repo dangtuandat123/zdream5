@@ -1,20 +1,35 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
+import { ToolTipsCard } from "./shared/ToolTipsCard"
+import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
+import { useToolHistory } from "@/hooks/use-tool-history"
 import { Label } from "@/components/ui/label"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 export function UpscalePage() {
-    const { refreshUser } = useAuth()
+    const { refreshUser, gems } = useAuth()
+    const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
     const [images, setImages] = useState<string[]>([])
     const [scaleFactor, setScaleFactor] = useState("2x")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null)
+
+    useEffect(() => {
+        if (!images[0]) { setImageDims(null); return }
+        const img = new Image()
+        img.onload = () => setImageDims({ w: img.naturalWidth, h: img.naturalHeight })
+        img.src = images[0]
+    }, [images])
+
+    const scale = scaleFactor === "4x" ? 4 : 2
 
     const handleSubmit = async () => {
         if (!images[0]) return toast.error("Vui lòng tải ảnh lên")
@@ -24,6 +39,7 @@ export function UpscalePage() {
             const res = await toolsApi.upscale({ image: images[0], scale_factor: scaleFactor })
             setResult(res.image.file_url)
             refreshUser()
+            refreshHistory()
             toast.success(res.message)
         } catch (e: any) {
             toast.error(e.message)
@@ -43,10 +59,24 @@ export function UpscalePage() {
                             <ToggleGroupItem value="2x" className="rounded-full px-6 h-9 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">2x</ToggleGroupItem>
                             <ToggleGroupItem value="4x" className="rounded-full px-6 h-9 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">4x</ToggleGroupItem>
                         </ToggleGroup>
+                        {imageDims && (
+                            <p className="text-xs text-muted-foreground">
+                                {imageDims.w} x {imageDims.h} px → <span className="text-foreground font-medium">{imageDims.w * scale} x {imageDims.h * scale} px</span>
+                            </p>
+                        )}
                     </div>
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" />
+                    <ToolTipsCard tips={TOOL_TIPS['upscale']} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />
                 </div>
-                <ToolResultDisplay imageUrl={result} loading={loading} />
+                <div className="space-y-4">
+                    <ToolResultDisplay
+                        imageUrl={result}
+                        loading={loading}
+                        beforeImageUrl={images[0]}
+                        emptyHint="Tải ảnh cần phóng to lên để bắt đầu"
+                    />
+                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
+                </div>
             </div>
         </ToolPageLayout>
     )

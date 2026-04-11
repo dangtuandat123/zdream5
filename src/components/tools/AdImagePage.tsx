@@ -4,23 +4,39 @@ import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
+import { ToolTipsCard } from "./shared/ToolTipsCard"
+import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
+import { useToolHistory } from "@/hooks/use-tool-history"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
+const PLATFORM_RATIOS: Record<string, string> = {
+    facebook: "16:9",
+    instagram: "1:1",
+    tiktok: "9:16",
+}
+
 const RATIOS = ["1:1", "4:5", "9:16", "16:9"] as const
 
 export function AdImagePage() {
-    const { refreshUser } = useAuth()
+    const { refreshUser, gems } = useAuth()
+    const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("ad-image")
     const [images, setImages] = useState<string[]>([])
     const [description, setDescription] = useState("")
     const [platform, setPlatform] = useState("facebook")
-    const [aspectRatio, setAspectRatio] = useState("1:1")
+    const [aspectRatio, setAspectRatio] = useState("16:9")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+
+    const handlePlatformChange = (value: string) => {
+        setPlatform(value)
+        setAspectRatio(PLATFORM_RATIOS[value] || "1:1")
+    }
 
     const handleSubmit = async () => {
         if (!images[0]) return toast.error("Vui lòng tải ảnh sản phẩm")
@@ -31,6 +47,7 @@ export function AdImagePage() {
             const res = await toolsApi.adImage({ image: images[0], description, platform, aspect_ratio: aspectRatio })
             setResult(res.image.file_url)
             refreshUser()
+            refreshHistory()
             toast.success(res.message)
         } catch (e: any) {
             toast.error(e.message)
@@ -45,7 +62,10 @@ export function AdImagePage() {
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh sản phẩm" />
                     <div className="space-y-2">
-                        <Label>Mô tả quảng cáo</Label>
+                        <div className="flex items-center justify-between">
+                            <Label>Mô tả quảng cáo</Label>
+                            <span className="text-[10px] text-muted-foreground">{description.length}/1000</span>
+                        </div>
                         <Textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
@@ -57,7 +77,7 @@ export function AdImagePage() {
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Nền tảng</Label>
-                            <Select value={platform} onValueChange={setPlatform}>
+                            <Select value={platform} onValueChange={handlePlatformChange}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="facebook">Facebook</SelectItem>
@@ -77,9 +97,17 @@ export function AdImagePage() {
                             </ToggleGroup>
                         </div>
                     </div>
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} />
+                    <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} gemsBalance={gems} />
                 </div>
-                <ToolResultDisplay imageUrl={result} loading={loading} />
+                <div className="space-y-4">
+                    <ToolResultDisplay
+                        imageUrl={result}
+                        loading={loading}
+                        emptyHint="Tải ảnh sản phẩm và mô tả quảng cáo để bắt đầu"
+                    />
+                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
+                </div>
             </div>
         </ToolPageLayout>
     )

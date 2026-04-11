@@ -1,16 +1,22 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import { Info } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
+import { ToolTipsCard } from "./shared/ToolTipsCard"
+import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
+import { useToolHistory } from "@/hooks/use-tool-history"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
 export function ConsistentCharacterPage() {
-    const { refreshUser } = useAuth()
+    const { refreshUser, gems } = useAuth()
+    const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("consistent-character")
     const [images, setImages] = useState<string[]>([])
     const [scene, setScene] = useState("")
     const [result, setResult] = useState<string | null>(null)
@@ -25,6 +31,7 @@ export function ConsistentCharacterPage() {
             const res = await toolsApi.consistentCharacter({ images, scene_description: scene })
             setResult(res.image.file_url)
             refreshUser()
+            refreshHistory()
             toast.success(res.message)
         } catch (e: any) {
             toast.error(e.message)
@@ -37,6 +44,10 @@ export function ConsistentCharacterPage() {
         <ToolPageLayout title="Nhân vật AI" description="Tạo nhân vật riêng và giữ nhất quán qua mọi bối cảnh">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
+                    <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-400">
+                        <Info className="size-3.5 shrink-0 mt-0.5" />
+                        <span>Dùng 2-3 ảnh cùng nhân vật từ các góc khác nhau để AI hiểu khuôn mặt và đặc điểm tốt hơn.</span>
+                    </div>
                     <div className="space-y-2">
                         <Label>Ảnh nhân vật tham chiếu (1-3 ảnh)</Label>
                         <ToolImageUpload images={images} onImagesChange={setImages} multiple maxFiles={3} label="Tải ảnh nhân vật" />
@@ -51,9 +62,17 @@ export function ConsistentCharacterPage() {
                             maxLength={2000}
                         />
                     </div>
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images.length || !scene.trim()} gemsCost={2} />
+                    <ToolTipsCard tips={TOOL_TIPS['consistent-character']} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images.length || !scene.trim()} gemsCost={2} gemsBalance={gems} />
                 </div>
-                <ToolResultDisplay imageUrl={result} loading={loading} />
+                <div className="space-y-4">
+                    <ToolResultDisplay
+                        imageUrl={result}
+                        loading={loading}
+                        emptyHint="Tải ảnh nhân vật và mô tả bối cảnh mới để bắt đầu"
+                    />
+                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
+                </div>
             </div>
         </ToolPageLayout>
     )
