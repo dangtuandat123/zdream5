@@ -26,7 +26,7 @@ export function ImageToPromptPage() {
         setLoading(true)
         setResult(null)
         try {
-            const res = await toolsApi.imageToPrompt({ image: images[0] })
+            const res = await toolsApi.imageToPrompt({ image: images[0], language })
             setResult(res.result.prompt)
             refreshUser()
             refreshHistory()

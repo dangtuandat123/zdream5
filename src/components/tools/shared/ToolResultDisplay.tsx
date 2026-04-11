@@ -2,7 +2,7 @@ import { Download, Copy, Check, ImageIcon, ArrowRight, RotateCcw } from "lucide-
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { BeforeAfterCompare } from "./BeforeAfterCompare"
+import { BeforeAfterSlider } from "./BeforeAfterSlider"
 
 interface ToolResultDisplayProps {
     imageUrl?: string | null
@@ -86,7 +86,7 @@ export function ToolResultDisplay({
         return (
             <div className="space-y-3">
                 {beforeImageUrl ? (
-                    <BeforeAfterCompare beforeUrl={beforeImageUrl} afterUrl={imageUrl} />
+                    <BeforeAfterSlider beforeUrl={beforeImageUrl} afterUrl={imageUrl} />
                 ) : (
                     <div className="relative rounded-xl overflow-hidden border bg-muted">
                         <img src={imageUrl} alt="Result" className="w-full max-h-[500px] object-contain" />

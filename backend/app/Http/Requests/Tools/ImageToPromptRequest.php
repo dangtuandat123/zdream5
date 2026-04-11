@@ -14,6 +14,7 @@ class ImageToPromptRequest extends FormRequest
     {
         return [
             'image' => ['required', 'string', 'max:13500000'],
+            'language' => ['nullable', 'string', 'in:en,vi'],
         ];
     }
 }

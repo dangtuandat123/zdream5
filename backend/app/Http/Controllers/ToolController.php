@@ -50,10 +50,17 @@ class ToolController extends Controller
         ];
         $styleLabel = $styleLabels[$v['target_style']] ?? $v['target_style'];
 
+        $intensityHints = [
+            'light' => 'Apply a subtle, light touch of',
+            'medium' => 'Transform this image into',
+            'strong' => 'Completely and dramatically transform this image into',
+        ];
+        $intensityHint = $intensityHints[$v['intensity'] ?? 'medium'] ?? $intensityHints['medium'];
+
         return $this->processImageTool(
             request: $request,
             toolName: 'style-transfer',
-            prompt: "Transform this image into {$styleLabel}. Keep the exact same composition, subjects, and layout.",
+            prompt: "{$intensityHint} {$styleLabel}. Keep the exact same composition, subjects, and layout.",
             referenceImages: [$v['image']],
             taskType: 'style-transfer',
         );
@@ -196,8 +203,13 @@ class ToolController extends Controller
         }
 
         try {
+            $language = $v['language'] ?? 'en';
+            $langInstruction = $language === 'vi'
+                ? 'Write the prompt in Vietnamese (Tiếng Việt).'
+                : 'Write in English.';
+
             $result = $this->openRouterService->analyzeImage(
-                systemPrompt: 'You are an expert AI image prompt engineer. Analyze the given image and write a detailed, precise prompt that could recreate this image using an AI image generator. Include: subject description, composition, lighting, color palette, art style, camera angle, mood/atmosphere, and technical details. Output ONLY the prompt text, nothing else. Write in English, under 300 words.',
+                systemPrompt: "You are an expert AI image prompt engineer. Analyze the given image and write a detailed, precise prompt that could recreate this image using an AI image generator. Include: subject description, composition, lighting, color palette, art style, camera angle, mood/atmosphere, and technical details. Output ONLY the prompt text, nothing else. {$langInstruction} Under 300 words.",
                 referenceImages: [$v['image']],
             );
 

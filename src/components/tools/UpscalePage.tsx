@@ -6,6 +6,7 @@ import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { ZoomCompare } from "./shared/ZoomCompare"
 import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -69,12 +70,15 @@ export function UpscalePage() {
                     <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />
                 </div>
                 <div className="space-y-4">
-                    <ToolResultDisplay
-                        imageUrl={result}
-                        loading={loading}
-                        beforeImageUrl={images[0]}
-                        emptyHint="Tải ảnh cần phóng to lên để bắt đầu"
-                    />
+                    {result && images[0] ? (
+                        <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
+                    ) : (
+                        <ToolResultDisplay
+                            imageUrl={result}
+                            loading={loading}
+                            emptyHint="Tải ảnh cần phóng to lên để bắt đầu"
+                        />
+                    )}
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
                 </div>
             </div>

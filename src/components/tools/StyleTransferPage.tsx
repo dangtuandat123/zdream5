@@ -43,7 +43,7 @@ export function StyleTransferPage() {
         setLoading(true)
         setResult(null)
         try {
-            const res = await toolsApi.styleTransfer({ image: images[0], target_style: style })
+            const res = await toolsApi.styleTransfer({ image: images[0], target_style: style, intensity })
             setResult(res.image.file_url)
             refreshUser()
             refreshHistory()

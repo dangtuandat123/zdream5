@@ -15,6 +15,7 @@ class StyleTransferRequest extends FormRequest
         return [
             'image' => ['required', 'string', 'max:13500000'],
             'target_style' => ['required', 'string', 'in:anime,oil-painting,watercolor,cyberpunk,pixel-art,3d-render'],
+            'intensity' => ['nullable', 'string', 'in:light,medium,strong'],
         ];
     }
 }

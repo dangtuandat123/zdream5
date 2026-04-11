@@ -7,6 +7,7 @@ import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { ExtendPreview } from "./shared/ExtendPreview"
 import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -66,6 +67,11 @@ export function ExtendPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} />
+
+                    {images[0] && (
+                        <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} />
+                    )}
+
                     <div className="space-y-2">
                         <Label>Hướng mở rộng</Label>
                         <div className="grid grid-cols-4 gap-2">
@@ -83,11 +89,6 @@ export function ExtendPage() {
                                 </button>
                             ))}
                         </div>
-                        {directions.length > 0 && (
-                            <p className="text-[10px] text-muted-foreground">
-                                Đã chọn: {directions.map(d => DIRECTIONS.find(dir => dir.id === d)?.label).join(", ")}
-                            </p>
-                        )}
                     </div>
                     <div className="space-y-2">
                         <Label>Tỷ lệ mở rộng</Label>

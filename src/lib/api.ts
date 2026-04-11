@@ -329,7 +329,7 @@ export interface ToolTextResponse {
 }
 
 export const toolsApi = {
-    styleTransfer: (data: { image: string; target_style: string }) =>
+    styleTransfer: (data: { image: string; target_style: string; intensity?: string }) =>
         request<ToolImageResponse>('/tools/style-transfer', { method: 'POST', body: JSON.stringify(data) }),
 
     imageVariation: (data: { image: string; strength?: number }) =>
@@ -356,7 +356,7 @@ export const toolsApi = {
     extend: (data: { image: string; directions: string[]; description?: string }) =>
         request<ToolImageResponse>('/tools/extend', { method: 'POST', body: JSON.stringify(data) }),
 
-    imageToPrompt: (data: { image: string }) =>
+    imageToPrompt: (data: { image: string; language?: string }) =>
         request<ToolTextResponse>('/tools/image-to-prompt', { method: 'POST', body: JSON.stringify(data) }),
 };
 
