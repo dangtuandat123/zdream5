@@ -62,6 +62,7 @@ class ToolController extends Controller
             toolName: 'style-transfer',
             prompt: "{$intensityHint} {$styleLabel}. Keep the exact same composition, subjects, and layout.",
             referenceImages: [$v['image']],
+            aspectRatio: $this->detectAspectRatio($v['image']),
             taskType: 'style-transfer',
         );
     }
@@ -77,6 +78,7 @@ class ToolController extends Controller
             toolName: 'image-variation',
             prompt: "Create a {$hint} variation of this image. Same concept and mood, but with fresh perspective.",
             referenceImages: [$v['image']],
+            aspectRatio: $this->detectAspectRatio($v['image']),
             taskType: 'variation',
         );
     }
@@ -106,6 +108,7 @@ class ToolController extends Controller
             toolName: 'consistent-character',
             prompt: $v['scene_description'],
             referenceImages: $v['images'],
+            aspectRatio: $this->detectAspectRatio($v['images'][0]),
             taskType: 'character',
         );
     }
@@ -125,6 +128,7 @@ class ToolController extends Controller
             toolName: 'upscale',
             prompt: "Upscale and enhance this image to {$scale} higher resolution. Add fine details, sharpen edges, improve clarity while maintaining the original composition and style exactly.",
             referenceImages: [$v['image']],
+            aspectRatio: $this->detectAspectRatio($v['image']),
             imageSize: $imageSize,
         );
     }
@@ -138,6 +142,7 @@ class ToolController extends Controller
             toolName: 'remove-bg',
             prompt: "Remove the background completely from this image. Keep only the main subject. Output on a clean pure white background. Preserve all details of the subject perfectly.",
             referenceImages: [$v['image']],
+            aspectRatio: $this->detectAspectRatio($v['image']),
         );
     }
 
@@ -150,6 +155,7 @@ class ToolController extends Controller
             toolName: 'remove-object',
             prompt: "Remove the following from this image: {$v['description']}. Fill the area naturally so it looks like the object was never there. Keep everything else exactly the same.",
             referenceImages: [$v['image']],
+            aspectRatio: $this->detectAspectRatio($v['image']),
         );
     }
 
@@ -162,6 +168,7 @@ class ToolController extends Controller
             toolName: 'inpainting',
             prompt: "In the masked/highlighted region of this image, replace the content with: {$v['description']}. Blend seamlessly with the surrounding area. Keep everything outside the mask exactly the same.",
             referenceImages: [$v['image'], $v['mask']],
+            aspectRatio: $this->detectAspectRatio($v['image']),
         );
     }
 
@@ -171,11 +178,32 @@ class ToolController extends Controller
         $dirs = implode(', ', $v['directions']);
         $desc = $v['description'] ?? 'matching the existing scene';
 
+        // Extend changes the aspect ratio — estimate new ratio based on directions
+        $origRatio = $this->detectAspectRatio($v['image']);
+        $parts = explode(':', $origRatio);
+        $rw = (float) $parts[0];
+        $rh = (float) $parts[1];
+        $extendPct = ((int) ($v['extend_ratio'] ?? 50)) / 100;
+        $horizontal = array_intersect($v['directions'], ['left', 'right']);
+        $vertical = array_intersect($v['directions'], ['top', 'bottom']);
+        $rw += $rw * $extendPct * count($horizontal);
+        $rh += $rh * $extendPct * count($vertical);
+        // Re-detect closest standard ratio from computed dimensions
+        $newRatioVal = $rw / $rh;
+        $standards = ['1:1' => 1.0, '4:5' => 0.8, '5:4' => 1.25, '3:4' => 0.75, '4:3' => 1.333, '2:3' => 0.667, '3:2' => 1.5, '9:16' => 0.5625, '16:9' => 1.778];
+        $extendRatio = '1:1';
+        $minDiff = PHP_FLOAT_MAX;
+        foreach ($standards as $label => $val) {
+            $diff = abs($newRatioVal - $val);
+            if ($diff < $minDiff) { $minDiff = $diff; $extendRatio = $label; }
+        }
+
         return $this->processImageTool(
             request: $request,
             toolName: 'extend',
             prompt: "Extend this image outward in the following directions: {$dirs}. Continue the scene naturally, {$desc}. The extended area must blend seamlessly with the original image.",
             referenceImages: [$v['image']],
+            aspectRatio: $extendRatio,
         );
     }
 
@@ -327,6 +355,53 @@ class ToolController extends Controller
                 'gems_remaining' => $user->gems,
             ], 500);
         }
+    }
+
+    /**
+     * Detect aspect ratio from base64 image data.
+     * Returns closest standard ratio string (e.g. '16:9', '4:3', '1:1').
+     */
+    private function detectAspectRatio(string $base64): string
+    {
+        $data = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
+        $decoded = base64_decode($data);
+        if ($decoded === false) return '1:1';
+
+        $img = @imagecreatefromstring($decoded);
+        if (!$img) return '1:1';
+
+        $w = imagesx($img);
+        $h = imagesy($img);
+        imagedestroy($img);
+
+        if ($w <= 0 || $h <= 0) return '1:1';
+
+        $ratio = $w / $h;
+
+        // Map to closest standard ratio
+        $standards = [
+            '1:1'  => 1.0,
+            '4:5'  => 0.8,
+            '5:4'  => 1.25,
+            '3:4'  => 0.75,
+            '4:3'  => 1.333,
+            '2:3'  => 0.667,
+            '3:2'  => 1.5,
+            '9:16' => 0.5625,
+            '16:9' => 1.778,
+        ];
+
+        $closest = '1:1';
+        $minDiff = PHP_FLOAT_MAX;
+        foreach ($standards as $label => $val) {
+            $diff = abs($ratio - $val);
+            if ($diff < $minDiff) {
+                $minDiff = $diff;
+                $closest = $label;
+            }
+        }
+
+        return $closest;
     }
 
     /**
