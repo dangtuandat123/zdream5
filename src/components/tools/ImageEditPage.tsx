@@ -114,6 +114,11 @@ export function ImageEditPage() {
                             rows={mode === "remove" ? 2 : 3}
                             maxLength={1000}
                         />
+                        {mode === "remove" && !maskBase64 && (
+                            <p className="text-[10px] text-muted-foreground">
+                                💡 Tô trực tiếp lên ảnh để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả để AI tự tìm
+                            </p>
+                        )}
                     </div>
 
                     <ToolTipsCard tips={TOOL_TIPS['image-edit']} />

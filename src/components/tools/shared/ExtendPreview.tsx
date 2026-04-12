@@ -4,50 +4,64 @@ interface ExtendPreviewProps {
     imageUrl: string
     directions: string[]
     extendRatio: string
+    imageDims?: { w: number; h: number } | null
     className?: string
 }
 
 const HATCH = "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.08) 4px, rgba(255,255,255,0.08) 8px)"
 
-export function ExtendPreview({ imageUrl, directions, extendRatio, className }: ExtendPreviewProps) {
-    const extPctNum = parseInt(extendRatio)  // 25, 50, or 100
-    // Scale zones proportionally — use a fixed base that looks good visually
-    const extPx = Math.max(24, Math.round(extPctNum * 0.6))  // 15px, 30px, or 60px
+export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, className }: ExtendPreviewProps) {
+    const extPct = parseInt(extendRatio) / 100 // 0.25, 0.5, 1.0
 
     const hasTop = directions.includes("top")
     const hasBottom = directions.includes("bottom")
     const hasLeft = directions.includes("left")
     const hasRight = directions.includes("right")
 
+    // Calculate output dimensions
+    const outW = imageDims ? Math.round(imageDims.w * (1 + extPct * ((hasLeft ? 1 : 0) + (hasRight ? 1 : 0)))) : null
+    const outH = imageDims ? Math.round(imageDims.h * (1 + extPct * ((hasTop ? 1 : 0) + (hasBottom ? 1 : 0)))) : null
+
+    // For CSS: use flex ratios so extend zones are proportional to image
+    // Image = 1 unit, each extend side = extPct units
+    const imgFlex = 1
+    const hFlex = extPct // flex for left/right zones
+    const vFlex = extPct // flex for top/bottom zones
+
     return (
         <div className={cn("rounded-xl overflow-hidden border bg-muted/50 p-3", className)}>
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-2">
-                Xem trước vùng mở rộng ({extendRatio}%)
+            <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-2">
+                <span>Xem trước vùng mở rộng</span>
+                {imageDims && outW && outH && directions.length > 0 && (
+                    <span className="text-foreground font-medium">
+                        {imageDims.w}×{imageDims.h} → {outW}×{outH} px
+                    </span>
+                )}
             </div>
             <div className="relative flex flex-col items-center">
                 {/* Top extend zone */}
                 {hasTop && (
                     <div
                         className="w-full rounded-t-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60"
-                        style={{ height: `${extPx}px`, background: HATCH, minHeight: 24 }}
+                        style={{ height: 0, paddingBottom: `${vFlex * 100 / (imgFlex + (hasTop ? vFlex : 0) + (hasBottom ? vFlex : 0))}%`, background: HATCH, minHeight: 20 }}
                     >
-                        ↑ Mở rộng
+                        ↑ {imageDims ? `+${Math.round(imageDims.h * extPct)}px` : "Mở rộng"}
                     </div>
                 )}
 
-                <div className="flex w-full">
+                <div className="flex w-full" style={{ flex: imgFlex }}>
                     {/* Left extend zone */}
                     {hasLeft && (
                         <div
                             className="rounded-l-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60 shrink-0"
-                            style={{ width: `${extPx}px`, background: HATCH, minWidth: 24 }}
+                            style={{ width: `${hFlex / (imgFlex + (hasLeft ? hFlex : 0) + (hasRight ? hFlex : 0)) * 100}%`, background: HATCH, minWidth: 20 }}
                         >
                             ←
                         </div>
                     )}
 
                     {/* Center image */}
-                    <div className="flex-1 min-w-0">
+                    <div style={{ flex: imgFlex }} className="min-w-0">
                         <img
                             src={imageUrl}
                             alt="Preview"
@@ -60,7 +74,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
                     {hasRight && (
                         <div
                             className="rounded-r-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60 shrink-0"
-                            style={{ width: `${extPx}px`, background: HATCH, minWidth: 24 }}
+                            style={{ width: `${hFlex / (imgFlex + (hasLeft ? hFlex : 0) + (hasRight ? hFlex : 0)) * 100}%`, background: HATCH, minWidth: 20 }}
                         >
                             →
                         </div>
@@ -71,9 +85,9 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
                 {hasBottom && (
                     <div
                         className="w-full rounded-b-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60"
-                        style={{ height: `${extPx}px`, background: HATCH, minHeight: 24 }}
+                        style={{ height: 0, paddingBottom: `${vFlex * 100 / (imgFlex + (hasTop ? vFlex : 0) + (hasBottom ? vFlex : 0))}%`, background: HATCH, minHeight: 20 }}
                     >
-                        ↓ Mở rộng
+                        ↓ {imageDims ? `+${Math.round(imageDims.h * extPct)}px` : "Mở rộng"}
                     </div>
                 )}
 

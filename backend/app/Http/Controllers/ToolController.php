@@ -166,7 +166,7 @@ class ToolController extends Controller
         return $this->processImageTool(
             request: $request,
             toolName: 'remove-bg',
-            prompt: "Remove the background completely from this image. Keep only {$subjectHint}. Output on a clean pure white background. {$edgeHint} Preserve all details of the subject perfectly.",
+            prompt: "Remove the background completely from this image. Keep only {$subjectHint}. Output the subject on a completely transparent background (PNG with alpha channel). If transparency is not possible, use a clean solid white background. {$edgeHint} Preserve all details of the subject perfectly.",
             referenceImages: [$v['image']],
             aspectRatio: $this->detectAspectRatio($v['image']),
         );

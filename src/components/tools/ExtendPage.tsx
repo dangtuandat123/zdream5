@@ -115,7 +115,7 @@ export function ExtendPage() {
                     <ToolImageUpload images={images} onImagesChange={setImages} />
 
                     {images[0] && (
-                        <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} />
+                        <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
                     )}
 
                     {/* Smart ratio presets */}
@@ -169,7 +169,7 @@ export function ExtendPage() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label>Tỷ lệ mở rộng</Label>
+                        <Label>Mức mở rộng</Label>
                         <ToggleGroup type="single" value={extendRatio} onValueChange={(v) => { if (v) { setExtendRatio(v); setActivePreset(null) } }} className="justify-start">
                             {EXTEND_RATIOS.map((r) => (
                                 <ToggleGroupItem key={r.value} value={r.value} className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
@@ -177,6 +177,20 @@ export function ExtendPage() {
                                 </ToggleGroupItem>
                             ))}
                         </ToggleGroup>
+                        {imageDims && directions.length > 0 && (() => {
+                            const ext = parseInt(extendRatio) / 100
+                            const hDirs = directions.filter(d => d === "left" || d === "right").length
+                            const vDirs = directions.filter(d => d === "top" || d === "bottom").length
+                            const outW = Math.round(imageDims.w * (1 + ext * hDirs))
+                            const outH = Math.round(imageDims.h * (1 + ext * vDirs))
+                            return (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span>{imageDims.w}×{imageDims.h}</span>
+                                    <span>→</span>
+                                    <span className="text-foreground font-semibold">{outW}×{outH} px</span>
+                                </div>
+                            )
+                        })()}
                     </div>
                     <div className="space-y-2">
                         <Label>Mô tả nội dung mở rộng (tùy chọn)</Label>
