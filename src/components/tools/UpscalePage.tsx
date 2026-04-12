@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { Download } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
@@ -12,6 +12,7 @@ import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
+import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -24,6 +25,8 @@ export function UpscalePage() {
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null)
+
+    useInputFromUrl(useCallback((url: string) => setImages([url]), []))
 
     useEffect(() => {
         if (!images[0]) { setImageDims(null); return }

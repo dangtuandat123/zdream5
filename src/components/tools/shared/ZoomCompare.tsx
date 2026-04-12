@@ -14,6 +14,12 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
     const containerRef = useRef<HTMLDivElement>(null)
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
     const [containerWidth, setContainerWidth] = useState(0)
+    const [isMobile, setIsMobile] = useState(false)
+    const [showAfter, setShowAfter] = useState(true)
+
+    useEffect(() => {
+        setIsMobile(window.matchMedia("(pointer: coarse)").matches)
+    }, [])
 
     useEffect(() => {
         const el = containerRef.current
@@ -39,9 +45,32 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
         setMousePos(null)
     }, [])
 
+    // Mobile: tap to toggle before/after
+    if (isMobile) {
+        return (
+            <div className={cn("space-y-2", className)}>
+                <div
+                    ref={containerRef}
+                    className="relative rounded-xl overflow-hidden border bg-muted cursor-pointer active:scale-[0.99] transition-transform"
+                    onClick={() => setShowAfter(!showAfter)}
+                >
+                    <img
+                        src={showAfter ? afterUrl : beforeUrl}
+                        alt={showAfter ? "Upscaled" : "Original"}
+                        className="w-full max-h-[500px] object-contain"
+                        draggable={false}
+                    />
+                    <span className="absolute top-2 left-2 text-[10px] font-medium bg-black/60 text-white px-2 py-0.5 rounded">
+                        {showAfter ? "Sau upscale" : "Ảnh gốc"}
+                    </span>
+                </div>
+                <p className="text-[10px] text-muted-foreground text-center">Nhấn vào ảnh để chuyển đổi trước/sau</p>
+            </div>
+        )
+    }
+
     return (
         <div className={cn("space-y-2", className)}>
-            {/* Main image with zoom on hover */}
             <div
                 ref={containerRef}
                 className="relative rounded-xl overflow-hidden border bg-muted cursor-zoom-in"
@@ -50,7 +79,6 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
             >
                 <img src={afterUrl} alt="Upscaled" className="w-full max-h-[500px] object-contain" draggable={false} />
 
-                {/* Zoom lenses */}
                 {mousePos && (
                     <div
                         className="absolute pointer-events-none z-10 flex gap-0.5"
@@ -59,7 +87,6 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
                             top: mousePos.y - LENS_SIZE / 2,
                         }}
                     >
-                        {/* Before lens */}
                         <div className="relative overflow-hidden rounded-lg border-2 border-white/80 shadow-lg" style={{ width: LENS_SIZE, height: LENS_SIZE }}>
                             <div
                                 className="absolute"
@@ -75,7 +102,6 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
                             <span className="absolute bottom-0.5 left-1 text-[8px] font-medium bg-black/60 text-white px-1 rounded">Gốc</span>
                         </div>
 
-                        {/* After lens */}
                         <div className="relative overflow-hidden rounded-lg border-2 border-primary/80 shadow-lg" style={{ width: LENS_SIZE, height: LENS_SIZE }}>
                             <div
                                 className="absolute"

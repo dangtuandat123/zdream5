@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { toast } from "sonner"
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
@@ -12,6 +12,7 @@ import { TOOL_TIPS } from "./shared/toolExamples"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
+import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -39,6 +40,8 @@ export function ExtendPage() {
     const [description, setDescription] = useState("")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+
+    useInputFromUrl(useCallback((url: string) => setImages([url]), []))
 
     const toggleDirection = (dir: string) => {
         setDirections((prev) => prev.includes(dir) ? prev.filter((d) => d !== dir) : [...prev, dir])
@@ -118,6 +121,7 @@ export function ExtendPage() {
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
+                        onUseAsInput={(url) => { setImages([url]); setResult(null); setDirections([]) }}
                         emptyHint="Tải ảnh lên và chọn hướng mở rộng"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

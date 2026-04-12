@@ -1,8 +1,22 @@
-import { Download, Copy, Check, ImageIcon, ArrowRight, RotateCcw } from "lucide-react"
+import { Download, Copy, Check, ImageIcon, ArrowRight, RotateCcw, Wand2, ZoomIn, Eraser, Expand, PenTool } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { BeforeAfterSlider } from "./BeforeAfterSlider"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+const CROSS_TOOLS = [
+    { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
+    { path: "/app/tools/upscale", label: "Upscale ảnh", icon: ZoomIn },
+    { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
+    { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
+    { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
+]
 
 interface ToolResultDisplayProps {
     imageUrl?: string | null
@@ -27,6 +41,7 @@ export function ToolResultDisplay({
 }: ToolResultDisplayProps) {
     const [copied, setCopied] = useState(false)
     const navigate = useNavigate()
+    const location = useLocation()
 
     const handleDownload = async () => {
         if (!imageUrl) return
@@ -47,6 +62,9 @@ export function ToolResultDisplay({
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
+
+    // Cross-tool navigation: filter out current tool
+    const crossTools = CROSS_TOOLS.filter(t => !location.pathname.startsWith(t.path))
 
     if (loading) {
         return (
@@ -115,6 +133,27 @@ export function ToolResultDisplay({
                             Dùng làm đầu vào
                         </Button>
                     )}
+                    {/* Cross-tool navigation */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button size="sm" variant="outline" className="gap-1.5">
+                                <ArrowRight className="size-3.5" />
+                                Tiếp tục với...
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            {crossTools.map((tool) => (
+                                <DropdownMenuItem
+                                    key={tool.path}
+                                    onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(imageUrl)}`)}
+                                    className="gap-2 text-xs"
+                                >
+                                    <tool.icon className="size-3.5" />
+                                    {tool.label}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             </div>
         )
