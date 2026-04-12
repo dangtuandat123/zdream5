@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { toast } from "sonner"
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MonitorPlay, Smartphone, Square, RectangleHorizontal } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -31,6 +31,13 @@ const EXTEND_RATIOS = [
     { value: "100", label: "100%" },
 ] as const
 
+const RATIO_PRESETS = [
+    { id: "youtube", label: "YouTube", sub: "16:9", icon: MonitorPlay, targetRatio: 16 / 9 },
+    { id: "reels", label: "Reels", sub: "9:16", icon: Smartphone, targetRatio: 9 / 16 },
+    { id: "square", label: "Vuông", sub: "1:1", icon: Square, targetRatio: 1 },
+    { id: "banner", label: "Banner", sub: "3:1", icon: RectangleHorizontal, targetRatio: 3 },
+] as const
+
 export function ExtendPage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("extend")
@@ -40,11 +47,47 @@ export function ExtendPage() {
     const [description, setDescription] = useState("")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [activePreset, setActivePreset] = useState<string | null>(null)
+    const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null)
 
     useInputFromUrl(useCallback((url: string) => setImages([url]), []))
 
+    useEffect(() => {
+        if (!images[0]) { setImageDims(null); return }
+        const img = new Image()
+        img.onload = () => setImageDims({ w: img.naturalWidth, h: img.naturalHeight })
+        img.src = images[0]
+    }, [images])
+
     const toggleDirection = (dir: string) => {
+        setActivePreset(null)
         setDirections((prev) => prev.includes(dir) ? prev.filter((d) => d !== dir) : [...prev, dir])
+    }
+
+    const applyPreset = (presetId: string) => {
+        if (!imageDims) return toast.error("Tải ảnh lên trước")
+        const preset = RATIO_PRESETS.find(p => p.id === presetId)
+        if (!preset) return
+
+        const currentRatio = imageDims.w / imageDims.h
+        const target = preset.targetRatio
+        const newDirs: string[] = []
+
+        if (target > currentRatio) {
+            newDirs.push("left", "right")
+        } else if (target < currentRatio) {
+            newDirs.push("top", "bottom")
+        }
+        if (newDirs.length === 0) newDirs.push("left", "right")
+
+        const ratioDiff = Math.abs(target - currentRatio) / Math.max(target, currentRatio)
+        let ratio = "25"
+        if (ratioDiff > 0.5) ratio = "100"
+        else if (ratioDiff > 0.2) ratio = "50"
+
+        setDirections(newDirs)
+        setExtendRatio(ratio)
+        setActivePreset(presetId)
     }
 
     const handleSubmit = async () => {
@@ -75,6 +118,38 @@ export function ExtendPage() {
                         <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} />
                     )}
 
+                    {/* Smart ratio presets */}
+                    {imageDims && (
+                        <div className="space-y-2">
+                            <Label>Mở rộng nhanh theo tỷ lệ</Label>
+                            <div className="grid grid-cols-4 gap-2">
+                                {RATIO_PRESETS.map((p) => {
+                                    const currentRatio = imageDims.w / imageDims.h
+                                    const alreadyMatches = Math.abs(currentRatio - p.targetRatio) < 0.1
+                                    return (
+                                        <button
+                                            key={p.id}
+                                            onClick={() => applyPreset(p.id)}
+                                            disabled={alreadyMatches}
+                                            className={cn(
+                                                "flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center",
+                                                activePreset === p.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30",
+                                                alreadyMatches && "opacity-40 cursor-not-allowed"
+                                            )}
+                                        >
+                                            <p.icon className={cn("size-4", activePreset === p.id ? "text-primary" : "text-muted-foreground")} />
+                                            <span className="text-[10px] font-medium">{p.label}</span>
+                                            <span className="text-[8px] text-muted-foreground">{alreadyMatches ? "Đã khớp" : p.sub}</span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                                Ảnh hiện tại: {imageDims.w}×{imageDims.h} ({(imageDims.w / imageDims.h).toFixed(2)})
+                            </p>
+                        </div>
+                    )}
+
                     <div className="space-y-2">
                         <Label>Hướng mở rộng</Label>
                         <div className="grid grid-cols-4 gap-2">
@@ -95,7 +170,7 @@ export function ExtendPage() {
                     </div>
                     <div className="space-y-2">
                         <Label>Tỷ lệ mở rộng</Label>
-                        <ToggleGroup type="single" value={extendRatio} onValueChange={(v) => v && setExtendRatio(v)} className="justify-start">
+                        <ToggleGroup type="single" value={extendRatio} onValueChange={(v) => { if (v) { setExtendRatio(v); setActivePreset(null) } }} className="justify-start">
                             {EXTEND_RATIOS.map((r) => (
                                 <ToggleGroupItem key={r.value} value={r.value} className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
                                     {r.label}
@@ -121,7 +196,7 @@ export function ExtendPage() {
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
-                        onUseAsInput={(url) => { setImages([url]); setResult(null); setDirections([]) }}
+                        onUseAsInput={(url) => { setImages([url]); setResult(null); setDirections([]); setActivePreset(null) }}
                         emptyHint="Tải ảnh lên và chọn hướng mở rộng"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

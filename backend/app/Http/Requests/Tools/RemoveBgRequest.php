@@ -14,6 +14,8 @@ class RemoveBgRequest extends FormRequest
     {
         return [
             'image' => ['required', 'string', 'max:13500000'],
+            'subject_type' => ['nullable', 'string', 'in:auto,person,product,animal'],
+            'edge_refine' => ['nullable', 'string', 'in:standard,fine,hard'],
         ];
     }
 }

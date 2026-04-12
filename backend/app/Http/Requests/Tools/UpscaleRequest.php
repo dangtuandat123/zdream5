@@ -15,6 +15,8 @@ class UpscaleRequest extends FormRequest
         return [
             'image' => ['required', 'string', 'max:13500000'],
             'scale_factor' => ['nullable', 'string', 'in:2x,4x'],
+            'enhance_mode' => ['nullable', 'string', 'in:sharp,soft,detail'],
+            'denoise' => ['nullable', 'boolean'],
         ];
     }
 }

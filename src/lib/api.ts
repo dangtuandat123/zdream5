@@ -341,10 +341,10 @@ export const toolsApi = {
     consistentCharacter: (data: { images: string[]; scene_description: string }) =>
         request<ToolImageResponse>('/tools/consistent-character', { method: 'POST', body: JSON.stringify(data) }),
 
-    upscale: (data: { image: string; scale_factor?: string }) =>
+    upscale: (data: { image: string; scale_factor?: string; enhance_mode?: string; denoise?: boolean }) =>
         request<ToolImageResponse>('/tools/upscale', { method: 'POST', body: JSON.stringify(data) }),
 
-    removeBg: (data: { image: string }) =>
+    removeBg: (data: { image: string; subject_type?: string; edge_refine?: string }) =>
         request<ToolImageResponse>('/tools/remove-bg', { method: 'POST', body: JSON.stringify(data) }),
 
     removeObject: (data: { image: string; description: string }) =>

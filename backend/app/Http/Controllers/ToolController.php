@@ -122,11 +122,21 @@ class ToolController extends Controller
         $v = $request->validated();
         $scale = $v['scale_factor'] ?? '2x';
         $imageSize = $scale === '4x' ? '4K' : '2K';
+        $enhanceMode = $v['enhance_mode'] ?? 'sharp';
+        $denoise = $v['denoise'] ?? false;
+
+        $enhanceHints = [
+            'sharp' => 'Maximize sharpness, enhance edges and textures, add crisp fine details.',
+            'soft' => 'Smooth skin, reduce blemishes, maintain soft gradients, gentle beauty enhancement.',
+            'detail' => 'Maximize texture detail, enhance material surfaces, add micro-detail and depth.',
+        ];
+        $enhanceHint = $enhanceHints[$enhanceMode] ?? $enhanceHints['sharp'];
+        $denoiseHint = $denoise ? ' First reduce noise and grain from the original.' : '';
 
         return $this->processImageTool(
             request: $request,
             toolName: 'upscale',
-            prompt: "Upscale and enhance this image to {$scale} higher resolution. Add fine details, sharpen edges, improve clarity while maintaining the original composition and style exactly.",
+            prompt: "Upscale and enhance this image to {$scale} higher resolution.{$denoiseHint} {$enhanceHint} Maintain the original composition and style exactly.",
             referenceImages: [$v['image']],
             aspectRatio: $this->detectAspectRatio($v['image']),
             imageSize: $imageSize,
@@ -136,11 +146,27 @@ class ToolController extends Controller
     public function removeBg(RemoveBgRequest $request): JsonResponse
     {
         $v = $request->validated();
+        $subjectType = $v['subject_type'] ?? 'auto';
+        $edgeRefine = $v['edge_refine'] ?? 'standard';
+
+        $subjectHints = [
+            'auto' => 'the main subject',
+            'person' => 'the person/people (preserve hair, clothing, accessories in fine detail)',
+            'product' => 'the product/object (preserve clean edges and material details)',
+            'animal' => 'the animal (preserve fur, feathers, whiskers in fine detail)',
+        ];
+        $edgeHints = [
+            'standard' => 'Clean, standard edge quality.',
+            'fine' => 'Extra fine edges — carefully preserve hair strands, fur, feathers, and soft edges with anti-aliasing.',
+            'hard' => 'Sharp, crisp edges — clean hard cuts suitable for product photos and geometric shapes.',
+        ];
+        $subjectHint = $subjectHints[$subjectType] ?? $subjectHints['auto'];
+        $edgeHint = $edgeHints[$edgeRefine] ?? $edgeHints['standard'];
 
         return $this->processImageTool(
             request: $request,
             toolName: 'remove-bg',
-            prompt: "Remove the background completely from this image. Keep only the main subject. Output on a clean pure white background. Preserve all details of the subject perfectly.",
+            prompt: "Remove the background completely from this image. Keep only {$subjectHint}. Output on a clean pure white background. {$edgeHint} Preserve all details of the subject perfectly.",
             referenceImages: [$v['image']],
             aspectRatio: $this->detectAspectRatio($v['image']),
         );
