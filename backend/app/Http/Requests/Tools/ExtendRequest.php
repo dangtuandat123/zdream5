@@ -16,6 +16,7 @@ class ExtendRequest extends FormRequest
             'image' => ['required', 'string', 'max:13500000'],
             'directions' => ['required', 'array', 'min:1'],
             'directions.*' => ['string', 'in:top,bottom,left,right'],
+            'extend_ratio' => ['nullable', 'string', 'in:25,50,100'],
             'description' => ['nullable', 'string', 'max:1000'],
         ];
     }

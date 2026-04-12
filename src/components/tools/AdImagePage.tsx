@@ -42,9 +42,19 @@ export function AdImagePage() {
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
 
+    const [ratioManuallySet, setRatioManuallySet] = useState(false)
+
     const handlePlatformChange = (value: string) => {
         setPlatform(value)
-        setAspectRatio(PLATFORM_RATIOS[value] || "1:1")
+        if (!ratioManuallySet) {
+            setAspectRatio(PLATFORM_RATIOS[value] || "1:1")
+        }
+    }
+
+    const handleRatioChange = (value: string) => {
+        if (!value) return
+        setAspectRatio(value)
+        setRatioManuallySet(true)
     }
 
     const handleSubmit = async () => {
@@ -118,7 +128,7 @@ export function AdImagePage() {
                         </div>
                         <div className="space-y-2">
                             <Label>Tỉ lệ</Label>
-                            <ToggleGroup type="single" value={aspectRatio} onValueChange={(v) => v && setAspectRatio(v)} className="justify-start">
+                            <ToggleGroup type="single" value={aspectRatio} onValueChange={handleRatioChange} className="justify-start">
                                 {RATIOS.map((r) => (
                                     <ToggleGroupItem key={r} value={r} className="text-xs px-2.5 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
                                         {r}

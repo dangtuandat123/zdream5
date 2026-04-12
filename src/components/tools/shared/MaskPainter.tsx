@@ -31,34 +31,68 @@ export function MaskPainter({ imageUrl, onMaskChange, className }: MaskPainterPr
 
     const currentBrushSize = BRUSH_SIZES.find(b => b.id === brushSize)?.size ?? 25
 
+    const imgRef = useRef<HTMLImageElement | null>(null)
+
+    const setupCanvas = useCallback((naturalWidth: number, naturalHeight: number) => {
+        const container = containerRef.current
+        if (!container) return
+        const containerWidth = container.clientWidth
+        if (containerWidth <= 0) return
+        const scale = containerWidth / naturalWidth
+        const w = containerWidth
+        const h = Math.round(naturalHeight * scale)
+        setCanvasSize({ w, h })
+
+        const canvas = canvasRef.current
+        if (canvas) {
+            // Save existing mask data before resize
+            const oldCtx = canvas.getContext("2d")
+            const oldData = (canvas.width > 0 && canvas.height > 0 && oldCtx)
+                ? oldCtx.getImageData(0, 0, canvas.width, canvas.height) : null
+
+            canvas.width = w
+            canvas.height = h
+            const ctx = canvas.getContext("2d")
+            if (ctx) {
+                if (oldData && oldData.width > 0) {
+                    // Redraw old mask scaled to new size
+                    const tmpCanvas = document.createElement("canvas")
+                    tmpCanvas.width = oldData.width
+                    tmpCanvas.height = oldData.height
+                    tmpCanvas.getContext("2d")!.putImageData(oldData, 0, 0)
+                    ctx.drawImage(tmpCanvas, 0, 0, w, h)
+                }
+                const initialData = ctx.getImageData(0, 0, w, h)
+                setHistory([initialData])
+                setHistoryIndex(0)
+            }
+        }
+    }, [])
+
     // Load image and setup canvas dimensions
     useEffect(() => {
         const img = new Image()
         img.crossOrigin = "anonymous"
         img.onload = () => {
-            const container = containerRef.current
-            if (!container) return
-            const containerWidth = container.clientWidth
-            const scale = containerWidth / img.naturalWidth
-            const w = containerWidth
-            const h = Math.round(img.naturalHeight * scale)
-            setCanvasSize({ w, h })
-
-            const canvas = canvasRef.current
-            if (canvas) {
-                canvas.width = w
-                canvas.height = h
-                const ctx = canvas.getContext("2d")
-                if (ctx) {
-                    ctx.clearRect(0, 0, w, h)
-                    const initialData = ctx.getImageData(0, 0, w, h)
-                    setHistory([initialData])
-                    setHistoryIndex(0)
-                }
-            }
+            imgRef.current = img
+            setupCanvas(img.naturalWidth, img.naturalHeight)
         }
         img.src = imageUrl
-    }, [imageUrl])
+    }, [imageUrl, setupCanvas])
+
+    // Handle container resize
+    useEffect(() => {
+        const container = containerRef.current
+        if (!container) return
+        const observer = new ResizeObserver(() => {
+            const img = imgRef.current
+            if (img && img.naturalWidth > 0) {
+                setupCanvas(img.naturalWidth, img.naturalHeight)
+            }
+        })
+        observer.observe(container)
+        return () => observer.disconnect()
+    }, [setupCanvas])
 
     const getCanvasPoint = useCallback((e: React.PointerEvent) => {
         const canvas = canvasRef.current

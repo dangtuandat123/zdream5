@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react"
+import { useRef, useState, useCallback, useEffect } from "react"
 import { cn } from "@/lib/utils"
 
 interface ZoomCompareProps {
@@ -13,6 +13,17 @@ const ZOOM = 3
 export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps) {
     const containerRef = useRef<HTMLDivElement>(null)
     const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
+    const [containerWidth, setContainerWidth] = useState(0)
+
+    useEffect(() => {
+        const el = containerRef.current
+        if (!el) return
+        const observer = new ResizeObserver((entries) => {
+            setContainerWidth(entries[0].contentRect.width)
+        })
+        observer.observe(el)
+        return () => observer.disconnect()
+    }, [])
 
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         const container = containerRef.current
@@ -55,7 +66,7 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
                                 style={{
                                     backgroundImage: `url(${beforeUrl})`,
                                     backgroundPosition: `-${mousePos.x * ZOOM - LENS_SIZE / 2}px -${mousePos.y * ZOOM - LENS_SIZE / 2}px`,
-                                    backgroundSize: `${(containerRef.current?.clientWidth ?? 0) * ZOOM}px auto`,
+                                    backgroundSize: `${containerWidth * ZOOM}px auto`,
                                     backgroundRepeat: "no-repeat",
                                     width: LENS_SIZE,
                                     height: LENS_SIZE,
@@ -71,7 +82,7 @@ export function ZoomCompare({ beforeUrl, afterUrl, className }: ZoomCompareProps
                                 style={{
                                     backgroundImage: `url(${afterUrl})`,
                                     backgroundPosition: `-${mousePos.x * ZOOM - LENS_SIZE / 2}px -${mousePos.y * ZOOM - LENS_SIZE / 2}px`,
-                                    backgroundSize: `${(containerRef.current?.clientWidth ?? 0) * ZOOM}px auto`,
+                                    backgroundSize: `${containerWidth * ZOOM}px auto`,
                                     backgroundRepeat: "no-repeat",
                                     width: LENS_SIZE,
                                     height: LENS_SIZE,

@@ -95,7 +95,7 @@ export function StyleTransferPage() {
                         </ToggleGroup>
                     </div>
                     <ToolTipsCard tips={TOOL_TIPS['style-transfer']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} gemsBalance={gems} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Chuyển phong cách" gemsBalance={gems} />
                 </div>
                 <div className="space-y-4">
                     <ToolResultDisplay

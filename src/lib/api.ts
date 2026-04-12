@@ -353,7 +353,7 @@ export const toolsApi = {
     inpainting: (data: { image: string; mask: string; description: string }) =>
         request<ToolImageResponse>('/tools/inpainting', { method: 'POST', body: JSON.stringify(data) }),
 
-    extend: (data: { image: string; directions: string[]; description?: string }) =>
+    extend: (data: { image: string; directions: string[]; extend_ratio?: string; description?: string }) =>
         request<ToolImageResponse>('/tools/extend', { method: 'POST', body: JSON.stringify(data) }),
 
     imageToPrompt: (data: { image: string; language?: string }) =>

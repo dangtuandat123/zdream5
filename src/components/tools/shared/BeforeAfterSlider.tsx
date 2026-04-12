@@ -55,14 +55,14 @@ export function BeforeAfterSlider({
             onPointerLeave={handlePointerUp}
             style={{ touchAction: "none" }}
         >
-            {/* Before image (full) */}
-            <img src={beforeUrl} alt="Before" className="w-full max-h-[500px] object-contain" draggable={false} />
+            {/* Before image (full, sets container height) */}
+            <img src={beforeUrl} alt="Before" className="w-full max-h-[500px] object-contain block" draggable={false} />
 
-            {/* After image (clipped) */}
+            {/* After image (clipped, matches before image sizing exactly) */}
             <img
                 src={afterUrl}
                 alt="After"
-                className="absolute inset-0 w-full max-h-[500px] object-contain"
+                className="absolute inset-0 w-full h-full object-contain"
                 style={{ clipPath: `inset(0 0 0 ${position}%)` }}
                 draggable={false}
             />

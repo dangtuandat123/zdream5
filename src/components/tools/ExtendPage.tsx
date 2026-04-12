@@ -50,7 +50,7 @@ export function ExtendPage() {
         setLoading(true)
         setResult(null)
         try {
-            const res = await toolsApi.extend({ image: images[0], directions, description: description || undefined })
+            const res = await toolsApi.extend({ image: images[0], directions, extend_ratio: extendRatio, description: description || undefined })
             setResult(res.image.file_url)
             refreshUser()
             refreshHistory()
