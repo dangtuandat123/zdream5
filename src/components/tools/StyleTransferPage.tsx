@@ -21,6 +21,7 @@ const STYLES = [
     { id: "cyberpunk", label: "Cyberpunk", emoji: "🌃", desc: "Tương lai neon rực rỡ" },
     { id: "pixel-art", label: "Pixel Art", emoji: "👾", desc: "Phong cách game retro" },
     { id: "3d-render", label: "3D Render", emoji: "💎", desc: "Dựng hình 3D chân thực" },
+    { id: "variation", label: "Biến thể", emoji: "🔄", desc: "Giữ ý tưởng, đổi góc nhìn" },
 ] as const
 
 const INTENSITIES = [
@@ -29,21 +30,35 @@ const INTENSITIES = [
     { value: "strong", label: "Mạnh" },
 ] as const
 
+const STRENGTHS = [
+    { value: "0.3", label: "Nhẹ" },
+    { value: "0.5", label: "Vừa" },
+    { value: "0.8", label: "Mạnh" },
+] as const
+
 export function StyleTransferPage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("style-transfer")
     const [images, setImages] = useState<string[]>([])
     const [style, setStyle] = useState<string>("anime")
     const [intensity, setIntensity] = useState("medium")
+    const [strength, setStrength] = useState("0.5")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+
+    const isVariation = style === "variation"
 
     const handleSubmit = async () => {
         if (!images[0]) return toast.error("Vui lòng tải ảnh lên")
         setLoading(true)
         setResult(null)
         try {
-            const res = await toolsApi.styleTransfer({ image: images[0], target_style: style, intensity })
+            let res
+            if (isVariation) {
+                res = await toolsApi.imageVariation({ image: images[0], strength: parseFloat(strength) })
+            } else {
+                res = await toolsApi.styleTransfer({ image: images[0], target_style: style, intensity })
+            }
             setResult(res.image.file_url)
             refreshUser()
             refreshHistory()
@@ -61,33 +76,38 @@ export function StyleTransferPage() {
     }
 
     return (
-        <ToolPageLayout title="Chuyển phong cách" description="Biến ảnh thường thành tranh anime, sơn dầu, hoạt hình, cyberpunk,...">
+        <ToolPageLayout title="Chuyển phong cách" description="Biến ảnh thành tranh anime, sơn dầu, cyberpunk hoặc tạo biến thể mới">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
                     <div className="space-y-2">
                         <Label>Chọn phong cách</Label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                             {STYLES.map((s) => (
                                 <button
                                     key={s.id}
                                     onClick={() => setStyle(s.id)}
                                     className={cn(
-                                        "flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center",
+                                        "flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center",
                                         style === s.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
                                     )}
                                 >
-                                    <span className="text-2xl">{s.emoji}</span>
-                                    <span className="text-xs font-medium">{s.label}</span>
-                                    <span className="text-[10px] text-muted-foreground leading-tight">{s.desc}</span>
+                                    <span className="text-xl">{s.emoji}</span>
+                                    <span className="text-[11px] font-medium">{s.label}</span>
+                                    <span className="text-[9px] text-muted-foreground leading-tight">{s.desc}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label>Cường độ chuyển đổi</Label>
-                        <ToggleGroup type="single" value={intensity} onValueChange={(v) => v && setIntensity(v)} className="justify-start">
-                            {INTENSITIES.map((i) => (
+                        <Label>{isVariation ? "Mức độ thay đổi" : "Cường độ chuyển đổi"}</Label>
+                        <ToggleGroup
+                            type="single"
+                            value={isVariation ? strength : intensity}
+                            onValueChange={(v) => { if (!v) return; isVariation ? setStrength(v) : setIntensity(v) }}
+                            className="justify-start"
+                        >
+                            {(isVariation ? STRENGTHS : INTENSITIES).map((i) => (
                                 <ToggleGroupItem key={i.value} value={i.value} className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
                                     {i.label}
                                 </ToggleGroupItem>
@@ -95,7 +115,7 @@ export function StyleTransferPage() {
                         </ToggleGroup>
                     </div>
                     <ToolTipsCard tips={TOOL_TIPS['style-transfer']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Chuyển phong cách" gemsBalance={gems} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"} gemsBalance={gems} />
                 </div>
                 <div className="space-y-4">
                     <ToolResultDisplay
