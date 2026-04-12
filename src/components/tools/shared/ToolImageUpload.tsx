@@ -1,6 +1,9 @@
-import { useCallback, useRef, useState } from "react"
+import { useCallback, useRef, useState, useEffect } from "react"
 import { Upload, X, ImageIcon } from "lucide-react"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+
+const MAX_FILE_SIZE_MB = 10
 
 interface ToolImageUploadProps {
     onImagesChange: (images: string[]) => void
@@ -20,7 +23,22 @@ export function ToolImageUpload({
     className,
 }: ToolImageUploadProps) {
     const [isDragging, setIsDragging] = useState(false)
+    const [imageInfo, setImageInfo] = useState<{ w: number; h: number; size: string } | null>(null)
     const inputRef = useRef<HTMLInputElement>(null)
+
+    // Detect image dimensions when single image loaded
+    useEffect(() => {
+        if (!images[0] || multiple) { setImageInfo(null); return }
+        const img = new Image()
+        img.onload = () => {
+            const bytes = Math.round((images[0].length * 3) / 4) // approximate base64 → bytes
+            const sizeStr = bytes > 1024 * 1024
+                ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+                : `${Math.round(bytes / 1024)} KB`
+            setImageInfo({ w: img.naturalWidth, h: img.naturalHeight, size: sizeStr })
+        }
+        img.src = images[0]
+    }, [images, multiple])
 
     const processFiles = useCallback((files: FileList | null) => {
         if (!files) return
@@ -29,6 +47,10 @@ export function ToolImageUpload({
 
         toProcess.forEach((file) => {
             if (!file.type.startsWith("image/")) return
+            if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                toast.error(`Ảnh quá lớn (${(file.size / (1024 * 1024)).toFixed(1)} MB). Tối đa ${MAX_FILE_SIZE_MB} MB.`)
+                return
+            }
             const reader = new FileReader()
             reader.onload = (e) => {
                 const result = e.target?.result as string
@@ -52,14 +74,21 @@ export function ToolImageUpload({
 
     if (images.length > 0 && !multiple) {
         return (
-            <div className={cn("relative rounded-xl overflow-hidden border bg-muted", className)}>
-                <img src={images[0]} alt="Upload" className="w-full max-h-[400px] object-contain" />
-                <button
-                    onClick={() => onImagesChange([])}
-                    className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
-                >
-                    <X className="size-4" />
-                </button>
+            <div className={cn("space-y-1", className)}>
+                <div className="relative rounded-xl overflow-hidden border bg-muted">
+                    <img src={images[0]} alt="Upload" className="w-full max-h-[400px] object-contain" />
+                    <button
+                        onClick={() => { onImagesChange([]); setImageInfo(null) }}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                    >
+                        <X className="size-4" />
+                    </button>
+                </div>
+                {imageInfo && (
+                    <p className="text-[10px] text-muted-foreground text-right px-1">
+                        {imageInfo.w} × {imageInfo.h} px · {imageInfo.size}
+                    </p>
+                )}
             </div>
         )
     }

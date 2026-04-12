@@ -83,6 +83,7 @@ export function InpaintingPage() {
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
+                        onUseAsInput={(url) => { handleImagesChange([url]) }}
                         emptyHint="Tải ảnh → tô vùng cần sửa → mô tả nội dung mới"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

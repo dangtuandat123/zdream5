@@ -138,7 +138,7 @@ export function AdImagePage() {
                         </div>
                     </div>
                     <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} gemsBalance={gems} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />
                 </div>
                 <div className="space-y-4">
                     <ToolResultDisplay

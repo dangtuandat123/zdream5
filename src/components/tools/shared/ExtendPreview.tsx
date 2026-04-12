@@ -10,8 +10,9 @@ interface ExtendPreviewProps {
 const HATCH = "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.08) 4px, rgba(255,255,255,0.08) 8px)"
 
 export function ExtendPreview({ imageUrl, directions, extendRatio, className }: ExtendPreviewProps) {
-    const ratio = parseInt(extendRatio) / 100  // 0.25, 0.5, or 1.0
-    const extPct = Math.round(ratio / (1 + ratio) * 100)  // percentage of total for extend areas
+    const extPctNum = parseInt(extendRatio)  // 25, 50, or 100
+    // Scale zones proportionally — use a fixed base that looks good visually
+    const extPx = Math.max(24, Math.round(extPctNum * 0.6))  // 15px, 30px, or 60px
 
     const hasTop = directions.includes("top")
     const hasBottom = directions.includes("bottom")
@@ -28,7 +29,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
                 {hasTop && (
                     <div
                         className="w-full rounded-t-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60"
-                        style={{ height: `${extPct}px`, background: HATCH, minHeight: 24 }}
+                        style={{ height: `${extPx}px`, background: HATCH, minHeight: 24 }}
                     >
                         ↑ Mở rộng
                     </div>
@@ -39,7 +40,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
                     {hasLeft && (
                         <div
                             className="rounded-l-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60 shrink-0"
-                            style={{ width: `${extPct}px`, background: HATCH, minWidth: 24 }}
+                            style={{ width: `${extPx}px`, background: HATCH, minWidth: 24 }}
                         >
                             ←
                         </div>
@@ -59,7 +60,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
                     {hasRight && (
                         <div
                             className="rounded-r-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60 shrink-0"
-                            style={{ width: `${extPct}px`, background: HATCH, minWidth: 24 }}
+                            style={{ width: `${extPx}px`, background: HATCH, minWidth: 24 }}
                         >
                             →
                         </div>
@@ -70,7 +71,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
                 {hasBottom && (
                     <div
                         className="w-full rounded-b-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60"
-                        style={{ height: `${extPct}px`, background: HATCH, minHeight: 24 }}
+                        style={{ height: `${extPx}px`, background: HATCH, minHeight: 24 }}
                     >
                         ↓ Mở rộng
                     </div>

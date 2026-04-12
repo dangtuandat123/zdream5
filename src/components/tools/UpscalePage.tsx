@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
+import { Download } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -12,6 +13,7 @@ import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 export function UpscalePage() {
@@ -71,7 +73,26 @@ export function UpscalePage() {
                 </div>
                 <div className="space-y-4">
                     {result && images[0] ? (
-                        <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
+                        <div className="space-y-3">
+                            <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
+                            <div className="flex gap-2">
+                                <Button size="sm" variant="outline" className="gap-1.5" onClick={async () => {
+                                    try {
+                                        const response = await fetch(result)
+                                        const blob = await response.blob()
+                                        const url = URL.createObjectURL(blob)
+                                        const a = document.createElement("a")
+                                        a.href = url
+                                        a.download = `zdream-upscale-${Date.now()}.png`
+                                        a.click()
+                                        URL.revokeObjectURL(url)
+                                    } catch { /* ignore */ }
+                                }}>
+                                    <Download className="size-3.5" />
+                                    Tải về
+                                </Button>
+                            </div>
+                        </div>
                     ) : (
                         <ToolResultDisplay
                             imageUrl={result}

@@ -50,9 +50,15 @@ export function ToolResultDisplay({
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center gap-3 p-8 rounded-xl border bg-muted/30 min-h-[300px]">
-                <div className="size-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                <p className="text-sm text-muted-foreground">Đang xử lý...</p>
+            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/30 min-h-[300px]">
+                <div className="relative">
+                    <div className="size-12 rounded-full border-2 border-primary/20" />
+                    <div className="absolute inset-0 size-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                </div>
+                <div className="text-center space-y-1">
+                    <p className="text-sm font-medium">AI đang xử lý ảnh<span className="animate-pulse">...</span></p>
+                    <p className="text-[11px] text-muted-foreground">Thường mất 10-30 giây, vui lòng đợi</p>
+                </div>
             </div>
         )
     }
