@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react"
 import { toast } from "sonner"
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MonitorPlay, Smartphone, Square, RectangleHorizontal, Expand } from "lucide-react"
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MonitorPlay, Smartphone, Square, RectangleHorizontal } from "lucide-react"
 import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -198,10 +198,6 @@ export function ExtendPage() {
     return (
         <ToolPageShell
             title="Mở rộng ảnh"
-            description="Kéo dãn viền ảnh ra ngoài khung hình gốc, AI tự sinh nội dung phù hợp"
-            icon={Expand}
-            gradient="bg-gradient-to-br from-sky-500/10 via-blue-500/5 to-transparent"
-            hasCanvasContent={!!result || loading || history.length > 0}
             controls={controls}
             submitButton={
                 <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
