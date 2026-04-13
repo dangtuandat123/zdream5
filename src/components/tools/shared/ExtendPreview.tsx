@@ -4,18 +4,32 @@ interface ExtendPreviewProps {
     imageUrl: string
     directions: string[]
     extendRatio: string
+    imageDims?: { w: number; h: number } | null
     className?: string
 }
 
 const HATCH = "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.08) 4px, rgba(255,255,255,0.08) 8px)"
 
-export function ExtendPreview({ imageUrl, directions, extendRatio, className }: ExtendPreviewProps) {
+// OpenRouter image_size=1K ≈ 1024px cạnh dài
+const BASE_LONG_SIDE = 1024
+
+export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, className }: ExtendPreviewProps) {
     const extPct = parseInt(extendRatio) / 100 // 0.25, 0.5, 1.0
 
     const hasTop = directions.includes("top")
     const hasBottom = directions.includes("bottom")
     const hasLeft = directions.includes("left")
     const hasRight = directions.includes("right")
+
+    // Estimate output dimensions based on new aspect ratio + image_size=1K
+    const outputEstimate = imageDims && directions.length > 0 ? (() => {
+        const newRatioW = 1 + extPct * ((hasLeft ? 1 : 0) + (hasRight ? 1 : 0))
+        const newRatioH = 1 + extPct * ((hasTop ? 1 : 0) + (hasBottom ? 1 : 0))
+        const newAspect = (imageDims.w * newRatioW) / (imageDims.h * newRatioH)
+        const outW = newAspect >= 1 ? BASE_LONG_SIDE : Math.round(BASE_LONG_SIDE * newAspect)
+        const outH = newAspect >= 1 ? Math.round(BASE_LONG_SIDE / newAspect) : BASE_LONG_SIDE
+        return { w: outW, h: outH }
+    })() : null
 
     // For CSS: use flex ratios so extend zones are proportional to image
     // Image = 1 unit, each extend side = extPct units
@@ -27,8 +41,8 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, className }: 
         <div className={cn("rounded-xl overflow-hidden border bg-muted/50 p-3", className)}>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-2">
                 <span>Xem trước vùng mở rộng</span>
-                {directions.length > 0 && (
-                    <span className="text-foreground font-medium">+{extendRatio}% mỗi hướng</span>
+                {outputEstimate && (
+                    <span className="text-foreground font-medium">~{outputEstimate.w}×{outputEstimate.h} px</span>
                 )}
             </div>
             <div className="relative flex flex-col items-center">

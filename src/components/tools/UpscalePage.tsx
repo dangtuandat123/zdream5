@@ -83,11 +83,18 @@ export function UpscalePage() {
                             <div className="flex items-center justify-between rounded-xl border p-3">
                                 <div>
                                     <p className="text-xs font-medium">Hệ số phóng to</p>
-                                    {imageDims && (
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">{scaleFactor === "4x" ? "4K" : "2K"}</span>
-                                        </p>
-                                    )}
+                                    {imageDims && (() => {
+                                        const longSide = scaleFactor === "4x" ? 4096 : 2048
+                                        const ratio = imageDims.w / imageDims.h
+                                        const outW = ratio >= 1 ? longSide : Math.round(longSide * ratio)
+                                        const outH = ratio >= 1 ? Math.round(longSide / ratio) : longSide
+                                        return (
+                                            <p className="text-[10px] text-muted-foreground">
+                                                {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">~{outW}×{outH}</span>
+                                                <span className="ml-1 text-primary">{(outW * outH / 1_000_000).toFixed(1)} MP</span>
+                                            </p>
+                                        )
+                                    })()}
                                 </div>
                                 <div className="flex gap-1">
                                     {["2x", "4x"].map((v) => (

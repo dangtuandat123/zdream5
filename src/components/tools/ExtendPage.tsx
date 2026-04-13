@@ -121,7 +121,7 @@ export function ExtendPage() {
                     {images[0] && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {/* Preview */}
-                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} />
+                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
 
                             {/* Ratio presets — quick actions */}
                             {imageDims && (
