@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
-import { Copy, Check, ArrowRight, Loader2, Sparkles, Download } from "lucide-react"
+import { Copy, Check, ArrowRight, Loader2, Sparkles, Download, FileText } from "lucide-react"
 import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -202,6 +202,10 @@ export function ImageToPromptPage() {
     return (
         <ToolPageShell
             title="Ảnh thành Prompt"
+            description="AI phân tích ảnh và viết prompt chi tiết để bạn tái tạo hoặc cải tiến"
+            icon={FileText}
+            gradient="bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent"
+            hasCanvasContent={!!result || loading}
             controls={controls}
             submitButton={
                 <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích" gemsBalance={gems} />

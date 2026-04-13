@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
+import { Wand2 } from "lucide-react"
 import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -135,6 +136,10 @@ export function StyleTransferPage() {
     return (
         <ToolPageShell
             title="Chuyển phong cách"
+            description="Biến ảnh thành tranh anime, sơn dầu, cyberpunk hoặc tạo biến thể mới"
+            icon={Wand2}
+            gradient="bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent"
+            hasCanvasContent={!!result || loading || history.length > 0}
             controls={controls}
             submitButton={
                 <ToolSubmitButton

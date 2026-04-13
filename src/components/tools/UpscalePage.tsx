@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Focus, Brush, Sparkles } from "lucide-react"
+import { Focus, Brush, Sparkles, ZoomIn } from "lucide-react"
 import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -157,6 +157,10 @@ export function UpscalePage() {
     return (
         <ToolPageShell
             title="Upscale ảnh"
+            description="Phóng to ảnh lên 2x–4x mà vẫn giữ chi tiết sắc nét nhờ AI"
+            icon={ZoomIn}
+            gradient="bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent"
+            hasCanvasContent={!!result || loading || history.length > 0}
             controls={controls}
             submitButton={
                 <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />

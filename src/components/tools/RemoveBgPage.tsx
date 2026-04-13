@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download } from "lucide-react"
+import { Download, Eraser } from "lucide-react"
 import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -159,6 +159,10 @@ export function RemoveBgPage() {
     return (
         <ToolPageShell
             title="Xóa nền ảnh"
+            description="Tách chủ thể khỏi phông nền chỉ với một click"
+            icon={Eraser}
+            gradient="bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent"
+            hasCanvasContent={!!result || loading || history.length > 0}
             controls={controls}
             submitButton={
                 <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />

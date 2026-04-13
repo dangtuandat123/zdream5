@@ -133,6 +133,10 @@ export function ImageEditPage() {
     return (
         <ToolPageShell
             title="Chỉnh sửa ảnh"
+            description="Tô lên vùng cần chỉnh sửa — xóa vật thể hoặc thay thế bằng nội dung mới"
+            icon={PenTool}
+            gradient="bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent"
+            hasCanvasContent={!!result || loading || history.length > 0}
             controls={controls}
             submitButton={
                 <ToolSubmitButton
