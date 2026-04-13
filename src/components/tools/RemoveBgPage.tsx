@@ -91,7 +91,7 @@ export function RemoveBgPage() {
             icon={Eraser}
             gradient="bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent"
         >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} />
 
@@ -145,7 +145,7 @@ export function RemoveBgPage() {
                         </div>
                     )}
                 </div>
-                <div className="space-y-4">
+                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}

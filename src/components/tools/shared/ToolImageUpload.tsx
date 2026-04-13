@@ -132,7 +132,7 @@ export function ToolImageUpload({
     return (
         <div
             className={cn(
-                "relative flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed transition-colors cursor-pointer",
+                "relative flex flex-col items-center justify-center gap-2.5 p-5 sm:p-8 rounded-xl border-2 border-dashed transition-colors cursor-pointer",
                 isDragging ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/50",
                 className,
             )}

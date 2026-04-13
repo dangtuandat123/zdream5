@@ -84,7 +84,7 @@ export function StyleTransferPage() {
             icon={Wand2}
             gradient="bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent"
         >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
 
@@ -156,7 +156,7 @@ export function StyleTransferPage() {
                         gemsBalance={gems}
                     />
                 </div>
-                <div className="space-y-4">
+                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}

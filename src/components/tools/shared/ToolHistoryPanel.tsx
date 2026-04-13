@@ -1,4 +1,4 @@
-import { History, ImageIcon } from "lucide-react"
+import { History } from "lucide-react"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import type { GeneratedImageData } from "@/lib/api"
 import { cn } from "@/lib/utils"
@@ -27,20 +27,7 @@ export function ToolHistoryPanel({ history, loading, onSelectImage, selectedUrl 
         )
     }
 
-    if (history.length === 0) {
-        return (
-            <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                    <History className="size-3.5" />
-                    Lịch sử
-                </div>
-                <div className="flex items-center justify-center gap-2 p-4 rounded-lg border border-dashed border-border/50">
-                    <ImageIcon className="size-4 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Chưa có kết quả nào</span>
-                </div>
-            </div>
-        )
-    }
+    if (history.length === 0) return null
 
     return (
         <div className="space-y-2">

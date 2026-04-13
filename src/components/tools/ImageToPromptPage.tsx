@@ -97,7 +97,7 @@ export function ImageToPromptPage() {
             icon={FileText}
             gradient="bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent"
         >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} />
 
@@ -124,7 +124,7 @@ export function ImageToPromptPage() {
 
                     <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích" gemsBalance={gems} />
                 </div>
-                <div className="space-y-4">
+                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
                     {loading ? (
                         <ToolResultDisplay loading={loading} emptyHint="" />
                     ) : result ? (
