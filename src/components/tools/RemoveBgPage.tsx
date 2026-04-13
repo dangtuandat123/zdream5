@@ -1,28 +1,32 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download } from "lucide-react"
+import { Download, Eraser } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
-import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
 import { BackgroundPreviewer } from "./shared/BackgroundPreviewer"
-import { TOOL_TIPS } from "./shared/toolExamples"
+
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
 const SUBJECT_TYPES = [
-    { id: "auto", label: "Tự động", desc: "AI tự nhận diện" },
-    { id: "person", label: "Người", desc: "Chân dung, toàn thân" },
-    { id: "product", label: "Sản phẩm", desc: "Đồ vật, thương mại" },
-    { id: "animal", label: "Động vật", desc: "Thú cưng, hoang dã" },
+    { id: "auto", label: "Tự động", emoji: "✨" },
+    { id: "person", label: "Người", emoji: "👤" },
+    { id: "product", label: "Sản phẩm", emoji: "📦" },
+    { id: "animal", label: "Động vật", emoji: "🐾" },
+] as const
+
+const EDGE_OPTIONS = [
+    { id: "standard", label: "Tiêu chuẩn" },
+    { id: "fine", label: "Mịn (tóc, lông)" },
+    { id: "hard", label: "Sắc nét" },
 ] as const
 
 export function RemoveBgPage() {
@@ -81,48 +85,65 @@ export function RemoveBgPage() {
     }
 
     return (
-        <ToolPageLayout title="Xóa nền ảnh" description="Tách chủ thể khỏi phông nền chỉ với một click">
+        <ToolPageLayout
+            title="Xóa nền ảnh"
+            description="Tách chủ thể khỏi phông nền chỉ với một click"
+            icon={Eraser}
+            gradient="bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent"
+        >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} />
 
-                    {/* Subject type — helps AI know what to preserve */}
-                    <div className="space-y-2">
-                        <Label>Loại chủ thể</Label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {SUBJECT_TYPES.map((t) => (
-                                <button
-                                    key={t.id}
-                                    onClick={() => setSubjectType(t.id)}
-                                    className={cn(
-                                        "flex flex-col items-center gap-0.5 p-2.5 rounded-xl border-2 transition-all text-center",
-                                        subjectType === t.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
-                                    )}
-                                >
-                                    <span className="text-[11px] font-medium">{t.label}</span>
-                                    <span className="text-[9px] text-muted-foreground leading-tight">{t.desc}</span>
-                                </button>
-                            ))}
+                    {/* Settings — progressive disclosure */}
+                    {images[0] && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {/* Subject type — horizontal chips */}
+                            <div className="space-y-2">
+                                <Label className="text-xs">Loại chủ thể</Label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {SUBJECT_TYPES.map((t) => (
+                                        <button
+                                            key={t.id}
+                                            onClick={() => setSubjectType(t.id)}
+                                            className={cn(
+                                                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                                subjectType === t.id
+                                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                            )}
+                                        >
+                                            <span>{t.emoji}</span>
+                                            {t.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Edge quality — horizontal chips */}
+                            <div className="space-y-2">
+                                <Label className="text-xs">Chất lượng viền</Label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {EDGE_OPTIONS.map((e) => (
+                                        <button
+                                            key={e.id}
+                                            onClick={() => setEdgeRefine(e.id)}
+                                            className={cn(
+                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                                edgeRefine === e.id
+                                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                            )}
+                                        >
+                                            {e.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />
                         </div>
-                    </div>
-
-                    {/* Edge quality */}
-                    <div className="space-y-2">
-                        <Label>Chất lượng viền</Label>
-                        <ToggleGroup type="single" value={edgeRefine} onValueChange={(v) => v && setEdgeRefine(v)} className="justify-start">
-                            <ToggleGroupItem value="standard" className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">Tiêu chuẩn</ToggleGroupItem>
-                            <ToggleGroupItem value="fine" className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">Mịn (tóc, lông)</ToggleGroupItem>
-                            <ToggleGroupItem value="hard" className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">Sắc nét</ToggleGroupItem>
-                        </ToggleGroup>
-                        <p className="text-[10px] text-muted-foreground">
-                            {edgeRefine === "fine" ? "Tốt cho tóc, lông thú, chi tiết mịn" :
-                             edgeRefine === "hard" ? "Tốt cho sản phẩm, kiến trúc, vật thể rõ ràng" :
-                             "Phù hợp cho hầu hết ảnh"}
-                        </p>
-                    </div>
-
-                    <ToolTipsCard tips={TOOL_TIPS['remove-bg']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />
+                    )}
                 </div>
                 <div className="space-y-4">
                     <ToolResultDisplay

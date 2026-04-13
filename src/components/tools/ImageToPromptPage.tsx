@@ -1,13 +1,12 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
-import { Copy, Check, ArrowRight, Loader2, Sparkles, Download } from "lucide-react"
+import { Copy, Check, ArrowRight, Loader2, Sparkles, Download, FileText } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
-import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
-import { TOOL_TIPS } from "./shared/toolExamples"
+
 import { toolsApi, imageApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
@@ -15,7 +14,7 @@ import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from "@/lib/utils"
 
 export function ImageToPromptPage() {
     const { refreshUser, gems } = useAuth()
@@ -92,25 +91,44 @@ export function ImageToPromptPage() {
     }
 
     return (
-        <ToolPageLayout title="Ảnh thành Prompt" description="AI phân tích ảnh và viết prompt chi tiết để bạn tái tạo hoặc cải tiến">
+        <ToolPageLayout
+            title="Ảnh thành Prompt"
+            description="AI phân tích ảnh và viết prompt chi tiết để bạn tái tạo hoặc cải tiến"
+            icon={FileText}
+            gradient="bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent"
+        >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} />
+
+                    {/* Language — compact inline chips */}
                     <div className="space-y-2">
-                        <Label>Ngôn ngữ prompt</Label>
-                        <ToggleGroup type="single" value={language} onValueChange={(v) => v && setLanguage(v)} className="justify-start">
-                            <ToggleGroupItem value="en" className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">English</ToggleGroupItem>
-                            <ToggleGroupItem value="vi" className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">Tiếng Việt</ToggleGroupItem>
-                        </ToggleGroup>
+                        <Label className="text-xs">Ngôn ngữ prompt</Label>
+                        <div className="flex gap-1.5">
+                            {[{ v: "en", l: "🇬🇧 English" }, { v: "vi", l: "🇻🇳 Tiếng Việt" }].map((lang) => (
+                                <button
+                                    key={lang.v}
+                                    onClick={() => setLanguage(lang.v)}
+                                    className={cn(
+                                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        language === lang.v
+                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                    )}
+                                >
+                                    {lang.l}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                    <ToolTipsCard tips={TOOL_TIPS['image-to-prompt']} />
+
                     <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích" gemsBalance={gems} />
                 </div>
                 <div className="space-y-4">
                     {loading ? (
                         <ToolResultDisplay loading={loading} emptyHint="" />
                     ) : result ? (
-                        <div className="space-y-4">
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {/* Editable prompt result */}
                             <div className="rounded-xl border bg-card p-4 space-y-3">
                                 <div className="flex items-center justify-between">
@@ -156,7 +174,7 @@ export function ImageToPromptPage() {
                                 </div>
                             )}
                             {generatedImage && (
-                                <div className="space-y-3">
+                                <div className="space-y-3 animate-in fade-in duration-200">
                                     <div className="rounded-xl overflow-hidden border bg-muted">
                                         <img src={generatedImage} alt="Generated" className="w-full max-h-[400px] object-contain" />
                                     </div>

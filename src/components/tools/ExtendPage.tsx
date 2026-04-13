@@ -1,21 +1,19 @@
 import { useState, useCallback, useEffect } from "react"
 import { toast } from "sonner"
-import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MonitorPlay, Smartphone, Square, RectangleHorizontal } from "lucide-react"
+import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MonitorPlay, Smartphone, Square, RectangleHorizontal, Expand } from "lucide-react"
 import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
-import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
 import { ExtendPreview } from "./shared/ExtendPreview"
-import { TOOL_TIPS } from "./shared/toolExamples"
+
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 
 const DIRECTIONS = [
@@ -26,9 +24,9 @@ const DIRECTIONS = [
 ] as const
 
 const EXTEND_RATIOS = [
-    { value: "25", label: "25%" },
-    { value: "50", label: "50%" },
-    { value: "100", label: "100%" },
+    { value: "25", label: "Nhẹ (25%)" },
+    { value: "50", label: "Vừa (50%)" },
+    { value: "100", label: "Gấp đôi" },
 ] as const
 
 const RATIO_PRESETS = [
@@ -108,102 +106,124 @@ export function ExtendPage() {
         }
     }
 
+    // Compute output dimensions
+    const outputDims = imageDims && directions.length > 0 ? (() => {
+        const ext = parseInt(extendRatio) / 100
+        const hDirs = directions.filter(d => d === "left" || d === "right").length
+        const vDirs = directions.filter(d => d === "top" || d === "bottom").length
+        return { w: Math.round(imageDims.w * (1 + ext * hDirs)), h: Math.round(imageDims.h * (1 + ext * vDirs)) }
+    })() : null
+
     return (
-        <ToolPageLayout title="Mở rộng ảnh" description="Kéo dãn viền ảnh ra ngoài khung hình gốc, AI tự sinh nội dung phù hợp">
+        <ToolPageLayout
+            title="Mở rộng ảnh"
+            description="Kéo dãn viền ảnh ra ngoài khung hình gốc, AI tự sinh nội dung phù hợp"
+            icon={Expand}
+            gradient="bg-gradient-to-br from-sky-500/10 via-blue-500/5 to-transparent"
+        >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <ToolImageUpload images={images} onImagesChange={setImages} />
 
+                    {/* Settings — progressive disclosure */}
                     {images[0] && (
-                        <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
-                    )}
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {/* Preview */}
+                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
 
-                    {/* Smart ratio presets */}
-                    {imageDims && (
-                        <div className="space-y-2">
-                            <Label>Mở rộng nhanh theo tỷ lệ</Label>
-                            <div className="grid grid-cols-4 gap-2">
-                                {RATIO_PRESETS.map((p) => {
-                                    const currentRatio = imageDims.w / imageDims.h
-                                    const alreadyMatches = Math.abs(currentRatio - p.targetRatio) < 0.1
-                                    return (
-                                        <button
-                                            key={p.id}
-                                            onClick={() => applyPreset(p.id)}
-                                            disabled={alreadyMatches}
-                                            className={cn(
-                                                "flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center",
-                                                activePreset === p.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30",
-                                                alreadyMatches && "opacity-40 cursor-not-allowed"
-                                            )}
-                                        >
-                                            <p.icon className={cn("size-4", activePreset === p.id ? "text-primary" : "text-muted-foreground")} />
-                                            <span className="text-[10px] font-medium">{p.label}</span>
-                                            <span className="text-[8px] text-muted-foreground">{alreadyMatches ? "Đã khớp" : p.sub}</span>
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                            <p className="text-[10px] text-muted-foreground">
-                                Ảnh hiện tại: {imageDims.w}×{imageDims.h} ({(imageDims.w / imageDims.h).toFixed(2)})
-                            </p>
-                        </div>
-                    )}
-
-                    <div className="space-y-2">
-                        <Label>Hướng mở rộng</Label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {DIRECTIONS.map(({ id, label, icon: Icon }) => (
-                                <button
-                                    key={id}
-                                    onClick={() => toggleDirection(id)}
-                                    className={cn(
-                                        "flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all",
-                                        directions.includes(id) ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
-                                    )}
-                                >
-                                    <Icon className="size-4" />
-                                    <span className="text-xs font-medium">{label}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Mức mở rộng</Label>
-                        <ToggleGroup type="single" value={extendRatio} onValueChange={(v) => { if (v) { setExtendRatio(v); setActivePreset(null) } }} className="justify-start">
-                            {EXTEND_RATIOS.map((r) => (
-                                <ToggleGroupItem key={r.value} value={r.value} className="text-xs px-4 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-                                    {r.label}
-                                </ToggleGroupItem>
-                            ))}
-                        </ToggleGroup>
-                        {imageDims && directions.length > 0 && (() => {
-                            const ext = parseInt(extendRatio) / 100
-                            const hDirs = directions.filter(d => d === "left" || d === "right").length
-                            const vDirs = directions.filter(d => d === "top" || d === "bottom").length
-                            const outW = Math.round(imageDims.w * (1 + ext * hDirs))
-                            const outH = Math.round(imageDims.h * (1 + ext * vDirs))
-                            return (
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>{imageDims.w}×{imageDims.h}</span>
-                                    <span>→</span>
-                                    <span className="text-foreground font-semibold">{outW}×{outH} px</span>
+                            {/* Ratio presets — quick actions */}
+                            {imageDims && (
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Mở rộng nhanh theo tỷ lệ</Label>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {RATIO_PRESETS.map((p) => {
+                                            const currentRatio = imageDims.w / imageDims.h
+                                            const alreadyMatches = Math.abs(currentRatio - p.targetRatio) < 0.1
+                                            return (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => applyPreset(p.id)}
+                                                    disabled={alreadyMatches}
+                                                    className={cn(
+                                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                                        activePreset === p.id
+                                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                                            : "bg-muted hover:bg-muted/80 text-muted-foreground",
+                                                        alreadyMatches && "opacity-40 cursor-not-allowed"
+                                                    )}
+                                                >
+                                                    <p.icon className="size-3.5" />
+                                                    {p.label} {p.sub}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
                                 </div>
-                            )
-                        })()}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Mô tả nội dung mở rộng (tùy chọn)</Label>
-                        <Textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="VD: Mở rộng thêm bầu trời và cây cối..."
-                            rows={2}
-                            maxLength={1000}
-                        />
-                    </div>
-                    <ToolTipsCard tips={TOOL_TIPS['extend']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
+                            )}
+
+                            {/* Direction + ratio — side by side */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Hướng mở rộng</Label>
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        {DIRECTIONS.map(({ id, label, icon: Icon }) => (
+                                            <button
+                                                key={id}
+                                                onClick={() => toggleDirection(id)}
+                                                className={cn(
+                                                    "flex items-center gap-1.5 p-2 rounded-lg border-2 transition-all text-xs font-medium",
+                                                    directions.includes(id) ? "border-primary bg-primary/5 text-primary" : "border-border/50 hover:border-primary/30 text-muted-foreground"
+                                                )}
+                                            >
+                                                <Icon className="size-3.5" />
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs">Mức mở rộng</Label>
+                                    <div className="flex flex-col gap-1.5">
+                                        {EXTEND_RATIOS.map((r) => (
+                                            <button
+                                                key={r.value}
+                                                onClick={() => { setExtendRatio(r.value); setActivePreset(null) }}
+                                                className={cn(
+                                                    "px-3 py-2 rounded-lg text-xs font-medium transition-all text-left",
+                                                    extendRatio === r.value
+                                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                                )}
+                                            >
+                                                {r.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Output dimensions badge */}
+                            {outputDims && imageDims && (
+                                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-xs">
+                                    <span className="text-muted-foreground">{imageDims.w}×{imageDims.h}</span>
+                                    <span className="text-muted-foreground">→</span>
+                                    <span className="text-foreground font-bold">{outputDims.w}×{outputDims.h} px</span>
+                                </div>
+                            )}
+
+                            {/* Description — compact */}
+                            <Textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Mô tả nội dung mở rộng (tùy chọn)..."
+                                rows={2}
+                                maxLength={1000}
+                                className="text-sm"
+                            />
+
+                            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
+                        </div>
+                    )}
                 </div>
                 <div className="space-y-4">
                     <ToolResultDisplay

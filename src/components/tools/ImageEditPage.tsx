@@ -4,17 +4,16 @@ import { ToolPageLayout } from "./ToolPageLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
-import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
 import { MaskPainter } from "./shared/MaskPainter"
-import { TOOL_TIPS } from "./shared/toolExamples"
+
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from "@/lib/utils"
 import { Trash2, PenTool } from "lucide-react"
 
 type EditMode = "remove" | "replace"
@@ -71,28 +70,49 @@ export function ImageEditPage() {
     }
 
     return (
-        <ToolPageLayout title="Chỉnh sửa ảnh" description="Tô lên vùng cần chỉnh sửa — xóa vật thể hoặc thay thế bằng nội dung mới">
+        <ToolPageLayout
+            title="Chỉnh sửa ảnh"
+            description="Tô lên vùng cần chỉnh sửa — xóa vật thể hoặc thay thế bằng nội dung mới"
+            icon={PenTool}
+            gradient="bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent"
+        >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                    {/* Mode toggle */}
-                    <ToggleGroup type="single" value={mode} onValueChange={(v) => v && setMode(v as EditMode)} className="justify-start">
-                        <ToggleGroupItem value="remove" className="gap-1.5 px-4 h-9 rounded-full text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                    {/* Mode toggle — pill style */}
+                    <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit">
+                        <button
+                            onClick={() => setMode("remove")}
+                            className={cn(
+                                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                                mode === "remove"
+                                    ? "bg-background shadow-sm text-foreground"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
                             <Trash2 className="size-3.5" />
                             Xóa vật thể
-                        </ToggleGroupItem>
-                        <ToggleGroupItem value="replace" className="gap-1.5 px-4 h-9 rounded-full text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                        </button>
+                        <button
+                            onClick={() => setMode("replace")}
+                            className={cn(
+                                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                                mode === "replace"
+                                    ? "bg-background shadow-sm text-foreground"
+                                    : "text-muted-foreground hover:text-foreground"
+                            )}
+                        >
                             <PenTool className="size-3.5" />
                             Thay thế nội dung
-                        </ToggleGroupItem>
-                    </ToggleGroup>
+                        </button>
+                    </div>
 
                     {/* Image upload or mask painter */}
                     {!images[0] ? (
                         <ToolImageUpload images={images} onImagesChange={handleImagesChange} label={mode === "remove" ? "Tải ảnh cần xóa vật thể" : "Tải ảnh cần chỉnh sửa"} />
                     ) : (
-                        <div className="space-y-2">
+                        <div className="space-y-2 animate-in fade-in duration-200">
                             <div className="flex items-center justify-between">
-                                <Label>{mode === "remove" ? "Tô lên vật thể cần xóa" : "Tô lên vùng cần thay thế"}</Label>
+                                <Label className="text-xs">{mode === "remove" ? "Tô lên vật thể cần xóa" : "Tô lên vùng cần thay thế"}</Label>
                                 <button onClick={() => handleImagesChange([])} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                                     Đổi ảnh
                                 </button>
@@ -101,35 +121,36 @@ export function ImageEditPage() {
                         </div>
                     )}
 
-                    {/* Description */}
-                    <div className="space-y-2">
-                        <Label>{mode === "remove" ? "Mô tả thêm (tùy chọn)" : "Nội dung thay thế"}</Label>
-                        <Textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder={mode === "remove"
-                                ? "VD: Xóa người đứng bên phải, xóa watermark..."
-                                : "VD: Thay bằng bông hoa hồng đỏ, thêm cái ghế gỗ..."
-                            }
-                            rows={mode === "remove" ? 2 : 3}
-                            maxLength={1000}
-                        />
-                        {mode === "remove" && !maskBase64 && (
-                            <p className="text-[10px] text-muted-foreground">
-                                💡 Tô trực tiếp lên ảnh để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả để AI tự tìm
-                            </p>
-                        )}
-                    </div>
+                    {/* Description + submit — progressive */}
+                    {images[0] && (
+                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            <Textarea
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder={mode === "remove"
+                                    ? "VD: Xóa người đứng bên phải, xóa watermark..."
+                                    : "VD: Thay bằng bông hoa hồng đỏ, thêm cái ghế gỗ..."
+                                }
+                                rows={mode === "remove" ? 2 : 3}
+                                maxLength={1000}
+                                className="text-sm"
+                            />
+                            {mode === "remove" && !maskBase64 && (
+                                <p className="text-[10px] text-muted-foreground">
+                                    💡 Tô trực tiếp lên ảnh để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả để AI tự tìm
+                                </p>
+                            )}
 
-                    <ToolTipsCard tips={TOOL_TIPS['image-edit']} />
-                    <ToolSubmitButton
-                        onClick={handleSubmit}
-                        loading={loading}
-                        disabled={!images[0] || (mode === "replace" ? (!maskBase64 || !description.trim()) : (!maskBase64 && !description.trim()))}
-                        gemsCost={2}
-                        label={mode === "remove" ? "Xóa vật thể" : "Thay thế"}
-                        gemsBalance={gems}
-                    />
+                            <ToolSubmitButton
+                                onClick={handleSubmit}
+                                loading={loading}
+                                disabled={!images[0] || (mode === "replace" ? (!maskBase64 || !description.trim()) : (!maskBase64 && !description.trim()))}
+                                gemsCost={2}
+                                label={mode === "remove" ? "Xóa vật thể" : "Thay thế"}
+                                gemsBalance={gems}
+                            />
+                        </div>
+                    )}
                 </div>
                 <div className="space-y-4">
                     <ToolResultDisplay

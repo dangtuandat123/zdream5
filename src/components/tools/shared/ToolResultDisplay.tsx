@@ -1,4 +1,4 @@
-import { Download, Copy, Check, ImageIcon, ArrowRight, RotateCcw, Wand2, ZoomIn, Eraser, Expand, PenTool } from "lucide-react"
+import { Download, Copy, Check, ArrowRight, RotateCcw, Wand2, ZoomIn, Eraser, Expand, PenTool, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
@@ -63,19 +63,20 @@ export function ToolResultDisplay({
         setTimeout(() => setCopied(false), 2000)
     }
 
-    // Cross-tool navigation: filter out current tool
     const crossTools = CROSS_TOOLS.filter(t => !location.pathname.startsWith(t.path))
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/30 min-h-[300px]">
+            <div className="flex flex-col items-center justify-center gap-5 p-10 rounded-2xl border bg-gradient-to-b from-muted/50 to-muted/20 min-h-[300px]">
                 <div className="relative">
-                    <div className="size-12 rounded-full border-2 border-primary/20" />
-                    <div className="absolute inset-0 size-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    <div className="size-14 rounded-full bg-primary/5" />
+                    <div className="absolute inset-0 size-14 rounded-full border-2 border-primary/20" />
+                    <div className="absolute inset-0 size-14 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-5 text-primary animate-pulse" />
                 </div>
                 <div className="text-center space-y-1">
-                    <p className="text-sm font-medium">AI đang xử lý ảnh<span className="animate-pulse">...</span></p>
-                    <p className="text-[11px] text-muted-foreground">Thường mất 10-30 giây, vui lòng đợi</p>
+                    <p className="text-sm font-semibold">AI đang xử lý<span className="animate-pulse">...</span></p>
+                    <p className="text-[11px] text-muted-foreground">Thường mất 10–30 giây</p>
                 </div>
             </div>
         )
@@ -108,7 +109,7 @@ export function ToolResultDisplay({
 
     if (imageUrl) {
         return (
-            <div className="space-y-3">
+            <div className="space-y-3 animate-in fade-in duration-300">
                 {beforeImageUrl ? (
                     <BeforeAfterSlider beforeUrl={beforeImageUrl} afterUrl={imageUrl} />
                 ) : (
@@ -133,7 +134,6 @@ export function ToolResultDisplay({
                             Dùng làm đầu vào
                         </Button>
                     )}
-                    {/* Cross-tool navigation */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button size="sm" variant="outline" className="gap-1.5">
@@ -160,11 +160,14 @@ export function ToolResultDisplay({
     }
 
     return (
-        <div className="flex flex-col items-center justify-center gap-3 p-8 rounded-xl border border-dashed border-border/50 min-h-[300px]">
-            <div className="flex items-center justify-center size-12 rounded-xl bg-muted">
-                <ImageIcon className="size-6 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center gap-4 p-10 rounded-2xl border border-dashed border-border/40 min-h-[300px] bg-gradient-to-b from-muted/30 to-transparent">
+            <div className="flex items-center justify-center size-14 rounded-2xl bg-muted/50">
+                <Sparkles className="size-6 text-muted-foreground/50" />
             </div>
-            <p className="text-sm text-muted-foreground text-center">{emptyHint || "Kết quả sẽ hiển thị ở đây"}</p>
+            <div className="text-center space-y-1">
+                <p className="text-sm font-medium text-muted-foreground">{emptyHint || "Kết quả sẽ hiển thị ở đây"}</p>
+                <p className="text-[10px] text-muted-foreground/60">Kết quả AI sẽ xuất hiện ở đây sau khi xử lý</p>
+            </div>
         </div>
     )
 }
