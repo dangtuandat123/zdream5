@@ -1,11 +1,10 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Eraser } from "lucide-react"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { Download } from "lucide-react"
+import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
-import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
-import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { ToolCanvasGrid } from "./shared/ToolCanvasGrid"
 import { BackgroundPreviewer } from "./shared/BackgroundPreviewer"
 
 import { toolsApi } from "@/lib/api"
@@ -84,87 +83,87 @@ export function RemoveBgPage() {
         }
     }
 
-    return (
-        <ToolPageLayout
-            title="Xóa nền ảnh"
-            description="Tách chủ thể khỏi phông nền chỉ với một click"
-            icon={Eraser}
-            gradient="bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
-                    <ToolImageUpload images={images} onImagesChange={setImages} />
+    const controls = (
+        <div className="space-y-4">
+            <ToolImageUpload images={images} onImagesChange={setImages} />
 
-                    {/* Settings — progressive disclosure */}
-                    {images[0] && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {/* Subject type — horizontal chips */}
-                            <div className="space-y-2">
-                                <Label className="text-xs">Loại chủ thể</Label>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {SUBJECT_TYPES.map((t) => (
-                                        <button
-                                            key={t.id}
-                                            onClick={() => setSubjectType(t.id)}
-                                            className={cn(
-                                                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                                subjectType === t.id
-                                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                            )}
-                                        >
-                                            <span>{t.emoji}</span>
-                                            {t.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Edge quality — horizontal chips */}
-                            <div className="space-y-2">
-                                <Label className="text-xs">Chất lượng viền</Label>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {EDGE_OPTIONS.map((e) => (
-                                        <button
-                                            key={e.id}
-                                            onClick={() => setEdgeRefine(e.id)}
-                                            className={cn(
-                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                                edgeRefine === e.id
-                                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                            )}
-                                        >
-                                            {e.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />
+            {images[0] && (
+                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="space-y-2">
+                        <Label className="text-xs">Loại chủ thể</Label>
+                        <div className="flex flex-wrap gap-1.5">
+                            {SUBJECT_TYPES.map((t) => (
+                                <button
+                                    key={t.id}
+                                    onClick={() => setSubjectType(t.id)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        subjectType === t.id
+                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                    )}
+                                >
+                                    <span>{t.emoji}</span>
+                                    {t.label}
+                                </button>
+                            ))}
                         </div>
-                    )}
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-xs">Chất lượng viền</Label>
+                        <div className="flex flex-wrap gap-1.5">
+                            {EDGE_OPTIONS.map((e) => (
+                                <button
+                                    key={e.id}
+                                    onClick={() => setEdgeRefine(e.id)}
+                                    className={cn(
+                                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                        edgeRefine === e.id
+                                            ? "bg-primary text-primary-foreground shadow-sm"
+                                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                    )}
+                                >
+                                    {e.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
-                    <ToolResultDisplay
-                        imageUrl={result}
-                        loading={loading}
-                        beforeImageUrl={images[0]}
-                        onUseAsInput={(url) => { setImages([url]); setResult(null) }}
-                        emptyHint="Tải ảnh lên để xóa nền tự động"
-                    />
-                    {result && (
-                        <>
-                            <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} />
-                            <Button size="sm" variant="outline" className="gap-1.5" onClick={handleDownloadWithBg}>
-                                <Download className="size-3.5" />
-                                Tải về với nền đang chọn
-                            </Button>
-                        </>
-                    )}
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+            )}
+        </div>
+    )
+
+    const canvas = (
+        <ToolCanvasGrid
+            resultUrl={result}
+            loading={loading}
+            history={history}
+            historyLoading={historyLoading}
+            emptyHint="Tải ảnh lên để xóa nền tự động"
+            onUseAsInput={(url) => { setImages([url]); setResult(null) }}
+            extraContent={
+                result ? (
+                    <div className="space-y-3">
+                        <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} />
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={handleDownloadWithBg}>
+                            <Download className="size-3.5" />
+                            Tải về với nền đang chọn
+                        </Button>
+                    </div>
+                ) : undefined
+            }
+        />
+    )
+
+    return (
+        <ToolPageShell
+            title="Xóa nền ảnh"
+            controls={controls}
+            submitButton={
+                <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />
+            }
+            canvas={canvas}
+        />
     )
 }

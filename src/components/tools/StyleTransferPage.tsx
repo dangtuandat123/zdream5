@@ -1,11 +1,9 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
-import { Wand2 } from "lucide-react"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolPageShell } from "./shared/ToolPageShell"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
-import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
-import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { ToolCanvasGrid } from "./shared/ToolCanvasGrid"
 
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -66,107 +64,98 @@ export function StyleTransferPage() {
         }
     }
 
-    const handleUseAsInput = (url: string) => {
-        setImages([url])
-        setResult(null)
-    }
-
     const intensityOptions = isVariation
         ? [{ v: "0.3", l: "Nhẹ" }, { v: "0.5", l: "Vừa" }, { v: "0.8", l: "Mạnh" }]
         : [{ v: "light", l: "Nhẹ" }, { v: "medium", l: "Vừa" }, { v: "strong", l: "Mạnh" }]
 
     const currentIntensity = isVariation ? strength : intensity
 
-    return (
-        <ToolPageLayout
-            title="Chuyển phong cách"
-            description="Biến ảnh thành tranh anime, sơn dầu, cyberpunk hoặc tạo biến thể mới"
-            icon={Wand2}
-            gradient="bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
-                    <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
+    const controls = (
+        <div className="space-y-4">
+            <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
 
-                    {/* Style grid — always visible, this IS the main interaction */}
-                    <div className="space-y-2">
-                        <Label className="text-xs">Chọn phong cách</Label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {STYLES.map((s) => (
-                                <button
-                                    key={s.id}
-                                    onClick={() => setStyle(s.id)}
-                                    className={cn(
-                                        "relative flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center overflow-hidden",
-                                        style === s.id ? "border-primary ring-1 ring-primary/20" : "border-border/50 hover:border-primary/30"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "absolute inset-0 bg-gradient-to-br opacity-[0.07] transition-opacity",
-                                        s.color,
-                                        style === s.id && "opacity-[0.15]"
-                                    )} />
-                                    <span className="text-lg relative">{s.emoji}</span>
-                                    <span className="text-[10px] font-medium relative leading-tight">{s.label}</span>
-                                    <span className="text-[8px] text-muted-foreground relative">{s.desc}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Custom style input */}
-                    {isCustom && (
-                        <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                            <Input
-                                value={customStyle}
-                                onChange={(e) => setCustomStyle(e.target.value)}
-                                placeholder="VD: Studio Ghibli, Van Gogh, Art Nouveau..."
-                                maxLength={200}
-                            />
-                        </div>
-                    )}
-
-                    {/* Intensity — compact chips */}
-                    <div className="space-y-2">
-                        <Label className="text-xs">{isVariation ? "Mức độ thay đổi" : "Cường độ"}</Label>
-                        <div className="flex gap-1.5">
-                            {intensityOptions.map((i) => (
-                                <button
-                                    key={i.v}
-                                    onClick={() => isVariation ? setStrength(i.v) : setIntensity(i.v)}
-                                    className={cn(
-                                        "px-4 py-1.5 rounded-full text-xs font-medium transition-all",
-                                        currentIntensity === i.v
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                    )}
-                                >
-                                    {i.l}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <ToolSubmitButton
-                        onClick={handleSubmit}
-                        loading={loading}
-                        disabled={!images[0] || (isCustom && !customStyle.trim())}
-                        gemsCost={2}
-                        label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"}
-                        gemsBalance={gems}
-                    />
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
-                    <ToolResultDisplay
-                        imageUrl={result}
-                        loading={loading}
-                        beforeImageUrl={images[0]}
-                        onUseAsInput={handleUseAsInput}
-                        emptyHint="Tải ảnh lên và chọn phong cách để bắt đầu"
-                    />
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
+            <div className="space-y-2">
+                <Label className="text-xs">Chọn phong cách</Label>
+                <div className="grid grid-cols-4 gap-2">
+                    {STYLES.map((s) => (
+                        <button
+                            key={s.id}
+                            onClick={() => setStyle(s.id)}
+                            className={cn(
+                                "relative flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center overflow-hidden",
+                                style === s.id ? "border-primary ring-1 ring-primary/20" : "border-border/50 hover:border-primary/30"
+                            )}
+                        >
+                            <div className={cn(
+                                "absolute inset-0 bg-gradient-to-br opacity-[0.07] transition-opacity",
+                                s.color,
+                                style === s.id && "opacity-[0.15]"
+                            )} />
+                            <span className="text-lg relative">{s.emoji}</span>
+                            <span className="text-[10px] font-medium relative leading-tight">{s.label}</span>
+                            <span className="text-[8px] text-muted-foreground relative">{s.desc}</span>
+                        </button>
+                    ))}
                 </div>
             </div>
-        </ToolPageLayout>
+
+            {isCustom && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                    <Input
+                        value={customStyle}
+                        onChange={(e) => setCustomStyle(e.target.value)}
+                        placeholder="VD: Studio Ghibli, Van Gogh, Art Nouveau..."
+                        maxLength={200}
+                    />
+                </div>
+            )}
+
+            <div className="space-y-2">
+                <Label className="text-xs">{isVariation ? "Mức độ thay đổi" : "Cường độ"}</Label>
+                <div className="flex gap-1.5">
+                    {intensityOptions.map((i) => (
+                        <button
+                            key={i.v}
+                            onClick={() => isVariation ? setStrength(i.v) : setIntensity(i.v)}
+                            className={cn(
+                                "px-4 py-1.5 rounded-full text-xs font-medium transition-all",
+                                currentIntensity === i.v
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                            )}
+                        >
+                            {i.l}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    )
+
+    return (
+        <ToolPageShell
+            title="Chuyển phong cách"
+            controls={controls}
+            submitButton={
+                <ToolSubmitButton
+                    onClick={handleSubmit}
+                    loading={loading}
+                    disabled={!images[0] || (isCustom && !customStyle.trim())}
+                    gemsCost={2}
+                    label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"}
+                    gemsBalance={gems}
+                />
+            }
+            canvas={
+                <ToolCanvasGrid
+                    resultUrl={result}
+                    loading={loading}
+                    history={history}
+                    historyLoading={historyLoading}
+                    emptyHint="Tải ảnh lên và chọn phong cách để bắt đầu"
+                    onUseAsInput={(url) => { setImages([url]); setResult(null) }}
+                />
+            }
+        />
     )
 }
