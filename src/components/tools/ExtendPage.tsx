@@ -106,14 +106,6 @@ export function ExtendPage() {
         }
     }
 
-    // Compute output dimensions
-    const outputDims = imageDims && directions.length > 0 ? (() => {
-        const ext = parseInt(extendRatio) / 100
-        const hDirs = directions.filter(d => d === "left" || d === "right").length
-        const vDirs = directions.filter(d => d === "top" || d === "bottom").length
-        return { w: Math.round(imageDims.w * (1 + ext * hDirs)), h: Math.round(imageDims.h * (1 + ext * vDirs)) }
-    })() : null
-
     return (
         <ToolPageLayout
             title="Mở rộng ảnh"
@@ -129,7 +121,7 @@ export function ExtendPage() {
                     {images[0] && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             {/* Preview */}
-                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
+                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} />
 
                             {/* Ratio presets — quick actions */}
                             {imageDims && (
@@ -201,15 +193,6 @@ export function ExtendPage() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Output dimensions badge */}
-                            {outputDims && imageDims && (
-                                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 text-xs">
-                                    <span className="text-muted-foreground">{imageDims.w}×{imageDims.h}</span>
-                                    <span className="text-muted-foreground">→</span>
-                                    <span className="text-foreground font-bold">{outputDims.w}×{outputDims.h} px</span>
-                                </div>
-                            )}
 
                             {/* Description — compact */}
                             <Textarea

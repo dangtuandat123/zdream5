@@ -4,23 +4,18 @@ interface ExtendPreviewProps {
     imageUrl: string
     directions: string[]
     extendRatio: string
-    imageDims?: { w: number; h: number } | null
     className?: string
 }
 
 const HATCH = "repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.08) 4px, rgba(255,255,255,0.08) 8px)"
 
-export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, className }: ExtendPreviewProps) {
+export function ExtendPreview({ imageUrl, directions, extendRatio, className }: ExtendPreviewProps) {
     const extPct = parseInt(extendRatio) / 100 // 0.25, 0.5, 1.0
 
     const hasTop = directions.includes("top")
     const hasBottom = directions.includes("bottom")
     const hasLeft = directions.includes("left")
     const hasRight = directions.includes("right")
-
-    // Calculate output dimensions
-    const outW = imageDims ? Math.round(imageDims.w * (1 + extPct * ((hasLeft ? 1 : 0) + (hasRight ? 1 : 0)))) : null
-    const outH = imageDims ? Math.round(imageDims.h * (1 + extPct * ((hasTop ? 1 : 0) + (hasBottom ? 1 : 0)))) : null
 
     // For CSS: use flex ratios so extend zones are proportional to image
     // Image = 1 unit, each extend side = extPct units
@@ -32,10 +27,8 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, cl
         <div className={cn("rounded-xl overflow-hidden border bg-muted/50 p-3", className)}>
             <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-2">
                 <span>Xem trước vùng mở rộng</span>
-                {imageDims && outW && outH && directions.length > 0 && (
-                    <span className="text-foreground font-medium">
-                        {imageDims.w}×{imageDims.h} → {outW}×{outH} px
-                    </span>
+                {directions.length > 0 && (
+                    <span className="text-foreground font-medium">+{extendRatio}% mỗi hướng</span>
                 )}
             </div>
             <div className="relative flex flex-col items-center">
@@ -45,7 +38,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, cl
                         className="w-full rounded-t-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60"
                         style={{ height: 0, paddingBottom: `${vFlex * 100 / (imgFlex + (hasTop ? vFlex : 0) + (hasBottom ? vFlex : 0))}%`, background: HATCH, minHeight: 20 }}
                     >
-                        ↑ {imageDims ? `+${Math.round(imageDims.h * extPct)}px` : "Mở rộng"}
+                        ↑ +{extendRatio}%
                     </div>
                 )}
 
@@ -87,7 +80,7 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, cl
                         className="w-full rounded-b-lg border border-dashed border-primary/30 flex items-center justify-center text-[10px] text-primary/60"
                         style={{ height: 0, paddingBottom: `${vFlex * 100 / (imgFlex + (hasTop ? vFlex : 0) + (hasBottom ? vFlex : 0))}%`, background: HATCH, minHeight: 20 }}
                     >
-                        ↓ {imageDims ? `+${Math.round(imageDims.h * extPct)}px` : "Mở rộng"}
+                        ↓ +{extendRatio}%
                     </div>
                 )}
 

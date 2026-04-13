@@ -43,8 +43,6 @@ export function UpscalePage() {
         img.src = images[0]
     }, [images])
 
-    const scale = scaleFactor === "4x" ? 4 : 2
-
     const handleSubmit = async () => {
         if (!images[0]) return toast.error("Vui lòng tải ảnh lên")
         setLoading(true)
@@ -87,8 +85,7 @@ export function UpscalePage() {
                                     <p className="text-xs font-medium">Hệ số phóng to</p>
                                     {imageDims && (
                                         <p className="text-[10px] text-muted-foreground">
-                                            {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">{imageDims.w * scale}×{imageDims.h * scale}</span>
-                                            <span className="ml-1 text-primary">{((imageDims.w * scale * imageDims.h * scale) / 1_000_000).toFixed(1)} MP</span>
+                                            {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">{scaleFactor === "4x" ? "4K" : "2K"}</span>
                                         </p>
                                     )}
                                 </div>
