@@ -28,7 +28,6 @@ export function ImageToPromptPage() {
 
     useInputFromUrl(useCallback((url: string) => setImages([url]), []))
 
-    // Generate from prompt state
     const [generatedImage, setGeneratedImage] = useState<string | null>(null)
     const [generating, setGenerating] = useState(false)
 
@@ -96,16 +95,13 @@ export function ImageToPromptPage() {
             description="AI phân tích ảnh và viết prompt chi tiết để bạn tái tạo hoặc cải tiến"
             icon={FileText}
             gradient="bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
+            controls={
+                <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
-
-                    {/* Language — compact inline chips */}
                     <div className="space-y-2">
                         <Label className="text-xs">Ngôn ngữ prompt</Label>
                         <div className="flex gap-1.5">
-                            {[{ v: "en", l: "🇬🇧 English" }, { v: "vi", l: "🇻🇳 Tiếng Việt" }].map((lang) => (
+                            {[{ v: "en", l: "English" }, { v: "vi", l: "Tiếng Việt" }].map((lang) => (
                                 <button
                                     key={lang.v}
                                     onClick={() => setLanguage(lang.v)}
@@ -121,15 +117,14 @@ export function ImageToPromptPage() {
                             ))}
                         </div>
                     </div>
-
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích" gemsBalance={gems} />
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
+                </>
+            }
+            canvas={
+                <>
                     {loading ? (
                         <ToolResultDisplay loading={loading} emptyHint="" />
                     ) : result ? (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {/* Editable prompt result */}
                             <div className="rounded-xl border bg-card p-4 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-sm font-semibold">Prompt được tạo</h3>
@@ -147,23 +142,15 @@ export function ImageToPromptPage() {
                                 />
                                 <p className="text-[10px] text-muted-foreground">Chỉnh sửa prompt phía trên rồi nhấn tạo ảnh — không cần rời trang</p>
                             </div>
-
-                            {/* Generate button inline */}
                             <Button
                                 onClick={handleGenerateFromPrompt}
                                 disabled={generating || !editedPrompt.trim() || (gems !== undefined && gems < 1)}
                                 className="w-full h-11 gap-2 text-sm font-semibold"
                                 size="lg"
                             >
-                                {generating ? (
-                                    <Loader2 className="size-4 animate-spin" />
-                                ) : (
-                                    <Sparkles className="size-4" />
-                                )}
+                                {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
                                 {generating ? "Đang tạo ảnh..." : "Tạo ảnh từ prompt (1 💎)"}
                             </Button>
-
-                            {/* Generated image result */}
                             {generating && (
                                 <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/30 min-h-[200px]">
                                     <div className="relative">
@@ -195,8 +182,9 @@ export function ImageToPromptPage() {
                         <ToolResultDisplay emptyHint="Tải ảnh lên để AI phân tích và viết prompt" />
                     )}
                     <ToolHistoryPanel history={history} loading={historyLoading} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={<ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích" gemsBalance={gems} />}
+        />
     )
 }

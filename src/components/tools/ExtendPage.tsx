@@ -112,18 +112,12 @@ export function ExtendPage() {
             description="Kéo dãn viền ảnh ra ngoài khung hình gốc, AI tự sinh nội dung phù hợp"
             icon={Expand}
             gradient="bg-gradient-to-br from-sky-500/10 via-blue-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
+            controls={
+                <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
-
-                    {/* Settings — progressive disclosure */}
                     {images[0] && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {/* Preview */}
                             <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
-
-                            {/* Ratio presets — quick actions */}
                             {imageDims && (
                                 <div className="space-y-2">
                                     <Label className="text-xs">Mở rộng nhanh theo tỷ lệ</Label>
@@ -152,8 +146,6 @@ export function ExtendPage() {
                                     </div>
                                 </div>
                             )}
-
-                            {/* Direction + ratio — side by side */}
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-2">
                                     <Label className="text-xs">Hướng mở rộng</Label>
@@ -193,8 +185,6 @@ export function ExtendPage() {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Description — compact */}
                             <Textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
@@ -203,12 +193,12 @@ export function ExtendPage() {
                                 maxLength={1000}
                                 className="text-sm"
                             />
-
-                            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
                         </div>
                     )}
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
+                </>
+            }
+            canvas={
+                <>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
@@ -217,8 +207,13 @@ export function ExtendPage() {
                         emptyHint="Tải ảnh lên và chọn hướng mở rộng"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={
+                images[0] ? (
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
+                ) : undefined
+            }
+        />
     )
 }

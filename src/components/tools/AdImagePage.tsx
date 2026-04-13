@@ -78,9 +78,11 @@ export function AdImagePage() {
     }
 
     return (
-        <ToolPageLayout title="Ảnh quảng cáo" description="Tạo ảnh quảng cáo sản phẩm bắt mắt cho Facebook, Instagram, TikTok">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
+        <ToolPageLayout
+            title="Ảnh quảng cáo"
+            description="Tạo ảnh quảng cáo sản phẩm bắt mắt cho Facebook, Instagram, TikTok"
+            controls={
+                <>
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh sản phẩm" />
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
@@ -138,17 +140,19 @@ export function AdImagePage() {
                         </div>
                     </div>
                     <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />
-                </div>
-                <div className="space-y-4">
+                </>
+            }
+            canvas={
+                <>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         emptyHint="Tải ảnh sản phẩm và mô tả quảng cáo để bắt đầu"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={<ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />}
+        />
     )
 }

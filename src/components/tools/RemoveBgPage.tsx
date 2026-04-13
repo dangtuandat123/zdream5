@@ -90,15 +90,11 @@ export function RemoveBgPage() {
             description="Tách chủ thể khỏi phông nền chỉ với một click"
             icon={Eraser}
             gradient="bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
+            controls={
+                <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
-
-                    {/* Settings — progressive disclosure */}
                     {images[0] && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {/* Subject type — horizontal chips */}
                             <div className="space-y-2">
                                 <Label className="text-xs">Loại chủ thể</Label>
                                 <div className="flex flex-wrap gap-1.5">
@@ -119,8 +115,6 @@ export function RemoveBgPage() {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Edge quality — horizontal chips */}
                             <div className="space-y-2">
                                 <Label className="text-xs">Chất lượng viền</Label>
                                 <div className="flex flex-wrap gap-1.5">
@@ -140,12 +134,12 @@ export function RemoveBgPage() {
                                     ))}
                                 </div>
                             </div>
-
-                            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />
                         </div>
                     )}
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
+                </>
+            }
+            canvas={
+                <>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
@@ -163,8 +157,9 @@ export function RemoveBgPage() {
                         </>
                     )}
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} /> : undefined}
+        />
     )
 }

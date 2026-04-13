@@ -75,10 +75,9 @@ export function ImageEditPage() {
             description="Tô lên vùng cần chỉnh sửa — xóa vật thể hoặc thay thế bằng nội dung mới"
             icon={PenTool}
             gradient="bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
-                    {/* Mode toggle — pill style */}
+            controls={
+                <>
+                    {/* Mode toggle */}
                     <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit">
                         <button
                             onClick={() => setMode("remove")}
@@ -121,7 +120,7 @@ export function ImageEditPage() {
                         </div>
                     )}
 
-                    {/* Description + submit — progressive */}
+                    {/* Description */}
                     {images[0] && (
                         <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <Textarea
@@ -137,22 +136,15 @@ export function ImageEditPage() {
                             />
                             {mode === "remove" && !maskBase64 && (
                                 <p className="text-[10px] text-muted-foreground">
-                                    💡 Tô trực tiếp lên ảnh để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả để AI tự tìm
+                                    Tô trực tiếp lên ảnh để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả để AI tự tìm
                                 </p>
                             )}
-
-                            <ToolSubmitButton
-                                onClick={handleSubmit}
-                                loading={loading}
-                                disabled={!images[0] || (mode === "replace" ? (!maskBase64 || !description.trim()) : (!maskBase64 && !description.trim()))}
-                                gemsCost={2}
-                                label={mode === "remove" ? "Xóa vật thể" : "Thay thế"}
-                                gemsBalance={gems}
-                            />
                         </div>
                     )}
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
+                </>
+            }
+            canvas={
+                <>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
@@ -161,8 +153,20 @@ export function ImageEditPage() {
                         emptyHint={mode === "remove" ? "Tải ảnh lên và tô vùng cần xóa" : "Tải ảnh → tô vùng → mô tả nội dung mới"}
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={
+                images[0] ? (
+                    <ToolSubmitButton
+                        onClick={handleSubmit}
+                        loading={loading}
+                        disabled={!images[0] || (mode === "replace" ? (!maskBase64 || !description.trim()) : (!maskBase64 && !description.trim()))}
+                        gemsCost={2}
+                        label={mode === "remove" ? "Xóa vật thể" : "Thay thế"}
+                        gemsBalance={gems}
+                    />
+                ) : undefined
+            }
+        />
     )
 }

@@ -71,15 +71,11 @@ export function UpscalePage() {
             description="Phóng to ảnh lên 2x–4x mà vẫn giữ chi tiết sắc nét nhờ AI"
             icon={ZoomIn}
             gradient="bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
+            controls={
+                <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
-
-                    {/* Settings — only show after image uploaded */}
                     {images[0] && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {/* Scale factor — compact inline */}
                             <div className="flex items-center justify-between rounded-xl border p-3">
                                 <div>
                                     <p className="text-xs font-medium">Hệ số phóng to</p>
@@ -113,8 +109,6 @@ export function UpscalePage() {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Enhancement mode */}
                             <div className="space-y-2">
                                 <Label className="text-xs">Chế độ nâng cấp</Label>
                                 <div className="grid grid-cols-3 gap-2">
@@ -134,8 +128,6 @@ export function UpscalePage() {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Denoise — compact inline */}
                             <div className="flex items-center justify-between rounded-xl border p-3">
                                 <div>
                                     <p className="text-xs font-medium">Giảm nhiễu</p>
@@ -143,12 +135,12 @@ export function UpscalePage() {
                                 </div>
                                 <Switch checked={denoise} onCheckedChange={setDenoise} />
                             </div>
-
-                            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />
                         </div>
                     )}
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
+                </>
+            }
+            canvas={
+                <>
                     {result && images[0] ? (
                         <div className="space-y-3">
                             <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
@@ -171,15 +163,12 @@ export function UpscalePage() {
                             </div>
                         </div>
                     ) : (
-                        <ToolResultDisplay
-                            imageUrl={result}
-                            loading={loading}
-                            emptyHint="Tải ảnh cần phóng to lên để bắt đầu"
-                        />
+                        <ToolResultDisplay imageUrl={result} loading={loading} emptyHint="Tải ảnh cần phóng to lên để bắt đầu" />
                     )}
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} /> : undefined}
+        />
     )
 }

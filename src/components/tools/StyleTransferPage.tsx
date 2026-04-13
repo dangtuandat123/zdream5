@@ -83,12 +83,9 @@ export function StyleTransferPage() {
             description="Biến ảnh thành tranh anime, sơn dầu, cyberpunk hoặc tạo biến thể mới"
             icon={Wand2}
             gradient="bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent"
-        >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                <div className="space-y-4">
+            controls={
+                <>
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
-
-                    {/* Style grid — always visible, this IS the main interaction */}
                     <div className="space-y-2">
                         <Label className="text-xs">Chọn phong cách</Label>
                         <div className="grid grid-cols-4 gap-2">
@@ -113,8 +110,6 @@ export function StyleTransferPage() {
                             ))}
                         </div>
                     </div>
-
-                    {/* Custom style input */}
                     {isCustom && (
                         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                             <Input
@@ -125,8 +120,6 @@ export function StyleTransferPage() {
                             />
                         </div>
                     )}
-
-                    {/* Intensity — compact chips */}
                     <div className="space-y-2">
                         <Label className="text-xs">{isVariation ? "Mức độ thay đổi" : "Cường độ"}</Label>
                         <div className="flex gap-1.5">
@@ -146,17 +139,10 @@ export function StyleTransferPage() {
                             ))}
                         </div>
                     </div>
-
-                    <ToolSubmitButton
-                        onClick={handleSubmit}
-                        loading={loading}
-                        disabled={!images[0] || (isCustom && !customStyle.trim())}
-                        gemsCost={2}
-                        label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"}
-                        gemsBalance={gems}
-                    />
-                </div>
-                <div className={cn("space-y-4", (result || loading) && "order-first lg:order-none")}>
+                </>
+            }
+            canvas={
+                <>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
@@ -165,8 +151,18 @@ export function StyleTransferPage() {
                         emptyHint="Tải ảnh lên và chọn phong cách để bắt đầu"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={
+                <ToolSubmitButton
+                    onClick={handleSubmit}
+                    loading={loading}
+                    disabled={!images[0] || (isCustom && !customStyle.trim())}
+                    gemsCost={2}
+                    label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"}
+                    gemsBalance={gems}
+                />
+            }
+        />
     )
 }

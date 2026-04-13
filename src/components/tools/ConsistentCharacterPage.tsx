@@ -41,9 +41,11 @@ export function ConsistentCharacterPage() {
     }
 
     return (
-        <ToolPageLayout title="Nhân vật AI" description="Tạo nhân vật riêng và giữ nhất quán qua mọi bối cảnh">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
+        <ToolPageLayout
+            title="Nhân vật AI"
+            description="Tạo nhân vật riêng và giữ nhất quán qua mọi bối cảnh"
+            controls={
+                <>
                     <div className="flex items-start gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-xs text-blue-400">
                         <Info className="size-3.5 shrink-0 mt-0.5" />
                         <span>Dùng 2-3 ảnh cùng nhân vật từ các góc khác nhau để AI hiểu khuôn mặt và đặc điểm tốt hơn.</span>
@@ -63,17 +65,19 @@ export function ConsistentCharacterPage() {
                         />
                     </div>
                     <ToolTipsCard tips={TOOL_TIPS['consistent-character']} />
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images.length || !scene.trim()} gemsCost={2} gemsBalance={gems} />
-                </div>
-                <div className="space-y-4">
+                </>
+            }
+            canvas={
+                <>
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         emptyHint="Tải ảnh nhân vật và mô tả bối cảnh mới để bắt đầu"
                     />
                     <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </div>
-            </div>
-        </ToolPageLayout>
+                </>
+            }
+            submitButton={<ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images.length || !scene.trim()} gemsCost={2} gemsBalance={gems} />}
+        />
     )
 }
