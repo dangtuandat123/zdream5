@@ -385,16 +385,19 @@ export function TemplateDetailPage() {
                 </div>
             )}
 
-            {/* Tương tác Controls cho ảnh đầu vào thống nhất bằng ToolImageUpload gốc */}
-            <div className="space-y-2">
-                <ToolImageUpload 
-                    images={uploadedImage ? [uploadedImage] : []} 
-                    onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
-                    label="Ảnh đầu vào gốc"
-                />
-            </div>
-
-            <Separator />
+            {/* Tương tác Controls cho ảnh đầu vào: CHỈ HIỂN THỊ khi ĐÃ CÓ ẢNH */}
+            {uploadedImage && (
+                <>
+                    <div className="space-y-2">
+                        <ToolImageUpload 
+                            images={[uploadedImage]} 
+                            onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
+                            label="Ảnh đầu vào gốc"
+                        />
+                    </div>
+                    <Separator />
+                </>
+            )}
 
             {/* Tỷ lệ khung hình */}
             <div className="space-y-2">
