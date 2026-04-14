@@ -6,6 +6,7 @@ import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
+import { useToolPanel } from "./ToolPanelContext"
 
 import { toolsApi, imageApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -89,36 +90,39 @@ export function ImageToPromptPage() {
         } catch { /* ignore */ }
     }
 
+    // Đẩy controls lên Dynamic Panel (Col 2)
+    useToolPanel({
+        title: "Ảnh thành Prompt",
+        icon: FileText,
+        controls: (
+            <>
+                <ToolImageUpload images={images} onImagesChange={setImages} />
+                <div className="space-y-2">
+                    <Label className="text-xs">Ngôn ngữ prompt</Label>
+                    <div className="flex gap-1.5">
+                        {[{ v: "en", l: "English" }, { v: "vi", l: "Tiếng Việt" }].map((lang) => (
+                            <button
+                                key={lang.v}
+                                onClick={() => setLanguage(lang.v)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                    language === lang.v
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                )}
+                            >
+                                {lang.l}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </>
+        ),
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích Prompt" gemsBalance={gems} />,
+    })
+
     return (
         <ToolWorkspaceLayout
-            title="Ảnh thành Prompt"
-            icon={FileText}
-            hasInputImage={!!images[0]}
-            currentInputUrl={images[0]}
-            controls={
-                <>
-                    <ToolImageUpload images={images} onImagesChange={setImages} />
-                    <div className="space-y-2">
-                        <Label className="text-xs">Ngôn ngữ prompt</Label>
-                        <div className="flex gap-1.5">
-                            {[{ v: "en", l: "English" }, { v: "vi", l: "Tiếng Việt" }].map((lang) => (
-                                <button
-                                    key={lang.v}
-                                    onClick={() => setLanguage(lang.v)}
-                                    className={cn(
-                                        "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                        language === lang.v
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                    )}
-                                >
-                                    {lang.l}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </>
-            }
             canvas={
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh gốc cần dùng AI phân tích cấu trúc" />
@@ -186,7 +190,6 @@ export function ImageToPromptPage() {
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} />
             }
-            submitButton={<ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích Prompt" gemsBalance={gems} />}
         />
     )
 }

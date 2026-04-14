@@ -7,6 +7,7 @@ import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
 import { ExtendPreview } from "./shared/ExtendPreview"
+import { useToolPanel } from "./ToolPanelContext"
 
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -107,96 +108,101 @@ export function ExtendPage() {
         }
     }
 
-    return (
-        <ToolWorkspaceLayout
-            title="Mở rộng ảnh"
-            icon={Expand}
-            hasInputImage={!!images[0]}
-            currentInputUrl={images[0]}
-            controls={
-                <>
-                    <ToolImageUpload images={images} onImagesChange={setImages} />
-                    {images[0] && (
-                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            {imageDims && (
-                                <div className="space-y-2">
-                                    <Label className="text-xs">Mở rộng nhanh theo tỷ lệ</Label>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {RATIO_PRESETS.map((p) => {
-                                            const currentRatio = imageDims.w / imageDims.h
-                                            const alreadyMatches = Math.abs(currentRatio - p.targetRatio) < 0.1
-                                            return (
-                                                <button
-                                                    key={p.id}
-                                                    onClick={() => applyPreset(p.id)}
-                                                    disabled={alreadyMatches}
-                                                    className={cn(
-                                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                                        activePreset === p.id
-                                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                                            : "bg-muted hover:bg-muted/80 text-muted-foreground",
-                                                        alreadyMatches && "opacity-40 cursor-not-allowed"
-                                                    )}
-                                                >
-                                                    <p.icon className="size-3.5" />
-                                                    {p.label} {p.sub}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </div>
-                            )}
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-2">
-                                    <Label className="text-xs">Hướng mở rộng</Label>
-                                    <div className="grid grid-cols-2 gap-1.5">
-                                        {DIRECTIONS.map(({ id, label, icon: Icon }) => (
+    // Đẩy controls lên Dynamic Panel (Col 2)
+    useToolPanel({
+        title: "Mở rộng ảnh",
+        icon: Expand,
+        controls: (
+            <>
+                <ToolImageUpload images={images} onImagesChange={setImages} />
+                {images[0] && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        {imageDims && (
+                            <div className="space-y-2">
+                                <Label className="text-xs">Mở rộng nhanh theo tỷ lệ</Label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {RATIO_PRESETS.map((p) => {
+                                        const currentRatio = imageDims.w / imageDims.h
+                                        const alreadyMatches = Math.abs(currentRatio - p.targetRatio) < 0.1
+                                        return (
                                             <button
-                                                key={id}
-                                                onClick={() => toggleDirection(id)}
+                                                key={p.id}
+                                                onClick={() => applyPreset(p.id)}
+                                                disabled={alreadyMatches}
                                                 className={cn(
-                                                    "flex items-center gap-1.5 p-2 rounded-lg border-2 transition-all text-xs font-medium",
-                                                    directions.includes(id) ? "border-primary bg-primary/5 text-primary" : "border-border/50 hover:border-primary/30 text-muted-foreground"
-                                                )}
-                                            >
-                                                <Icon className="size-3.5" />
-                                                {label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-xs">Mức mở rộng</Label>
-                                    <div className="flex flex-col gap-1.5">
-                                        {EXTEND_RATIOS.map((r) => (
-                                            <button
-                                                key={r.value}
-                                                onClick={() => { setExtendRatio(r.value); setActivePreset(null) }}
-                                                className={cn(
-                                                    "px-3 py-2 rounded-lg text-xs font-medium transition-all text-left",
-                                                    extendRatio === r.value
+                                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                                    activePreset === p.id
                                                         ? "bg-primary text-primary-foreground shadow-sm"
-                                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                                        : "bg-muted hover:bg-muted/80 text-muted-foreground",
+                                                    alreadyMatches && "opacity-40 cursor-not-allowed"
                                                 )}
                                             >
-                                                {r.label}
+                                                <p.icon className="size-3.5" />
+                                                {p.label} {p.sub}
                                             </button>
-                                        ))}
-                                    </div>
+                                        )
+                                    })}
                                 </div>
                             </div>
-                            <Textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Mô tả bù đắp cho nội dung nếu được mở rộng ra (Tùy chọn)..."
-                                rows={2}
-                                maxLength={1000}
-                                className="text-sm"
-                            />
+                        )}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="space-y-2">
+                                <Label className="text-xs">Hướng mở rộng</Label>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    {DIRECTIONS.map(({ id, label, icon: Icon }) => (
+                                        <button
+                                            key={id}
+                                            onClick={() => toggleDirection(id)}
+                                            className={cn(
+                                                "flex items-center gap-1.5 p-2 rounded-lg border-2 transition-all text-xs font-medium",
+                                                directions.includes(id) ? "border-primary bg-primary/5 text-primary" : "border-border/50 hover:border-primary/30 text-muted-foreground"
+                                            )}
+                                        >
+                                            <Icon className="size-3.5" />
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs">Mức mở rộng</Label>
+                                <div className="flex flex-col gap-1.5">
+                                    {EXTEND_RATIOS.map((r) => (
+                                        <button
+                                            key={r.value}
+                                            onClick={() => { setExtendRatio(r.value); setActivePreset(null) }}
+                                            className={cn(
+                                                "px-3 py-2 rounded-lg text-xs font-medium transition-all text-left",
+                                                extendRatio === r.value
+                                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                            )}
+                                        >
+                                            {r.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    )}
-                </>
-            }
+                        <Textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Mô tả bù đắp cho nội dung nếu được mở rộng ra (Tùy chọn)..."
+                            rows={2}
+                            maxLength={1000}
+                            className="text-sm"
+                        />
+                    </div>
+                )}
+            </>
+        ),
+        submitButton: images[0] ? (
+            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng khung" gemsBalance={gems} />
+        ) : undefined,
+    })
+
+    return (
+        <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh cần được mở rộng viền" />
@@ -222,11 +228,6 @@ export function ExtendPage() {
             }
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-            }
-            submitButton={
-                images[0] ? (
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng khung" gemsBalance={gems} />
-                ) : undefined
             }
         />
     )

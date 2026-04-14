@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
+import { ImageIcon } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -7,6 +8,7 @@ import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolTipsCard } from "./shared/ToolTipsCard"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
 import { TOOL_TIPS } from "./shared/toolExamples"
+import { useToolPanel } from "./ToolPanelContext"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
@@ -77,72 +79,76 @@ export function AdImagePage() {
         }
     }
 
+    // Đẩy controls lên Dynamic Panel (Col 2)
+    useToolPanel({
+        title: "Ảnh quảng cáo",
+        icon: ImageIcon,
+        controls: (
+            <div className="space-y-4">
+                <ToolImageUpload images={images} onImagesChange={setImages} label="Ảnh sản phẩm gốc" />
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                        <Label>Mô tả quảng cáo</Label>
+                        <span className="text-[10px] text-muted-foreground">{description.length}/1000</span>
+                    </div>
+                    <Textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="VD: Quảng cáo cho chai nước hoa cao cấp, phong cách sang trọng..."
+                        rows={3}
+                        maxLength={1000}
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label>Phong cách quảng cáo</Label>
+                    <div className="grid grid-cols-4 gap-2">
+                        {AD_STYLES.map((s) => (
+                            <button
+                                key={s.id}
+                                onClick={() => setAdStyle(s.id)}
+                                className={cn(
+                                    "flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center",
+                                    adStyle === s.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
+                                )}
+                            >
+                                <span className="text-xl">{s.emoji}</span>
+                                <span className="text-xs font-medium">{s.label}</span>
+                                <span className="text-[10px] text-muted-foreground leading-tight">{s.desc}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Nền tảng</Label>
+                        <Select value={platform} onValueChange={handlePlatformChange}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="facebook">Facebook</SelectItem>
+                                <SelectItem value="instagram">Instagram</SelectItem>
+                                <SelectItem value="tiktok">TikTok</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Tỉ lệ</Label>
+                        <ToggleGroup type="single" value={aspectRatio} onValueChange={handleRatioChange} className="justify-start">
+                            {RATIOS.map((r) => (
+                                <ToggleGroupItem key={r} value={r} className="text-xs px-2.5 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                                    {r}
+                                </ToggleGroupItem>
+                            ))}
+                        </ToggleGroup>
+                    </div>
+                </div>
+                <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
+            </div>
+        ),
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />,
+    })
+
     return (
         <ToolWorkspaceLayout
-            title="Ảnh quảng cáo"
-            hasInputImage={!!images[0]}
-            currentInputUrl={images[0]}
-            controls={
-                <div className="space-y-4">
-                    <ToolImageUpload images={images} onImagesChange={setImages} label="Ảnh sản phẩm gốc" />
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <Label>Mô tả quảng cáo</Label>
-                            <span className="text-[10px] text-muted-foreground">{description.length}/1000</span>
-                        </div>
-                        <Textarea
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="VD: Quảng cáo cho chai nước hoa cao cấp, phong cách sang trọng..."
-                            rows={3}
-                            maxLength={1000}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Phong cách quảng cáo</Label>
-                        <div className="grid grid-cols-4 gap-2">
-                            {AD_STYLES.map((s) => (
-                                <button
-                                    key={s.id}
-                                    onClick={() => setAdStyle(s.id)}
-                                    className={cn(
-                                        "flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center",
-                                        adStyle === s.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
-                                    )}
-                                >
-                                    <span className="text-xl">{s.emoji}</span>
-                                    <span className="text-xs font-medium">{s.label}</span>
-                                    <span className="text-[10px] text-muted-foreground leading-tight">{s.desc}</span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label>Nền tảng</Label>
-                            <Select value={platform} onValueChange={handlePlatformChange}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="facebook">Facebook</SelectItem>
-                                    <SelectItem value="instagram">Instagram</SelectItem>
-                                    <SelectItem value="tiktok">TikTok</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Tỉ lệ</Label>
-                            <ToggleGroup type="single" value={aspectRatio} onValueChange={handleRatioChange} className="justify-start">
-                                {RATIOS.map((r) => (
-                                    <ToggleGroupItem key={r} value={r} className="text-xs px-2.5 h-8 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
-                                        {r}
-                                    </ToggleGroupItem>
-                                ))}
-                            </ToggleGroup>
-                        </div>
-                    </div>
-                    <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
-                </div>
-            }
             canvas={
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Mẫu Sản Phẩm (Tạo Quảng Cáo)" />
@@ -157,7 +163,6 @@ export function AdImagePage() {
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
-            submitButton={<ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />}
         />
     )
 }

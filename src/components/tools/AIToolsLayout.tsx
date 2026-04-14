@@ -11,7 +11,8 @@ import {
   PenTool,
   FileText,
   UserCheck,
-  Sparkles
+  Sparkles,
+  ArrowLeft,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -19,6 +20,9 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { ToolPanelProvider, useToolPanelState } from "./ToolPanelContext"
 
 interface AITool {
   id: string
@@ -188,6 +192,7 @@ function ToolListCard({ tool }: { tool: AITool }) {
   return <div className="cursor-not-allowed">{card}</div>
 }
 
+// === Welcome Screen khi chưa chọn tool ===
 export function AIToolsIndex() {
   return (
     <div className="flex flex-col items-center justify-center w-full h-full text-center p-8 text-muted-foreground animate-in fade-in duration-500">
@@ -202,7 +207,8 @@ export function AIToolsIndex() {
   )
 }
 
-export function AIToolsLayout() {
+// === Tool Catalog Panel (Danh sách tool) ===
+function ToolCatalogPanel() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Tất cả")
 
@@ -234,83 +240,170 @@ export function AIToolsLayout() {
   }
 
   return (
-    <div className="flex w-full h-[calc(100vh-65px)] overflow-hidden bg-background">
-      
-      {/* SECONDARY SIDEBAR: Tool Catalog */}
-      <aside className="w-[300px] xl:w-[320px] shrink-0 border-r bg-card/10 flex flex-col h-full">
-        {/* Header section fixed */}
-        <div className="p-4 flex flex-col gap-4 shrink-0 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.05)] z-10 bg-background/95 backdrop-blur">
-          <div>
-            <h1 className="text-lg font-bold tracking-tight">Công cụ AI</h1>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Bộ công cụ AI mạnh mẽ nâng tầm sáng tạo.</p>
-          </div>
-          <div className="w-full">
-            <ToggleGroup
-              type="single"
-              value={category}
-              onValueChange={handleCategoryChange}
-              className="flex justify-between w-full p-1 bg-muted/40 rounded-lg"
-            >
-              {categories.map((cat) => (
-                <ToggleGroupItem
-                  key={cat}
-                  value={cat}
-                  className="rounded-md px-2 text-[10px] font-medium h-6 leading-none data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm flex-1"
-                >
-                  {cat}
-                </ToggleGroupItem>
+    <>
+      {/* Header section fixed */}
+      <div className="p-4 flex flex-col gap-4 shrink-0 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.05)] z-10 bg-background/95 backdrop-blur">
+        <div>
+          <h1 className="text-lg font-bold tracking-tight">Công cụ AI</h1>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Bộ công cụ AI mạnh mẽ nâng tầm sáng tạo.</p>
+        </div>
+        <div className="w-full">
+          <ToggleGroup
+            type="single"
+            value={category}
+            onValueChange={handleCategoryChange}
+            className="flex justify-between w-full p-1 bg-muted/40 rounded-lg"
+          >
+            {categories.map((cat) => (
+              <ToggleGroupItem
+                key={cat}
+                value={cat}
+                className="rounded-md px-2 text-[10px] font-medium h-6 leading-none data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm flex-1"
+              >
+                {cat}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+        <div className="relative w-full">
+          <SearchIcon className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Tìm công cụ..."
+            className="pl-8 h-8 text-xs bg-muted/40 border-transparent focus-visible:border-primary focus-visible:ring-1"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Scrollable list section */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 custom-scrollbar">
+        {filteredAvailable.length > 0 && (
+          <div className="space-y-1">
+            <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Đang hoạt động</h2>
+            <div className="flex flex-col gap-1">
+              {filteredAvailable.map((tool) => (
+                <ToolListCard key={tool.id} tool={tool} />
               ))}
-            </ToggleGroup>
+            </div>
           </div>
-          <div className="relative w-full">
-            <SearchIcon className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Tìm công cụ..."
-              className="pl-8 h-8 text-xs bg-muted/40 border-transparent focus-visible:border-primary focus-visible:ring-1"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+        )}
+
+        {filteredTools.length > 0 && (
+          <div className="space-y-1">
+            <Separator className="mx-2 mb-3 mt-1 opacity-50" />
+            <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Sắp ra mắt</h2>
+            <div className="flex flex-col gap-1">
+              {filteredTools.map((tool) => (
+                <ToolListCard key={tool.id} tool={tool} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {filteredAvailable.length === 0 && filteredTools.length === 0 && (
+          <div className="text-center py-10 opacity-70">
+            <p className="text-xs font-medium">Không tìm thấy công cụ</p>
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+// === Tool Config Panel (Khi đã chọn tool — Drill-down) ===
+function ToolConfigPanel() {
+  const { panel } = useToolPanelState()
+  if (!panel) return null
+
+  const Icon = panel.icon
+
+  return (
+    <>
+      {/* Header với nút Back và tên tool */}
+      <div className="p-4 shrink-0 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.05)] z-10 bg-background/95 backdrop-blur">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-1" asChild>
+            <Link to="/app/tools">
+              <ArrowLeft className="size-4" />
+            </Link>
+          </Button>
+          <div className="flex items-center gap-2 min-w-0">
+            {Icon && (
+              <div className="shrink-0 size-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Icon className="size-4 text-primary" />
+              </div>
+            )}
+            <h2 className="text-sm font-bold truncate">{panel.title}</h2>
           </div>
         </div>
+      </div>
 
-        {/* Scrollable list section */}
-        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 custom-scrollbar">
-          {filteredAvailable.length > 0 && (
-            <div className="space-y-1">
-              <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Đang hoạt động</h2>
-              <div className="flex flex-col gap-1">
-                {filteredAvailable.map((tool) => (
-                  <ToolListCard key={tool.id} tool={tool} />
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Scrollable controls */}
+      <ScrollArea className="flex-1">
+        <div className="p-4 space-y-5">
+          {panel.controls}
+        </div>
+      </ScrollArea>
 
-          {filteredTools.length > 0 && (
-            <div className="space-y-1">
-              <Separator className="mx-2 mb-3 mt-1 opacity-50" />
-              <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Sắp ra mắt</h2>
-              <div className="flex flex-col gap-1">
-                {filteredTools.map((tool) => (
-                  <ToolListCard key={tool.id} tool={tool} />
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Sticky bottom submit button — giống nút Generate hồng của OpenArt */}
+      {panel.submitButton && (
+        <div className="p-4 border-t bg-background/95 backdrop-blur shrink-0">
+          {panel.submitButton}
+        </div>
+      )}
+    </>
+  )
+}
 
-          {filteredAvailable.length === 0 && filteredTools.length === 0 && (
-            <div className="text-center py-10 opacity-70">
-              <p className="text-xs font-medium">Không tìm thấy công cụ</p>
-            </div>
-          )}
+// === Main Layout Component ===
+function AIToolsLayoutInner() {
+  const location = useLocation()
+  const { panel } = useToolPanelState()
+  
+  // Determines which panel to show: Catalog or Config
+  const isToolIndex = location.pathname === "/app/tools" || location.pathname === "/app/tools/"
+  const showCatalog = isToolIndex || !panel
+
+  return (
+    <div className="flex w-full h-[calc(100vh-65px)] overflow-hidden bg-background">
+      
+      {/* COL 2: DYNAMIC PANEL (Drill-down) */}
+      <aside className="w-[300px] xl:w-[340px] shrink-0 border-r bg-card/10 flex flex-col h-full relative overflow-hidden">
+        {/* Panel Catalog — luôn render nhưng ẩn khi đang ở tool */}
+        <div className={cn(
+          "absolute inset-0 flex flex-col transition-all duration-300 ease-in-out",
+          showCatalog 
+            ? "translate-x-0 opacity-100" 
+            : "-translate-x-full opacity-0 pointer-events-none"
+        )}>
+          <ToolCatalogPanel />
+        </div>
+
+        {/* Panel Config — slide in từ phải khi có tool active */}
+        <div className={cn(
+          "absolute inset-0 flex flex-col transition-all duration-300 ease-in-out",
+          !showCatalog 
+            ? "translate-x-0 opacity-100" 
+            : "translate-x-full opacity-0 pointer-events-none"
+        )}>
+          <ToolConfigPanel />
         </div>
       </aside>
 
-      {/* WORKSPACE AREA */}
+      {/* COL 3: FULL-WIDTH OUTPUT CANVAS */}
       <main className="flex-1 h-full overflow-hidden relative bg-muted/10">
         <Outlet />
       </main>
 
     </div>
+  )
+}
+
+export function AIToolsLayout() {
+  return (
+    <ToolPanelProvider>
+      <AIToolsLayoutInner />
+    </ToolPanelProvider>
   )
 }

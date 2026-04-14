@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
 import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
+import { useToolPanel } from "@/components/tools/ToolPanelContext"
 
 import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -666,18 +667,20 @@ export function TemplateDetailPage() {
         )
     }
 
+    // === Push controls lên Dynamic Panel (Col 2) ===
+    useToolPanel({
+        title: template?.name ?? "Template",
+        icon: LayoutTemplate,
+        controls: ControlsBlock,
+        submitButton: GenerateButton,
+    })
+
     // ============================
     // UNIFIED DESKTOP / MOBILE LAYOUT via ToolWorkspaceLayout
     // ============================
     return (
         <>
             <ToolWorkspaceLayout
-                title={template.name}
-                icon={LayoutTemplate}
-                hasInputImage={true} // Always show controls
-                currentInputUrl={uploadedImage}
-                controls={ControlsBlock}
-                submitButton={GenerateButton}
                 canvas={
                     !uploadedImage ? (
                         <ToolImageUpload 

@@ -7,6 +7,7 @@ import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
 import { BackgroundPreviewer } from "./shared/BackgroundPreviewer"
+import { useToolPanel } from "./ToolPanelContext"
 
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -84,60 +85,63 @@ export function RemoveBgPage() {
         }
     }
 
-    return (
-        <ToolWorkspaceLayout
-            title="Xóa nền ảnh"
-            icon={Eraser}
-            hasInputImage={!!images[0]}
-            currentInputUrl={images[0]}
-            controls={
-                <>
-                    <ToolImageUpload images={images} onImagesChange={setImages} />
-                    {images[0] && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="space-y-2">
-                                <Label className="text-xs">Loại chủ thể</Label>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {SUBJECT_TYPES.map((t) => (
-                                        <button
-                                            key={t.id}
-                                            onClick={() => setSubjectType(t.id)}
-                                            className={cn(
-                                                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                                subjectType === t.id
-                                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                            )}
-                                        >
-                                            <span>{t.emoji}</span>
-                                            {t.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs">Chất lượng viền</Label>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {EDGE_OPTIONS.map((e) => (
-                                        <button
-                                            key={e.id}
-                                            onClick={() => setEdgeRefine(e.id)}
-                                            className={cn(
-                                                "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                                edgeRefine === e.id
-                                                    ? "bg-primary text-primary-foreground shadow-sm"
-                                                    : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                            )}
-                                        >
-                                            {e.label}
-                                        </button>
-                                    ))}
-                                </div>
+    // Đẩy controls lên Dynamic Panel (Col 2) qua context
+    useToolPanel({
+        title: "Xóa nền ảnh",
+        icon: Eraser,
+        controls: (
+            <>
+                <ToolImageUpload images={images} onImagesChange={setImages} />
+                {images[0] && (
+                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="space-y-2">
+                            <Label className="text-xs">Loại chủ thể</Label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {SUBJECT_TYPES.map((t) => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => setSubjectType(t.id)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                            subjectType === t.id
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        )}
+                                    >
+                                        <span>{t.emoji}</span>
+                                        {t.label}
+                                    </button>
+                                ))}
                             </div>
                         </div>
-                    )}
-                </>
-            }
+                        <div className="space-y-2">
+                            <Label className="text-xs">Chất lượng viền</Label>
+                            <div className="flex flex-wrap gap-1.5">
+                                {EDGE_OPTIONS.map((e) => (
+                                    <button
+                                        key={e.id}
+                                        onClick={() => setEdgeRefine(e.id)}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                            edgeRefine === e.id
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        )}
+                                    >
+                                        {e.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </>
+        ),
+        submitButton: images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} /> : undefined,
+    })
+
+    return (
+        <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Xóa phông tự động" />
@@ -164,7 +168,6 @@ export function RemoveBgPage() {
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
-            submitButton={images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} /> : undefined}
         />
     )
 }
