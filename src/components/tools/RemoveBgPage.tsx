@@ -90,56 +90,50 @@ export function RemoveBgPage() {
         title: "Xóa nền ảnh",
         icon: Eraser,
         controls: (
-            <>
-                {!images[0] ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
-                        <Eraser className="size-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
+            <div className={cn("space-y-4 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
+                <div className="space-y-2">
+                    <Label className="text-xs">Loại chủ thể</Label>
+                    <div className="flex flex-wrap gap-1.5">
+                        {SUBJECT_TYPES.map((t) => (
+                            <button
+                                key={t.id}
+                                onClick={() => setSubjectType(t.id)}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                    subjectType === t.id
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                )}
+                            >
+                                <span>{t.emoji}</span>
+                                {t.label}
+                            </button>
+                        ))}
                     </div>
-                ) : (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="space-y-2">
-                            <Label className="text-xs">Loại chủ thể</Label>
-                            <div className="flex flex-wrap gap-1.5">
-                                {SUBJECT_TYPES.map((t) => (
-                                    <button
-                                        key={t.id}
-                                        onClick={() => setSubjectType(t.id)}
-                                        className={cn(
-                                            "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                            subjectType === t.id
-                                                ? "bg-primary text-primary-foreground shadow-sm"
-                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                        )}
-                                    >
-                                        <span>{t.emoji}</span>
-                                        {t.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs">Chất lượng viền</Label>
-                            <div className="flex flex-wrap gap-1.5">
-                                {EDGE_OPTIONS.map((e) => (
-                                    <button
-                                        key={e.id}
-                                        onClick={() => setEdgeRefine(e.id)}
-                                        className={cn(
-                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                            edgeRefine === e.id
-                                                ? "bg-primary text-primary-foreground shadow-sm"
-                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                        )}
-                                    >
-                                        {e.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs flex items-center justify-between">
+                        Chất lượng viền
+                        {!images[0] && <span className="text-[10px] text-muted-foreground font-normal italic">Xem trước</span>}
+                    </Label>
+                    <div className="flex flex-wrap gap-1.5">
+                        {EDGE_OPTIONS.map((e) => (
+                            <button
+                                key={e.id}
+                                onClick={() => setEdgeRefine(e.id)}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                    edgeRefine === e.id
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                )}
+                            >
+                                {e.label}
+                            </button>
+                        ))}
                     </div>
-                )}
-            </>
+                </div>
+            </div>
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />,

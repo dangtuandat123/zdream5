@@ -74,63 +74,55 @@ export function ImageEditPage() {
         title: "Chỉnh sửa ảnh",
         icon: PenTool,
         controls: (
-            <>
-                {!images[0] ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
-                        <PenTool className="size-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        {/* Mode toggle */}
-                        <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit">
-                            <button
-                                onClick={() => setMode("remove")}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
-                                    mode === "remove"
-                                        ? "bg-background shadow-sm text-foreground"
-                                        : "text-muted-foreground hover:text-foreground"
-                                )}
-                            >
-                                <Trash2 className="size-3.5" />
-                                Xóa vật thể
-                            </button>
-                            <button
-                                onClick={() => setMode("replace")}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
-                                    mode === "replace"
-                                        ? "bg-background shadow-sm text-foreground"
-                                        : "text-muted-foreground hover:text-foreground"
-                                )}
-                            >
-                                <PenTool className="size-3.5" />
-                                Thay thế nội dung
-                            </button>
-                        </div>
-                        {/* Description */}
-                        <div className="space-y-3">
-                            <Textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder={mode === "remove"
-                                    ? "VD: Xóa người đứng bên phải, xóa watermark..."
-                                    : "VD: Thay bằng bông hoa hồng đỏ, thêm cái ghế gỗ..."
-                                }
-                                rows={mode === "remove" ? 2 : 3}
-                                maxLength={1000}
-                                className="text-sm"
-                            />
-                            {mode === "remove" && !maskBase64 && (
-                                <p className="text-[10px] text-muted-foreground">
-                                    Tô trực tiếp lên phần ảnh bên trái để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả bằng chữ để AI tự tìm
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </>
+            <div className={cn("space-y-4 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
+                {/* Mode toggle */}
+                <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit relative">
+                    {!images[0] && <div className="absolute inset-0 bg-transparent flex items-center justify-center -top-6"><span className="text-[10px] text-muted-foreground font-normal italic">Xem trước</span></div>}
+                    <button
+                        onClick={() => setMode("remove")}
+                        className={cn(
+                            "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                            mode === "remove"
+                                ? "bg-background shadow-sm text-foreground"
+                                : "text-muted-foreground hover:text-foreground"
+                        )}
+                    >
+                        <Trash2 className="size-3.5" />
+                        Xóa vật thể
+                    </button>
+                    <button
+                        onClick={() => setMode("replace")}
+                        className={cn(
+                            "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                            mode === "replace"
+                                ? "bg-background shadow-sm text-foreground"
+                                : "text-muted-foreground hover:text-foreground"
+                        )}
+                    >
+                        <PenTool className="size-3.5" />
+                        Thay thế nội dung
+                    </button>
+                </div>
+                {/* Description */}
+                <div className="space-y-3">
+                    <Textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder={mode === "remove"
+                            ? "VD: Xóa người đứng bên phải, xóa watermark..."
+                            : "VD: Thay bằng bông hoa hồng đỏ, thêm cái ghế gỗ..."
+                        }
+                        rows={mode === "remove" ? 2 : 3}
+                        maxLength={1000}
+                        className="text-sm"
+                    />
+                    {mode === "remove" && !maskBase64 && images[0] && (
+                        <p className="text-[10px] text-muted-foreground">
+                            Tô trực tiếp lên phần ảnh bên trái để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả bằng chữ để AI tự tìm
+                        </p>
+                    )}
+                </div>
+            </div>
         ),
         submitButton: (
             <ToolSubmitButton

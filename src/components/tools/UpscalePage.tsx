@@ -71,76 +71,72 @@ export function UpscalePage() {
         title: "Upscale ảnh",
         icon: ZoomIn,
         controls: (
-            <>
-                {!images[0] ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
-                        <ZoomIn className="size-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
+            <div className={cn("space-y-4 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
+                <div className="flex items-center justify-between rounded-xl border p-3">
+                    <div>
+                        <p className="text-xs font-medium">Hệ số phóng to</p>
+                        {imageDims ? (() => {
+                            const longSide = scaleFactor === "4x" ? 4096 : 2048
+                            const ratio = imageDims.w / imageDims.h
+                            const outW = ratio >= 1 ? longSide : Math.round(longSide * ratio)
+                            const outH = ratio >= 1 ? Math.round(longSide / ratio) : longSide
+                            return (
+                                <p className="text-[10px] text-muted-foreground">
+                                    {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">~{outW}×{outH}</span>
+                                    <span className="ml-1 text-primary">{(outW * outH / 1_000_000).toFixed(1)} MP</span>
+                                </p>
+                            )
+                        })() : (
+                            <p className="text-[10px] text-muted-foreground">Vui lòng tải ảnh lên trước</p>
+                        )}
                     </div>
-                ) : (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="flex items-center justify-between rounded-xl border p-3">
-                            <div>
-                                <p className="text-xs font-medium">Hệ số phóng to</p>
-                                {imageDims && (() => {
-                                    const longSide = scaleFactor === "4x" ? 4096 : 2048
-                                    const ratio = imageDims.w / imageDims.h
-                                    const outW = ratio >= 1 ? longSide : Math.round(longSide * ratio)
-                                    const outH = ratio >= 1 ? Math.round(longSide / ratio) : longSide
-                                    return (
-                                        <p className="text-[10px] text-muted-foreground">
-                                            {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">~{outW}×{outH}</span>
-                                            <span className="ml-1 text-primary">{(outW * outH / 1_000_000).toFixed(1)} MP</span>
-                                        </p>
-                                    )
-                                })()}
-                            </div>
-                            <div className="flex gap-1">
-                                {["2x", "4x"].map((v) => (
-                                    <button
-                                        key={v}
-                                        onClick={() => setScaleFactor(v)}
-                                        className={cn(
-                                            "px-4 h-8 rounded-lg text-xs font-semibold transition-all",
-                                            scaleFactor === v
-                                                ? "bg-primary text-primary-foreground shadow-sm"
-                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                        )}
-                                    >
-                                        {v}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label className="text-xs">Chế độ nâng cấp</Label>
-                            <div className="grid grid-cols-3 gap-2">
-                                {ENHANCE_MODES.map((m) => (
-                                    <button
-                                        key={m.id}
-                                        onClick={() => setEnhanceMode(m.id)}
-                                        className={cn(
-                                            "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center",
-                                            enhanceMode === m.id ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/30"
-                                        )}
-                                    >
-                                        <m.icon className={cn("size-5", enhanceMode === m.id ? "text-primary" : "text-muted-foreground")} />
-                                        <span className="text-[11px] font-medium">{m.label}</span>
-                                        <span className="text-[9px] text-muted-foreground leading-tight">{m.desc}</span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between rounded-xl border p-3">
-                            <div>
-                                <p className="text-xs font-medium">Giảm nhiễu</p>
-                                <p className="text-[10px] text-muted-foreground">Tốt cho ảnh cũ, chụp tối</p>
-                            </div>
-                            <Switch checked={denoise} onCheckedChange={setDenoise} />
-                        </div>
+                    <div className="flex gap-1">
+                        {["2x", "4x"].map((v) => (
+                            <button
+                                key={v}
+                                onClick={() => setScaleFactor(v)}
+                                className={cn(
+                                    "px-4 h-8 rounded-lg text-xs font-semibold transition-all",
+                                    scaleFactor === v
+                                        ? "bg-primary text-primary-foreground shadow-sm"
+                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                )}
+                            >
+                                {v}
+                            </button>
+                        ))}
                     </div>
-                )}
-            </>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-xs flex items-center justify-between">
+                        Chế độ nâng cấp
+                        {!images[0] && <span className="text-[10px] text-muted-foreground font-normal italic">Xem trước</span>}
+                    </Label>
+                    <div className="grid grid-cols-3 gap-2">
+                        {ENHANCE_MODES.map((m) => (
+                            <button
+                                key={m.id}
+                                onClick={() => setEnhanceMode(m.id)}
+                                className={cn(
+                                    "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center",
+                                    enhanceMode === m.id ? "border-primary bg-primary/5 shadow-sm" : "border-border/50 hover:border-primary/30"
+                                )}
+                            >
+                                <m.icon className={cn("size-5", enhanceMode === m.id ? "text-primary" : "text-muted-foreground")} />
+                                <span className="text-[11px] font-medium leading-none mt-0.5">{m.label}</span>
+                                <span className="text-[9px] text-muted-foreground leading-tight mt-auto">{m.desc}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="flex items-center justify-between rounded-xl border p-3">
+                    <div>
+                        <p className="text-xs font-medium">Giảm nhiễu</p>
+                        <p className="text-[10px] text-muted-foreground">Tốt cho ảnh cũ, chụp tối</p>
+                    </div>
+                    <Switch checked={denoise} onCheckedChange={setDenoise} />
+                </div>
+            </div>
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

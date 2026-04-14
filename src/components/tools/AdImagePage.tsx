@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
-import { ImageIcon, LayoutTemplate } from "lucide-react"
+import { ImageIcon } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -84,17 +84,13 @@ export function AdImagePage() {
         title: "Ảnh quảng cáo",
         icon: ImageIcon,
         controls: (
-            <>
-                {!images[0] ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
-                        <LayoutTemplate className="size-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="space-y-2">
+            <div className={cn("space-y-4 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
+                <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                        <Label>Mô tả quảng cáo</Label>
+                        <Label className="flex items-center gap-2">
+                            Mô tả quảng cáo
+                            {!images[0] && <span className="text-[10px] text-muted-foreground font-normal italic">Xem trước</span>}
+                        </Label>
                         <span className="text-[10px] text-muted-foreground">{description.length}/1000</span>
                     </div>
                     <Textarea
@@ -147,12 +143,10 @@ export function AdImagePage() {
                         </ToggleGroup>
                     </div>
                 </div>
-                    <div className="space-y-4">
-                        <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
-                    </div>
+                <div className="space-y-4">
+                    <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
                 </div>
-                )}
-            </>
+            </div>
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

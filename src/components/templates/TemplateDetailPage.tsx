@@ -35,7 +35,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
 import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
-import { ToolResultDisplay } from "@/components/tools/shared/ToolResultDisplay"
+
 import { useToolPanel } from "@/components/tools/ToolPanelContext"
 
 import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
@@ -655,7 +655,11 @@ export function TemplateDetailPage() {
     useToolPanel({
         title: template?.name || "Template",
         icon: LayoutTemplate,
-        controls: template ? ControlsBlock : null,
+        controls: template ? (
+            <div className={`transition-all duration-300 ${!uploadedImage ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : ""}`}>
+                {ControlsBlock}
+            </div>
+        ) : null,
         submitButton: template ? GenerateButton : null,
     }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress])
 
@@ -686,7 +690,19 @@ export function TemplateDetailPage() {
             <ToolWorkspaceLayout
                 canvas={
                     !uploadedImage ? (
-                        <ToolResultDisplay emptyHint={`Hãy tải ảnh lên ở cột công cụ bên trái để sử dụng mẫu thiết kế: ${template.name}`} />
+                        <div className="flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                            <div className="text-center space-y-2">
+                                <h3 className="text-xl font-semibold">Tạo ảnh với mẫu: <span className="text-primary">{template.name}</span></h3>
+                                <p className="text-sm text-muted-foreground">Tải ảnh gốc của bạn lên để AI bắt đầu áp dụng hiệu ứng thiết kế.</p>
+                            </div>
+                            <ToolImageUpload 
+                                images={[]} 
+                                onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
+                                variant="huge"
+                                label="Tải ảnh gốc của bạn lên"
+                                className="w-full"
+                            />
+                        </div>
                     ) : (
                         CanvasContent
                     )
