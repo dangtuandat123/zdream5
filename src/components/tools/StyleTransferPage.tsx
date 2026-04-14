@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
 import { Wand2 } from "lucide-react"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -78,11 +78,9 @@ export function StyleTransferPage() {
     const currentIntensity = isVariation ? strength : intensity
 
     return (
-        <ToolPageLayout
+        <ToolWorkspaceLayout
             title="Chuyển phong cách"
-            description="Biến ảnh thành tranh anime, sơn dầu, cyberpunk hoặc tạo biến thể mới"
             icon={Wand2}
-            gradient="bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-transparent"
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
@@ -150,8 +148,10 @@ export function StyleTransferPage() {
                         onUseAsInput={handleUseAsInput}
                         emptyHint="Tải ảnh lên và chọn phong cách để bắt đầu"
                     />
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
                 </>
+            }
+            historyPanel={
+                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
             submitButton={
                 <ToolSubmitButton

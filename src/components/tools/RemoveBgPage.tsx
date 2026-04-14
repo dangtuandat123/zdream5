@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
 import { Download, Eraser } from "lucide-react"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -85,11 +85,9 @@ export function RemoveBgPage() {
     }
 
     return (
-        <ToolPageLayout
+        <ToolWorkspaceLayout
             title="Xóa nền ảnh"
-            description="Tách chủ thể khỏi phông nền chỉ với một click"
             icon={Eraser}
-            gradient="bg-gradient-to-br from-emerald-500/10 via-green-500/5 to-transparent"
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
@@ -156,8 +154,10 @@ export function RemoveBgPage() {
                             </Button>
                         </>
                     )}
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
                 </>
+            }
+            historyPanel={
+                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
             submitButton={images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} /> : undefined}
         />

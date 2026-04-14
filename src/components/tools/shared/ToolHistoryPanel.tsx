@@ -13,8 +13,8 @@ interface ToolHistoryPanelProps {
 export function ToolHistoryPanel({ history, loading, onSelectImage, selectedUrl }: ToolHistoryPanelProps) {
     if (loading) {
         return (
-            <div className="space-y-2">
-                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+            <div className="space-y-2 bg-background/80 backdrop-blur-xl border rounded-2xl p-3 shadow-lg shadow-black/5">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground ml-1">
                     <History className="size-3.5" />
                     Lịch sử
                 </div>
@@ -30,8 +30,8 @@ export function ToolHistoryPanel({ history, loading, onSelectImage, selectedUrl 
     if (history.length === 0) return null
 
     return (
-        <div className="space-y-2">
-            <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+        <div className="space-y-2 bg-background/80 backdrop-blur-xl border rounded-2xl p-3 shadow-lg shadow-black/5">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground ml-1">
                 <History className="size-3.5" />
                 Lịch sử ({history.length})
             </div>

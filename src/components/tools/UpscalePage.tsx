@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
 import { Download, Sparkles, Focus, Brush, ZoomIn } from "lucide-react"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -66,11 +66,9 @@ export function UpscalePage() {
     }
 
     return (
-        <ToolPageLayout
+        <ToolWorkspaceLayout
             title="Upscale ảnh"
-            description="Phóng to ảnh lên 2x–4x mà vẫn giữ chi tiết sắc nét nhờ AI"
             icon={ZoomIn}
-            gradient="bg-gradient-to-br from-blue-500/10 via-cyan-500/5 to-transparent"
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
@@ -165,8 +163,10 @@ export function UpscalePage() {
                     ) : (
                         <ToolResultDisplay imageUrl={result} loading={loading} emptyHint="Tải ảnh cần phóng to lên để bắt đầu" />
                     )}
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
                 </>
+            }
+            historyPanel={
+                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
             submitButton={images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} /> : undefined}
         />
