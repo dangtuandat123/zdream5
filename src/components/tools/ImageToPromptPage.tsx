@@ -139,7 +139,7 @@ export function ImageToPromptPage() {
             </div>
         ),
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setImages([url])} selectedUrl={result} />
-    })
+    }, [images, language, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout

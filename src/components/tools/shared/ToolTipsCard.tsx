@@ -9,7 +9,7 @@ interface ToolTipsCardProps {
 export function ToolTipsCard({ tips }: ToolTipsCardProps) {
     const [open, setOpen] = useState(false)
 
-    if (tips.length === 0) return null
+    if (!tips || tips.length === 0) return null
 
     return (
         <div className="rounded-xl border bg-muted/30">

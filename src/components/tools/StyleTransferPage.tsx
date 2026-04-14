@@ -157,7 +157,7 @@ export function StyleTransferPage() {
             gemsBalance={gems}
         />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    })
+    }, [images, isCustom, customStyle, style, intensity, strength, loading, result, history, historyLoading, gems, isVariation])
 
     return (
         <ToolWorkspaceLayout

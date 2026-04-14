@@ -23,6 +23,7 @@ const UpscalePage = lazy(() => import("@/components/tools/UpscalePage").then(m =
 const RemoveBgPage = lazy(() => import("@/components/tools/RemoveBgPage").then(m => ({ default: m.RemoveBgPage })));
 const ExtendPage = lazy(() => import("@/components/tools/ExtendPage").then(m => ({ default: m.ExtendPage })));
 const ImageToPromptPage = lazy(() => import("@/components/tools/ImageToPromptPage").then(m => ({ default: m.ImageToPromptPage })));
+const AdImagePage = lazy(() => import("@/components/tools/AdImagePage").then(m => ({ default: m.AdImagePage as React.ComponentType<any> })));
 
 // Lazy load admin components
 const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
@@ -68,6 +69,7 @@ function App() {
               <Route path="remove-bg" element={<Suspense fallback={null}><RemoveBgPage /></Suspense>} />
               <Route path="extend" element={<Suspense fallback={null}><ExtendPage /></Suspense>} />
               <Route path="image-to-prompt" element={<Suspense fallback={null}><ImageToPromptPage /></Suspense>} />
+              <Route path="ad-image" element={<Suspense fallback={null}><AdImagePage /></Suspense>} />
               
               {/* Redirects for merged tools */}
               <Route path="remove-object" element={<Navigate to="/app/tools/image-edit" replace />} />

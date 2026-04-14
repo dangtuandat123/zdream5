@@ -147,14 +147,16 @@ export function AdImagePage() {
                         </ToggleGroup>
                     </div>
                 </div>
-                <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
+                    <div className="space-y-4">
+                        <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
                     </div>
+                </div>
                 )}
             </>
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    })
+    }, [images, description, adStyle, platform, aspectRatio, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout

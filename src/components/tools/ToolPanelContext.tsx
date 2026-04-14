@@ -38,13 +38,9 @@ export function useToolPanel(config: ToolPanelState, dependencies: React.Depende
 
     useEffect(() => {
         setPanel(config)
+        return () => setPanel(null)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, dependencies)
-
-    // Cleanup khi tool page unmount (quay về catalog)
-    useEffect(() => {
-        return () => setPanel(null)
-    }, [setPanel])
 }
 
 /**

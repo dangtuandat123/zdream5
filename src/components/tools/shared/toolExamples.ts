@@ -29,6 +29,12 @@ export const TOOL_TIPS: Record<string, string[]> = {
         'Phù hợp để chuyển ảnh dọc sang ngang hoặc mở rộng bầu trời.',
         'Ảnh có pattern lặp lại (bầu trời, biển, cỏ) mở rộng đẹp nhất.',
     ],
+    'ad-image': [
+        'Tải ảnh sản phẩm có độ phân giải cao và phông nền đơn giản để AI dễ nhận diện.',
+        'Mô tả chi tiết bối cảnh xung quanh (VD: trên mặt bàn gỗ, trong rừng, ánh sáng nắng).',
+        'AI sẽ tự động tách nền sản phẩm và ghép vào bối cảnh mới một cách nghệ thuật.',
+        'Thử các phong cách khác nhau (Elegant, Bold, Minimal) để tìm ra quảng cáo phù hợp nhất.',
+    ],
     'image-to-prompt': [
         'Tải lên bất kỳ ảnh nào — AI sẽ phân tích và viết prompt chi tiết.',
         'Prompt tạo ra có thể dùng trực tiếp trong Tạo ảnh để tái tạo.',
