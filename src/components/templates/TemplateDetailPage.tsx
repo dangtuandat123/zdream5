@@ -651,30 +651,32 @@ export function TemplateDetailPage() {
         </div>
     )
 
+    // === Push controls lên Dynamic Panel (Col 2) ===
+    useToolPanel({
+        title: template?.name || "Template",
+        icon: LayoutTemplate,
+        controls: template ? ControlsBlock : null,
+        submitButton: template ? GenerateButton : null,
+    }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress])
+
     // Loading / not found guard
     if (templateLoading) {
         return (
-            <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="size-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+            <div className="flex flex-col items-center justify-center h-full min-h-[60vh] bg-background">
+                <div className="size-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-4" />
+                <p className="text-sm text-muted-foreground animate-pulse">Đang tải cấu hình mẫu...</p>
             </div>
         )
     }
     if (!template) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-                <p className="text-muted-foreground">Không tìm thấy template</p>
-                <Link to="/app/tools" className="text-sm text-primary underline">← Quay lại công cụ AI</Link>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 bg-background">
+                <LayoutTemplate className="size-10 text-muted-foreground/30" />
+                <p className="text-muted-foreground font-medium">Không tìm thấy mẫu thiết kế</p>
+                <Link to="/app/tools" className="text-sm text-primary underline hover:text-primary/80 transition-colors">← Quay lại công cụ AI</Link>
             </div>
         )
     }
-
-    // === Push controls lên Dynamic Panel (Col 2) ===
-    useToolPanel({
-        title: template?.name ?? "Template",
-        icon: LayoutTemplate,
-        controls: ControlsBlock,
-        submitButton: GenerateButton,
-    }, [template?.name, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress])
 
     // ============================
     // UNIFIED DESKTOP / MOBILE LAYOUT via ToolWorkspaceLayout
