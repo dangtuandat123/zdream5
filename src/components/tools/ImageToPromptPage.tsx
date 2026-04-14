@@ -96,26 +96,34 @@ export function ImageToPromptPage() {
         icon: FileText,
         controls: (
             <>
-                <ToolImageUpload images={images} onImagesChange={setImages} />
-                <div className="space-y-2">
-                    <Label className="text-xs">Ngôn ngữ prompt</Label>
-                    <div className="flex gap-1.5">
-                        {[{ v: "en", l: "English" }, { v: "vi", l: "Tiếng Việt" }].map((lang) => (
-                            <button
-                                key={lang.v}
-                                onClick={() => setLanguage(lang.v)}
-                                className={cn(
-                                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                                    language === lang.v
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                )}
-                            >
-                                {lang.l}
-                            </button>
-                        ))}
+                {!images[0] ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
+                        <FileText className="size-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
                     </div>
-                </div>
+                ) : (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                        <div className="space-y-2">
+                            <Label className="text-xs">Ngôn ngữ prompt</Label>
+                            <div className="flex gap-1.5">
+                                {[{ v: "en", l: "English" }, { v: "vi", l: "Tiếng Việt" }].map((lang) => (
+                                    <button
+                                        key={lang.v}
+                                        onClick={() => setLanguage(lang.v)}
+                                        className={cn(
+                                            "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                            language === lang.v
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        )}
+                                    >
+                                        {lang.l}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
             </>
         ),
         submitButton: (
@@ -137,7 +145,7 @@ export function ImageToPromptPage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để AI phân tích và dịch ra prompt" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh gốc cần dùng AI phân tích cấu trúc" />
                 ) : (
                     <div className="w-full max-w-2xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
                         {loading && (

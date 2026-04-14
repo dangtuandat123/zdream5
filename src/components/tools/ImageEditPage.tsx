@@ -75,8 +75,12 @@ export function ImageEditPage() {
         icon: PenTool,
         controls: (
             <>
-                <ToolImageUpload images={images} onImagesChange={handleImagesChange} />
-                {images[0] && (
+                {!images[0] ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
+                        <PenTool className="size-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
+                    </div>
+                ) : (
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         {/* Mode toggle */}
                         <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit">
@@ -145,7 +149,7 @@ export function ImageEditPage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolResultDisplay emptyHint={mode === "remove" ? "Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu xóa vật thể" : "Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu thay thế chi tiết"} />
+                    <ToolImageUpload images={images} onImagesChange={handleImagesChange} variant="huge" className="w-full max-w-2xl mx-auto" label={mode === "remove" ? "Ảnh cần xóa vật thể" : "Ảnh cần thay thế nội dung"} />
                 ) : loading || result ? (
                     <ToolResultDisplay
                         imageUrl={result}

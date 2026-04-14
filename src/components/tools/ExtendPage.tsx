@@ -114,8 +114,12 @@ export function ExtendPage() {
         icon: Expand,
         controls: (
             <>
-                <ToolImageUpload images={images} onImagesChange={setImages} />
-                {images[0] && (
+                {!images[0] ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
+                        <Expand className="size-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
+                    </div>
+                ) : (
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         {imageDims && (
                             <div className="space-y-2">
@@ -204,7 +208,7 @@ export function ExtendPage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu mở rộng" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Mở rộng & Vẽ thêm" />
                 ) : (
                     <>
                         {!loading && !result ? (

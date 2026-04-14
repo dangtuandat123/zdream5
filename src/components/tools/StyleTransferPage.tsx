@@ -84,60 +84,68 @@ export function StyleTransferPage() {
         icon: Wand2,
         controls: (
             <>
-                <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
-                <div className="space-y-2">
-                    <Label className="text-xs">Chọn phong cách</Label>
-                    <div className="grid grid-cols-4 gap-2">
-                        {STYLES.map((s) => (
-                            <button
-                                key={s.id}
-                                onClick={() => setStyle(s.id)}
-                                className={cn(
-                                    "relative flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center overflow-hidden",
-                                    style === s.id ? "border-primary ring-1 ring-primary/20" : "border-border/50 hover:border-primary/30"
-                                )}
-                            >
-                                <div className={cn(
-                                    "absolute inset-0 bg-gradient-to-br opacity-[0.07] transition-opacity",
-                                    s.color,
-                                    style === s.id && "opacity-[0.15]"
-                                )} />
-                                <span className="text-lg relative">{s.emoji}</span>
-                                <span className="text-[10px] font-medium relative leading-tight">{s.label}</span>
-                                <span className="text-[8px] text-muted-foreground relative">{s.desc}</span>
-                            </button>
-                        ))}
+                {!images[0] ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
+                        <Wand2 className="size-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
                     </div>
-                </div>
-                {isCustom && (
-                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                        <Input
-                            value={customStyle}
-                            onChange={(e) => setCustomStyle(e.target.value)}
-                            placeholder="VD: Studio Ghibli, Van Gogh, Art Nouveau..."
-                            maxLength={200}
-                        />
-                    </div>
+                ) : (
+                    <>
+                        <div className="space-y-2">
+                            <Label className="text-xs">Chọn phong cách</Label>
+                            <div className="grid grid-cols-4 gap-2">
+                                {STYLES.map((s) => (
+                                    <button
+                                        key={s.id}
+                                        onClick={() => setStyle(s.id)}
+                                        className={cn(
+                                            "relative flex flex-col items-center gap-1 p-2.5 rounded-xl border-2 transition-all text-center overflow-hidden",
+                                            style === s.id ? "border-primary ring-1 ring-primary/20" : "border-border/50 hover:border-primary/30"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "absolute inset-0 bg-gradient-to-br opacity-[0.07] transition-opacity",
+                                            s.color,
+                                            style === s.id && "opacity-[0.15]"
+                                        )} />
+                                        <span className="text-lg relative">{s.emoji}</span>
+                                        <span className="text-[10px] font-medium relative leading-tight">{s.label}</span>
+                                        <span className="text-[8px] text-muted-foreground relative">{s.desc}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        {isCustom && (
+                            <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                                <Input
+                                    value={customStyle}
+                                    onChange={(e) => setCustomStyle(e.target.value)}
+                                    placeholder="VD: Studio Ghibli, Van Gogh, Art Nouveau..."
+                                    maxLength={200}
+                                />
+                            </div>
+                        )}
+                        <div className="space-y-2">
+                            <Label className="text-xs">{isVariation ? "Mức độ thay đổi" : "Cường độ"}</Label>
+                            <div className="flex gap-1.5">
+                                {intensityOptions.map((i) => (
+                                    <button
+                                        key={i.v}
+                                        onClick={() => isVariation ? setStrength(i.v) : setIntensity(i.v)}
+                                        className={cn(
+                                            "px-4 py-1.5 rounded-full text-xs font-medium transition-all",
+                                            currentIntensity === i.v
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        )}
+                                    >
+                                        {i.l}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </>
                 )}
-                <div className="space-y-2">
-                    <Label className="text-xs">{isVariation ? "Mức độ thay đổi" : "Cường độ"}</Label>
-                    <div className="flex gap-1.5">
-                        {intensityOptions.map((i) => (
-                            <button
-                                key={i.v}
-                                onClick={() => isVariation ? setStrength(i.v) : setIntensity(i.v)}
-                                className={cn(
-                                    "px-4 py-1.5 rounded-full text-xs font-medium transition-all",
-                                    currentIntensity === i.v
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                )}
-                            >
-                                {i.l}
-                            </button>
-                        ))}
-                    </div>
-                </div>
             </>
         ),
         submitButton: <ToolSubmitButton
@@ -155,7 +163,7 @@ export function StyleTransferPage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu tạo ảnh với AI" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Cần Đổi Phong Cách" />
                 ) : (
                     <ToolResultDisplay
                         imageUrl={result}

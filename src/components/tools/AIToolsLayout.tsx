@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ToolPanelProvider, useToolPanelState } from "./ToolPanelContext"
 
 interface AITool {
@@ -309,19 +309,18 @@ function ToolCatalogPanel() {
 // === Tool Config Panel (Drill-down khi đã chọn tool) ===
 function ToolConfigPanel() {
   const { panel } = useToolPanelState()
-  const navigate = useNavigate()
   if (!panel) return null
 
   const Icon = panel.icon
 
   return (
-    <>
+    <div className="flex flex-col h-full bg-background absolute inset-0">
       {/* Header với nút Back và tên tool */}
-      <div className="px-4 py-3 shrink-0 border-b bg-background/95 backdrop-blur z-10">
+      <div className="px-4 py-3 shrink-0 border-b bg-background/95 backdrop-blur z-20">
         <div className="flex items-center gap-2.5">
-          <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => navigate("/app/tools")}>
+          <Link to="/app/tools" replace className="shrink-0 size-8 -ml-1 rounded-lg hover:bg-muted/80 transition-colors flex items-center justify-center text-muted-foreground hover:text-foreground">
               <ArrowLeft className="size-4" />
-          </Button>
+          </Link>
           {Icon && (
             <div className="shrink-0 size-8 rounded-lg bg-primary/10 flex items-center justify-center">
               <Icon className="size-4 text-primary" />
@@ -331,27 +330,39 @@ function ToolConfigPanel() {
         </div>
       </div>
 
-      {/* Scrollable controls — fill toàn bộ chiều cao còn lại */}
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="p-4 space-y-5">
-          {panel.controls}
+      <Tabs defaultValue="config" className="flex-1 flex flex-col min-h-0">
+        <div className="px-4 py-2 border-b bg-muted/20 shrink-0">
+          <TabsList className="w-full h-8">
+            <TabsTrigger value="config" className="flex-1 text-xs px-2 py-1 h-6">Tùy chỉnh</TabsTrigger>
+            {panel.historyPanel && <TabsTrigger value="history" className="flex-1 text-xs px-2 py-1 h-6">Lịch sử ảnh</TabsTrigger>}
+          </TabsList>
         </div>
-      </ScrollArea>
 
-      {/* History Panel (nếu có) */}
-      {panel.historyPanel && (
-        <div className="px-4 pb-0 pt-3 border-t bg-background/95 backdrop-blur shrink-0 max-h-[140px] overflow-hidden">
-          {panel.historyPanel}
-        </div>
-      )}
+        <TabsContent value="config" className="flex-1 flex flex-col m-0 outline-none min-h-0 data-[state=inactive]:hidden border-0">
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="p-4 space-y-5">
+              {panel.controls}
+            </div>
+          </ScrollArea>
+          {/* Sticky bottom submit button */}
+          {panel.submitButton && (
+            <div className="p-4 border-t bg-background/95 backdrop-blur shrink-0 z-10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+              {panel.submitButton}
+            </div>
+          )}
+        </TabsContent>
 
-      {/* Sticky bottom submit button */}
-      {panel.submitButton && (
-        <div className="p-4 border-t bg-background/95 backdrop-blur shrink-0 z-10">
-          {panel.submitButton}
-        </div>
-      )}
-    </>
+        {panel.historyPanel && (
+          <TabsContent value="history" className="flex-1 m-0 outline-none data-[state=inactive]:hidden border-0 bg-muted/5">
+            <ScrollArea className="h-full">
+                <div className="p-4">
+                  {panel.historyPanel}
+                </div>
+            </ScrollArea>
+          </TabsContent>
+        )}
+      </Tabs>
+    </div>
   )
 }
 

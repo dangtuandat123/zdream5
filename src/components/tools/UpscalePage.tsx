@@ -72,8 +72,12 @@ export function UpscalePage() {
         icon: ZoomIn,
         controls: (
             <>
-                <ToolImageUpload images={images} onImagesChange={setImages} />
-                {images[0] && (
+                {!images[0] ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
+                        <ZoomIn className="size-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
+                    </div>
+                ) : (
                     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="flex items-center justify-between rounded-xl border p-3">
                             <div>
@@ -146,7 +150,7 @@ export function UpscalePage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu phóng to" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Gốc Cần Upscale" />
                 ) : (
                     <>
                         {result && images[0] ? (

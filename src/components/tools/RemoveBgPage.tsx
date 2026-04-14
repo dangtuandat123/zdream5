@@ -91,9 +91,13 @@ export function RemoveBgPage() {
         icon: Eraser,
         controls: (
             <>
-                <ToolImageUpload images={images} onImagesChange={setImages} />
-                {images[0] && (
-                    <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                {!images[0] ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-3 opacity-60">
+                        <Eraser className="size-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Vui lòng tải ảnh lên ở vùng bên phải để bắt đầu thiết lập</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                         <div className="space-y-2">
                             <Label className="text-xs">Loại chủ thể</Label>
                             <div className="flex flex-wrap gap-1.5">
@@ -145,7 +149,7 @@ export function RemoveBgPage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu xóa nền" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Gốc Cần Xóa Nền" />
                 ) : (
                     <>
                         <ToolResultDisplay
