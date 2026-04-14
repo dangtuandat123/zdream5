@@ -10,7 +10,7 @@ import { TemplatesPage } from "@/components/templates/TemplatesPage";
 import { LibraryPage } from "@/components/library/LibraryPage";
 import { TemplateDetailPage } from "@/components/templates/TemplateDetailPage";
 import { TopUpPage } from "@/components/topup/TopUpPage";
-import { AIToolsPage } from "@/components/tools/AIToolsPage";
+import { AIToolsLayout, AIToolsIndex } from "@/components/tools/AIToolsLayout";
 import { ProtectedRoute, PublicRoute } from "@/components/auth/ProtectedRoute"
 import { GoogleCallback } from "@/components/auth/GoogleCallback";
 import AdminRoute from "@/components/auth/AdminRoute";
@@ -56,19 +56,25 @@ function App() {
           <Route path="/app" element={<AppShell />}>
             <Route index element={<Navigate to="/app/home" replace />} />
             <Route path="home" element={<Dashboard />} />
-            <Route path="tools" element={<AIToolsPage />} />
-            <Route path="tools/templates" element={<TemplatesPage />} />
-            <Route path="tools/templates/:slug" element={<TemplateDetailPage />} />
-            <Route path="tools/style-transfer" element={<Suspense fallback={null}><StyleTransferPage /></Suspense>} />
-            <Route path="tools/image-edit" element={<Suspense fallback={null}><ImageEditPage /></Suspense>} />
-            <Route path="tools/upscale" element={<Suspense fallback={null}><UpscalePage /></Suspense>} />
-            <Route path="tools/remove-bg" element={<Suspense fallback={null}><RemoveBgPage /></Suspense>} />
-            <Route path="tools/extend" element={<Suspense fallback={null}><ExtendPage /></Suspense>} />
-            <Route path="tools/image-to-prompt" element={<Suspense fallback={null}><ImageToPromptPage /></Suspense>} />
-            {/* Redirects for merged tools */}
-            <Route path="tools/remove-object" element={<Navigate to="/app/tools/image-edit" replace />} />
-            <Route path="tools/inpainting" element={<Navigate to="/app/tools/image-edit" replace />} />
-            <Route path="tools/image-variation" element={<Navigate to="/app/tools/style-transfer" replace />} />
+            
+            {/* Unified Secondary-Sidebar Tools Layout */}
+            <Route path="tools" element={<AIToolsLayout />}>
+              <Route index element={<AIToolsIndex />} />
+              <Route path="templates" element={<TemplatesPage />} />
+              <Route path="templates/:slug" element={<TemplateDetailPage />} />
+              <Route path="style-transfer" element={<Suspense fallback={null}><StyleTransferPage /></Suspense>} />
+              <Route path="image-edit" element={<Suspense fallback={null}><ImageEditPage /></Suspense>} />
+              <Route path="upscale" element={<Suspense fallback={null}><UpscalePage /></Suspense>} />
+              <Route path="remove-bg" element={<Suspense fallback={null}><RemoveBgPage /></Suspense>} />
+              <Route path="extend" element={<Suspense fallback={null}><ExtendPage /></Suspense>} />
+              <Route path="image-to-prompt" element={<Suspense fallback={null}><ImageToPromptPage /></Suspense>} />
+              
+              {/* Redirects for merged tools */}
+              <Route path="remove-object" element={<Navigate to="/app/tools/image-edit" replace />} />
+              <Route path="inpainting" element={<Navigate to="/app/tools/image-edit" replace />} />
+              <Route path="image-variation" element={<Navigate to="/app/tools/style-transfer" replace />} />
+            </Route>
+
             <Route path="generate" element={<GeneratePage />} />
 
             {/* Redirect old /app/templates → /app/tools/templates */}

@@ -119,45 +119,6 @@ export function ToolWorkspaceLayout(props: ToolWorkspaceLayoutProps) {
     // ==========================================
     return (
         <div className="flex flex-col h-[100dvh] w-full overflow-hidden bg-background">
-            {/* 1. SEAMLESS NAVIGATION HEADER */}
-            <header className="h-14 border-b flex items-center px-4 shrink-0 bg-card z-20 shadow-sm relative">
-                {/* Left Area: Back Button */}
-                <div className="flex items-center gap-3 w-[250px] shrink-0">
-                    <Button variant="ghost" size="sm" className="-ml-2 gap-1.5 text-muted-foreground hover:text-foreground" asChild>
-                        <Link to="/app/tools"><ArrowLeft className="size-4" /> Công cụ AI</Link>
-                    </Button>
-                </div>
-
-                {/* Center Area: Tool Switcher (Segmented Control style via Tabs layout) */}
-                <div className="flex-1 flex justify-center">
-                    <div className="flex bg-muted/60 p-1 rounded-lg border shadow-inner">
-                        {WORKSPACE_TOOLS.map(tool => {
-                            const isActive = location.pathname.includes(tool.path)
-                            return (
-                                <Link 
-                                    key={tool.id} 
-                                    to={getTabLink(tool.path)}
-                                    className={cn(
-                                        "flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-md transition-all duration-200 select-none cursor-pointer",
-                                        isActive 
-                                            ? "bg-background text-foreground shadow-sm border border-border/50" 
-                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
-                                    )}
-                                >
-                                    <tool.icon className={cn("size-3.5", isActive && "text-primary")} />
-                                    {tool.name}
-                                </Link>
-                            )
-                        })}
-                    </div>
-                </div>
-
-                {/* Right Area: Reserved for Balance / Export / Output Actions */}
-                <div className="w-[250px] shrink-0 flex justify-end">
-                    {/* Placeholder for header actions if needed later */}
-                </div>
-            </header>
-
             {/* 2. MAIN WORKSPACE */}
             <main className="flex-1 flex min-h-0 bg-dot-[#333333]/[0.1] dark:bg-dot-white/[0.05] relative">
                 {/* Background dot pattern absolute across whole main */}
