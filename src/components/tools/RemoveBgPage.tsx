@@ -88,6 +88,8 @@ export function RemoveBgPage() {
         <ToolWorkspaceLayout
             title="Xóa nền ảnh"
             icon={Eraser}
+            hasInputImage={!!images[0]}
+            currentInputUrl={images[0]}
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
@@ -137,24 +139,27 @@ export function RemoveBgPage() {
                 </>
             }
             canvas={
-                <>
-                    <ToolResultDisplay
-                        imageUrl={result}
-                        loading={loading}
-                        beforeImageUrl={images[0]}
-                        onUseAsInput={(url) => { setImages([url]); setResult(null) }}
-                        emptyHint="Tải ảnh lên để xóa nền tự động"
-                    />
-                    {result && (
-                        <>
-                            <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} />
-                            <Button size="sm" variant="outline" className="gap-1.5" onClick={handleDownloadWithBg}>
-                                <Download className="size-3.5" />
-                                Tải về với nền đang chọn
-                            </Button>
-                        </>
-                    )}
-                </>
+                !images[0] ? (
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Xóa phông tự động" />
+                ) : (
+                    <>
+                        <ToolResultDisplay
+                            imageUrl={result}
+                            loading={loading}
+                            beforeImageUrl={images[0]}
+                            onUseAsInput={(url) => { setImages([url]); setResult(null) }}
+                        />
+                        {result && (
+                            <div className="flex flex-col items-center gap-3 mt-4 animate-in slide-in-from-bottom-2">
+                                <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} />
+                                <Button size="sm" variant="outline" className="gap-1.5 shadow-sm" onClick={handleDownloadWithBg}>
+                                    <Download className="size-3.5" />
+                                    Tải về với nền đang chọn
+                                </Button>
+                            </div>
+                        )}
+                    </>
+                )
             }
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

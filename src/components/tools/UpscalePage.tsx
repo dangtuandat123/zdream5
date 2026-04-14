@@ -69,6 +69,8 @@ export function UpscalePage() {
         <ToolWorkspaceLayout
             title="Upscale ảnh"
             icon={ZoomIn}
+            hasInputImage={!!images[0]}
+            currentInputUrl={images[0]}
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
@@ -138,32 +140,36 @@ export function UpscalePage() {
                 </>
             }
             canvas={
-                <>
-                    {result && images[0] ? (
-                        <div className="space-y-3">
-                            <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
-                            <div className="flex gap-2">
-                                <Button size="sm" variant="outline" className="gap-1.5" onClick={async () => {
-                                    try {
-                                        const response = await fetch(result)
-                                        const blob = await response.blob()
-                                        const url = URL.createObjectURL(blob)
-                                        const a = document.createElement("a")
-                                        a.href = url
-                                        a.download = `zdream-upscale-${Date.now()}.png`
-                                        a.click()
-                                        URL.revokeObjectURL(url)
-                                    } catch { /* ignore */ }
-                                }}>
-                                    <Download className="size-3.5" />
-                                    Tải về
-                                </Button>
+                !images[0] ? (
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Phóng to ảnh (Upscale)" />
+                ) : (
+                    <>
+                        {result && images[0] ? (
+                            <div className="space-y-4 w-full flex flex-col items-center">
+                                <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
+                                <div className="flex gap-2">
+                                    <Button size="sm" className="gap-1.5 px-6 shadow-sm" onClick={async () => {
+                                        try {
+                                            const response = await fetch(result)
+                                            const blob = await response.blob()
+                                            const url = URL.createObjectURL(blob)
+                                            const a = document.createElement("a")
+                                            a.href = url
+                                            a.download = `zdream-upscale-${Date.now()}.png`
+                                            a.click()
+                                            URL.revokeObjectURL(url)
+                                        } catch { /* ignore */ }
+                                    }}>
+                                        <Download className="size-4" />
+                                        Lưu ảnh gốc HD
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    ) : (
-                        <ToolResultDisplay imageUrl={result} loading={loading} emptyHint="Tải ảnh cần phóng to lên để bắt đầu" />
-                    )}
-                </>
+                        ) : (
+                            <ToolResultDisplay imageUrl={result} loading={loading} />
+                        )}
+                    </>
+                )
             }
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

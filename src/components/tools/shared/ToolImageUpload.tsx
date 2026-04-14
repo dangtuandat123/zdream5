@@ -1,7 +1,9 @@
 import { useCallback, useRef, useState, useEffect } from "react"
-import { Upload, X, ImageIcon } from "lucide-react"
+import { Upload, X, ImageIcon, ImagePlus } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 
 const MAX_FILE_SIZE_MB = 10
 
@@ -12,6 +14,7 @@ interface ToolImageUploadProps {
     maxFiles?: number
     label?: string
     className?: string
+    variant?: "default" | "huge" // new prop
 }
 
 export function ToolImageUpload({
@@ -21,6 +24,7 @@ export function ToolImageUpload({
     maxFiles = 1,
     label = "Tải ảnh lên",
     className,
+    variant = "default",
 }: ToolImageUploadProps) {
     const [isDragging, setIsDragging] = useState(false)
     const [imageInfo, setImageInfo] = useState<{ w: number; h: number; size: string } | null>(null)
@@ -129,11 +133,48 @@ export function ToolImageUpload({
         )
     }
 
+    if (variant === "huge") {
+        return (
+            <Card
+                className={cn(
+                    "relative flex flex-col items-center justify-center overflow-hidden transition-all duration-300 border-2 border-dashed shadow-none cursor-pointer w-full max-w-2xl mx-auto bg-muted/10",
+                    isDragging ? "border-primary bg-primary/5 scale-[1.02]" : "hover:border-primary/50 hover:bg-muted/30",
+                    className,
+                )}
+                onClick={() => inputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
+                onDragLeave={() => setIsDragging(false)}
+                onDrop={handleDrop}
+            >
+                <CardContent className="flex flex-col items-center justify-center p-12 py-24 text-center gap-5 w-full">
+                    <div className="flex items-center justify-center size-24 rounded-full bg-background shadow-sm border">
+                        <ImagePlus className="size-10 text-muted-foreground/80" />
+                    </div>
+                    <div className="space-y-2">
+                        <h3 className="text-2xl font-bold tracking-tight">{label}</h3>
+                        <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                            Kéo thả ảnh của bạn vào đây hoặc click để duyệt file trên máy tính. Kết quả sẽ hiển thị ngay tại vùng này.
+                        </p>
+                    </div>
+                    <Button variant="secondary" className="mt-4 pointer-events-none rounded-full px-8">Chọn ảnh từ máy tính</Button>
+                </CardContent>
+                <input
+                    ref={inputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple={multiple}
+                    className="hidden"
+                    onChange={(e) => processFiles(e.target.files)}
+                />
+            </Card>
+        )
+    }
+
     return (
-        <div
+        <Card
             className={cn(
-                "relative flex flex-col items-center justify-center gap-2.5 p-5 sm:p-8 rounded-xl border-2 border-dashed transition-colors cursor-pointer",
-                isDragging ? "border-primary bg-primary/5" : "border-border/50 hover:border-primary/50",
+                "relative flex flex-col items-center justify-center gap-2.5 p-5 sm:p-8 rounded-xl border-2 border-dashed shadow-none transition-colors cursor-pointer bg-muted/20",
+                isDragging ? "border-primary bg-primary/5" : "hover:border-primary/50 hover:bg-muted/40",
                 className,
             )}
             onClick={() => inputRef.current?.click()}
@@ -141,12 +182,12 @@ export function ToolImageUpload({
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
         >
-            <div className="flex items-center justify-center size-12 rounded-xl bg-muted">
+            <div className="flex items-center justify-center size-12 rounded-xl bg-background shadow-sm border">
                 <ImageIcon className="size-6 text-muted-foreground" />
             </div>
             <div className="text-center">
-                <p className="text-sm font-medium">{label}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Kéo thả hoặc click để chọn ảnh</p>
+                <p className="text-sm font-semibold">{label}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Kéo thả hoặc nhấn để chọn</p>
             </div>
             <input
                 ref={inputRef}
@@ -156,6 +197,6 @@ export function ToolImageUpload({
                 className="hidden"
                 onChange={(e) => processFiles(e.target.files)}
             />
-        </div>
+        </Card>
     )
 }

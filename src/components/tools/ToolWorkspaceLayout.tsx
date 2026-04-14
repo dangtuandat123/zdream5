@@ -1,9 +1,21 @@
-import { Link } from "react-router-dom"
-import { ArrowLeft } from "lucide-react"
+import { Link, useLocation } from "react-router-dom"
+import { ArrowLeft, Eraser, Expand, FileText, PenTool, Wand2, ZoomIn, LayoutTemplate } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 import type { LucideIcon } from "lucide-react"
+
+// The main tools supporting seamless image transfer
+const WORKSPACE_TOOLS = [
+  { id: "remove-bg", name: "Xóa nền", icon: Eraser, path: "/app/tools/remove-bg" },
+  { id: "upscale", name: "Upscale", icon: ZoomIn, path: "/app/tools/upscale" },
+  { id: "image-edit", name: "Chỉnh sửa", icon: PenTool, path: "/app/tools/image-edit" },
+  { id: "extend", name: "Mở rộng", icon: Expand, path: "/app/tools/extend" },
+  { id: "style-transfer", name: "Phong cách", icon: Wand2, path: "/app/tools/style-transfer" },
+  { id: "image-to-prompt", name: "Ảnh → Prompt", icon: FileText, path: "/app/tools/image-to-prompt" },
+  { id: "templates", name: "Templates", icon: LayoutTemplate, path: "/app/tools/templates" },
+]
 
 interface ToolWorkspaceLayoutProps {
     title: string
@@ -12,18 +24,44 @@ interface ToolWorkspaceLayoutProps {
     canvas: React.ReactNode
     submitButton?: React.ReactNode
     historyPanel?: React.ReactNode
+    /**
+     * Determines whether to show the Right Sidebar.
+     * True means an image is loaded and we can show the configuration controls.
+     */
+    hasInputImage?: boolean
+    /**
+     * Current Image URL. Passed to the Seamless Switcher so users don't lose context.
+     */
+    currentInputUrl?: string | null
 }
 
 export function ToolWorkspaceLayout(props: ToolWorkspaceLayoutProps) {
-    const { title, icon: Icon, controls, canvas, submitButton, historyPanel } = props
+    const { 
+        title, 
+        icon: Icon, 
+        controls, 
+        canvas, 
+        submitButton, 
+        historyPanel, 
+        hasInputImage = true, // By default show for tools that don't need input first
+        currentInputUrl 
+    } = props
+    
     const isMobile = useIsMobile()
+    const location = useLocation()
+
+    // Append ?input= if available
+    const getTabLink = (path: string) => {
+        if (!currentInputUrl) return path;
+        return `${path}?input=${encodeURIComponent(currentInputUrl)}`
+    }
 
     if (isMobile) {
         return (
             <div className="flex flex-col min-h-[100dvh] bg-background">
                 {/* Header */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b shrink-0 bg-background/80 backdrop-blur z-10 sticky top-0">
-                    <Button variant="ghost" size="icon" className="shrink-0 size-8" asChild>
+                    <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-2" asChild>
                         <Link to="/app/tools"><ArrowLeft className="size-4" /></Link>
                     </Button>
                     <div className="flex-1 min-w-0">
@@ -31,79 +69,142 @@ export function ToolWorkspaceLayout(props: ToolWorkspaceLayoutProps) {
                     </div>
                 </div>
 
-                {/* Canvas Area (Top half on mobile) */}
-                <div className="relative min-h-[40vh] bg-muted/30 border-b flex items-center justify-center overflow-hidden">
+                {/* Mobile Tabs Switcher (Horizontal Scroll) */}
+                <ScrollArea className="w-full border-b bg-muted/20 whitespace-nowrap">
+                    <div className="flex p-2 gap-1 w-max">
+                        {WORKSPACE_TOOLS.map((tool) => {
+                            const isActive = location.pathname.includes(tool.path)
+                            return (
+                                <Link
+                                    key={tool.id}
+                                    to={getTabLink(tool.path)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                                        isActive ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                    )}
+                                >
+                                    <tool.icon className="size-3.5" />
+                                    {tool.name}
+                                </Link>
+                            )
+                        })}
+                    </div>
+                </ScrollArea>
+
+                {/* Canvas Area (Upload / Display) */}
+                <div className="relative min-h-[50vh] bg-dot-[#333333]/[0.1] dark:bg-dot-white/[0.05] border-b flex flex-col items-center justify-center p-4">
                     {canvas}
                 </div>
 
-                {/* Controls Area (Bottom half) */}
-                <ScrollArea className="flex-1">
-                    <div className="p-4 space-y-4">
-                        {controls}
-                        {submitButton}
-                        {historyPanel && (
-                            <div className="pt-4 border-t mt-4">
-                                {historyPanel}
-                            </div>
-                        )}
-                    </div>
-                </ScrollArea>
+                {/* Controls Area (Bottom half) - Only show if hasInputImage */}
+                {hasInputImage && (
+                    <ScrollArea className="flex-1 bg-card">
+                        <div className="p-4 space-y-4">
+                            {controls}
+                            {submitButton}
+                            {historyPanel && (
+                                <div className="pt-4 border-t mt-4">
+                                    {historyPanel}
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                )}
             </div>
         )
     }
 
-    // DESKTOP: Fullscreen Workspace with Floating Panels
+    // ==========================================
+    // DESKTOP: SHADCN Standard Fullscreen Editor Layout
+    // ==========================================
     return (
-        <div className="relative flex h-[100dvh] w-full overflow-hidden bg-dot-[#333333]/[0.1] dark:bg-dot-white/[0.05] bg-zinc-50 dark:bg-zinc-950">
-            {/* Absolute positioning for the background dots */}
-            <div className="absolute inset-0 pointer-events-none" />
-
-            {/* CANVAS (Center Stage - Full Bleed) */}
-            <div className="absolute inset-0 flex items-center justify-center p-4 pl-[80px] lg:pl-0 pr-[340px]">
-                <div className="relative w-full h-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl shadow-black/5 dark:shadow-black/20 bg-background/50 backdrop-blur-sm border flex items-center justify-center p-6">
-                     {canvas}
+        <div className="flex flex-col h-[100dvh] w-full overflow-hidden bg-background">
+            {/* 1. SEAMLESS NAVIGATION HEADER */}
+            <header className="h-14 border-b flex items-center px-4 shrink-0 bg-card z-20 shadow-sm relative">
+                {/* Left Area: Back Button */}
+                <div className="flex items-center gap-3 w-[250px] shrink-0">
+                    <Button variant="ghost" size="sm" className="-ml-2 gap-1.5 text-muted-foreground hover:text-foreground" asChild>
+                        <Link to="/app/tools"><ArrowLeft className="size-4" /> Công cụ AI</Link>
+                    </Button>
                 </div>
-            </div>
 
-            {/* HEADER (Floating Top Left) */}
-            <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-background/80 backdrop-blur-xl border rounded-full p-1.5 shadow-lg shadow-black/5">
-                <Button variant="ghost" size="icon" className="shrink-0 size-8 rounded-full hover:bg-muted" asChild>
-                    <Link to="/app/tools"><ArrowLeft className="size-4" /></Link>
-                </Button>
-                <div className="flex items-center gap-2 pr-4 pl-1">
-                    {Icon && <Icon className="size-4 text-primary" />}
-                    <span className="text-sm font-semibold">{title}</span>
-                </div>
-            </div>
-
-            {/* HISTORY PANEL (Floating Bottom Left) */}
-            {historyPanel && (
-                <div className="absolute bottom-4 left-4 z-20 max-w-[300px]">
-                    {historyPanel}
-                </div>
-            )}
-
-            {/* CONTROLS (Floating Right Panel) */}
-            <div className="absolute top-4 right-4 bottom-4 w-[320px] z-20 flex flex-col bg-background/80 backdrop-blur-2xl border shadow-2xl shadow-black/10 rounded-3xl overflow-hidden">
-                <div className="px-5 py-4 border-b bg-background/50">
-                    <h2 className="text-sm font-semibold flex items-center gap-2">
-                        {Icon && <Icon className="size-4" />}
-                        Tùy chỉnh
-                    </h2>
-                </div>
-                
-                <ScrollArea className="flex-1">
-                    <div className="p-5 space-y-5">
-                        {controls}
+                {/* Center Area: Tool Switcher (Segmented Control style via Tabs layout) */}
+                <div className="flex-1 flex justify-center">
+                    <div className="flex bg-muted/60 p-1 rounded-lg border shadow-inner">
+                        {WORKSPACE_TOOLS.map(tool => {
+                            const isActive = location.pathname.includes(tool.path)
+                            return (
+                                <Link 
+                                    key={tool.id} 
+                                    to={getTabLink(tool.path)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-md transition-all duration-200 select-none cursor-pointer",
+                                        isActive 
+                                            ? "bg-background text-foreground shadow-sm border border-border/50" 
+                                            : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                                    )}
+                                >
+                                    <tool.icon className={cn("size-3.5", isActive && "text-primary")} />
+                                    {tool.name}
+                                </Link>
+                            )
+                        })}
                     </div>
-                </ScrollArea>
+                </div>
 
-                {submitButton && (
-                    <div className="p-4 bg-background/90 backdrop-blur border-t z-10 shrink-0">
-                        {submitButton}
+                {/* Right Area: Reserved for Balance / Export / Output Actions */}
+                <div className="w-[250px] shrink-0 flex justify-end">
+                    {/* Placeholder for header actions if needed later */}
+                </div>
+            </header>
+
+            {/* 2. MAIN WORKSPACE */}
+            <main className="flex-1 flex min-h-0 bg-dot-[#333333]/[0.1] dark:bg-dot-white/[0.05] relative">
+                {/* Background dot pattern absolute across whole main */}
+                <div className="absolute inset-0 pointer-events-none" />
+
+                {/* CENTER STAGE (THE CANVAS & UPLOAD ZONE) */}
+                {/* Seamlessly expands to 100% width if no image is uploaded and right sidebar is hidden */}
+                <section className={cn(
+                    "flex-1 flex flex-col p-4 sm:p-6 lg:p-8 overflow-y-auto relative transition-all duration-300 ease-in-out",
+                    hasInputImage ? "max-w-[75%]" : "max-w-full"
+                )}>
+                    {historyPanel && (
+                        <div className="absolute top-4 left-6 z-10 w-full max-w-[calc(100%-3rem)] animate-in fade-in slide-in-from-top-4 duration-500">
+                            {historyPanel}
+                        </div>
+                    )}
+                    
+                    <div className="flex-1 flex items-center justify-center w-full max-w-5xl mx-auto z-0 mt-8">
+                        {canvas}
                     </div>
+                </section>
+
+                {/* RIGHT SIDEBAR (THE CONTROLS) */}
+                {/* Hidden entirely when no image is loaded -> Keeps focus on Canvas Upload */}
+                {hasInputImage && (
+                    <aside className="w-[320px] lg:w-[350px] shrink-0 border-l bg-card flex flex-col shadow-2xl shadow-black/5 animate-in slide-in-from-right-8 duration-300">
+                        <div className="px-5 py-4 border-b bg-muted/10">
+                            <h2 className="text-sm font-bold flex items-center gap-2 tracking-tight">
+                                {Icon && <Icon className="size-4 text-primary" />}
+                                Tùy chỉnh {title}
+                            </h2>
+                        </div>
+                        
+                        <ScrollArea className="flex-1">
+                            <div className="p-5 space-y-6">
+                                {controls}
+                            </div>
+                        </ScrollArea>
+
+                        {submitButton && (
+                            <div className="p-5 border-t bg-muted/10 shrink-0">
+                                {submitButton}
+                            </div>
+                        )}
+                    </aside>
                 )}
-            </div>
+            </main>
         </div>
     )
 }
