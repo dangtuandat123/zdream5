@@ -149,7 +149,6 @@ function ToolListCard({ tool }: { tool: AITool }) {
           : "opacity-40 grayscale"
       )}
     >
-      {/* Thumbnail */}
       <div className="relative shrink-0 size-11 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
         <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80", gradientMap[tool.id] ?? "from-gray-600 to-gray-800")} />
         {Icon && (
@@ -158,8 +157,6 @@ function ToolListCard({ tool }: { tool: AITool }) {
           </div>
         )}
       </div>
-
-      {/* Content */}
       <div className="flex-1 min-w-0 pr-1">
         <div className="flex items-center gap-2">
           <h3 className={cn("text-[13px] font-semibold truncate", isActive ? "text-primary" : "text-foreground")}>
@@ -201,13 +198,13 @@ export function AIToolsIndex() {
       </div>
       <h2 className="text-xl font-bold tracking-tight text-foreground mb-2">Bộ Công Cụ AI ZDream5</h2>
       <p className="max-w-[280px] text-sm text-muted-foreground leading-relaxed">
-        Vui lòng chọn một công cụ quyền năng ở danh sách bên trái để bắt đầu thỏa sức sáng tạo.
+        Vui lòng chọn một công cụ ở danh sách bên trái để bắt đầu sáng tạo.
       </p>
     </div>
   )
 }
 
-// === Tool Catalog Panel (Danh sách tool) ===
+// === Tool Catalog Panel ===
 function ToolCatalogPanel() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("Tất cả")
@@ -241,30 +238,27 @@ function ToolCatalogPanel() {
 
   return (
     <>
-      {/* Header section fixed */}
-      <div className="p-4 flex flex-col gap-4 shrink-0 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.05)] z-10 bg-background/95 backdrop-blur">
+      <div className="p-4 flex flex-col gap-3 shrink-0 border-b bg-background/95 backdrop-blur z-10">
         <div>
-          <h1 className="text-lg font-bold tracking-tight">Công cụ AI</h1>
-          <p className="text-[11px] text-muted-foreground mt-0.5">Bộ công cụ AI mạnh mẽ nâng tầm sáng tạo.</p>
+          <h1 className="text-base font-bold tracking-tight">Công cụ AI</h1>
+          <p className="text-[11px] text-muted-foreground mt-0.5">Chọn công cụ để bắt đầu sáng tạo</p>
         </div>
-        <div className="w-full">
-          <ToggleGroup
-            type="single"
-            value={category}
-            onValueChange={handleCategoryChange}
-            className="flex justify-between w-full p-1 bg-muted/40 rounded-lg"
-          >
-            {categories.map((cat) => (
-              <ToggleGroupItem
-                key={cat}
-                value={cat}
-                className="rounded-md px-2 text-[10px] font-medium h-6 leading-none data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm flex-1"
-              >
-                {cat}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </div>
+        <ToggleGroup
+          type="single"
+          value={category}
+          onValueChange={handleCategoryChange}
+          className="flex justify-between w-full p-1 bg-muted/40 rounded-lg"
+        >
+          {categories.map((cat) => (
+            <ToggleGroupItem
+              key={cat}
+              value={cat}
+              className="rounded-md px-2 text-[10px] font-medium h-6 leading-none data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm flex-1"
+            >
+              {cat}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
         <div className="relative w-full">
           <SearchIcon className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -276,42 +270,43 @@ function ToolCatalogPanel() {
         </div>
       </div>
 
-      {/* Scrollable list section */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 custom-scrollbar">
-        {filteredAvailable.length > 0 && (
-          <div className="space-y-1">
-            <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Đang hoạt động</h2>
-            <div className="flex flex-col gap-1">
-              {filteredAvailable.map((tool) => (
-                <ToolListCard key={tool.id} tool={tool} />
-              ))}
+      <ScrollArea className="flex-1">
+        <div className="px-3 py-3 space-y-4">
+          {filteredAvailable.length > 0 && (
+            <div className="space-y-1">
+              <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Đang hoạt động</h2>
+              <div className="flex flex-col gap-0.5">
+                {filteredAvailable.map((tool) => (
+                  <ToolListCard key={tool.id} tool={tool} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {filteredTools.length > 0 && (
-          <div className="space-y-1">
-            <Separator className="mx-2 mb-3 mt-1 opacity-50" />
-            <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Sắp ra mắt</h2>
-            <div className="flex flex-col gap-1">
-              {filteredTools.map((tool) => (
-                <ToolListCard key={tool.id} tool={tool} />
-              ))}
+          {filteredTools.length > 0 && (
+            <div className="space-y-1">
+              <Separator className="mx-2 mb-3 mt-1 opacity-50" />
+              <h2 className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground px-2 pb-1">Sắp ra mắt</h2>
+              <div className="flex flex-col gap-0.5">
+                {filteredTools.map((tool) => (
+                  <ToolListCard key={tool.id} tool={tool} />
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {filteredAvailable.length === 0 && filteredTools.length === 0 && (
-          <div className="text-center py-10 opacity-70">
-            <p className="text-xs font-medium">Không tìm thấy công cụ</p>
-          </div>
-        )}
-      </div>
+          {filteredAvailable.length === 0 && filteredTools.length === 0 && (
+            <div className="text-center py-10 opacity-70">
+              <p className="text-xs font-medium">Không tìm thấy công cụ</p>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
     </>
   )
 }
 
-// === Tool Config Panel (Khi đã chọn tool — Drill-down) ===
+// === Tool Config Panel (Drill-down khi đã chọn tool) ===
 function ToolConfigPanel() {
   const { panel } = useToolPanelState()
   if (!panel) return null
@@ -321,32 +316,30 @@ function ToolConfigPanel() {
   return (
     <>
       {/* Header với nút Back và tên tool */}
-      <div className="p-4 shrink-0 shadow-[0_1px_3px_0_rgb(0_0_0_/_0.05)] z-10 bg-background/95 backdrop-blur">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-1" asChild>
+      <div className="px-4 py-3 shrink-0 border-b bg-background/95 backdrop-blur z-10">
+        <div className="flex items-center gap-2.5">
+          <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-1 rounded-lg" asChild>
             <Link to="/app/tools">
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
-          <div className="flex items-center gap-2 min-w-0">
-            {Icon && (
-              <div className="shrink-0 size-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Icon className="size-4 text-primary" />
-              </div>
-            )}
-            <h2 className="text-sm font-bold truncate">{panel.title}</h2>
-          </div>
+          {Icon && (
+            <div className="shrink-0 size-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Icon className="size-4 text-primary" />
+            </div>
+          )}
+          <h2 className="text-sm font-bold truncate">{panel.title}</h2>
         </div>
       </div>
 
-      {/* Scrollable controls */}
-      <ScrollArea className="flex-1">
+      {/* Scrollable controls — fill toàn bộ chiều cao còn lại */}
+      <ScrollArea className="flex-1 min-h-0">
         <div className="p-4 space-y-5">
           {panel.controls}
         </div>
       </ScrollArea>
 
-      {/* Sticky bottom submit button — giống nút Generate hồng của OpenArt */}
+      {/* Sticky bottom submit button */}
       {panel.submitButton && (
         <div className="p-4 border-t bg-background/95 backdrop-blur shrink-0">
           {panel.submitButton}
@@ -361,16 +354,15 @@ function AIToolsLayoutInner() {
   const location = useLocation()
   const { panel } = useToolPanelState()
   
-  // Determines which panel to show: Catalog or Config
   const isToolIndex = location.pathname === "/app/tools" || location.pathname === "/app/tools/"
   const showCatalog = isToolIndex || !panel
 
   return (
-    <div className="flex w-full h-[calc(100vh-65px)] overflow-hidden bg-background">
+    <div className="flex w-full h-[calc(100dvh-60px)] md:h-dvh overflow-hidden bg-background">
       
-      {/* COL 2: DYNAMIC PANEL (Drill-down) */}
-      <aside className="w-[300px] xl:w-[340px] shrink-0 border-r bg-card/10 flex flex-col h-full relative overflow-hidden">
-        {/* Panel Catalog — luôn render nhưng ẩn khi đang ở tool */}
+      {/* COL 2: DYNAMIC PANEL */}
+      <aside className="w-[300px] xl:w-[340px] shrink-0 border-r bg-card/5 flex flex-col h-full relative overflow-hidden">
+        {/* Catalog panel */}
         <div className={cn(
           "absolute inset-0 flex flex-col transition-all duration-300 ease-in-out",
           showCatalog 
@@ -380,7 +372,7 @@ function AIToolsLayoutInner() {
           <ToolCatalogPanel />
         </div>
 
-        {/* Panel Config — slide in từ phải khi có tool active */}
+        {/* Config panel — slide in từ phải */}
         <div className={cn(
           "absolute inset-0 flex flex-col transition-all duration-300 ease-in-out",
           !showCatalog 
@@ -392,7 +384,7 @@ function AIToolsLayoutInner() {
       </aside>
 
       {/* COL 3: FULL-WIDTH OUTPUT CANVAS */}
-      <main className="flex-1 h-full overflow-hidden relative bg-muted/10">
+      <main className="flex-1 h-full overflow-hidden relative">
         <Outlet />
       </main>
 
