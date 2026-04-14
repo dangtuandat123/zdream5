@@ -674,7 +674,7 @@ export function TemplateDetailPage() {
         icon: LayoutTemplate,
         controls: ControlsBlock,
         submitButton: GenerateButton,
-    })
+    }, [template?.name, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress])
 
     // ============================
     // UNIFIED DESKTOP / MOBILE LAYOUT via ToolWorkspaceLayout

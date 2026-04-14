@@ -143,7 +143,7 @@ export function RemoveBgPage() {
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />,
-    })
+    }, [images, subjectType, edgeRefine, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout

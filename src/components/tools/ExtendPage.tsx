@@ -202,7 +202,7 @@ export function ExtendPage() {
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />,
-    })
+    }, [images, activePreset, extendRatio, description, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout

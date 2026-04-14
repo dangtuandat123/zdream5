@@ -144,7 +144,7 @@ export function UpscalePage() {
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    })
+    }, [images, scaleFactor, enhanceMode, denoise, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout

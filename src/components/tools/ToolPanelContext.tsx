@@ -31,19 +31,15 @@ export function ToolPanelProvider({ children }: { children: ReactNode }) {
 /**
  * Hook dành cho tool pages: đăng ký controls lên Dynamic Panel (Col 2).
  * Đã sửa lỗi re-render bằng cách sử dụng ref để track active id hoặc để user tự control.
- * Vì Node không thể check equality dễ dàng con đường tốt nhất là để components mount mới call.
+ * - dependencies: Mảng các biến ảnh hưởng đến controls (vd: loading, result, images, v.v.)
  */
-export function useToolPanel(config: ToolPanelState) {
+export function useToolPanel(config: ToolPanelState, dependencies: React.DependencyList = []) {
     const { setPanel } = useContext(ToolPanelContext)
 
     useEffect(() => {
         setPanel(config)
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-        config.title, 
-        config.controls, 
-        config.submitButton
-    ])
+    }, dependencies)
 
     // Cleanup khi tool page unmount (quay về catalog)
     useEffect(() => {

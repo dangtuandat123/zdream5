@@ -143,7 +143,7 @@ export function ImageEditPage() {
             />
         ),
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    })
+    }, [images, mode, prompt, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout
