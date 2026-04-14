@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react"
-import { Link, Outlet, useLocation } from "react-router-dom"
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom"
 import {
   SearchIcon,
   Lock,
@@ -309,6 +309,7 @@ function ToolCatalogPanel() {
 // === Tool Config Panel (Drill-down khi đã chọn tool) ===
 function ToolConfigPanel() {
   const { panel } = useToolPanelState()
+  const navigate = useNavigate()
   if (!panel) return null
 
   const Icon = panel.icon
@@ -318,10 +319,8 @@ function ToolConfigPanel() {
       {/* Header với nút Back và tên tool */}
       <div className="px-4 py-3 shrink-0 border-b bg-background/95 backdrop-blur z-10">
         <div className="flex items-center gap-2.5">
-          <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-1 rounded-lg" asChild>
-            <Link to="/app/tools">
+          <Button variant="ghost" size="icon" className="shrink-0 size-8 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => navigate("/app/tools")}>
               <ArrowLeft className="size-4" />
-            </Link>
           </Button>
           {Icon && (
             <div className="shrink-0 size-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -339,9 +338,16 @@ function ToolConfigPanel() {
         </div>
       </ScrollArea>
 
+      {/* History Panel (nếu có) */}
+      {panel.historyPanel && (
+        <div className="px-4 pb-0 pt-3 border-t bg-background/95 backdrop-blur shrink-0 max-h-[140px] overflow-hidden">
+          {panel.historyPanel}
+        </div>
+      )}
+
       {/* Sticky bottom submit button */}
       {panel.submitButton && (
-        <div className="p-4 border-t bg-background/95 backdrop-blur shrink-0">
+        <div className="p-4 border-t bg-background/95 backdrop-blur shrink-0 z-10">
           {panel.submitButton}
         </div>
       )}

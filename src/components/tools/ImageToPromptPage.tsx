@@ -118,46 +118,72 @@ export function ImageToPromptPage() {
                 </div>
             </>
         ),
-        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={1} label="Phân tích Prompt" gemsBalance={gems} />,
+        submitButton: (
+            <div className="space-y-4">
+                <ToolSubmitButton
+                    onClick={handleSubmit}
+                    loading={loading}
+                    disabled={!images[0]}
+                    gemsCost={0}
+                    label="Phân tích ảnh"
+                    gemsBalance={gems}
+                />
+            </div>
+        ),
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setImages([url])} selectedUrl={result} />
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh gốc cần dùng AI phân tích cấu trúc" />
-                ) : loading ? (
-                    <ToolResultDisplay loading={loading} emptyHint="" />
-                ) : result ? (
-                    <div className="space-y-4 w-full max-w-4xl animate-in fade-in slide-in-from-bottom-2 duration-300">
-                        <div className="rounded-xl border bg-card p-4 space-y-3 shadow-sm">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-semibold">Prompt được tạo</h3>
-                                <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={handleCopy}>
-                                    {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                                    {copied ? "Đã sao chép" : "Sao chép"}
-                                </Button>
+                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để AI phân tích và dịch ra prompt" />
+                ) : (
+                    <div className="w-full max-w-2xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
+                        {loading && (
+                            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/10 w-full min-h-[300px]">
+                                <div className="relative">
+                                    <div className="size-16 rounded-full border-4 border-primary/20" />
+                                    <div className="absolute inset-0 size-16 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                                </div>
+                                <p className="text-sm font-medium">Hệ thống đang phân tích ảnh<span className="animate-pulse">...</span></p>
                             </div>
-                            <Textarea
-                                value={editedPrompt}
-                                onChange={(e) => setEditedPrompt(e.target.value)}
-                                rows={6}
-                                className="text-sm leading-relaxed resize-none font-mono"
-                                placeholder="Chỉnh sửa prompt trước khi tạo ảnh..."
-                            />
-                            <p className="text-[10px] text-muted-foreground">Bạn có thể tự do chỉnh sửa chi tiết prompt này trước khi tạo ảnh để đạt độ chính xác cao nhất.</p>
-                        </div>
-                        <Button
-                            onClick={handleGenerateFromPrompt}
-                            disabled={generating || !editedPrompt.trim() || (gems !== undefined && gems < 1)}
-                            className="w-full h-11 gap-2 text-sm font-semibold"
-                            size="lg"
-                        >
-                            {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-                            {generating ? "Đang tạo ảnh..." : "Bắt đầu tạo ảnh mới từ prompt này (1 💎)"}
-                        </Button>
+                        )}
+                        {result && !loading && !generatedImage && (
+                            <div className="space-y-4 w-full bg-muted/5 p-6 rounded-2xl border shadow-inner">
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="size-5 text-primary" />
+                                        <h3 className="font-semibold">Prompt được trích xuất</h3>
+                                    </div>
+                                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={handleCopy}>
+                                        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+                                        {copied ? "Đã sao chép" : "Sao chép"}
+                                    </Button>
+                                </div>
+                                <Textarea
+                                    value={editedPrompt}
+                                    onChange={(e) => setEditedPrompt(e.target.value)}
+                                    rows={6}
+                                    className="text-sm leading-relaxed resize-none font-mono"
+                                    placeholder="Chỉnh sửa prompt trước khi tạo ảnh..."
+                                />
+                                <p className="text-[10px] text-muted-foreground">Bạn có thể tự do chỉnh sửa chi tiết prompt này trước khi tạo ảnh để đạt độ chính xác cao nhất.</p>
+                            </div>
+                        )}
+                        {result && !loading && (
+                            <Button
+                                onClick={handleGenerateFromPrompt}
+                                disabled={generating || !editedPrompt.trim() || (gems !== undefined && gems < 1)}
+                                className="w-full h-11 gap-2 text-sm font-semibold"
+                                size="lg"
+                            >
+                                {generating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
+                                {generating ? "Đang tạo ảnh..." : "Bắt đầu tạo ảnh mới từ prompt này (1 💎)"}
+                            </Button>
+                        )}
                         {generating && (
-                            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/10 min-h-[200px]">
+                            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/10 min-h-[200px] w-full">
                                 <div className="relative">
                                     <div className="size-12 rounded-full border-2 border-primary/20" />
                                     <div className="absolute inset-0 size-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
@@ -182,13 +208,11 @@ export function ImageToPromptPage() {
                                 </div>
                             </div>
                         )}
+                        {!loading && !result && !generating && !generatedImage && (
+                             <ToolResultDisplay emptyHint="Ảnh đã được tải lên. Nhấn 'Phân tích ảnh' để trích xuất prompt." />
+                        )}
                     </div>
-                ) : (
-                    <ToolResultDisplay emptyHint="Tải ảnh lên để AI phân tích và viết prompt" />
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} />
             }
         />
     )

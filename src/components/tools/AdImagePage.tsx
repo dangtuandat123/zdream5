@@ -145,13 +145,14 @@ export function AdImagePage() {
             </div>
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />,
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Mẫu Sản Phẩm (Tạo Quảng Cáo)" />
+                    <ToolResultDisplay emptyHint="Hãy tải ảnh mẫu sản phẩm lên ở cột công cụ bên trái để bắt đầu tạo quảng cáo" />
                 ) : (
                     <ToolResultDisplay
                         imageUrl={result}
@@ -159,9 +160,6 @@ export function AdImagePage() {
                         emptyHint="Tải ảnh sản phẩm và mô tả quảng cáo để bắt đầu"
                     />
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
         />
     )

@@ -196,38 +196,39 @@ export function ExtendPage() {
                 )}
             </>
         ),
-        submitButton: images[0] ? (
-            <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng khung" gemsBalance={gems} />
-        ) : undefined,
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />,
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />,
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh cần được mở rộng viền" />
-                ) : loading || result ? (
-                    <ToolResultDisplay
-                        imageUrl={result}
-                        loading={loading}
-                        beforeImageUrl={images[0]}
-                        onUseAsInput={(url) => { setImages([url]); setResult(null); setDirections([]); setActivePreset(null) }}
-                    />
+                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu mở rộng" />
                 ) : (
-                    <div className="w-full max-w-4xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
-                        <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
-                            <Label className="text-sm font-medium">Bản xem trước lưới hiển thị diện tích ảnh sẽ mở rộng ra</Label>
-                            <Button variant="outline" size="sm" onClick={() => { setImages([]); setResult(null) }} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
-                        </div>
-                        <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
-                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
-                        </div>
-                    </div>
+                    <>
+                        {!loading && !result ? (
+                            <div className="w-full max-w-4xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
+                                <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
+                                    <Label className="text-sm font-medium">Bản xem trước lưới hiển thị diện tích ảnh sẽ mở rộng ra</Label>
+                                    <Button variant="outline" size="sm" onClick={() => { setImages([]); setResult(null) }} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
+                                </div>
+                                <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
+                                    <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                                    <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
+                                </div>
+                            </div>
+                        ) : (
+                            <ToolResultDisplay
+                                imageUrl={result}
+                                loading={loading}
+                                beforeImageUrl={images[0]}
+                                onUseAsInput={(url) => { setImages([url]); setResult(null); setDirections([]); setActivePreset(null) }}
+                                emptyHint="Ảnh đã được tải lên. Nhấn 'Mở rộng' để bắt đầu xử lý."
+                            />
+                        )}
+                    </>
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
         />
     )

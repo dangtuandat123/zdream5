@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
 import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
+import { ToolResultDisplay } from "@/components/tools/shared/ToolResultDisplay"
 import { useToolPanel } from "@/components/tools/ToolPanelContext"
 
 import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
@@ -683,13 +684,7 @@ export function TemplateDetailPage() {
             <ToolWorkspaceLayout
                 canvas={
                     !uploadedImage ? (
-                        <ToolImageUpload 
-                            images={[]} 
-                            onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
-                            variant="huge" 
-                            className="w-full max-w-2xl mx-auto" 
-                            label={`Sử dụng mẫu thiết kế: ${template.name}`} 
-                        />
+                        <ToolResultDisplay emptyHint={`Hãy tải ảnh lên ở cột công cụ bên trái để sử dụng mẫu thiết kế: ${template.name}`} />
                     ) : (
                         CanvasContent
                     )

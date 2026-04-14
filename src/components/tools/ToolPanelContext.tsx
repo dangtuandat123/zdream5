@@ -6,6 +6,7 @@ interface ToolPanelState {
     icon?: LucideIcon
     controls: ReactNode
     submitButton?: ReactNode
+    historyPanel?: ReactNode
 }
 
 interface ToolPanelContextValue {
@@ -29,16 +30,20 @@ export function ToolPanelProvider({ children }: { children: ReactNode }) {
 
 /**
  * Hook dành cho tool pages: đăng ký controls lên Dynamic Panel (Col 2).
- * Khi component unmount, tự động xoá panel.
+ * Đã sửa lỗi re-render bằng cách sử dụng ref để track active id hoặc để user tự control.
+ * Vì Node không thể check equality dễ dàng con đường tốt nhất là để components mount mới call.
  */
 export function useToolPanel(config: ToolPanelState) {
     const { setPanel } = useContext(ToolPanelContext)
 
     useEffect(() => {
         setPanel(config)
-        // Không cleanup ở đây vì config thay đổi liên tục (re-render)
-        // Cleanup chỉ khi unmount
-    }) // intentionally no deps — update on every render to keep controls in sync
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        config.title, 
+        config.controls, 
+        config.submitButton
+    ])
 
     // Cleanup khi tool page unmount (quay về catalog)
     useEffect(() => {

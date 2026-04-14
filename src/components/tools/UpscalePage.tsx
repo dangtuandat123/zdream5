@@ -138,14 +138,15 @@ export function UpscalePage() {
                 )}
             </>
         ),
-        submitButton: images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} /> : undefined,
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />,
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Phóng to ảnh (Upscale)" />
+                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu phóng to" />
                 ) : (
                     <>
                         {result && images[0] ? (
@@ -170,13 +171,15 @@ export function UpscalePage() {
                                 </div>
                             </div>
                         ) : (
-                            <ToolResultDisplay imageUrl={result} loading={loading} />
+                            <ToolResultDisplay
+                                imageUrl={result}
+                                loading={loading}
+                                beforeImageUrl={images[0]}
+                                emptyHint="Ảnh đã được tải lên. Nhấn 'Upscale' để bắt đầu xử lý."
+                            />
                         )}
                     </>
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
         />
     )

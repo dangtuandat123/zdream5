@@ -137,14 +137,15 @@ export function RemoveBgPage() {
                 )}
             </>
         ),
-        submitButton: images[0] ? <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} /> : undefined,
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Xóa nền" gemsBalance={gems} />,
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />,
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Xóa phông tự động" />
+                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu xóa nền" />
                 ) : (
                     <>
                         <ToolResultDisplay
@@ -152,6 +153,7 @@ export function RemoveBgPage() {
                             loading={loading}
                             beforeImageUrl={images[0]}
                             onUseAsInput={(url) => { setImages([url]); setResult(null) }}
+                            emptyHint="Ảnh đã được tải lên. Nhấn 'Xóa nền' để bắt đầu xử lý."
                         />
                         {result && (
                             <div className="flex flex-col items-center gap-3 mt-4 animate-in slide-in-from-bottom-2">
@@ -164,9 +166,6 @@ export function RemoveBgPage() {
                         )}
                     </>
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
         />
     )

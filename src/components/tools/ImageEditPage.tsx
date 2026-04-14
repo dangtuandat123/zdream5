@@ -128,7 +128,7 @@ export function ImageEditPage() {
                 )}
             </>
         ),
-        submitButton: images[0] ? (
+        submitButton: (
             <ToolSubmitButton
                 onClick={handleSubmit}
                 loading={loading}
@@ -137,14 +137,15 @@ export function ImageEditPage() {
                 label={mode === "remove" ? "Xóa vật thể" : "Thay thế"}
                 gemsBalance={gems}
             />
-        ) : undefined,
+        ),
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={handleImagesChange} variant="huge" className="w-full max-w-2xl mx-auto" label={mode === "remove" ? "Ảnh cần xóa vật thể" : "Ảnh cần thay thế nội dung"} />
+                    <ToolResultDisplay emptyHint={mode === "remove" ? "Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu xóa vật thể" : "Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu thay thế chi tiết"} />
                 ) : loading || result ? (
                     <ToolResultDisplay
                         imageUrl={result}
@@ -164,9 +165,6 @@ export function ImageEditPage() {
                         </div>
                     </div>
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
         />
     )

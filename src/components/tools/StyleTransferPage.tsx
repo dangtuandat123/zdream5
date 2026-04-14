@@ -140,34 +140,31 @@ export function StyleTransferPage() {
                 </div>
             </>
         ),
-        submitButton: (
-            <ToolSubmitButton
-                onClick={handleSubmit}
-                loading={loading}
-                disabled={!images[0] || (isCustom && !customStyle.trim())}
-                gemsCost={2}
-                label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"}
-                gemsBalance={gems}
-            />
-        ),
+        submitButton: <ToolSubmitButton
+            onClick={handleSubmit}
+            loading={loading}
+            disabled={!images[0] || (isCustom && !customStyle.trim())}
+            gemsCost={2}
+            label={isVariation ? "Tạo biến thể" : "Chuyển phong cách"}
+            gemsBalance={gems}
+        />,
+        historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
     })
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Cần Đổi Phong Cách" />
+                    <ToolResultDisplay emptyHint="Hãy tải ảnh lên ở cột công cụ bên trái để bắt đầu tạo ảnh với AI" />
                 ) : (
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
                         onUseAsInput={handleUseAsInput}
+                        emptyHint="Ảnh đã được tải lên. Nhấn tải tạo ảnh để bắt đầu xử lý."
                     />
                 )
-            }
-            historyPanel={
-                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
         />
     )
