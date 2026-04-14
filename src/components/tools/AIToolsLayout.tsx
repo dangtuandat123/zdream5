@@ -13,6 +13,7 @@ import {
   UserCheck,
   Sparkles,
   ArrowLeft,
+  ImageIcon,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -107,6 +108,15 @@ const tools: AITool[] = [
     path: "/app/tools/image-to-prompt",
     available: true,
   },
+  {
+    id: "ad-image",
+    name: "Ảnh quảng cáo",
+    description: "Tạo ảnh sản phẩm chuyên nghiệp bằng AI.",
+    category: "Sáng tạo",
+    thumbnail: "/images/tools/ad-image.jpg",
+    path: "/app/tools/ad-image",
+    available: true,
+  },
 ]
 
 const categories = ["Tất cả", ...Array.from(new Set(tools.map((t) => t.category)))]
@@ -120,6 +130,7 @@ const gradientMap: Record<string, string> = {
   "style-transfer": "from-indigo-600 via-violet-500 to-purple-400",
   "consistent-character": "from-amber-600 via-orange-500 to-rose-400",
   "image-to-prompt": "from-emerald-600 via-teal-500 to-cyan-400",
+  "ad-image": "from-rose-600 via-pink-500 to-amber-400",
 }
 
 const iconMap: Record<string, LucideIcon> = {
@@ -131,6 +142,7 @@ const iconMap: Record<string, LucideIcon> = {
   extend: Expand,
   "style-transfer": Wand2,
   "image-to-prompt": FileText,
+  "ad-image": ImageIcon,
 }
 
 function ToolListCard({ tool }: { tool: AITool }) {
@@ -141,7 +153,7 @@ function ToolListCard({ tool }: { tool: AITool }) {
   const card = (
     <div
       className={cn(
-        "group relative flex items-center gap-3 p-2.5 rounded-xl border transition-all duration-200",
+        "group relative flex items-center gap-3.5 p-2.5 rounded-xl border transition-all duration-200",
         tool.available
           ? isActive 
              ? "border-primary/50 bg-primary/10 shadow-sm" 
@@ -149,7 +161,7 @@ function ToolListCard({ tool }: { tool: AITool }) {
           : "opacity-40 grayscale"
       )}
     >
-      <div className="relative shrink-0 size-11 rounded-lg overflow-hidden border border-black/5 dark:border-white/5">
+      <div className="relative shrink-0 size-11 rounded-xl overflow-hidden border border-black/5 dark:border-white/5 shadow-sm">
         <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80", gradientMap[tool.id] ?? "from-gray-600 to-gray-800")} />
         {Icon && (
           <div className="absolute inset-0 flex items-center justify-center">
@@ -157,9 +169,9 @@ function ToolListCard({ tool }: { tool: AITool }) {
           </div>
         )}
       </div>
-      <div className="flex-1 min-w-0 pr-1">
-        <div className="flex items-center gap-2">
-          <h3 className={cn("text-[13px] font-semibold truncate", isActive ? "text-primary" : "text-foreground")}>
+      <div className="flex-1 min-w-0 pr-1 py-0.5">
+        <div className="flex items-center gap-2 mb-0.5">
+          <h3 className={cn("text-xs font-bold truncate", isActive ? "text-primary" : "text-foreground")}>
             {tool.name}
           </h3>
           {tool.available ? (
@@ -171,7 +183,7 @@ function ToolListCard({ tool }: { tool: AITool }) {
             </Badge>
           )}
         </div>
-        <p className="text-[10px] text-muted-foreground leading-tight line-clamp-1 mt-0.5" title={tool.description}>
+        <p className="text-[11px] text-muted-foreground leading-[1.3] line-clamp-2" title={tool.description}>
           {tool.description}
         </p>
       </div>
@@ -253,7 +265,7 @@ function ToolCatalogPanel() {
             <ToggleGroupItem
               key={cat}
               value={cat}
-              className="rounded-md px-2 text-[10px] font-medium h-6 leading-none data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm flex-1"
+              className="rounded-md px-2 text-[11px] font-semibold h-7 leading-none data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm flex-1 truncate"
             >
               {cat}
             </ToggleGroupItem>
