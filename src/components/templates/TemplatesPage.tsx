@@ -4,7 +4,6 @@ import { SearchIcon, SparklesIcon, ArrowRightIcon, RefreshCw } from "lucide-reac
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { ToolPageLayout } from "@/components/tools/ToolPageLayout"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import {
     Pagination,
@@ -82,45 +81,45 @@ export function TemplatesPage() {
     }
 
     return (
-        <ToolPageLayout
-            title="Mẫu thiết kế"
-            description="Chọn mẫu → Tải ảnh lên → Nhận ảnh mới theo phong cách mẫu"
-            headerRight={
+        <div className="flex flex-col h-full bg-background overflow-hidden relative">
+            <div className="sticky top-0 bg-background/95 backdrop-blur z-20 border-b p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-lg font-bold">Mẫu thiết kế ảnh ({filteredTemplates.length})</h1>
+                    <p className="text-xs text-muted-foreground mt-0.5">Chọn mẫu → Tải ảnh lên → Nhận ảnh mới siêu đẹp</p>
+                </div>
                 <div className="relative w-full sm:w-[280px]">
                     <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                        placeholder="Tìm mẫu..."
+                        placeholder="Tìm mẫu (anime, 3d, concept...)"
                         className="pl-9 h-9"
                         value={search}
                         onChange={(e) => handleSearchChange(e.target.value)}
                     />
                 </div>
-            }
-        >
-            {/* Category Filter */}
-            <ToggleGroup
-                type="single"
-                value={category}
-                onValueChange={handleCategoryChange}
-                className="flex flex-wrap justify-start gap-1"
-            >
-                {categories.map((cat) => (
-                    <ToggleGroupItem
-                        key={cat}
-                        value={cat}
-                        className="rounded-full px-4 text-xs h-8 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-6">
+                {/* Category Filter */}
+                <div className="flex overflow-x-auto pb-1 custom-scrollbar">
+                    <ToggleGroup
+                        type="single"
+                        value={category}
+                        onValueChange={handleCategoryChange}
+                        className="flex justify-start gap-1 w-max"
                     >
-                        {cat}
-                    </ToggleGroupItem>
-                ))}
-            </ToggleGroup>
+                        {categories.map((cat) => (
+                            <ToggleGroupItem
+                                key={cat}
+                                value={cat}
+                                className="rounded-full px-4 text-xs h-8 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                            >
+                                {cat}
+                            </ToggleGroupItem>
+                        ))}
+                    </ToggleGroup>
+                </div>
 
-            {/* Results count */}
-            <p className="text-xs text-muted-foreground -mt-2">
-                {filteredTemplates.length} mẫu
-            </p>
-
-            {/* Template Grid */}
+                {/* Template Grid */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {paginatedTemplates.map((template) => (
                     <Link
@@ -238,6 +237,7 @@ export function TemplatesPage() {
                     </Button>
                 </div>
             )}
-        </ToolPageLayout>
+            </div>
+        </div>
     )
 }

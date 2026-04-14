@@ -3,12 +3,8 @@ import { useState, useRef, useCallback, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { toast } from "sonner"
 import {
-    ArrowLeft,
-    Upload,
     Download,
-    ImageIcon,
     Sparkles,
-    X,
     Wand2,
     RectangleHorizontal,
     RectangleVertical,
@@ -18,13 +14,13 @@ import {
     AlertCircle,
     Settings2,
     ChevronDown,
-    ChevronRight,
     Ban,
     Pencil,
     ZoomIn,
     Layers,
     Ruler,
-    Clock
+    Clock,
+    LayoutTemplate
 } from "lucide-react"
 
 import { ImageLightbox } from "@/components/ui/image-lightbox"
@@ -33,12 +29,12 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Card, CardContent } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
-import { useIsMobile } from "@/hooks/use-mobile"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
+import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
 
 import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -179,7 +175,6 @@ function GenerateSkeleton({ progress }: { progress: number }) {
 
 export function TemplateDetailPage() {
     const { slug } = useParams<{ slug: string }>()
-    const isMobile = useIsMobile()
     const { updateGems } = useAuth()
     const [template, setTemplate] = useState<TemplateData | null>(null)
     const [templateLoading, setTemplateLoading] = useState(true)
@@ -205,10 +200,14 @@ export function TemplateDetailPage() {
     const [historyLoading, setHistoryLoading] = useState(true)
     const [outputSize, setOutputSize] = useState("1:1")
     const [imageSize, setImageSize] = useState("1K")
-    const [imageCount, setImageCount] = useState(1)
-    const [isDragging, setIsDragging] = useState(false)
-    const [hasError, setHasError] = useState(false)
     const [optionsOpen, setOptionsOpen] = useState(false)
+    const [imageCount, setImageCount] = useState(1)
+    const [hasError, setHasError] = useState(false)
+    const [effectSelections, setEffectSelections] = useState<Record<string, string>>({})
+    const [extraPrompt, setExtraPrompt] = useState("")
+    const [viewerOpen, setViewerOpen] = useState(false)
+    const [viewerSource, setViewerSource] = useState<"sample" | "generated">("sample")
+    const [viewerIndex, setViewerIndex] = useState(0)
 
     // Tải lịch sử ảnh đã tạo từ template này
     useEffect(() => {
@@ -228,11 +227,9 @@ export function TemplateDetailPage() {
                 }))
                 setGeneratedImages(historyImages)
             })
-            .catch(() => { /* Không cần hiển thị lỗi nếu không load được lịch sử */ })
+            .catch(() => {})
             .finally(() => setHistoryLoading(false))
     }, [slug])
-    const [effectSelections, setEffectSelections] = useState<Record<string, string>>({})
-    const [extraPrompt, setExtraPrompt] = useState("")
 
     // Mặc định chọn option đầu tiên của mỗi effect group
     useEffect(() => {
@@ -245,53 +242,6 @@ export function TemplateDetailPage() {
         }
         setEffectSelections(defaults)
     }, [template])
-
-    // Viewer state — tách biệt source (sample vs generated)
-    const [viewerOpen, setViewerOpen] = useState(false)
-    const [viewerSource, setViewerSource] = useState<"sample" | "generated">("sample")
-    const [viewerIndex, setViewerIndex] = useState(0)
-
-    const fileInputRef = useRef<HTMLInputElement>(null)
-
-    // === Handlers ===
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onload = () => {
-                setUploadedImage(reader.result as string)
-                toast.success("Ảnh đã sẵn sàng")
-            }
-            reader.readAsDataURL(file)
-        }
-    }
-
-    const handleDragOver = useCallback((e: React.DragEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setIsDragging(true)
-    }, [])
-
-    const handleDragLeave = useCallback((e: React.DragEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setIsDragging(false)
-    }, [])
-
-    const handleDrop = useCallback((e: React.DragEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setIsDragging(false)
-        const file = e.dataTransfer.files?.[0]
-        if (file && file.type.startsWith("image/")) {
-            const reader = new FileReader()
-            reader.onload = () => {
-                setUploadedImage(reader.result as string)
-                toast.success("Ảnh đã sẵn sàng")
-            }
-            reader.readAsDataURL(file)
-        }
-    }, [])
 
     const handleGenerate = useCallback(async () => {
         if (!uploadedImage || isGenerating || !template) return
@@ -435,37 +385,13 @@ export function TemplateDetailPage() {
                 </div>
             )}
 
-            {/* Upload ảnh */}
+            {/* Tương tác Controls cho ảnh đầu vào thống nhất bằng ToolImageUpload gốc */}
             <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Ảnh đầu vào</Label>
-                {!uploadedImage ? (
-                    <Card
-                        id="upload-dropzone"
-                        className={`cursor-pointer border-dashed transition-colors ${isDragging ? "border-primary bg-primary/5" : "hover:bg-muted/50"}`}
-                        onClick={() => fileInputRef.current?.click()}
-                        onDragOver={handleDragOver}
-                        onDragLeave={handleDragLeave}
-                        onDrop={handleDrop}
-                    >
-                        <CardContent className="flex flex-col items-center justify-center py-6 gap-1.5">
-                            <Upload className="size-7 text-muted-foreground" />
-                            <p className="text-sm font-medium">Kéo thả hoặc nhấp để tải ảnh</p>
-                            <p className="text-[11px] text-muted-foreground">PNG, JPG, WEBP · Tối đa 10MB</p>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <Card className="overflow-hidden relative flex flex-col items-center justify-center py-6 h-[106px]">
-                        <img src={uploadedImage} alt="Ảnh đầu vào" className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute top-2 right-2 flex gap-1 z-10">
-                            <Button size="icon" variant="secondary" className="size-7 shadow-md" onClick={() => fileInputRef.current?.click()}>
-                                <Upload className="size-3" />
-                            </Button>
-                            <Button size="icon" variant="destructive" className="size-7 shadow-md" onClick={() => setUploadedImage(null)}>
-                                <X className="size-3" />
-                            </Button>
-                        </div>
-                    </Card>
-                )}
+                <ToolImageUpload 
+                    images={uploadedImage ? [uploadedImage] : []} 
+                    onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
+                    label="Ảnh đầu vào gốc"
+                />
             </div>
 
             <Separator />
@@ -631,8 +557,8 @@ export function TemplateDetailPage() {
 
     // === Canvas content — ảnh mẫu luôn hiện, kết quả nằm trên ảnh mẫu ===
     const CanvasContent = (
-        <ScrollArea className="flex-1">
-            <div className="p-4 space-y-6">
+        <div className="w-full max-w-5xl mx-auto space-y-6">
+            <div className="space-y-6 pb-20">
                 {/* Skeleton khi đang tạo ảnh */}
                 {isGenerating && (
                     <div className="space-y-3">
@@ -708,16 +634,16 @@ export function TemplateDetailPage() {
                 {!isGenerating && !historyLoading && generatedImages.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
                         <div className="rounded-full bg-muted p-4 mb-4">
-                            <ImageIcon className="size-8 text-muted-foreground" />
+                            <Sparkles className="size-8 text-muted-foreground" />
                         </div>
-                        <h3 className="text-base font-semibold mb-1">Chưa có ảnh nào</h3>
+                        <h3 className="text-base font-semibold mb-1">Thiết kế mẫu siêu tốc</h3>
                         <p className="text-sm text-muted-foreground max-w-xs">
-                            Tải ảnh lên{isMobile ? " ở trên" : " bên trái"}, chọn kích thước rồi nhấn <strong>Tạo ảnh</strong> để bắt đầu.
+                            Kéo ảnh vào giao diện này, sau đó nhấn <strong>Tạo ảnh</strong> để sáng tạo bức ảnh độc nhất theo filter có sẵn.
                         </p>
                     </div>
                 )}
             </div>
-        </ScrollArea>
+        </div>
     )
 
     // Loading / not found guard
@@ -738,177 +664,31 @@ export function TemplateDetailPage() {
     }
 
     // ============================
-    // MOBILE LAYOUT — luồng đơn, scroll tự nhiên
-    // ============================
-    if (isMobile) {
-        return (
-            <div className="flex flex-col min-h-0 h-full">
-                {/* Header */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b shrink-0">
-                    <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                        <Link to="/app/tools/templates"><ArrowLeft className="size-4" /></Link>
-                    </Button>
-                    <div className="min-w-0 flex-1">
-                        <nav className="flex items-center gap-1 text-[11px] text-muted-foreground mb-0.5">
-                            <Link to="/app/tools" className="hover:text-foreground transition-colors">Công cụ AI</Link>
-                            <ChevronRight className="size-3" />
-                            <Link to="/app/tools/templates" className="hover:text-foreground transition-colors">Mẫu</Link>
-                        </nav>
-                        <h1 className="text-sm font-semibold truncate">{template?.name}</h1>
-                    </div>
-                    <Badge variant="secondary" className="shrink-0 text-[10px]">{template?.category}</Badge>
-                </div>
-
-                {/* Scrollable content */}
-                <ScrollArea className="flex-1">
-                    <div className="p-4 space-y-4">
-                        {/* Controls */}
-                        {ControlsBlock}
-
-                        {/* Generate */}
-                        {GenerateButton}
-
-                        <Separator />
-
-                        {/* Canvas */}
-                        <div className="space-y-4">
-                            {/* Skeleton khi đang tạo ảnh */}
-                            {isGenerating && (
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <Wand2 className="size-4 text-primary animate-pulse" />
-                                        <span className="text-sm font-medium">Đang tạo ảnh...</span>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {Array.from({ length: imageCount }).map((_, i) => (
-                                            <GenerateSkeleton key={`m-gen-sk-${i}`} progress={generateProgress} />
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Kết quả đã tạo */}
-                            {generatedImages.length > 0 && (
-                                <div className="space-y-3">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            <Sparkles className="size-4 text-primary" />
-                                            <span className="text-sm font-medium">Kết quả</span>
-                                        </div>
-                                        <Badge variant="outline" className="text-xs">{generatedImages.length} ảnh</Badge>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        {generatedImages.map((img, idx) => (
-                                            <div
-                                                key={img.id}
-                                                className="relative rounded-xl overflow-hidden cursor-pointer shadow-sm active:scale-[0.97] transition-all duration-200 ring-1 ring-border/20"
-                                                onClick={() => openGeneratedViewer(idx)}
-                                            >
-                                                <div className="relative aspect-square bg-muted/20">
-                                                    <ImageWithSkeleton src={img.url} alt={`Kết quả ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
-                                                    {/* Gradient overlay luôn hiện */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                                                    {/* Action bar luôn hiện trên mobile */}
-                                                    <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2.5 py-2">
-                                                        <Badge variant="secondary" className="text-[10px] bg-black/40 backdrop-blur-sm text-white border-0 shadow-sm">
-                                                            {new Date(img.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                                        </Badge>
-                                                        <Button size="icon" variant="ghost" className="size-8 text-white hover:bg-white/20" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
-                                                            <Download className="size-4" />
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Loading lịch sử */}
-                            {historyLoading && generatedImages.length === 0 && (
-                                <div className="grid grid-cols-2 gap-3">
-                                    {Array.from({ length: 4 }).map((_, i) => (
-                                        <Skeleton key={`m-hist-sk-${i}`} className="aspect-square rounded-xl" />
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Empty state khi chưa có kết quả */}
-                            {!isGenerating && !historyLoading && generatedImages.length === 0 && (
-                                <div className="flex flex-col items-center justify-center py-12 text-center">
-                                    <div className="rounded-full bg-muted p-3 mb-3">
-                                        <ImageIcon className="size-6 text-muted-foreground" />
-                                    </div>
-                                    <p className="text-sm text-muted-foreground">Tải ảnh lên rồi nhấn <strong>Tạo ảnh</strong></p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </ScrollArea>
-
-                {/* Hidden file input */}
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-
-                {/* Viewer Dialog */}
-                <ViewerDialog
-                    open={viewerOpen}
-                    onOpenChange={setViewerOpen}
-                    images={currentViewerImages}
-                    index={viewerIndex}
-                    setIndex={setViewerIndex}
-                    source={viewerSource}
-                    generatedImages={generatedImages}
-                    onDownload={handleDownload}
-                />
-            </div>
-        )
-    }
-
-    // ============================
-    // DESKTOP LAYOUT — 2 panel cố định, không scroll toàn trang
+    // UNIFIED DESKTOP / MOBILE LAYOUT via ToolWorkspaceLayout
     // ============================
     return (
-        <div className="flex flex-col h-[100dvh] overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b shrink-0">
-                <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                    <Link to="/app/tools/templates"><ArrowLeft className="size-4" /></Link>
-                </Button>
-                <div className="min-w-0 flex-1">
-                    <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-0.5">
-                        <Link to="/app/tools" className="hover:text-foreground transition-colors">Công cụ AI</Link>
-                        <ChevronRight className="size-3" />
-                        <Link to="/app/tools/templates" className="hover:text-foreground transition-colors">Mẫu thiết kế</Link>
-                        <ChevronRight className="size-3" />
-                        <span className="text-foreground font-medium truncate">{template?.name}</span>
-                    </nav>
-                    <h1 className="text-base font-semibold truncate">{template?.name}</h1>
-                </div>
-                <Badge variant="secondary" className="shrink-0">{template?.category}</Badge>
-            </div>
-
-            {/* 2-column layout */}
-            <div className="flex flex-1 min-h-0">
-                {/* LEFT: Controls */}
-                <div className="w-[380px] shrink-0 border-r flex flex-col overflow-hidden">
-                    <ScrollArea className="flex-1">
-                        <div className="p-4">
-                            {ControlsBlock}
-                        </div>
-                    </ScrollArea>
-                    <div className="p-4 border-t shrink-0">
-                        {GenerateButton}
-                    </div>
-                </div>
-
-                {/* RIGHT: Canvas */}
-                <div className="flex-1 flex flex-col min-h-0">
-                    {CanvasContent}
-                </div>
-            </div>
-
-            {/* Hidden file input */}
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+        <>
+            <ToolWorkspaceLayout
+                title={template.name}
+                icon={LayoutTemplate}
+                hasInputImage={true} // Always show controls
+                currentInputUrl={uploadedImage}
+                controls={ControlsBlock}
+                submitButton={GenerateButton}
+                canvas={
+                    !uploadedImage ? (
+                        <ToolImageUpload 
+                            images={[]} 
+                            onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
+                            variant="huge" 
+                            className="w-full max-w-2xl mx-auto" 
+                            label={`Sử dụng mẫu thiết kế: ${template.name}`} 
+                        />
+                    ) : (
+                        CanvasContent
+                    )
+                }
+            />
 
             {/* Viewer Dialog */}
             <ViewerDialog
@@ -921,7 +701,7 @@ export function TemplateDetailPage() {
                 generatedImages={generatedImages}
                 onDownload={handleDownload}
             />
-        </div>
+        </>
     )
 }
 
