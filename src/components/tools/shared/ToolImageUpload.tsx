@@ -26,7 +26,7 @@ function UrlImportDialog({ onSelect }: { onSelect: (url: string) => void }) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="w-full gap-2 rounded-xl h-11 hover:bg-muted/50 transition-all font-medium text-muted-foreground hover:text-foreground border-dashed border-2 hover:border-primary/40"><LinkIcon className="size-4" /> Dán Link URL</Button>
+                <Button variant="secondary" className="w-full gap-2 rounded-xl h-11 transition-all font-semibold text-foreground/80 hover:text-primary hover:bg-primary/10 shadow-sm"><LinkIcon className="size-4" /> Dán Link URL</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md rounded-2xl">
                 <DialogHeader>
@@ -65,7 +65,7 @@ function LibraryImportDialog({ onSelect }: { onSelect: (url: string) => void }) 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" className="w-full gap-2 rounded-xl h-11 hover:bg-muted/50 transition-all font-medium text-muted-foreground hover:text-foreground border-dashed border-2 hover:border-primary/40"><Library className="size-4" /> Thư viện của bạn</Button>
+                <Button variant="secondary" className="w-full gap-2 rounded-xl h-11 transition-all font-semibold text-foreground/80 hover:text-primary hover:bg-primary/10 shadow-sm"><Library className="size-4" /> Thư viện của bạn</Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-4xl max-h-[85vh] flex flex-col p-6 rounded-2xl">
                 <DialogHeader className="mb-2">
@@ -235,13 +235,13 @@ export function ToolImageUpload({
                     onDragLeave={() => setIsDragging(false)}
                     onDrop={handleDrop}
                 >
-                    <CardContent className="flex flex-col items-center justify-center p-10 py-16 text-center gap-5 w-full">
-                        <div className="flex items-center justify-center size-20 rounded-full bg-background shadow-sm border transition-transform group-hover:scale-105 group-hover:shadow-md text-foreground group-hover:text-primary">
+                    <CardContent className="flex flex-col items-center justify-center p-10 py-[72px] text-center gap-5 w-full">
+                        <div className="flex items-center justify-center size-20 rounded-full bg-background shadow-md border-2 transition-transform group-hover:scale-105 group-hover:shadow-lg text-foreground group-hover:text-primary group-hover:border-primary/30">
                             <Upload className="size-8 opacity-80" />
                         </div>
-                        <div className="space-y-2">
-                            <h3 className="text-xl font-bold tracking-tight">{label}</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                        <div className="space-y-1.5">
+                            <h3 className="text-xl font-bold tracking-tight text-foreground">{label}</h3>
+                            <p className="text-sm font-medium text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
                                 Kéo thả ảnh hoặc click để chọn file từ thiết bị của bạn.
                             </p>
                         </div>
