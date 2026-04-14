@@ -81,6 +81,8 @@ export function StyleTransferPage() {
         <ToolWorkspaceLayout
             title="Chuyển phong cách"
             icon={Wand2}
+            hasInputImage={!!images[0]}
+            currentInputUrl={images[0]}
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh gốc" />
@@ -140,15 +142,16 @@ export function StyleTransferPage() {
                 </>
             }
             canvas={
-                <>
+                !images[0] ? (
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Cần Đổi Phong Cách" />
+                ) : (
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
                         onUseAsInput={handleUseAsInput}
-                        emptyHint="Tải ảnh lên và chọn phong cách để bắt đầu"
                     />
-                </>
+                )
             }
             historyPanel={
                 <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />

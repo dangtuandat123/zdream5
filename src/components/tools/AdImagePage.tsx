@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -78,12 +78,13 @@ export function AdImagePage() {
     }
 
     return (
-        <ToolPageLayout
+        <ToolWorkspaceLayout
             title="Ảnh quảng cáo"
-            description="Tạo ảnh quảng cáo sản phẩm bắt mắt cho Facebook, Instagram, TikTok"
+            hasInputImage={!!images[0]}
+            currentInputUrl={images[0]}
             controls={
-                <>
-                    <ToolImageUpload images={images} onImagesChange={setImages} label="Tải ảnh sản phẩm" />
+                <div className="space-y-4">
+                    <ToolImageUpload images={images} onImagesChange={setImages} label="Ảnh sản phẩm gốc" />
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
                             <Label>Mô tả quảng cáo</Label>
@@ -140,17 +141,21 @@ export function AdImagePage() {
                         </div>
                     </div>
                     <ToolTipsCard tips={TOOL_TIPS['ad-image']} />
-                </>
+                </div>
             }
             canvas={
-                <>
+                !images[0] ? (
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Mẫu Sản Phẩm (Tạo Quảng Cáo)" />
+                ) : (
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         emptyHint="Tải ảnh sản phẩm và mô tả quảng cáo để bắt đầu"
                     />
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </>
+                )
+            }
+            historyPanel={
+                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
             submitButton={<ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !description.trim()} gemsCost={2} label="Tạo ảnh quảng cáo" gemsBalance={gems} />}
         />

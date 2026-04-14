@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react"
 import { toast } from "sonner"
 import { ArrowUp, ArrowDown, ArrowLeft, ArrowRight, MonitorPlay, Smartphone, Square, RectangleHorizontal, Expand } from "lucide-react"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -14,6 +14,7 @@ import { useToolHistory } from "@/hooks/use-tool-history"
 import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 const DIRECTIONS = [
@@ -107,17 +108,16 @@ export function ExtendPage() {
     }
 
     return (
-        <ToolPageLayout
+        <ToolWorkspaceLayout
             title="Mở rộng ảnh"
-            description="Kéo dãn viền ảnh ra ngoài khung hình gốc, AI tự sinh nội dung phù hợp"
             icon={Expand}
-            gradient="bg-gradient-to-br from-sky-500/10 via-blue-500/5 to-transparent"
+            hasInputImage={!!images[0]}
+            currentInputUrl={images[0]}
             controls={
                 <>
                     <ToolImageUpload images={images} onImagesChange={setImages} />
                     {images[0] && (
                         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
                             {imageDims && (
                                 <div className="space-y-2">
                                     <Label className="text-xs">Mở rộng nhanh theo tỷ lệ</Label>
@@ -188,7 +188,7 @@ export function ExtendPage() {
                             <Textarea
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                placeholder="Mô tả nội dung mở rộng (tùy chọn)..."
+                                placeholder="Mô tả bù đắp cho nội dung nếu được mở rộng ra (Tùy chọn)..."
                                 rows={2}
                                 maxLength={1000}
                                 className="text-sm"
@@ -198,20 +198,34 @@ export function ExtendPage() {
                 </>
             }
             canvas={
-                <>
+                !images[0] ? (
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh cần được mở rộng viền" />
+                ) : loading || result ? (
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
                         onUseAsInput={(url) => { setImages([url]); setResult(null); setDirections([]); setActivePreset(null) }}
-                        emptyHint="Tải ảnh lên và chọn hướng mở rộng"
                     />
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </>
+                ) : (
+                    <div className="w-full max-w-4xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
+                        <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
+                            <Label className="text-sm font-medium">Bản xem trước lưới hiển thị diện tích ảnh sẽ mở rộng ra</Label>
+                            <Button variant="outline" size="sm" onClick={() => { setImages([]); setResult(null) }} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
+                        </div>
+                        <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
+                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                            <ExtendPreview imageUrl={images[0]} directions={directions} extendRatio={extendRatio} imageDims={imageDims} />
+                        </div>
+                    </div>
+                )
+            }
+            historyPanel={
+                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
             submitButton={
                 images[0] ? (
-                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng" gemsBalance={gems} />
+                    <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0] || !directions.length} gemsCost={2} label="Mở rộng khung" gemsBalance={gems} />
                 ) : undefined
             }
         />

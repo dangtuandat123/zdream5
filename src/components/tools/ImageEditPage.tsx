@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
-import { ToolPageLayout } from "./ToolPageLayout"
+import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { Trash2, PenTool } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 type EditMode = "remove" | "replace"
 
@@ -70,90 +71,92 @@ export function ImageEditPage() {
     }
 
     return (
-        <ToolPageLayout
+        <ToolWorkspaceLayout
             title="Chỉnh sửa ảnh"
-            description="Tô lên vùng cần chỉnh sửa — xóa vật thể hoặc thay thế bằng nội dung mới"
             icon={PenTool}
-            gradient="bg-gradient-to-br from-violet-500/10 via-purple-500/5 to-transparent"
+            hasInputImage={!!images[0]}
+            currentInputUrl={images[0]}
             controls={
                 <>
-                    {/* Mode toggle */}
-                    <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit">
-                        <button
-                            onClick={() => setMode("remove")}
-                            className={cn(
-                                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
-                                mode === "remove"
-                                    ? "bg-background shadow-sm text-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            <Trash2 className="size-3.5" />
-                            Xóa vật thể
-                        </button>
-                        <button
-                            onClick={() => setMode("replace")}
-                            className={cn(
-                                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
-                                mode === "replace"
-                                    ? "bg-background shadow-sm text-foreground"
-                                    : "text-muted-foreground hover:text-foreground"
-                            )}
-                        >
-                            <PenTool className="size-3.5" />
-                            Thay thế nội dung
-                        </button>
-                    </div>
-
-                    {/* Image upload or mask painter */}
-                    {!images[0] ? (
-                        <ToolImageUpload images={images} onImagesChange={handleImagesChange} label={mode === "remove" ? "Tải ảnh cần xóa vật thể" : "Tải ảnh cần chỉnh sửa"} />
-                    ) : (
-                        <div className="space-y-2 animate-in fade-in duration-200">
-                            <div className="flex items-center justify-between">
-                                <Label className="text-xs">{mode === "remove" ? "Tô lên vật thể cần xóa" : "Tô lên vùng cần thay thế"}</Label>
-                                <button onClick={() => handleImagesChange([])} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                                    Đổi ảnh
+                    <ToolImageUpload images={images} onImagesChange={handleImagesChange} />
+                    {images[0] && (
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {/* Mode toggle */}
+                            <div className="flex gap-1 p-1 rounded-xl bg-muted w-fit">
+                                <button
+                                    onClick={() => setMode("remove")}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                                        mode === "remove"
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    <Trash2 className="size-3.5" />
+                                    Xóa vật thể
+                                </button>
+                                <button
+                                    onClick={() => setMode("replace")}
+                                    className={cn(
+                                        "flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-all",
+                                        mode === "replace"
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    <PenTool className="size-3.5" />
+                                    Thay thế nội dung
                                 </button>
                             </div>
-                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} />
-                        </div>
-                    )}
 
-                    {/* Description */}
-                    {images[0] && (
-                        <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <Textarea
-                                value={description}
-                                onChange={(e) => setDescription(e.target.value)}
-                                placeholder={mode === "remove"
-                                    ? "VD: Xóa người đứng bên phải, xóa watermark..."
-                                    : "VD: Thay bằng bông hoa hồng đỏ, thêm cái ghế gỗ..."
-                                }
-                                rows={mode === "remove" ? 2 : 3}
-                                maxLength={1000}
-                                className="text-sm"
-                            />
-                            {mode === "remove" && !maskBase64 && (
-                                <p className="text-[10px] text-muted-foreground">
-                                    Tô trực tiếp lên ảnh để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả để AI tự tìm
-                                </p>
-                            )}
+                            {/* Description */}
+                            <div className="space-y-3">
+                                <Textarea
+                                    value={description}
+                                    onChange={(e) => setDescription(e.target.value)}
+                                    placeholder={mode === "remove"
+                                        ? "VD: Xóa người đứng bên phải, xóa watermark..."
+                                        : "VD: Thay bằng bông hoa hồng đỏ, thêm cái ghế gỗ..."
+                                    }
+                                    rows={mode === "remove" ? 2 : 3}
+                                    maxLength={1000}
+                                    className="text-sm"
+                                />
+                                {mode === "remove" && !maskBase64 && (
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Tô trực tiếp lên phần ảnh bên trái để chọn chính xác vùng cần xóa, hoặc chỉ nhập mô tả bằng chữ để AI tự tìm
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     )}
                 </>
             }
             canvas={
-                <>
+                !images[0] ? (
+                    <ToolImageUpload images={images} onImagesChange={handleImagesChange} variant="huge" className="w-full max-w-2xl mx-auto" label={mode === "remove" ? "Ảnh cần xóa vật thể" : "Ảnh cần thay thế nội dung"} />
+                ) : loading || result ? (
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         beforeImageUrl={images[0]}
                         onUseAsInput={(url) => { handleImagesChange([url]) }}
-                        emptyHint={mode === "remove" ? "Tải ảnh lên và tô vùng cần xóa" : "Tải ảnh → tô vùng → mô tả nội dung mới"}
                     />
-                    <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-                </>
+                ) : (
+                    <div className="w-full max-w-3xl flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
+                        <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
+                            <Label className="text-sm font-medium">{mode === "remove" ? "Vẽ 1 nét liền bao quanh vật thể hoặc vùng cần xóa" : "Vẽ 1 nét liền bao quanh vùng bạn muốn thay thế ảnh khác"}</Label>
+                            <Button variant="outline" size="sm" onClick={() => handleImagesChange([])} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
+                        </div>
+                        <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
+                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} />
+                        </div>
+                    </div>
+                )
+            }
+            historyPanel={
+                <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
             }
             submitButton={
                 images[0] ? (
