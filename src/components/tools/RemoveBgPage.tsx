@@ -1,9 +1,8 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn, User, Package, Cat, Feather, Scissors, Maximize } from "lucide-react"
+import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn, User, Package, Cat, Feather, Scissors } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
-import { BoundingBoxImage } from "./shared/BoundingBoxImage"
 import { MaskPainter } from "./shared/MaskPainter"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
@@ -24,7 +23,6 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
@@ -58,7 +56,6 @@ export function RemoveBgPage() {
     const [subjectType, setSubjectType] = useState("auto")
     const [edgeRefine, setEdgeRefine] = useState("standard")
     const [bboxes, setBboxes] = useState<number[][] | null>(null)
-    const [selectionMode, setSelectionMode] = useState<"bbox" | "brush">("bbox")
     const [maskBase64, setMaskBase64] = useState<string>("")
 
     useInputFromUrl(useCallback((url: string) => { 
@@ -77,8 +74,8 @@ export function RemoveBgPage() {
                 image: images[0],
                 subject_type: subjectType,
                 edge_refine: edgeRefine,
-                ...(selectionMode === "bbox" && bboxes && bboxes.length > 0 ? { bboxes } : {}),
-                ...(selectionMode === "brush" && maskBase64 ? { mask_image: maskBase64 } : {})
+                ...(bboxes && bboxes.length > 0 ? { bboxes } : {}),
+                ...(maskBase64 ? { mask_image: maskBase64 } : {})
             })
             setResult(res.image.file_url)
             refreshUser()
@@ -184,32 +181,18 @@ export function RemoveBgPage() {
                             <Button variant="ghost" size="sm" onClick={() => { setImages([]); setBboxes(null); setMaskBase64("") }} className="text-muted-foreground hover:text-foreground">
                                 Đổi ảnh khác
                             </Button>
-                            
-                            <ToggleGroup 
-                                type="single" 
-                                value={selectionMode} 
-                                onValueChange={(v) => { 
-                                    if(v) { 
-                                        setSelectionMode(v as "bbox" | "brush"); 
-                                    } 
-                                }} 
-                                className="bg-muted p-1 rounded-full"
-                            >
-                                <ToggleGroupItem value="bbox" className="rounded-full px-4 h-8 text-xs gap-2 data-[state=on]:bg-background data-[state=on]:shadow-sm">
-                                    <Maximize className="size-3.5" /> Khoanh vuông
-                                </ToggleGroupItem>
-                                <ToggleGroupItem value="brush" className="rounded-full px-4 h-8 text-xs gap-2 data-[state=on]:bg-background data-[state=on]:shadow-sm">
-                                    <PenTool className="size-3.5" /> Tô cọ
-                                </ToggleGroupItem>
-                            </ToggleGroup>
                         </div>
 
                         {/* Interactive Canvas */}
-                        <div className={cn("w-full", selectionMode !== "bbox" && "hidden")}>
-                            <BoundingBoxImage src={images[0]} onBboxesChange={setBboxes} className="w-full" />
-                        </div>
-                        <div className={cn("w-full max-w-lg mt-2 ring-1 ring-border/40 shadow-sm rounded-xl overflow-hidden", selectionMode !== "brush" && "hidden")}>
-                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} className="w-full" />
+                        <div className="w-full mt-2 ring-1 ring-border/40 shadow-sm rounded-xl overflow-hidden">
+                            <MaskPainter 
+                                imageUrl={images[0]} 
+                                onSelectionChange={(payload) => {
+                                    setBboxes(payload.bboxes)
+                                    setMaskBase64(payload.maskBase64)
+                                }} 
+                                className="w-full" 
+                            />
                         </div>
 
                         {/* Status Hints */}
