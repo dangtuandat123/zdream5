@@ -207,22 +207,14 @@ export function ToolResultDisplay({
                                 
                                 {/* Expert Image Overlay Actions for Multi-image */}
                                 {displayImages.length > 1 && (
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
-                                        <div className="flex items-center gap-2">
-                                            <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors">
-                                                <Download className="size-3.5" />
-                                                Tải tấm này
-                                            </Button>
-                                            {onUseAsInput && (
-                                                <Button size="sm" variant="secondary" onClick={() => onUseAsInput(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors">
-                                                    <RotateCcw className="size-3.5" />
-                                                    Làm đầu vào
-                                                </Button>
-                                            )}
-                                        </div>
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5">
+                                        <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors w-40 justify-start px-4">
+                                            <Download className="size-3.5" />
+                                            Tải tấm này
+                                        </Button>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors">
+                                                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors w-40 justify-start px-4">
                                                     <ArrowRight className="size-3.5" />
                                                     Tiếp tục với tấm này...
                                                 </Button>
