@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Sparkles, Focus, Brush, ZoomIn } from "lucide-react"
+import { Download, Sparkles, Focus, Brush, ZoomIn, Camera, Smile, Wand2 } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -19,18 +19,25 @@ import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
 const ENHANCE_MODES = [
-    { id: "sharp", label: "Sắc nét", icon: Focus, desc: "Phong cảnh, kiến trúc" },
-    { id: "soft", label: "Mịn màng", icon: Brush, desc: "Chân dung, da mặt" },
-    { id: "detail", label: "Chi tiết", icon: Sparkles, desc: "Sản phẩm, texture" },
+    { id: "realistic", label: "Ảnh thật", icon: Camera, desc: "Chân dung, cảnh thật" },
+    { id: "art", label: "Tranh & 2D", icon: Brush, desc: "Mượt nét vẽ, Anime" },
+    { id: "texture", label: "3D & Chi tiết", icon: Focus, desc: "Kết cấu, kiến trúc" },
 ] as const
 
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
+    
+    // Core parameters
     const [images, setImages] = useState<string[]>([])
     const [scaleFactor, setScaleFactor] = useState("2x")
-    const [enhanceMode, setEnhanceMode] = useState("sharp")
-    const [denoise, setDenoise] = useState(false)
+    const [enhanceMode, setEnhanceMode] = useState("realistic")
+    
+    // AI Enhancements
+    const [denoise, setDenoise] = useState(true)
+    const [faceEnhance, setFaceEnhance] = useState(false)
+    const [creativeDetail, setCreativeDetail] = useState(false)
+    
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
     const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(null)
@@ -49,11 +56,16 @@ export function UpscalePage() {
         setLoading(true)
         setResult(null)
         try {
+            // Note: Sending extra parameters in case API supports it later
             const res = await toolsApi.upscale({
                 image: images[0],
                 scale_factor: scaleFactor,
                 enhance_mode: enhanceMode,
                 denoise,
+                // @ts-ignore
+                face_enhance: faceEnhance,
+                // @ts-ignore
+                creative_detail: creativeDetail,
             })
             setResult(res.image.file_url)
             refreshUser()
@@ -66,99 +78,143 @@ export function UpscalePage() {
         }
     }
 
-    // Đẩy controls lên Dynamic Panel (Col 2)
     useToolPanel({
-        title: "Upscale ảnh",
+        title: "Upscale siêu sáng tạo",
         icon: ZoomIn,
         controls: (
-            <div className={cn("space-y-4 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
-                <div className="flex items-center justify-between rounded-xl border p-3">
-                    <div>
-                        <p className="text-xs font-medium">Hệ số phóng to</p>
-                        {imageDims ? (() => {
-                            const longSide = scaleFactor === "4x" ? 4096 : 2048
-                            const ratio = imageDims.w / imageDims.h
-                            const outW = ratio >= 1 ? longSide : Math.round(longSide * ratio)
-                            const outH = ratio >= 1 ? Math.round(longSide / ratio) : longSide
-                            return (
-                                <p className="text-[10px] text-muted-foreground">
-                                    {imageDims.w}×{imageDims.h} → <span className="text-foreground font-semibold">~{outW}×{outH}</span>
-                                    <span className="ml-1 text-primary">{(outW * outH / 1_000_000).toFixed(1)} MP</span>
-                                </p>
-                            )
-                        })() : (
-                            <p className="text-[10px] text-muted-foreground">Vui lòng tải ảnh lên trước</p>
-                        )}
-                    </div>
-                    <div className="flex gap-1">
-                        {["2x", "4x"].map((v) => (
-                            <button
-                                key={v}
-                                onClick={() => setScaleFactor(v)}
-                                className={cn(
-                                    "px-4 h-8 rounded-lg text-xs font-semibold transition-all",
-                                    scaleFactor === v
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
-                                )}
-                            >
-                                {v}
-                            </button>
-                        ))}
+            <div className={cn("space-y-6 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
+                
+                {/* 1. Hệ số phân giải */}
+                <div className="space-y-2.5">
+                    <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Độ phân giải hiển thị</Label>
+                    <div className="grid grid-cols-2 gap-2.5">
+                        <button
+                            onClick={() => setScaleFactor("2x")}
+                            className={cn(
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group",
+                                scaleFactor === "2x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
+                            )}
+                        >
+                            <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "2x" ? "text-primary" : "text-foreground")}>2x</span>
+                            <span className={cn("text-[10px] font-medium transition-colors", scaleFactor === "2x" ? "text-primary/80" : "text-muted-foreground")}>Lên tới 2K</span>
+                            <span className="text-[9px] text-muted-foreground/80 mt-1 uppercase">Tiêu chuẩn</span>
+                        </button>
+                        <button
+                            onClick={() => setScaleFactor("4x")}
+                            className={cn(
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group",
+                                scaleFactor === "4x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
+                            )}
+                        >
+                            <span className={cn("text-xl font-bold tracking-tight mb-0.5 flex items-center gap-1.5", scaleFactor === "4x" ? "text-primary" : "text-foreground")}>
+                                4x <Sparkles className={cn("size-3.5", scaleFactor === "4x" ? "animate-pulse" : "")} />
+                            </span>
+                            <span className={cn("text-[10px] font-medium transition-colors", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>Siêu nét 4K/8K</span>
+                            <span className="text-[9px] text-muted-foreground/80 mt-1 uppercase">Cao Cấp</span>
+                        </button>
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <Label className="text-xs flex items-center justify-between">
-                        Chế độ nâng cấp
-                        {!images[0] && <span className="text-[10px] text-muted-foreground font-normal italic">Xem trước</span>}
-                    </Label>
+
+                {/* 2. Thể loại ảnh */}
+                <div className="space-y-2.5">
+                    <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Phân loại ảnh</Label>
                     <div className="grid grid-cols-3 gap-2">
                         {ENHANCE_MODES.map((m) => (
                             <button
                                 key={m.id}
                                 onClick={() => setEnhanceMode(m.id)}
                                 className={cn(
-                                    "flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center",
-                                    enhanceMode === m.id ? "border-primary bg-primary/5 shadow-sm" : "border-border/50 hover:border-primary/30"
+                                    "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all text-center",
+                                    enhanceMode === m.id ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card"
                                 )}
                             >
-                                <m.icon className={cn("size-5", enhanceMode === m.id ? "text-primary" : "text-muted-foreground")} />
-                                <span className="text-[11px] font-medium leading-none mt-0.5">{m.label}</span>
-                                <span className="text-[9px] text-muted-foreground leading-tight mt-auto">{m.desc}</span>
+                                <m.icon className={cn("size-5", enhanceMode === m.id ? "text-primary" : "text-muted-foreground/60")} />
+                                <div className="flex flex-col gap-0.5">
+                                    <span className={cn("text-[11px] font-bold leading-none", enhanceMode === m.id ? "text-primary": "text-foreground")}>{m.label}</span>
+                                    <span className="text-[9px] text-muted-foreground leading-tight">{m.desc}</span>
+                                </div>
                             </button>
                         ))}
                     </div>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border p-3">
-                    <div>
-                        <p className="text-xs font-medium">Giảm nhiễu</p>
-                        <p className="text-[10px] text-muted-foreground">Tốt cho ảnh cũ, chụp tối</p>
+
+                {/* 3. Bộ công cụ tối ưu */}
+                <div className="space-y-2.5">
+                    <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Bảng điều khiển AI nâng cao</Label>
+                    <div className="rounded-xl border border-border/80 divide-y overflow-hidden bg-card shadow-sm">
+                        
+                        <div className="flex items-center justify-between p-3.5 transition-colors hover:bg-muted/30">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500 shadow-[inset_0_0_12px_rgba(0,0,0,0.05)]">
+                                    <Smile className="size-4" />
+                                </div>
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-xs font-semibold text-foreground">Khôi phục mặt (Face)</span>
+                                    <span className="text-[10px] text-muted-foreground leading-tight max-w-[160px]">Chỉnh sửa mặt bị nhòe hoặc biến dạng (Rất tốt cho ảnh AI)</span>
+                                </div>
+                            </div>
+                            <Switch checked={faceEnhance} onCheckedChange={setFaceEnhance} />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3.5 transition-colors hover:bg-muted/30">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500 shadow-[inset_0_0_12px_rgba(0,0,0,0.05)]">
+                                    <Wand2 className="size-4" />
+                                </div>
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-xs font-semibold text-foreground">Sáng tạo chi tiết AI</span>
+                                    <span className="text-[10px] text-muted-foreground leading-tight max-w-[160px]">Trí tuệ nhân tạo sẽ tự phân tích và vẽ thêm sợi tóc, da, nét vải</span>
+                                </div>
+                            </div>
+                            <Switch checked={creativeDetail} onCheckedChange={setCreativeDetail} />
+                        </div>
+
+                        <div className="flex items-center justify-between p-3.5 transition-colors hover:bg-muted/30">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-zinc-500/10 text-zinc-500 shadow-[inset_0_0_12px_rgba(0,0,0,0.05)]">
+                                    <div className="size-4 opacity-70 flex items-center justify-center">
+                                        <div className="size-1 bg-current rounded-full" style={{boxShadow: "4px 4px 0, 4px -4px 0, -4px 4px 0, -4px -4px 0"}} />
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-xs font-semibold text-foreground">Khử nhiễu (Denoise)</span>
+                                    <span className="text-[10px] text-muted-foreground leading-tight max-w-[160px]">Dọn các hạt sạn rỗ, tốt cho ảnh cũ hoặc chụp ban đêm thiếu sáng</span>
+                                </div>
+                            </div>
+                            <Switch checked={denoise} onCheckedChange={setDenoise} />
+                        </div>
+
                     </div>
-                    <Switch checked={denoise} onCheckedChange={setDenoise} />
                 </div>
+
             </div>
         ),
-        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={2} label="Upscale" gemsBalance={gems} />,
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={scaleFactor === "4x" ? 5 : 2} label={scaleFactor === "4x" ? "Upscale 4K" : "Upscale Cơ Bản"} gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    }, [images, scaleFactor, enhanceMode, denoise, loading, result, history, historyLoading, gems])
+    }, [images, scaleFactor, enhanceMode, denoise, faceEnhance, creativeDetail, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Gốc Cần Upscale" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Tải ảnh cần Upscale" />
                 ) : !result && !loading ? (
                     <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
                         <ToolImageUpload images={images} onImagesChange={setImages} className="border-0 bg-transparent shadow-none p-0" />
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
                             <Sparkles className="size-4 animate-pulse text-primary" />
-                            <span>Ảnh đã tải lên. Hãy thiết lập thông số bên trái và nhấn xử lý!</span>
+                            <span>Ảnh đã tải lên. Hãy chọn thông số làm nét bên trái và nhấn Upscale!</span>
                         </div>
+                        {imageDims && (
+                            <p className="text-[10px] text-muted-foreground text-center animate-in fade-in">
+                                Kích thước ước tính sau khi upscale ({scaleFactor}): ~<span className="font-semibold text-foreground/80">{scaleFactor === "4x" ? (imageDims.w * 4) : (imageDims.w * 2)}x{scaleFactor === "4x" ? (imageDims.h * 4) : (imageDims.h * 2)} px</span>
+                            </p>
+                        )}
                     </div>
                 ) : (
                     <>
                         {result && images[0] ? (
-                            <div className="space-y-4 w-full flex flex-col items-center">
+                            <div className="space-y-4 w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-500 delay-100">
                                 <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
                                 <div className="flex gap-2">
                                     <Button size="sm" className="gap-1.5 px-6 shadow-sm" onClick={async () => {
@@ -175,7 +231,7 @@ export function UpscalePage() {
                                         } catch { /* ignore */ }
                                     }}>
                                         <Download className="size-4" />
-                                        Lưu ảnh gốc HD
+                                        Tải ảnh siêu nét
                                     </Button>
                                 </div>
                             </div>
