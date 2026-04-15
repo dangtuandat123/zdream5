@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn } from "lucide-react"
+import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn, User, Package, Cat, Feather, Scissors } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -33,16 +33,16 @@ const CROSS_TOOLS = [
 ]
 
 const SUBJECT_TYPES = [
-    { id: "auto", label: "Tự động", emoji: "✨" },
-    { id: "person", label: "Người", emoji: "👤" },
-    { id: "product", label: "Sản phẩm", emoji: "📦" },
-    { id: "animal", label: "Động vật", emoji: "🐾" },
+    { id: "auto", label: "Tự động", icon: Sparkles },
+    { id: "person", label: "Người", icon: User },
+    { id: "product", label: "Sản phẩm", icon: Package },
+    { id: "animal", label: "Động vật", icon: Cat },
 ] as const
 
 const EDGE_OPTIONS = [
-    { id: "standard", label: "Tiêu chuẩn" },
-    { id: "fine", label: "Mịn (tóc, lông)" },
-    { id: "hard", label: "Sắc nét" },
+    { id: "standard", label: "Tiêu chuẩn", icon: Wand2 },
+    { id: "fine", label: "Mịn (tóc/lông)", icon: Feather },
+    { id: "hard", label: "Sắc nét", icon: Scissors },
 ] as const
 
 export function RemoveBgPage() {
@@ -106,44 +106,48 @@ export function RemoveBgPage() {
         title: "Xóa nền ảnh",
         icon: Eraser,
         controls: (
-            <div className={cn("space-y-4 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
-                <div className="space-y-2">
-                    <Label className="text-xs">Loại chủ thể</Label>
-                    <div className="flex flex-wrap gap-1.5">
+            <div className={cn("space-y-5 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
+                <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground tracking-wide uppercase font-semibold">Loại chủ thể</Label>
+                    <div className="grid grid-cols-2 gap-2">
                         {SUBJECT_TYPES.map((t) => (
                             <button
                                 key={t.id}
                                 onClick={() => setSubjectType(t.id)}
                                 className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                    "flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-all duration-200 relative overflow-hidden group",
                                     subjectType === t.id
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        ? "bg-primary/5 border-primary/50 text-primary shadow-[0_2px_10px_-4px_rgba(var(--primary),0.3)]"
+                                        : "bg-muted/30 border-border/40 hover:bg-muted/70 text-muted-foreground hover:text-foreground"
                                 )}
                             >
-                                <span>{t.emoji}</span>
-                                {t.label}
+                                <t.icon className="size-5 transition-transform group-hover:scale-110" strokeWidth={subjectType === t.id ? 2.5 : 2} />
+                                <span className="text-xs font-semibold">{t.label}</span>
+                                {subjectType === t.id && (
+                                    <div className="absolute inset-x-0 bottom-0 h-[2px] rounded-t-full bg-primary/40 shadow-[0_0_12px_rgba(var(--primary),0.6)]" />
+                                )}
                             </button>
                         ))}
                     </div>
                 </div>
-                <div className="space-y-2">
-                    <Label className="text-xs flex items-center justify-between">
+                <div className="space-y-3">
+                    <Label className="text-xs text-muted-foreground tracking-wide uppercase font-semibold flex items-center justify-between">
                         Chất lượng viền
-                        {!images[0] && <span className="text-[10px] text-muted-foreground font-normal italic">Xem trước</span>}
+                        {!images[0] && <span className="text-[10px] text-muted-foreground/50 font-normal normal-case">Thiết lập trước</span>}
                     </Label>
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="grid grid-cols-3 gap-1 p-1 bg-muted/50 rounded-xl border border-border/40">
                         {EDGE_OPTIONS.map((e) => (
                             <button
                                 key={e.id}
                                 onClick={() => setEdgeRefine(e.id)}
                                 className={cn(
-                                    "px-3 py-1.5 rounded-full text-xs font-medium transition-all",
+                                    "flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-lg text-[10px] font-medium transition-all duration-200",
                                     edgeRefine === e.id
-                                        ? "bg-primary text-primary-foreground shadow-sm"
-                                        : "bg-muted hover:bg-muted/80 text-muted-foreground"
+                                        ? "bg-background text-foreground shadow-sm ring-1 ring-border/50 scale-100"
+                                        : "text-muted-foreground scale-95 hover:text-foreground hover:bg-muted/80"
                                 )}
                             >
+                                <e.icon className="size-3.5" />
                                 {e.label}
                             </button>
                         ))}
