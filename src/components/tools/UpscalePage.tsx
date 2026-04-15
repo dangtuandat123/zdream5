@@ -294,62 +294,70 @@ export function UpscalePage() {
                 ) : (
                     <>
                         {result && images[0] ? (
-                            <div className="space-y-4 w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-500 delay-100">
-                                <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
+                            <div className="w-full h-full flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-500 delay-100">
+                                {/* Ảnh chiếm không gian có sẵn */}
+                                <div className="flex-1 min-h-0 flex items-center justify-center">
+                                    <ZoomCompare beforeUrl={images[0]} afterUrl={result} className="max-w-full" />
+                                </div>
 
-                                {/* Output info */}
-                                {outputDims && (
+                                {/* Bottom bar: info + actions */}
+                                <div className="flex items-center justify-between gap-3 flex-wrap py-1">
+                                    {/* Info bên trái */}
                                     <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                                        <Badge variant="secondary" className="text-[10px] h-5 px-2 font-mono">
-                                            {outputDims.w}×{outputDims.h} px
-                                        </Badge>
-                                        <span>·</span>
-                                        <span>{scaleFactor === "4x" ? "Ultra HD" : scaleFactor === "2x" ? "Full HD" : "HD"}</span>
+                                        {outputDims && (
+                                            <>
+                                                <Badge variant="secondary" className="text-[10px] h-5 px-2 font-mono">
+                                                    {outputDims.w}×{outputDims.h}
+                                                </Badge>
+                                                <span className="text-muted-foreground/60">·</span>
+                                            </>
+                                        )}
+                                        <span className="font-medium">{scaleFactor === "4x" ? "Ultra HD" : scaleFactor === "2x" ? "Full HD" : "HD"}</span>
                                     </div>
-                                )}
 
-                                {/* Action buttons */}
-                                <div className="flex gap-2 flex-wrap justify-center">
-                                    <Button size="sm" className="gap-1.5 px-5 shadow-sm" onClick={async () => {
-                                        try {
-                                            const response = await fetch(result)
-                                            const blob = await response.blob()
-                                            const url = URL.createObjectURL(blob)
-                                            const a = document.createElement("a")
-                                            a.href = url
-                                            a.download = `zdream-upscale-${Date.now()}.png`
-                                            a.click()
-                                            URL.revokeObjectURL(url)
-                                        } catch { /* ignore */ }
-                                    }}>
-                                        <Download className="size-3.5" />
-                                        Tải ảnh
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => { setResult(null) }}>
-                                        <RotateCcw className="size-3.5" />
-                                        Thử lại
-                                    </Button>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button size="sm" variant="outline" className="gap-1.5">
-                                                <ArrowRight className="size-3.5" />
-                                                Tiếp tục với...
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="center">
-                                            {[
-                                                { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
-                                                { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
-                                                { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
-                                                { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
-                                            ].map((tool) => (
-                                                <DropdownMenuItem key={tool.path} onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(result)}`)} className="gap-2 text-xs">
-                                                    <tool.icon className="size-3.5" />
-                                                    {tool.label}
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                    {/* Actions bên phải */}
+                                    <div className="flex items-center gap-2">
+                                        <Button size="sm" className="gap-1.5 h-8 px-4 text-xs" onClick={async () => {
+                                            try {
+                                                const response = await fetch(result)
+                                                const blob = await response.blob()
+                                                const url = URL.createObjectURL(blob)
+                                                const a = document.createElement("a")
+                                                a.href = url
+                                                a.download = `zdream-upscale-${Date.now()}.png`
+                                                a.click()
+                                                URL.revokeObjectURL(url)
+                                            } catch { /* ignore */ }
+                                        }}>
+                                            <Download className="size-3.5" />
+                                            Tải ảnh
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setResult(null)}>
+                                            <RotateCcw className="size-3.5" />
+                                            Thử lại
+                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs">
+                                                    <ArrowRight className="size-3.5" />
+                                                    Tiếp tục với...
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                {[
+                                                    { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
+                                                    { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
+                                                    { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
+                                                    { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
+                                                ].map((tool) => (
+                                                    <DropdownMenuItem key={tool.path} onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(result)}`)} className="gap-2 text-xs">
+                                                        <tool.icon className="size-3.5" />
+                                                        {tool.label}
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
                                 </div>
                             </div>
                         ) : (
