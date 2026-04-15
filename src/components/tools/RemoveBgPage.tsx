@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn, User, Package, Cat, Feather, Scissors } from "lucide-react"
+import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn, User, Package, Cat, Feather, Scissors, Maximize } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { BoundingBoxImage } from "./shared/BoundingBoxImage"
+import { MaskPainter } from "./shared/MaskPainter"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
@@ -23,6 +24,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
@@ -55,9 +57,15 @@ export function RemoveBgPage() {
     const [loading, setLoading] = useState(false)
     const [subjectType, setSubjectType] = useState("auto")
     const [edgeRefine, setEdgeRefine] = useState("standard")
-    const [bbox, setBbox] = useState<[number, number, number, number] | null>(null)
+    const [bboxes, setBboxes] = useState<number[][] | null>(null)
+    const [selectionMode, setSelectionMode] = useState<"bbox" | "brush">("bbox")
+    const [maskBase64, setMaskBase64] = useState<string>("")
 
-    useInputFromUrl(useCallback((url: string) => { setImages([url]); setBbox(null) }, []))
+    useInputFromUrl(useCallback((url: string) => { 
+        setImages([url]); 
+        setBboxes(null); 
+        setMaskBase64(""); 
+    }, []))
     const bgPreviewerRef = useRef<{ getCompositeDataUrl: () => string | null }>(null)
 
     const handleSubmit = async () => {
@@ -69,7 +77,8 @@ export function RemoveBgPage() {
                 image: images[0],
                 subject_type: subjectType,
                 edge_refine: edgeRefine,
-                ...(bbox ? { bbox } : {})
+                ...(bboxes && bboxes.length > 0 ? { bboxes } : {}),
+                ...(maskBase64 ? { mask_image: maskBase64 } : {})
             })
             setResult(res.image.file_url)
             refreshUser()
@@ -169,21 +178,58 @@ export function RemoveBgPage() {
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Gốc Cần Xóa Nền" />
                 ) : !result && !loading ? (
                     <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto items-center animate-in fade-in zoom-in-95 duration-300">
-                        <BoundingBoxImage src={images[0]} onBboxChange={setBbox} className="w-full" />
+                        
+                        {/* Headers & Toggles */}
                         <div className="flex items-center justify-between w-full">
-                            <Button variant="ghost" size="sm" onClick={() => { setImages([]); setBbox(null) }} className="text-muted-foreground hover:text-foreground">
+                            <Button variant="ghost" size="sm" onClick={() => { setImages([]); setBboxes(null); setMaskBase64("") }} className="text-muted-foreground hover:text-foreground">
                                 Đổi ảnh khác
                             </Button>
-                            <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground bg-muted/60 px-3 py-1.5 rounded-full">
-                                {bbox ? (
+                            
+                            <ToggleGroup 
+                                type="single" 
+                                value={selectionMode} 
+                                onValueChange={(v) => { 
+                                    if(v) { 
+                                        setSelectionMode(v as "bbox" | "brush"); 
+                                        setBboxes(null); 
+                                        setMaskBase64(""); 
+                                    } 
+                                }} 
+                                className="bg-muted p-1 rounded-full"
+                            >
+                                <ToggleGroupItem value="bbox" className="rounded-full px-4 h-8 text-xs gap-2 data-[state=on]:bg-background data-[state=on]:shadow-sm">
+                                    <Maximize className="size-3.5" /> Khoanh vuông
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="brush" className="rounded-full px-4 h-8 text-xs gap-2 data-[state=on]:bg-background data-[state=on]:shadow-sm">
+                                    <PenTool className="size-3.5" /> Tô cọ
+                                </ToggleGroupItem>
+                            </ToggleGroup>
+                        </div>
+
+                        {/* Interactive Canvas */}
+                        {selectionMode === "bbox" ? (
+                            <BoundingBoxImage src={images[0]} onBboxesChange={setBboxes} className="w-full" />
+                        ) : (
+                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} className="w-full max-w-lg mt-2 ring-1 ring-border/40 shadow-sm" />
+                        )}
+
+                        {/* Status Hints */}
+                        <div className="flex items-center justify-center w-full mt-2">
+                            <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground bg-muted/60 px-4 py-2 rounded-full">
+                                {bboxes && bboxes.length > 0 ? (
                                     <>
                                         <div className="size-2 rounded-full bg-primary animate-pulse" />
-                                        <span>Đã khoanh vùng tọa độ: {bbox.join(', ')}</span>
+                                        <span>Đã khoanh {bboxes.length} vùng chọn</span>
+                                    </>
+                                ) : maskBase64 ? (
+                                    <>
+                                        <div className="size-2 rounded-full bg-primary animate-pulse" />
+                                        <span>Đã lưu dữ liệu cọ vẽ (Mask)</span>
                                     </>
                                 ) : (
                                     <>
                                         <Sparkles className="size-3.5 text-primary animate-pulse" />
-                                        <span>Tự động nhận diện (Hoặc thao tác khoanh vùng)</span>
+                                        <span>Tự động tách nền (Hoặc thao tác chỉ định thủ công)</span>
                                     </>
                                 )}
                             </div>
