@@ -121,26 +121,57 @@ class ToolController extends Controller
     {
         $v = $request->validated();
         $scale = $v['scale_factor'] ?? '2x';
-        $imageSize = $scale === '4x' ? '4K' : '2K';
-        $enhanceMode = $v['enhance_mode'] ?? 'sharp';
         $denoise = $v['denoise'] ?? false;
+        $faceEnhance = $v['face_enhance'] ?? false;
+        $creativeDetail = $v['creative_detail'] ?? false;
 
-        $enhanceHints = [
-            'sharp' => 'Maximize sharpness, enhance edges and textures, add crisp fine details.',
-            'soft' => 'Smooth skin, reduce blemishes, maintain soft gradients, gentle beauty enhancement.',
-            'detail' => 'Maximize texture detail, enhance material surfaces, add micro-detail and depth.',
-        ];
-        $enhanceHint = $enhanceHints[$enhanceMode] ?? $enhanceHints['sharp'];
-        $denoiseHint = $denoise ? ' First reduce noise and grain from the original.' : '';
+        // Map scale_factor → OpenRouter image_size
+        $imageSizeMap = ['1x' => '1K', '2x' => '2K', '4x' => '4K'];
+        $imageSize = $imageSizeMap[$scale] ?? '2K';
+
+        // Detect kích thước gốc để đưa context cho AI
+        $aspectRatio = $this->detectAspectRatio($v['image']);
+        $origDims = $this->getImageDimensions($v['image']);
+        $dimsHint = $origDims
+            ? "The original image is {$origDims['w']}×{$origDims['h']} pixels."
+            : '';
+
+        // Xây dựng prompt với các AI enhancement hints
+        $promptParts = [];
+        $promptParts[] = "Upscale and enhance this image to higher resolution ({$imageSize}).";
+        if ($dimsHint) $promptParts[] = $dimsHint;
+        if ($denoise) $promptParts[] = 'Reduce noise, grain and artifacts from the original image.';
+        if ($faceEnhance) $promptParts[] = 'Restore and enhance facial features: fix blurry eyes, refine skin texture, correct any AI-generated face distortions.';
+        if ($creativeDetail) $promptParts[] = 'Intelligently add fine details: individual hair strands, fabric textures, skin pores, material surfaces.';
+        $promptParts[] = 'Maximize sharpness, enhance edges and textures. Maintain the original composition, colors, and style exactly.';
 
         return $this->processImageTool(
             request: $request,
             toolName: 'upscale',
-            prompt: "Upscale and enhance this image to {$scale} higher resolution.{$denoiseHint} {$enhanceHint} Maintain the original composition and style exactly.",
+            prompt: implode(' ', $promptParts),
             referenceImages: [$v['image']],
-            aspectRatio: $this->detectAspectRatio($v['image']),
+            aspectRatio: $aspectRatio,
             imageSize: $imageSize,
         );
+    }
+
+    /**
+     * Lấy kích thước thực của ảnh từ base64 data.
+     */
+    private function getImageDimensions(string $base64): ?array
+    {
+        $data = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
+        $decoded = base64_decode($data);
+        if ($decoded === false) return null;
+
+        $img = @imagecreatefromstring($decoded);
+        if (!$img) return null;
+
+        $w = imagesx($img);
+        $h = imagesy($img);
+        imagedestroy($img);
+
+        return ($w > 0 && $h > 0) ? ['w' => $w, 'h' => $h] : null;
     }
 
     public function removeBg(RemoveBgRequest $request): JsonResponse

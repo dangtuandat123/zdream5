@@ -18,23 +18,49 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
-const getOutputDims = (w: number, h: number, factor: 1 | 2 | 4) => {
-    if (factor === 1) return { w, h };
-    const maxSide = factor === 4 ? 4096 : 2048;
-    let targetW = w * factor;
-    let targetH = h * factor;
-    if (Math.max(targetW, targetH) > maxSide) {
-        const ratio = w / h;
-        if (w >= h) {
-             targetW = maxSide;
-             targetH = Math.round(maxSide / ratio);
-        } else {
-             targetH = maxSide;
-             targetW = Math.round(maxSide * ratio);
-        }
+/**
+ * Pixel output cố định theo OpenRouter image_config.
+ * Key = aspect_ratio, Values = [1K, 2K, 4K] pixel dimensions.
+ */
+const RESOLUTION_TABLE: Record<string, { w: number; h: number }[]> = {
+    '1:1':  [{ w: 1024, h: 1024 }, { w: 2048, h: 2048 }, { w: 4096, h: 4096 }],
+    '4:5':  [{ w: 896, h: 1152 },  { w: 1792, h: 2304 }, { w: 3584, h: 4608 }],
+    '5:4':  [{ w: 1152, h: 896 },  { w: 2304, h: 1792 }, { w: 4608, h: 3584 }],
+    '3:4':  [{ w: 864, h: 1184 },  { w: 1728, h: 2368 }, { w: 3456, h: 4736 }],
+    '4:3':  [{ w: 1184, h: 864 },  { w: 2368, h: 1728 }, { w: 4736, h: 3456 }],
+    '2:3':  [{ w: 832, h: 1248 },  { w: 1664, h: 2496 }, { w: 3328, h: 4992 }],
+    '3:2':  [{ w: 1248, h: 832 },  { w: 2496, h: 1664 }, { w: 4992, h: 3328 }],
+    '9:16': [{ w: 768, h: 1344 },  { w: 1536, h: 2688 }, { w: 3072, h: 5376 }],
+    '16:9': [{ w: 1344, h: 768 },  { w: 2688, h: 1536 }, { w: 5376, h: 3072 }],
+}
+
+/**
+ * Detect closest standard ratio from actual pixel dimensions.
+ */
+const detectRatio = (w: number, h: number): string => {
+    const ratio = w / h
+    const standards: [string, number][] = [
+        ['1:1', 1], ['4:5', 0.8], ['5:4', 1.25], ['3:4', 0.75], ['4:3', 1.333],
+        ['2:3', 0.667], ['3:2', 1.5], ['9:16', 0.5625], ['16:9', 1.778],
+    ]
+    let closest = '1:1'
+    let minDiff = Infinity
+    for (const [label, val] of standards) {
+        const diff = Math.abs(ratio - val)
+        if (diff < minDiff) { minDiff = diff; closest = label }
     }
-    return { w: targetW, h: targetH };
-};
+    return closest
+}
+
+/**
+ * Trả pixel output chính xác theo OpenRouter spec.
+ * sizeIndex: 0=1K, 1=2K, 2=4K
+ */
+const getOutputDims = (w: number, h: number, sizeIndex: 0 | 1 | 2) => {
+    const ratio = detectRatio(w, h)
+    const entry = RESOLUTION_TABLE[ratio] ?? RESOLUTION_TABLE['1:1']
+    return entry[sizeIndex]
+}
 
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
@@ -62,20 +88,18 @@ export function UpscalePage() {
         img.src = images[0]
     }, [images])
 
+    const sizeIndex = scaleFactor === "4x" ? 2 : scaleFactor === "2x" ? 1 : 0
+
     const handleSubmit = async () => {
         if (!images[0]) return toast.error("Vui lòng tải ảnh lên")
         setLoading(true)
         setResult(null)
         try {
-            // Note: Sending extra parameters in case API supports it later
             const res = await toolsApi.upscale({
                 image: images[0],
                 scale_factor: scaleFactor,
-                enhance_mode: "soft", // Backend Vision model sẽ tự động phân tích và ghi đè
                 denoise,
-                // @ts-ignore
                 face_enhance: faceEnhance,
-                // @ts-ignore
                 creative_detail: creativeDetail,
             })
             setResult(res.image.file_url)
@@ -95,9 +119,9 @@ export function UpscalePage() {
         controls: (
             <div className={cn("space-y-6 animate-in fade-in transition-all duration-300", !images[0] ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : "")}>
                 
-                {/* 1. Hệ số phân giải */}
+                {/* 1. Độ phân giải đầu ra */}
                 <div className="space-y-2.5">
-                    <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Độ phân giải hiển thị</Label>
+                    <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Độ phân giải đầu ra</Label>
                     <div className="grid grid-cols-3 gap-2.5">
                         <button
                             onClick={() => setScaleFactor("1x")}
@@ -106,9 +130,9 @@ export function UpscalePage() {
                                 scaleFactor === "1x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
                             )}
                         >
-                            <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "1x" ? "text-primary" : "text-foreground")}>1x</span>
+                            <span className={cn("text-base font-bold tracking-tight mb-0.5", scaleFactor === "1x" ? "text-primary" : "text-foreground")}>HD</span>
                             <span className={cn("text-[10px] font-medium transition-colors text-center w-full truncate", scaleFactor === "1x" ? "text-primary/80" : "text-muted-foreground")}>
-                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 1).w}×${getOutputDims(imageDims.w, imageDims.h, 1).h} px` : "Giữ nguyên"}
+                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 0).w}×${getOutputDims(imageDims.w, imageDims.h, 0).h}` : "~1K px"}
                             </span>
                             <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Làm Nét</span>
                         </button>
@@ -119,9 +143,9 @@ export function UpscalePage() {
                                 scaleFactor === "2x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
                             )}
                         >
-                            <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "2x" ? "text-primary" : "text-foreground")}>2x</span>
+                            <span className={cn("text-base font-bold tracking-tight mb-0.5", scaleFactor === "2x" ? "text-primary" : "text-foreground")}>Full HD</span>
                             <span className={cn("text-[10px] font-medium transition-colors text-center w-full truncate", scaleFactor === "2x" ? "text-primary/80" : "text-muted-foreground")}>
-                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 2).w}×${getOutputDims(imageDims.w, imageDims.h, 2).h} px` : "Lên tới 2K"}
+                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 1).w}×${getOutputDims(imageDims.w, imageDims.h, 1).h}` : "~2K px"}
                             </span>
                             <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Tiêu chuẩn</span>
                         </button>
@@ -132,11 +156,11 @@ export function UpscalePage() {
                                 scaleFactor === "4x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
                             )}
                         >
-                            <span className={cn("text-xl font-bold tracking-tight mb-0.5 flex items-center gap-1.5", scaleFactor === "4x" ? "text-primary" : "text-foreground")}>
-                                4x <Sparkles className={cn("size-3.5", scaleFactor === "4x" ? "animate-pulse" : "")} />
+                            <span className={cn("text-base font-bold tracking-tight mb-0.5 flex items-center gap-1.5", scaleFactor === "4x" ? "text-primary" : "text-foreground")}>
+                                Ultra HD <Sparkles className={cn("size-3.5", scaleFactor === "4x" ? "animate-pulse" : "")} />
                             </span>
                             <span className={cn("text-[10px] font-medium transition-colors text-center w-full truncate", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>
-                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 4).w}×${getOutputDims(imageDims.w, imageDims.h, 4).h} px` : "Siêu nét 4K/8K"}
+                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 2).w}×${getOutputDims(imageDims.w, imageDims.h, 2).h}` : "~4K px"}
                             </span>
                             <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Cao Cấp</span>
                         </button>
@@ -194,7 +218,7 @@ export function UpscalePage() {
 
             </div>
         ),
-        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={scaleFactor === "4x" ? 5 : scaleFactor === "2x" ? 2 : 1} label={scaleFactor === "4x" ? "Upscale 4K" : scaleFactor === "2x" ? "Upscale 2K" : "Làm Nét Ảnh"} gemsBalance={gems} />,
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={scaleFactor === "4x" ? 5 : scaleFactor === "2x" ? 2 : 1} label={scaleFactor === "4x" ? "Upscale Ultra HD" : scaleFactor === "2x" ? "Upscale Full HD" : "Làm Nét HD"} gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
     }, [images, scaleFactor, denoise, faceEnhance, creativeDetail, loading, result, history, historyLoading, gems])
 
@@ -211,10 +235,10 @@ export function UpscalePage() {
                             <span>Ảnh đã tải lên. Hãy chọn thông số làm nét bên trái và nhấn Xử lý!</span>
                         </div>
                         {imageDims && (() => {
-                            const dims = getOutputDims(imageDims.w, imageDims.h, scaleFactor === "4x" ? 4 : scaleFactor === "2x" ? 2 : 1)
+                            const dims = getOutputDims(imageDims.w, imageDims.h, sizeIndex as 0 | 1 | 2)
                             return (
                                 <p className="text-[10px] text-muted-foreground text-center animate-in fade-in">
-                                    Kích thước ước tính sau xử lý: ~<span className="font-semibold text-foreground/80">{dims.w}x{dims.h} px</span>
+                                    Độ phân giải đầu ra: <span className="font-semibold text-foreground/80">{dims.w}×{dims.h} px</span>
                                 </p>
                             )
                         })()}
