@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { toast } from "sonner"
 import { ImageIcon, Sparkles } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
@@ -12,6 +12,7 @@ import { useToolPanel } from "./ToolPanelContext"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
+import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { cn } from "@/lib/utils"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -43,6 +44,8 @@ export function AdImagePage() {
     const [aspectRatio, setAspectRatio] = useState("16:9")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+
+    useInputFromUrl(useCallback((url: string) => setImages([url]), []))
 
     const [ratioManuallySet, setRatioManuallySet] = useState(false)
 
@@ -169,6 +172,8 @@ export function AdImagePage() {
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
+                        beforeImageUrl={images[0]}
+                        onUseAsInput={(url) => { setImages([url]); setResult(null) }}
                         emptyHint="Tải ảnh sản phẩm và mô tả quảng cáo để bắt đầu"
                     />
                 )

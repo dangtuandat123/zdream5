@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { toast } from "sonner"
 import { Info, UserCheck, Sparkles, Image as ImageIcon } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
@@ -10,6 +10,7 @@ import { useToolPanel } from "./ToolPanelContext"
 import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
+import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
@@ -44,6 +45,14 @@ export function ConsistentCharacterPage() {
     const [aspectRatio, setAspectRatio] = useState("auto")
     const [result, setResult] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+
+    useInputFromUrl(useCallback((url: string) => {
+        setImages(prev => {
+            if (prev.includes(url)) return prev
+            if (prev.length >= 3) return [url, ...prev.slice(0, 2)]
+            return [...prev, url]
+        })
+    }, []))
 
     const handleSubmit = async () => {
         if (!images.length) return toast.error("Vui lòng tải ảnh nhân vật")
@@ -169,6 +178,14 @@ export function ConsistentCharacterPage() {
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
+                        onUseAsInput={(url) => {
+                            setImages(prev => {
+                                if (prev.includes(url)) return prev
+                                if (prev.length >= 3) return [url, ...prev.slice(0, 2)]
+                                return [...prev, url]
+                            })
+                            setResult(null)
+                        }}
                         emptyHint="Đang tạo ảnh nhân vật..."
                         infoContent={
                             result ? (

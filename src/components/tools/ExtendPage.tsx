@@ -207,7 +207,7 @@ export function ExtendPage() {
                             <div className="w-full max-w-4xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
                                 <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
                                     <Label className="text-sm font-medium">Bản xem trước lưới hiển thị diện tích ảnh sẽ mở rộng ra</Label>
-                                    <Button variant="outline" size="sm" onClick={() => { setImages([]); setResult(null) }} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
+                                    <Button variant="secondary" size="sm" onClick={() => { setImages([]); setResult(null) }} className="h-9 px-4 rounded-xl text-xs font-semibold">Đổi ảnh</Button>
                                 </div>
                                 <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
                                     <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>

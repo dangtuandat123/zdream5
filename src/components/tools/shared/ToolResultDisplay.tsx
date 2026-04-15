@@ -174,8 +174,8 @@ export function ToolResultDisplay({
             <div className="rounded-xl border bg-card p-4 space-y-3">
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-semibold">Kết quả</h3>
-                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={() => handleCopy(textResult)}>
-                        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
+                    <Button size="sm" variant="secondary" className="gap-1.5 h-9 rounded-xl px-4 font-semibold text-xs transition-colors hover:bg-secondary/80" onClick={() => handleCopy(textResult)}>
+                        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
                         {copied ? "Đã sao chép" : "Sao chép"}
                     </Button>
                 </div>

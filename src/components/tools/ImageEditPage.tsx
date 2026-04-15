@@ -135,7 +135,7 @@ export function ImageEditPage() {
             />
         ),
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    }, [images, mode, prompt, loading, result, history, historyLoading, gems])
+    }, [images, mode, description, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout
@@ -153,7 +153,7 @@ export function ImageEditPage() {
                     <div className="w-full max-w-3xl flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
                         <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
                             <Label className="text-sm font-medium">{mode === "remove" ? "Vẽ 1 nét liền bao quanh vật thể hoặc vùng cần xóa" : "Vẽ 1 nét liền bao quanh vùng bạn muốn thay thế ảnh khác"}</Label>
-                            <Button variant="outline" size="sm" onClick={() => handleImagesChange([])} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
+                            <Button variant="secondary" size="sm" onClick={() => handleImagesChange([])} className="h-9 px-4 rounded-xl text-xs font-semibold">Đổi ảnh khởi tạo</Button>
                         </div>
                         <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
                             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
