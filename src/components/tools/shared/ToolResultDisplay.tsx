@@ -205,19 +205,41 @@ export function ToolResultDisplay({
                             <div key={idx} className="relative rounded-xl overflow-hidden border bg-muted shadow-sm group">
                                 <img src={src} alt={`Result ${idx + 1}`} className="w-full max-h-[500px] object-contain" />
                                 
-                                {/* Image Overlay Actions for Multi-image */}
+                                {/* Expert Image Overlay Actions for Multi-image */}
                                 {displayImages.length > 1 && (
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                        <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs">
-                                            <Download className="size-3.5" />
-                                            Tải xuống
-                                        </Button>
-                                        {onUseAsInput && (
-                                            <Button size="sm" variant="secondary" onClick={() => onUseAsInput(src)} className="gap-1.5 h-8 text-xs">
-                                                <RotateCcw className="size-3.5" />
-                                                Làm đầu vào
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors">
+                                                <Download className="size-3.5" />
+                                                Tải tấm này
                                             </Button>
-                                        )}
+                                            {onUseAsInput && (
+                                                <Button size="sm" variant="secondary" onClick={() => onUseAsInput(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors">
+                                                    <RotateCcw className="size-3.5" />
+                                                    Làm đầu vào
+                                                </Button>
+                                            )}
+                                        </div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors">
+                                                    <ArrowRight className="size-3.5" />
+                                                    Tiếp tục với tấm này...
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="center" className="rounded-xl border-border/40 shadow-xl">
+                                                {crossTools.map((tool) => (
+                                                    <DropdownMenuItem
+                                                        key={tool.path}
+                                                        onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(src)}`)}
+                                                        className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
+                                                    >
+                                                        <tool.icon className="size-3.5 text-muted-foreground" />
+                                                        <span className="font-medium">{tool.label}</span>
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 )}
                             </div>
@@ -225,11 +247,17 @@ export function ToolResultDisplay({
                     </div>
                 )}
                 {infoContent && (
-                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-1 mb-1">
+                    <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground mt-2 mb-1">
                         {infoContent}
                     </div>
                 )}
-                <div className="flex gap-2.5 flex-wrap items-center pt-2">
+                
+                {/* Global Action Bar (Glass Pill for Multi-image, Standard left-aligned for Single) */}
+                <div className={displayImages.length > 1 
+                    ? "flex gap-2.5 flex-wrap items-center justify-center backdrop-blur-md bg-secondary/30 border border-border/40 shadow-sm rounded-2xl px-5 py-3 ml-auto mr-auto w-fit mt-4 transition-all" 
+                    : "flex gap-2.5 flex-wrap items-center mt-3"
+                }>
+                    {/* [1] Nút Download */}
                     {displayImages.length === 1 ? (
                         <Button
                             size="sm"
@@ -244,13 +272,15 @@ export function ToolResultDisplay({
                         <Button
                             size="sm"
                             variant="secondary"
-                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all bg-primary/10 hover:bg-primary/20 text-primary"
                             onClick={() => displayImages.forEach(src => handleDownloadUrl(src))}
                         >
                             <Download className="size-3.5" />
                             <span className="text-xs font-semibold">Tải tất cả ({displayImages.length})</span>
                         </Button>
                     )}
+
+                    {/* [2] Nút Prompt (Luôn hiển thị vì prompt dùng chung cho tất cả ảnh) */}
                     {prompt && (
                         <Button
                             size="sm"
@@ -262,41 +292,47 @@ export function ToolResultDisplay({
                             <span className="text-xs font-semibold">Prompt</span>
                         </Button>
                     )}
-                    {onUseAsInput && (
-                        <Button
-                            size="sm"
-                            variant="secondary"
-                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
-                            onClick={() => onUseAsInput(displayImages[0])}
-                        >
-                            <RotateCcw className="size-3.5" />
-                            <span className="text-xs font-semibold">Dùng làm đầu vào</span>
-                        </Button>
-                    )}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button
-                                size="sm"
-                                variant="secondary"
-                                className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
-                            >
-                                <ArrowRight className="size-3.5" />
-                                <span className="text-xs font-semibold">Tiếp tục với...</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start" className="rounded-xl border-border/40 shadow-xl">
-                            {crossTools.map((tool) => (
-                                <DropdownMenuItem
-                                    key={tool.path}
-                                    onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(displayImages[0])}`)}
-                                    className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
+
+                    {/* [3] Single Image Only Actions: Làm đầu vào & Tiếp tục với */}
+                    {displayImages.length === 1 && (
+                        <>
+                            {onUseAsInput && (
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                    onClick={() => onUseAsInput(displayImages[0])}
                                 >
-                                    <tool.icon className="size-3.5 text-muted-foreground" />
-                                    <span className="font-medium">{tool.label}</span>
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                                    <RotateCcw className="size-3.5" />
+                                    <span className="text-xs font-semibold">Dùng làm đầu vào</span>
+                                </Button>
+                            )}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                    >
+                                        <ArrowRight className="size-3.5" />
+                                        <span className="text-xs font-semibold">Tiếp tục với...</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="rounded-xl border-border/40 shadow-xl">
+                                    {crossTools.map((tool) => (
+                                        <DropdownMenuItem
+                                            key={tool.path}
+                                            onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(displayImages[0])}`)}
+                                            className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
+                                        >
+                                            <tool.icon className="size-3.5 text-muted-foreground" />
+                                            <span className="font-medium">{tool.label}</span>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </>
+                    )}
                 </div>
             </div>
         )
