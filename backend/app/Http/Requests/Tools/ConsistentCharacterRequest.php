@@ -16,6 +16,7 @@ class ConsistentCharacterRequest extends FormRequest
             'images' => ['required', 'array', 'min:1', 'max:3'],
             'images.*' => ['required', 'string', 'max:13500000'],
             'scene_description' => ['required', 'string', 'max:2000'],
+            'aspect_ratio' => ['sometimes', 'string', 'in:1:1,4:3,3:4,16:9,9:16,3:2,2:3'],
         ];
     }
 }

@@ -338,7 +338,7 @@ export const toolsApi = {
     adImage: (data: { image: string; description: string; platform?: string; aspect_ratio?: string }) =>
         request<ToolImageResponse>('/tools/ad-image', { method: 'POST', body: JSON.stringify(data) }),
 
-    consistentCharacter: (data: { images: string[]; scene_description: string }) =>
+    consistentCharacter: (data: { images: string[]; scene_description: string; aspect_ratio?: string }) =>
         request<ToolImageResponse>('/tools/consistent-character', { method: 'POST', body: JSON.stringify(data) }),
 
     upscale: (data: { image: string; scale_factor?: string; enhance_mode?: string; denoise?: boolean; face_enhance?: boolean; creative_detail?: boolean; color_enhance?: boolean }) =>

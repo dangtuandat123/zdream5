@@ -108,7 +108,7 @@ class ToolController extends Controller
             toolName: 'consistent-character',
             prompt: $v['scene_description'],
             referenceImages: $v['images'],
-            aspectRatio: $this->detectAspectRatio($v['images'][0]),
+            aspectRatio: $v['aspect_ratio'] ?? $this->detectAspectRatio($v['images'][0]),
             taskType: 'character',
         );
     }
