@@ -38,9 +38,9 @@ export function ExtendPreview({ imageUrl, directions, extendRatio, imageDims, cl
     const vFlex = extPct // flex for top/bottom zones
 
     return (
-        <div className={cn("rounded-xl overflow-hidden border bg-muted/50 p-3", className)}>
-            <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-2">
-                <span>Xem trước vùng mở rộng</span>
+        <div className={cn("rounded-3xl overflow-hidden border bg-background/50 p-6 shadow-sm", className)}>
+            <div className="flex items-center justify-between text-xs text-muted-foreground mb-4 font-medium px-2">
+                <span>Xem trước vùng ảnh được mở rộng</span>
                 {outputEstimate && (
                     <span className="text-foreground font-medium">~{outputEstimate.w}×{outputEstimate.h} px</span>
                 )}

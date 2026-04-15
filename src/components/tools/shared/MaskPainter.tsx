@@ -250,49 +250,58 @@ export function MaskPainter({ imageUrl, onMaskChange, className }: MaskPainterPr
     }, [saveToHistory, onMaskChange])
 
     return (
-        <div className={cn("space-y-2", className)}>
-            {/* Toolbar */}
-            <div className="flex items-center gap-2 flex-wrap">
-                <ToggleGroup type="single" value={tool} onValueChange={(v) => v && setTool(v as "brush" | "eraser")}>
-                    <ToggleGroupItem value="brush" className="h-8 px-3 text-xs gap-1.5 data-[state=on]:bg-red-500/20 data-[state=on]:text-red-400">
-                        <Paintbrush className="size-3.5" />
-                        Tô
-                    </ToggleGroupItem>
-                    <ToggleGroupItem value="eraser" className="h-8 px-3 text-xs gap-1.5">
-                        <Eraser className="size-3.5" />
-                        Xóa
-                    </ToggleGroupItem>
-                </ToggleGroup>
-
-                <div className="w-px h-5 bg-border" />
-
-                <ToggleGroup type="single" value={brushSize} onValueChange={(v) => v && setBrushSize(v)}>
-                    {BRUSH_SIZES.map((b) => (
-                        <ToggleGroupItem key={b.id} value={b.id} className="h-8 w-8 text-xs font-medium">
-                            {b.label}
-                        </ToggleGroupItem>
-                    ))}
-                </ToggleGroup>
-
-                <div className="w-px h-5 bg-border" />
-
-                <Button size="icon" variant="ghost" className="size-8" onClick={undo} disabled={historyIndex <= 0}>
-                    <Undo2 className="size-3.5" />
-                </Button>
-                <Button size="icon" variant="ghost" className="size-8" onClick={redo} disabled={historyIndex >= history.length - 1}>
-                    <Redo2 className="size-3.5" />
-                </Button>
-                <Button size="icon" variant="ghost" className="size-8" onClick={clearAll}>
-                    <Trash2 className="size-3.5" />
-                </Button>
-            </div>
-
+        <div className={cn("w-full h-full relative", className)}>
             {/* Canvas */}
             <div
                 ref={containerRef}
-                className="relative rounded-xl overflow-hidden border bg-muted select-none"
+                className="relative rounded-3xl overflow-hidden border bg-background/50 select-none shadow-sm group min-h-[400px]"
                 style={{ height: canvasSize.h || "auto" }}
             >
+                {/* Floating Tooltip Instruction */}
+                {historyIndex <= 0 && (
+                    <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-md border shadow text-[11px] font-medium text-foreground flex items-center gap-2 z-20 pointer-events-none opacity-100 transition-opacity duration-300">
+                        <div className="size-2 rounded-full bg-primary animate-pulse" />
+                        {tool === "brush" ? "Kéo vẽ để chọn vùng ảnh" : "Xóa vùng vừa tô"}
+                    </div>
+                )}
+
+                {/* Floating Action Toolbar */}
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1.5 rounded-full bg-background/80 backdrop-blur-md border shadow-lg z-20 opacity-90 group-hover:opacity-100 transition-opacity duration-300">
+                    <ToggleGroup type="single" value={tool} onValueChange={(v) => v && setTool(v as "brush" | "eraser")}>
+                        <ToggleGroupItem value="brush" className="rounded-full h-9 px-4 text-xs gap-1.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <Paintbrush className="size-3.5" />
+                            Tô
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="eraser" className="rounded-full h-9 px-4 text-xs gap-1.5 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-all duration-300 shadow-sm">
+                            <Eraser className="size-3.5" />
+                            Xóa
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+
+                    <div className="w-px h-6 bg-border mx-1" />
+
+                    <ToggleGroup type="single" value={brushSize} onValueChange={(v) => v && setBrushSize(v)}>
+                        {BRUSH_SIZES.map((b) => (
+                            <ToggleGroupItem key={b.id} value={b.id} className="rounded-full h-8 w-8 text-xs font-bold data-[state=on]:bg-secondary data-[state=on]:text-secondary-foreground transition-all duration-300">
+                                {b.label}
+                            </ToggleGroupItem>
+                        ))}
+                    </ToggleGroup>
+
+                    <div className="w-px h-6 bg-border mx-1" />
+
+                    <Button size="icon" variant="ghost" className="rounded-full size-8 hover:bg-secondary transition-colors" onClick={undo} disabled={historyIndex <= 0}>
+                        <Undo2 className="size-3.5" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="rounded-full size-8 hover:bg-secondary transition-colors" onClick={redo} disabled={historyIndex >= history.length - 1}>
+                        <Redo2 className="size-3.5" />
+                    </Button>
+                    <div className="w-px h-6 bg-border mx-1" />
+                    <Button size="icon" variant="ghost" className="rounded-full size-8 text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors" onClick={clearAll}>
+                        <Trash2 className="size-3.5" />
+                    </Button>
+                </div>
+
                 <img
                     src={imageUrl}
                     alt="Source"
@@ -301,7 +310,7 @@ export function MaskPainter({ imageUrl, onMaskChange, className }: MaskPainterPr
                 />
                 <canvas
                     ref={canvasRef}
-                    className="absolute inset-0 w-full h-full"
+                    className="absolute inset-0 w-full h-full z-10"
                     style={{ touchAction: "none", cursor: tool === "brush" ? "crosshair" : "cell" }}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}
@@ -309,10 +318,6 @@ export function MaskPainter({ imageUrl, onMaskChange, className }: MaskPainterPr
                     onPointerLeave={handlePointerUp}
                 />
             </div>
-
-            <p className="text-[10px] text-muted-foreground">
-                {tool === "brush" ? "Tô lên vùng cần chỉnh sửa" : "Xóa vùng đã tô nhầm"} · Kích thước: {currentBrushSize}px
-            </p>
         </div>
     )
 }

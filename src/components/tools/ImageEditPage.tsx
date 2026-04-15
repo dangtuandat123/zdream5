@@ -13,7 +13,6 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { useInputFromUrl } from "@/hooks/use-input-from-url"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { Trash2, PenTool } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -150,15 +149,16 @@ export function ImageEditPage() {
                         onUseAsInput={(url) => { handleImagesChange([url]) }}
                     />
                 ) : (
-                    <div className="w-full max-w-3xl flex flex-col items-center justify-center space-y-4 animate-in fade-in duration-300">
-                        <div className="w-full bg-muted/20 p-4 rounded-xl border flex items-center justify-between shadow-sm">
-                            <Label className="text-sm font-medium">{mode === "remove" ? "Vẽ 1 nét liền bao quanh vật thể hoặc vùng cần xóa" : "Vẽ 1 nét liền bao quanh vùng bạn muốn thay thế ảnh khác"}</Label>
-                            <Button variant="outline" size="sm" onClick={() => handleImagesChange([])} className="h-8 text-xs">Đổi ảnh khởi tạo</Button>
-                        </div>
-                        <div className="w-full flex justify-center bg-muted/5 border rounded-2xl p-4 py-8 shadow-inner overflow-hidden relative">
-                            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} />
-                        </div>
+                    <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-center animate-in fade-in duration-300 relative group">
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            onClick={() => handleImagesChange([])} 
+                            className="absolute top-4 right-4 z-30 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full h-9 px-4 text-xs font-semibold backdrop-blur bg-background/80 hover:bg-background border"
+                        >
+                            Đổi ảnh
+                        </Button>
+                        <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} className="w-full" />
                     </div>
                 )
             }
