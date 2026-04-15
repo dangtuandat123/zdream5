@@ -146,30 +146,64 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
     )
 }
 
-// === Skeleton placeholder khi đang tạo ảnh ===
+// === Loading skeleton khi đang tạo ảnh — color-shifting blobs ===
 function GenerateSkeleton({ progress }: { progress: number }) {
-    return (
-        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-muted/20 border border-border/40 flex flex-col items-center justify-center isolate">
-            {/* Shimmer overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-            <Skeleton className="absolute inset-0 h-full w-full rounded-none opacity-20" />
+    const [elapsed, setElapsed] = useState(0)
+    useEffect(() => {
+        const t = setInterval(() => setElapsed(s => s + 1), 1000)
+        return () => clearInterval(t)
+    }, [])
 
-            <div className="flex flex-col items-center gap-3 z-10">
-                <Wand2 className="size-6 text-muted-foreground/40 animate-pulse" />
-                <div className="flex gap-1.5 items-center">
-                    <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="size-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '300ms' }} />
-                    <span className="text-[10px] text-muted-foreground/50 ml-1.5 tabular-nums">{Math.round(progress)}%</span>
+    return (
+        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-background border border-border/40 flex flex-col items-center justify-center isolate">
+            {/* Animated color-shifting blobs */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div
+                    className="absolute size-48 rounded-full blur-[60px] top-[-15%] left-[-10%]"
+                    style={{
+                        background: 'linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4)',
+                        animation: 'loadingBlob1 6s ease-in-out infinite alternate',
+                    }}
+                />
+                <div
+                    className="absolute size-40 rounded-full blur-[60px] bottom-[-15%] right-[-10%]"
+                    style={{
+                        background: 'linear-gradient(225deg, #f472b6, #8b5cf6, #6366f1)',
+                        animation: 'loadingBlob2 8s ease-in-out infinite alternate',
+                    }}
+                />
+            </div>
+            <style>{`
+                @keyframes loadingBlob1 {
+                    0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+                    50% { transform: translate(20%, 15%) scale(1.1); opacity: 0.3; }
+                    100% { transform: translate(-5%, 25%) scale(0.95); opacity: 0.15; }
+                }
+                @keyframes loadingBlob2 {
+                    0% { transform: translate(0, 0) scale(1); opacity: 0.15; }
+                    50% { transform: translate(-20%, -10%) scale(1.2); opacity: 0.3; }
+                    100% { transform: translate(10%, -15%) scale(0.9); opacity: 0.1; }
+                }
+            `}</style>
+
+            {/* Spinner */}
+            <div className="relative size-12 z-10">
+                <div className="absolute inset-0 rounded-full border-[1.5px] border-primary/15" />
+                <div className="absolute inset-0 rounded-full border-[1.5px] border-transparent border-t-primary/60 animate-spin" style={{ animationDuration: '1.8s' }} />
+                <div className="absolute inset-1.5 rounded-full border border-primary/10" />
+                <div className="absolute inset-1.5 rounded-full border border-transparent border-b-primary/40 animate-spin" style={{ animationDuration: '2.5s', animationDirection: 'reverse' }} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <Wand2 className="size-3.5 text-primary animate-pulse" style={{ animationDuration: '2s' }} />
                 </div>
             </div>
 
+            <p className="text-[11px] text-muted-foreground/80 mt-3 z-10 tabular-nums">
+                {elapsed > 0 && <>{elapsed}s · </>}{Math.round(progress)}%
+            </p>
+
             {/* Progress bar */}
-            <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/30">
-                <div
-                    className="h-full bg-primary/60 transition-all duration-300 ease-out"
-                    style={{ width: `${Math.min(progress, 100)}%` }}
-                />
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/20 z-10">
+                <div className="h-full bg-primary/50 transition-all duration-300 ease-out" style={{ width: `${Math.min(progress, 100)}%` }} />
             </div>
         </div>
     )
@@ -593,16 +627,17 @@ export function TemplateDetailPage() {
                             {generatedImages.map((img, idx) => (
                                 <div
                                     key={img.id}
-                                    className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ring-1 ring-border/20 hover:ring-primary/50"
+                                    className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ring-1 ring-border/20 hover:ring-primary/50 bg-muted/20"
                                     onClick={() => openGeneratedViewer(idx)}
                                 >
-                                    <div className="relative aspect-square bg-muted/20">
-                                        <ImageWithSkeleton
+                                    <div className="relative w-full">
+                                        <img
                                             src={img.url}
                                             alt={`Kết quả ${idx + 1}`}
-                                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            className="w-full h-auto max-h-[400px] object-contain transition-transform duration-500 group-hover:scale-105"
+                                            draggable={false}
                                         />
-                                        {/* Gradient overlay — luôn nhẹ, đậm hơn khi hover */}
+                                        {/* Gradient overlay */}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
                                         {/* Action bar */}
                                         <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2.5 py-2 translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
