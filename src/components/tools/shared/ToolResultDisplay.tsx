@@ -18,7 +18,7 @@ const CROSS_TOOLS = [
     { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
 ]
 
-// Bước progress loading
+// Loading với hiệu ứng background đổi màu
 function LoadingProgress() {
     const [elapsed, setElapsed] = useState(0)
 
@@ -28,12 +28,43 @@ function LoadingProgress() {
     }, [])
 
     return (
-        <div className="flex flex-col items-center justify-center gap-7 py-16 px-10 rounded-2xl border border-border/40 bg-gradient-to-b from-muted/40 via-background to-background min-h-[360px] relative overflow-hidden">
-            {/* Ambient glow */}
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 size-48 rounded-full bg-primary/[0.04] blur-[60px]" />
+        <div className="flex flex-col items-center justify-center gap-7 py-16 px-10 rounded-2xl border border-border/40 min-h-[360px] relative overflow-hidden bg-background">
+
+            {/* Animated color-shifting blobs */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div
+                    className="absolute size-72 rounded-full blur-[100px] opacity-[0.07] top-0 -left-10"
+                    style={{
+                        background: 'linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4)',
+                        animation: 'loadingBlob1 6s ease-in-out infinite alternate',
+                    }}
+                />
+                <div
+                    className="absolute size-64 rounded-full blur-[100px] opacity-[0.06] bottom-0 -right-10"
+                    style={{
+                        background: 'linear-gradient(225deg, #f472b6, #8b5cf6, #6366f1)',
+                        animation: 'loadingBlob2 8s ease-in-out infinite alternate',
+                    }}
+                />
+            </div>
+
+            {/* Inline keyframes */}
+            <style>{`
+                @keyframes loadingBlob1 {
+                    0% { transform: translate(0, 0) scale(1); opacity: 0.07; }
+                    33% { transform: translate(30%, 20%) scale(1.2); opacity: 0.1; }
+                    66% { transform: translate(-10%, 40%) scale(0.9); opacity: 0.06; }
+                    100% { transform: translate(20%, 10%) scale(1.1); opacity: 0.09; }
+                }
+                @keyframes loadingBlob2 {
+                    0% { transform: translate(0, 0) scale(1); opacity: 0.06; }
+                    50% { transform: translate(-30%, -20%) scale(1.3); opacity: 0.09; }
+                    100% { transform: translate(10%, -30%) scale(0.8); opacity: 0.05; }
+                }
+            `}</style>
 
             {/* Spinner */}
-            <div className="relative size-[72px]">
+            <div className="relative size-[72px] z-10">
                 {/* Vòng ngoài quay chậm */}
                 <div className="absolute inset-0 rounded-full border-[1.5px] border-primary/15" />
                 <div
