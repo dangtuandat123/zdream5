@@ -80,30 +80,41 @@ export function UpscalePage() {
                 {/* 1. Hệ số phân giải */}
                 <div className="space-y-2.5">
                     <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Độ phân giải hiển thị</Label>
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-3 gap-2.5">
+                        <button
+                            onClick={() => setScaleFactor("1x")}
+                            className={cn(
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group justify-between",
+                                scaleFactor === "1x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
+                            )}
+                        >
+                            <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "1x" ? "text-primary" : "text-foreground")}>1x</span>
+                            <span className={cn("text-[9px] font-medium transition-colors text-center", scaleFactor === "1x" ? "text-primary/80" : "text-muted-foreground")}>Giữ nguyên Size</span>
+                            <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Làm Nét</span>
+                        </button>
                         <button
                             onClick={() => setScaleFactor("2x")}
                             className={cn(
-                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group",
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group justify-between",
                                 scaleFactor === "2x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
                             )}
                         >
                             <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "2x" ? "text-primary" : "text-foreground")}>2x</span>
-                            <span className={cn("text-[10px] font-medium transition-colors", scaleFactor === "2x" ? "text-primary/80" : "text-muted-foreground")}>Lên tới 2K</span>
-                            <span className="text-[9px] text-muted-foreground/80 mt-1 uppercase">Tiêu chuẩn</span>
+                            <span className={cn("text-[9px] font-medium transition-colors text-center", scaleFactor === "2x" ? "text-primary/80" : "text-muted-foreground")}>Lên tới 2K</span>
+                            <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Tiêu chuẩn</span>
                         </button>
                         <button
                             onClick={() => setScaleFactor("4x")}
                             className={cn(
-                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group",
+                                "flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all relative overflow-hidden group justify-between",
                                 scaleFactor === "4x" ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card hover:bg-muted/50"
                             )}
                         >
                             <span className={cn("text-xl font-bold tracking-tight mb-0.5 flex items-center gap-1.5", scaleFactor === "4x" ? "text-primary" : "text-foreground")}>
                                 4x <Sparkles className={cn("size-3.5", scaleFactor === "4x" ? "animate-pulse" : "")} />
                             </span>
-                            <span className={cn("text-[10px] font-medium transition-colors", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>Siêu nét 4K/8K</span>
-                            <span className="text-[9px] text-muted-foreground/80 mt-1 uppercase">Cao Cấp</span>
+                            <span className={cn("text-[9px] font-medium transition-colors text-center", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>Siêu nét 4K/8K</span>
+                            <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Cao Cấp</span>
                         </button>
                     </div>
                 </div>
@@ -159,7 +170,7 @@ export function UpscalePage() {
 
             </div>
         ),
-        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={scaleFactor === "4x" ? 5 : 2} label={scaleFactor === "4x" ? "Upscale 4K" : "Upscale Cơ Bản"} gemsBalance={gems} />,
+        submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={scaleFactor === "4x" ? 5 : scaleFactor === "2x" ? 2 : 1} label={scaleFactor === "4x" ? "Upscale 4K" : scaleFactor === "2x" ? "Upscale 2K" : "Làm Nét Ảnh"} gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
     }, [images, scaleFactor, denoise, faceEnhance, creativeDetail, loading, result, history, historyLoading, gems])
 
@@ -167,17 +178,17 @@ export function UpscalePage() {
         <ToolWorkspaceLayout
             canvas={
                 !images[0] ? (
-                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Tải ảnh cần Upscale" />
+                    <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Tải ảnh cần xử lý" />
                 ) : !result && !loading ? (
                     <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
                         <ToolImageUpload images={images} onImagesChange={setImages} className="border-0 bg-transparent shadow-none p-0" />
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
                             <Sparkles className="size-4 animate-pulse text-primary" />
-                            <span>Ảnh đã tải lên. Hãy chọn thông số làm nét bên trái và nhấn Upscale!</span>
+                            <span>Ảnh đã tải lên. Hãy chọn thông số làm nét bên trái và nhấn Xử lý!</span>
                         </div>
                         {imageDims && (
                             <p className="text-[10px] text-muted-foreground text-center animate-in fade-in">
-                                Kích thước ước tính sau khi upscale ({scaleFactor}): ~<span className="font-semibold text-foreground/80">{scaleFactor === "4x" ? (imageDims.w * 4) : (imageDims.w * 2)}x{scaleFactor === "4x" ? (imageDims.h * 4) : (imageDims.h * 2)} px</span>
+                                Kích thước ước tính sau xử lý: ~<span className="font-semibold text-foreground/80">{scaleFactor === "4x" ? (imageDims.w * 4) : scaleFactor === "2x" ? (imageDims.w * 2) : imageDims.w}x{scaleFactor === "4x" ? (imageDims.h * 4) : scaleFactor === "2x" ? (imageDims.h * 2) : imageDims.h} px</span>
                             </p>
                         )}
                     </div>
