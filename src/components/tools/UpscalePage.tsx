@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Sparkles, ZoomIn, Smile, Wand2, Scan, Palette, Info, RotateCcw, ArrowRight, Eraser, Expand, PenTool } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { Download, Sparkles, ZoomIn, Smile, Wand2, Scan, Palette, Info, RotateCcw } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -22,7 +21,7 @@ import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
 
 /**
  * Pixel output cố định theo OpenRouter image_config.
@@ -109,7 +108,7 @@ const AI_TOGGLES = [
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
-    const navigate = useNavigate()
+
     
     // Core parameters
     const [images, setImages] = useState<string[]>([])
@@ -336,27 +335,6 @@ export function UpscalePage() {
                                             <RotateCcw className="size-3.5" />
                                             Thử lại
                                         </Button>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs">
-                                                    <ArrowRight className="size-3.5" />
-                                                    Tiếp tục với...
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                {[
-                                                    { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
-                                                    { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
-                                                    { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
-                                                    { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
-                                                ].map((tool) => (
-                                                    <DropdownMenuItem key={tool.path} onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(result)}`)} className="gap-2 text-xs">
-                                                        <tool.icon className="size-3.5" />
-                                                        {tool.label}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
                                     </div>
                                 </div>
                             </div>
