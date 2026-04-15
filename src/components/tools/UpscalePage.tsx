@@ -18,6 +18,24 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
+const getOutputDims = (w: number, h: number, factor: 1 | 2 | 4) => {
+    if (factor === 1) return { w, h };
+    const maxSide = factor === 4 ? 4096 : 2048;
+    let targetW = w * factor;
+    let targetH = h * factor;
+    if (Math.max(targetW, targetH) > maxSide) {
+        const ratio = w / h;
+        if (w >= h) {
+             targetW = maxSide;
+             targetH = Math.round(maxSide / ratio);
+        } else {
+             targetH = maxSide;
+             targetW = Math.round(maxSide * ratio);
+        }
+    }
+    return { w: targetW, h: targetH };
+};
+
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
@@ -89,7 +107,9 @@ export function UpscalePage() {
                             )}
                         >
                             <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "1x" ? "text-primary" : "text-foreground")}>1x</span>
-                            <span className={cn("text-[9px] font-medium transition-colors text-center", scaleFactor === "1x" ? "text-primary/80" : "text-muted-foreground")}>Giữ nguyên Size</span>
+                            <span className={cn("text-[10px] font-medium transition-colors text-center w-full truncate", scaleFactor === "1x" ? "text-primary/80" : "text-muted-foreground")}>
+                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 1).w}×${getOutputDims(imageDims.w, imageDims.h, 1).h} px` : "Giữ nguyên"}
+                            </span>
                             <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Làm Nét</span>
                         </button>
                         <button
@@ -100,7 +120,9 @@ export function UpscalePage() {
                             )}
                         >
                             <span className={cn("text-xl font-bold tracking-tight mb-0.5", scaleFactor === "2x" ? "text-primary" : "text-foreground")}>2x</span>
-                            <span className={cn("text-[9px] font-medium transition-colors text-center", scaleFactor === "2x" ? "text-primary/80" : "text-muted-foreground")}>Lên tới 2K</span>
+                            <span className={cn("text-[10px] font-medium transition-colors text-center w-full truncate", scaleFactor === "2x" ? "text-primary/80" : "text-muted-foreground")}>
+                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 2).w}×${getOutputDims(imageDims.w, imageDims.h, 2).h} px` : "Lên tới 2K"}
+                            </span>
                             <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Tiêu chuẩn</span>
                         </button>
                         <button
@@ -113,7 +135,9 @@ export function UpscalePage() {
                             <span className={cn("text-xl font-bold tracking-tight mb-0.5 flex items-center gap-1.5", scaleFactor === "4x" ? "text-primary" : "text-foreground")}>
                                 4x <Sparkles className={cn("size-3.5", scaleFactor === "4x" ? "animate-pulse" : "")} />
                             </span>
-                            <span className={cn("text-[9px] font-medium transition-colors text-center", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>Siêu nét 4K/8K</span>
+                            <span className={cn("text-[10px] font-medium transition-colors text-center w-full truncate", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>
+                                {imageDims ? `${getOutputDims(imageDims.w, imageDims.h, 4).w}×${getOutputDims(imageDims.w, imageDims.h, 4).h} px` : "Siêu nét 4K/8K"}
+                            </span>
                             <span className="text-[8px] text-muted-foreground/80 mt-1 uppercase tracking-tighter">Cao Cấp</span>
                         </button>
                     </div>
@@ -186,11 +210,14 @@ export function UpscalePage() {
                             <Sparkles className="size-4 animate-pulse text-primary" />
                             <span>Ảnh đã tải lên. Hãy chọn thông số làm nét bên trái và nhấn Xử lý!</span>
                         </div>
-                        {imageDims && (
-                            <p className="text-[10px] text-muted-foreground text-center animate-in fade-in">
-                                Kích thước ước tính sau xử lý: ~<span className="font-semibold text-foreground/80">{scaleFactor === "4x" ? (imageDims.w * 4) : scaleFactor === "2x" ? (imageDims.w * 2) : imageDims.w}x{scaleFactor === "4x" ? (imageDims.h * 4) : scaleFactor === "2x" ? (imageDims.h * 2) : imageDims.h} px</span>
-                            </p>
-                        )}
+                        {imageDims && (() => {
+                            const dims = getOutputDims(imageDims.w, imageDims.h, scaleFactor === "4x" ? 4 : scaleFactor === "2x" ? 2 : 1)
+                            return (
+                                <p className="text-[10px] text-muted-foreground text-center animate-in fade-in">
+                                    Kích thước ước tính sau xử lý: ~<span className="font-semibold text-foreground/80">{dims.w}x{dims.h} px</span>
+                                </p>
+                            )
+                        })()}
                     </div>
                 ) : (
                     <>
