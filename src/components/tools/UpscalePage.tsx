@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Sparkles, ZoomIn, Smile, Wand2, Scan, Palette, Info } from "lucide-react"
+import { Download, Sparkles, ZoomIn, Smile, Wand2, Scan, Palette, Info, RotateCcw, ArrowRight, Eraser, Expand, PenTool } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -21,6 +22,7 @@ import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 /**
  * Pixel output cố định theo OpenRouter image_config.
@@ -107,6 +109,7 @@ const AI_TOGGLES = [
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
+    const navigate = useNavigate()
     
     // Core parameters
     const [images, setImages] = useState<string[]>([])
@@ -293,13 +296,25 @@ export function UpscalePage() {
                         {result && images[0] ? (
                             <div className="space-y-4 w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-500 delay-100">
                                 <ZoomCompare beforeUrl={images[0]} afterUrl={result} />
-                                <div className="flex gap-2">
-                                    <Button size="sm" className="gap-1.5 px-6 shadow-sm" onClick={async () => {
+
+                                {/* Output info */}
+                                {outputDims && (
+                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                        <Badge variant="secondary" className="text-[10px] h-5 px-2 font-mono">
+                                            {outputDims.w}×{outputDims.h} px
+                                        </Badge>
+                                        <span>·</span>
+                                        <span>{scaleFactor === "4x" ? "Ultra HD" : scaleFactor === "2x" ? "Full HD" : "HD"}</span>
+                                    </div>
+                                )}
+
+                                {/* Action buttons */}
+                                <div className="flex gap-2 flex-wrap justify-center">
+                                    <Button size="sm" className="gap-1.5 px-5 shadow-sm" onClick={async () => {
                                         try {
                                             const response = await fetch(result)
                                             const blob = await response.blob()
                                             const url = URL.createObjectURL(blob)
-
                                             const a = document.createElement("a")
                                             a.href = url
                                             a.download = `zdream-upscale-${Date.now()}.png`
@@ -307,9 +322,34 @@ export function UpscalePage() {
                                             URL.revokeObjectURL(url)
                                         } catch { /* ignore */ }
                                     }}>
-                                        <Download className="size-4" />
-                                        Tải ảnh siêu nét
+                                        <Download className="size-3.5" />
+                                        Tải ảnh
                                     </Button>
+                                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => { setResult(null) }}>
+                                        <RotateCcw className="size-3.5" />
+                                        Thử lại
+                                    </Button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button size="sm" variant="outline" className="gap-1.5">
+                                                <ArrowRight className="size-3.5" />
+                                                Tiếp tục với...
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="center">
+                                            {[
+                                                { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
+                                                { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
+                                                { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
+                                                { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
+                                            ].map((tool) => (
+                                                <DropdownMenuItem key={tool.path} onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(result)}`)} className="gap-2 text-xs">
+                                                    <tool.icon className="size-3.5" />
+                                                    {tool.label}
+                                                </DropdownMenuItem>
+                                            ))}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </div>
                             </div>
                         ) : (
