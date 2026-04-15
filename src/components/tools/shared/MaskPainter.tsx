@@ -16,7 +16,7 @@ const BRUSH_SIZES = [
     { id: "l", label: "L", size: 50 },
 ] as const
 
-const PAINT_COLOR = "rgba(255, 60, 80, 0.45)"
+const PAINT_COLOR = "#ff3c50"
 
 export function MaskPainter({ imageUrl, onMaskChange, className }: MaskPainterProps) {
     const containerRef = useRef<HTMLDivElement>(null)
@@ -301,7 +301,7 @@ export function MaskPainter({ imageUrl, onMaskChange, className }: MaskPainterPr
                 />
                 <canvas
                     ref={canvasRef}
-                    className="absolute inset-0 w-full h-full"
+                    className="absolute inset-0 w-full h-full opacity-[0.45]"
                     style={{ touchAction: "none", cursor: tool === "brush" ? "crosshair" : "cell" }}
                     onPointerDown={handlePointerDown}
                     onPointerMove={handlePointerMove}

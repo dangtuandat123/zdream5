@@ -190,29 +190,22 @@ export function BoundingBoxImage({ src, onBboxesChange, className }: BoundingBox
                     </div>
                 )}
 
-                {/* Render Saved Boxes */}
-                {boxes.map((b, idx) => (
-                    <div
-                        key={idx}
-                        className="absolute border-2 border-[#ff3c50]/60 bg-[#ff3c50]/20 pointer-events-none transition-all duration-200"
-                        style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
-                    >
-                    </div>
-                ))}
+                {/* Wrapper for unified opacity logic - prevents overlapping multiplier */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.45]">
+                    {/* Render Saved Boxes */}
+                    {boxes.map((b, idx) => (
+                        <div
+                            key={idx}
+                            className="absolute bg-[#ff3c50] pointer-events-none transition-all duration-200"
+                            style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
+                        />
+                    ))}
 
-                {/* The Current Drawing Box */}
-                <div 
-                    className={cn(
-                        "absolute border-2 border-[#ff3c50] bg-[#ff3c50]/40 pointer-events-none",
-                        isDrawing && "border-dashed"
-                    )}
-                    style={boxStyle}
-                >
-                    {/* Corner handles (visual only) */}
-                    <div className="absolute top-0 left-0 w-2 h-2 bg-[#ff3c50] -translate-x-1 -translate-y-1" />
-                    <div className="absolute top-0 right-0 w-2 h-2 bg-[#ff3c50] translate-x-1 -translate-y-1" />
-                    <div className="absolute bottom-0 left-0 w-2 h-2 bg-[#ff3c50] -translate-x-1 translate-y-1" />
-                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-[#ff3c50] translate-x-1 translate-y-1" />
+                    {/* The Current Drawing Box */}
+                    <div 
+                        className="absolute bg-[#ff3c50] pointer-events-none"
+                        style={boxStyle}
+                    />
                 </div>
             </div>
 
