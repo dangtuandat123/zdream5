@@ -147,6 +147,14 @@ export function UpscalePage() {
             canvas={
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Gốc Cần Upscale" />
+                ) : !result && !loading ? (
+                    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+                        <ToolImageUpload images={images} onImagesChange={setImages} className="border-0 bg-transparent shadow-none p-0" />
+                        <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
+                            <Sparkles className="size-4 animate-pulse text-primary" />
+                            <span>Ảnh đã tải lên. Hãy thiết lập thông số bên trái và nhấn xử lý!</span>
+                        </div>
+                    </div>
                 ) : (
                     <>
                         {result && images[0] ? (
@@ -158,6 +166,7 @@ export function UpscalePage() {
                                             const response = await fetch(result)
                                             const blob = await response.blob()
                                             const url = URL.createObjectURL(blob)
+
                                             const a = document.createElement("a")
                                             a.href = url
                                             a.download = `zdream-upscale-${Date.now()}.png`

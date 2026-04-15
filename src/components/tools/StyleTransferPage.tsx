@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react"
 import { toast } from "sonner"
-import { Wand2 } from "lucide-react"
+import { Wand2, Sparkles } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -158,6 +158,14 @@ export function StyleTransferPage() {
             canvas={
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Cần Đổi Phong Cách" />
+                ) : !result && !loading ? (
+                    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+                        <ToolImageUpload images={images} onImagesChange={setImages} className="border-0 bg-transparent shadow-none p-0" />
+                        <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
+                            <Sparkles className="size-4 animate-pulse text-primary" />
+                            <span>Ảnh đã tải lên. Hãy thiết lập thông số bên trái và nhấn xử lý!</span>
+                        </div>
+                    </div>
                 ) : (
                     <ToolResultDisplay
                         imageUrl={result}
