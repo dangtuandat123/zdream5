@@ -332,7 +332,16 @@ export function TemplateDetailPage() {
             }
 
             if (extraPrompt.trim()) parts.push(extraPrompt.trim())
-            const finalPrompt = parts.join(". ")
+            
+            // Lọc các khoảng trắng thừa và nối lại
+            let finalPrompt = parts.filter(Boolean).join(". ").trim()
+
+            // Fallback cực kỳ quan trọng: Backend Laravel ZDream5 mặc định yêu cầu trường 'prompt'.
+            // Nếu mẫu này không có system_prompt và user để trống "mô tả thêm", API sẽ báo lỗi 422.
+            // Do đó tự padding 1 câu lệnh hợp lý nêó rỗng để bypass validation.
+            if (!finalPrompt) {
+                finalPrompt = `Transform image using template: ${template.name}`
+            }
 
             // Gọi API tạo ảnh thật
             const response = await imageApi.generate({
