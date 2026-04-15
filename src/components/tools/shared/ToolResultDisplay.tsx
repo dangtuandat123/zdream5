@@ -205,33 +205,35 @@ export function ToolResultDisplay({
                             <div key={idx} className="relative rounded-xl overflow-hidden border bg-muted shadow-sm group">
                                 <img src={src} alt={`Result ${idx + 1}`} className="w-full max-h-[500px] object-contain" />
                                 
-                                {/* Expert Image Overlay Actions for Multi-image */}
+                                {/* Bottom-anchored action toolbar for multi-image overlay */}
                                 {displayImages.length > 1 && (
-                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5">
-                                        <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors whitespace-nowrap px-4">
-                                            <Download className="size-3.5 shrink-0" />
-                                            Tải tấm này
-                                        </Button>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors whitespace-nowrap px-4">
-                                                    <ArrowRight className="size-3.5 shrink-0" />
-                                                    Tiếp tục với tấm này...
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="center" className="rounded-xl border-border/40 shadow-xl">
-                                                {crossTools.map((tool) => (
-                                                    <DropdownMenuItem
-                                                        key={tool.path}
-                                                        onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(src)}`)}
-                                                        className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
-                                                    >
-                                                        <tool.icon className="size-3.5 text-muted-foreground" />
-                                                        <span className="font-medium">{tool.label}</span>
-                                                    </DropdownMenuItem>
-                                                ))}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                        <div className="absolute bottom-0 inset-x-0 p-3 flex items-center justify-center gap-1.5">
+                                            <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors px-3">
+                                                <Download className="size-3.5 shrink-0" />
+                                                Tải xuống
+                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors px-3">
+                                                        <ArrowRight className="size-3.5 shrink-0" />
+                                                        Dùng tiếp
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent side="top" align="center" className="rounded-xl border-border/40 shadow-xl mb-1">
+                                                    {crossTools.map((tool) => (
+                                                        <DropdownMenuItem
+                                                            key={tool.path}
+                                                            onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(src)}`)}
+                                                            className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
+                                                        >
+                                                            <tool.icon className="size-3.5 text-muted-foreground" />
+                                                            <span className="font-medium">{tool.label}</span>
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </div>
                                 )}
                             </div>

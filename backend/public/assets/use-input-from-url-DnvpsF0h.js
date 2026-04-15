@@ -1,1 +1,0 @@
-import{a1 as u,r as c}from"./index-B2-ZnAPg.js";function o(r){const[e,t]=u(),a=c.useRef(!1);c.useEffect(()=>{const s=e.get("input");s&&!a.current&&(a.current=!0,r(s),e.delete("input"),t(e,{replace:!0}))},[e,t,r])}export{o as u};
