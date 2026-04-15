@@ -315,25 +315,35 @@ export function UpscalePage() {
                                     </div>
 
                                     {/* Actions bên phải */}
-                                    <div className="flex items-center gap-2">
-                                        <Button size="sm" className="gap-1.5 h-8 px-4 text-xs" onClick={async () => {
-                                            try {
-                                                const response = await fetch(result)
-                                                const blob = await response.blob()
-                                                const url = URL.createObjectURL(blob)
-                                                const a = document.createElement("a")
-                                                a.href = url
-                                                a.download = `zdream-upscale-${Date.now()}.png`
-                                                a.click()
-                                                URL.revokeObjectURL(url)
-                                            } catch { /* ignore */ }
-                                        }}>
+                                    <div className="flex items-center gap-2.5">
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                            onClick={async () => {
+                                                try {
+                                                    const response = await fetch(result)
+                                                    const blob = await response.blob()
+                                                    const url = URL.createObjectURL(blob)
+                                                    const a = document.createElement("a")
+                                                    a.href = url
+                                                    a.download = `zdream-upscale-${Date.now()}.png`
+                                                    a.click()
+                                                    URL.revokeObjectURL(url)
+                                                } catch { /* ignore */ }
+                                            }}
+                                        >
                                             <Download className="size-3.5" />
-                                            Tải ảnh
+                                            <span className="text-xs font-semibold">Tải ảnh</span>
                                         </Button>
-                                        <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setResult(null)}>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                            onClick={() => setResult(null)}
+                                        >
                                             <RotateCcw className="size-3.5" />
-                                            Thử lại
+                                            <span className="text-xs font-semibold">Thử lại</span>
                                         </Button>
                                     </div>
                                 </div>

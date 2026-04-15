@@ -151,13 +151,7 @@ export function ImageToPromptPage() {
                 ) : (
                     <div className="w-full max-w-2xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
                         {loading && (
-                            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/10 w-full min-h-[300px]">
-                                <div className="relative">
-                                    <div className="size-16 rounded-full border-4 border-primary/20" />
-                                    <div className="absolute inset-0 size-16 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-                                </div>
-                                <p className="text-sm font-medium">Hệ thống đang phân tích ảnh<span className="animate-pulse">...</span></p>
-                            </div>
+                            <ToolResultDisplay loading={true} emptyHint="" />
                         )}
                         {result && !loading && !generatedImage && (
                             <div className="space-y-4 w-full bg-muted/5 p-6 rounded-2xl border shadow-inner">
@@ -166,9 +160,9 @@ export function ImageToPromptPage() {
                                         <Sparkles className="size-5 text-primary" />
                                         <h3 className="font-semibold">Prompt được trích xuất</h3>
                                     </div>
-                                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={handleCopy}>
-                                        {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
-                                        {copied ? "Đã sao chép" : "Sao chép"}
+                                    <Button size="sm" variant="secondary" className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80" onClick={handleCopy}>
+                                        {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+                                        <span className="text-xs font-semibold">{copied ? "Đã sao chép" : "Sao chép"}</span>
                                     </Button>
                                 </div>
                                 <Textarea
@@ -193,27 +187,21 @@ export function ImageToPromptPage() {
                             </Button>
                         )}
                         {generating && (
-                            <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-xl border bg-muted/10 min-h-[200px] w-full">
-                                <div className="relative">
-                                    <div className="size-12 rounded-full border-2 border-primary/20" />
-                                    <div className="absolute inset-0 size-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                                </div>
-                                <p className="text-sm font-medium">Hệ thống đang sinh ảnh theo prompt<span className="animate-pulse">...</span></p>
-                            </div>
+                            <ToolResultDisplay loading={true} emptyHint="" />
                         )}
                         {generatedImage && (
                             <div className="space-y-3 animate-in fade-in duration-200 w-full flex flex-col items-center">
                                 <div className="rounded-xl overflow-hidden border bg-muted w-full max-w-2xl flex justify-center shadow-lg">
                                     <img src={generatedImage} alt="Generated" className="w-full object-contain" />
                                 </div>
-                                <div className="flex gap-2 mt-4">
-                                    <Button size="sm" className="gap-1.5 shadow-sm px-6" onClick={handleDownload}>
-                                        <Download className="size-4" />
-                                        Tải ảnh mới về máy
+                                <div className="flex gap-2.5 mt-4">
+                                    <Button size="sm" variant="secondary" className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80" onClick={handleDownload}>
+                                        <Download className="size-3.5" />
+                                        <span className="text-xs font-semibold">Tải ảnh mới về máy</span>
                                     </Button>
-                                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => { setImages([generatedImage]); setResult(null); setEditedPrompt(""); setGeneratedImage(null) }}>
+                                    <Button size="sm" variant="secondary" className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80" onClick={() => { setImages([generatedImage]); setResult(null); setEditedPrompt(""); setGeneratedImage(null) }}>
                                         <ArrowRight className="size-3.5" />
-                                        Tiếp tục phân tích ảnh mới này
+                                        <span className="text-xs font-semibold">Tiếp tục phân tích ảnh này</span>
                                     </Button>
                                 </div>
                             </div>

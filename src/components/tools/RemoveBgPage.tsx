@@ -164,9 +164,9 @@ export function RemoveBgPage() {
                         {result && (
                             <div className="flex flex-col items-center gap-3 mt-4 animate-in slide-in-from-bottom-2">
                                 <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} />
-                                <Button size="sm" variant="outline" className="gap-1.5 shadow-sm" onClick={handleDownloadWithBg}>
+                                <Button size="sm" variant="secondary" className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80" onClick={handleDownloadWithBg}>
                                     <Download className="size-3.5" />
-                                    Tải về với nền đang chọn
+                                    <span className="text-xs font-semibold">Tải về với nền đang chọn</span>
                                 </Button>
                             </div>
                         )}
