@@ -622,11 +622,11 @@ export function TemplateDetailPage() {
     // === Canvas content — redesigned to match other tools ===
     const CanvasContent = (
         <div className="w-full max-w-5xl mx-auto space-y-6">
-            <div className="space-y-6 pb-20">
+            <div className={`space-y-6 ${generatedImages.length > 0 ? 'pb-20' : ''}`}>
 
                 {/* State: Ảnh đã upload, chưa tạo — hiện ảnh preview + hint */}
                 {uploadedImage && !isGenerating && generatedImages.length === 0 && (
-                    <div className="flex flex-col justify-center gap-6 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+                    <div className="flex flex-col justify-center min-h-[calc(100vh-180px)] gap-6 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
                         <ToolImageUpload images={[uploadedImage]} onImagesChange={(urls) => setUploadedImage(urls[0] || null)} className="border-0 bg-transparent shadow-none p-0 overflow-visible" />
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-3 rounded-lg w-full shrink-0 border border-border/20 shadow-sm">
                             <Sparkles className="size-4 animate-pulse text-primary" />
@@ -787,7 +787,7 @@ export function TemplateDetailPage() {
             <ToolWorkspaceLayout
                 canvas={
                     !uploadedImage && generatedImages.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center w-full max-w-2xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-180px)] w-full max-w-2xl mx-auto space-y-8 animate-in fade-in zoom-in-95 duration-500">
                             <div className="text-center space-y-2">
                                 <h3 className="text-xl font-semibold">Tạo ảnh với mẫu: <span className="text-primary">{template.name}</span></h3>
                                 <p className="text-sm text-muted-foreground">Tải ảnh gốc của bạn lên để AI bắt đầu áp dụng hiệu ứng thiết kế.</p>
