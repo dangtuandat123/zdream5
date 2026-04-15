@@ -208,14 +208,14 @@ export function ToolResultDisplay({
                                 {/* Expert Image Overlay Actions for Multi-image */}
                                 {displayImages.length > 1 && (
                                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5">
-                                        <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors w-40 justify-start px-4">
-                                            <Download className="size-3.5" />
+                                        <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors whitespace-nowrap px-4">
+                                            <Download className="size-3.5 shrink-0" />
                                             Tải tấm này
                                         </Button>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors w-40 justify-start px-4">
-                                                    <ArrowRight className="size-3.5" />
+                                                <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors whitespace-nowrap px-4">
+                                                    <ArrowRight className="size-3.5 shrink-0" />
                                                     Tiếp tục với tấm này...
                                                 </Button>
                                             </DropdownMenuTrigger>
