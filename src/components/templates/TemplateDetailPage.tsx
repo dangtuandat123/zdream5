@@ -231,7 +231,8 @@ export function TemplateDetailPage() {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
     const [isGenerating, setIsGenerating] = useState(false)
     const [generateProgress, setGenerateProgress] = useState(0)
-    const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([])
+    const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]) // Chỉ ảnh tạo trong session hiện tại
+    const [historyImages, setHistoryImages] = useState<GeneratedImage[]>([]) // Lịch sử từ API
     const [historyLoading, setHistoryLoading] = useState(true)
     const [outputSize, setOutputSize] = useState("1:1")
     const [imageSize, setImageSize] = useState("1K")
@@ -241,16 +242,16 @@ export function TemplateDetailPage() {
     const [effectSelections, setEffectSelections] = useState<Record<string, string>>({})
     const [extraPrompt, setExtraPrompt] = useState("")
     const [viewerOpen, setViewerOpen] = useState(false)
-    const [viewerSource, setViewerSource] = useState<"sample" | "generated">("sample")
+    const [viewerSource, setViewerSource] = useState<"sample" | "generated" | "history">("sample")
     const [viewerIndex, setViewerIndex] = useState(0)
 
-    // Tải lịch sử ảnh đã tạo từ template này
+    // Tải lịch sử ảnh đã tạo từ template này — tách biệt khỏi canvas
     useEffect(() => {
         if (!slug) return
         setHistoryLoading(true)
         imageApi.list(1, 50, null, null, slug)
             .then((res) => {
-                const historyImages: GeneratedImage[] = res.data.map((img) => ({
+                const history: GeneratedImage[] = res.data.map((img) => ({
                     id: img.id,
                     url: img.file_url,
                     timestamp: new Date(img.created_at ?? Date.now()).getTime(),
@@ -260,7 +261,7 @@ export function TemplateDetailPage() {
                     gems_cost: img.gems_cost,
                     reference_images: img.reference_images,
                 }))
-                setGeneratedImages(historyImages)
+                setHistoryImages(history)
             })
             .catch(() => {})
             .finally(() => setHistoryLoading(false))
@@ -338,6 +339,8 @@ export function TemplateDetailPage() {
                 reference_images: img.reference_images,
             }))
             setGeneratedImages(prev => [...newImages, ...prev])
+            // Thêm vào history luôn để lần sau hiện
+            setHistoryImages(prev => [...newImages, ...prev])
             toast.success(`Tạo ${newImages.length} ảnh thành công!`)
         } catch (err) {
             clearInterval(interval)
@@ -385,9 +388,16 @@ export function TemplateDetailPage() {
         setViewerIndex(index)
         setViewerOpen(true)
     }
+    const openHistoryViewer = (index: number) => {
+        setViewerSource("history")
+        setViewerIndex(index)
+        setViewerOpen(true)
+    }
     const currentViewerImages = viewerSource === "generated"
         ? generatedImages.map(img => img.url)
-        : sampleImages
+        : viewerSource === "history"
+            ? historyImages.map(img => img.url)
+            : sampleImages
 
     // === Shared Controls Block (dùng cho cả desktop sidebar và mobile) ===
     const ControlsBlock = (
@@ -584,8 +594,8 @@ export function TemplateDetailPage() {
         <div className="w-full max-w-5xl mx-auto space-y-6">
             <div className="space-y-6 pb-20">
 
-                {/* State: Ảnh đã upload, chưa tạo, không loading — hiện ảnh preview + hint */}
-                {uploadedImage && !isGenerating && generatedImages.length === 0 && !historyLoading && (
+                {/* State: Ảnh đã upload, chưa tạo — hiện ảnh preview + hint */}
+                {uploadedImage && !isGenerating && generatedImages.length === 0 && (
                     <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
                         <ToolImageUpload images={[uploadedImage]} onImagesChange={(urls) => setUploadedImage(urls[0] || null)} className="border-0 bg-transparent shadow-none p-0" />
                         <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
@@ -666,16 +676,48 @@ export function TemplateDetailPage() {
                         </div>
                     </div>
                 )}
-
-                {/* Loading lịch sử */}
-                {historyLoading && generatedImages.length === 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-                        {Array.from({ length: 4 }).map((_, i) => (
-                            <Skeleton key={`hist-sk-${i}`} className="aspect-square rounded-xl" />
-                        ))}
-                    </div>
-                )}
             </div>
+        </div>
+    )
+
+    // === History Panel cho sidebar ===
+    const HistoryPanel = (
+        <div className="space-y-3">
+            {historyLoading ? (
+                <div className="grid grid-cols-2 gap-2">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <Skeleton key={`hist-sk-${i}`} className="aspect-square rounded-lg" />
+                    ))}
+                </div>
+            ) : historyImages.length === 0 ? (
+                <div className="py-8 text-center">
+                    <Sparkles className="size-6 text-muted-foreground/40 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">Chưa có ảnh nào từ mẫu này</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 gap-2">
+                    {historyImages.map((img, idx) => (
+                        <div
+                            key={img.id}
+                            className="group relative rounded-lg overflow-hidden cursor-pointer ring-1 ring-border/20 hover:ring-primary/50 transition-all"
+                            onClick={() => openHistoryViewer(idx)}
+                        >
+                            <img
+                                src={img.url}
+                                alt={`Lịch sử ${idx + 1}`}
+                                className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="absolute bottom-1 left-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span className="text-[9px] text-white/80 font-medium">
+                                    {new Date(img.timestamp).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" })}
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 
@@ -685,7 +727,8 @@ export function TemplateDetailPage() {
         icon: LayoutTemplate,
         controls: template ? ControlsBlock : null,
         submitButton: template ? GenerateButton : null,
-    }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress])
+        historyPanel: HistoryPanel,
+    }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress, historyImages, historyLoading])
 
     // Loading / not found guard
     if (templateLoading) {
@@ -713,7 +756,7 @@ export function TemplateDetailPage() {
         <>
             <ToolWorkspaceLayout
                 canvas={
-                    !uploadedImage && generatedImages.length === 0 && !historyLoading ? (
+                    !uploadedImage && generatedImages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
                             <div className="text-center space-y-2">
                                 <h3 className="text-xl font-semibold">Tạo ảnh với mẫu: <span className="text-primary">{template.name}</span></h3>
@@ -757,7 +800,7 @@ function ViewerDialog({
     images: string[]
     index: number
     setIndex: (i: number) => void
-    source: "sample" | "generated"
+    source: "sample" | "generated" | "history"
     generatedImages: GeneratedImage[]
     onDownload: (url: string) => void
 }) {
