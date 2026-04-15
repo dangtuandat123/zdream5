@@ -20,7 +20,8 @@ import {
     Layers,
     Ruler,
     Clock,
-    LayoutTemplate
+    LayoutTemplate,
+    ArrowLeft
 } from "lucide-react"
 
 import { ImageLightbox } from "@/components/ui/image-lightbox"
@@ -427,6 +428,12 @@ export function TemplateDetailPage() {
                             </div>
                         </div>
                     </Card>
+                    <div className="flex justify-start">
+                        <Link to="/app/tools/templates" className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors py-1">
+                            <ArrowLeft className="size-3" />
+                            Đổi mẫu thiết kế khác
+                        </Link>
+                    </div>
                 </div>
             )}
 
