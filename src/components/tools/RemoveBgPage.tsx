@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Eraser, Sparkles } from "lucide-react"
+import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -13,9 +13,24 @@ import { toolsApi } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { useInputFromUrl } from "@/hooks/use-input-from-url"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+
+const CROSS_TOOLS = [
+    { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
+    { path: "/app/tools/upscale", label: "Upscale ảnh", icon: ZoomIn },
+    { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
+    { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
+]
 
 const SUBJECT_TYPES = [
     { id: "auto", label: "Tự động", emoji: "✨" },
@@ -31,6 +46,7 @@ const EDGE_OPTIONS = [
 ] as const
 
 export function RemoveBgPage() {
+    const navigate = useNavigate()
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("remove-bg")
     const [images, setImages] = useState<string[]>([])
@@ -154,21 +170,79 @@ export function RemoveBgPage() {
                     </div>
                 ) : (
                     <>
-                        <ToolResultDisplay
-                            imageUrl={result}
-                            loading={loading}
-                            beforeImageUrl={images[0]}
-                            onUseAsInput={(url) => { setImages([url]); setResult(null) }}
-                            emptyHint="Ảnh đã được tải lên. Nhấn 'Xóa nền' để bắt đầu xử lý."
-                        />
-                        {result && (
-                            <div className="flex flex-col items-center gap-3 mt-4 animate-in slide-in-from-bottom-2">
-                                <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} />
-                                <Button size="sm" variant="secondary" className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80" onClick={handleDownloadWithBg}>
-                                    <Download className="size-3.5" />
-                                    <span className="text-xs font-semibold">Tải về với nền đang chọn</span>
-                                </Button>
+                        {result && images[0] ? (
+                            <div className="w-full h-full flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-500 delay-100">
+                                {/* Ảnh Background Previewer chiếm trọn Canvas */}
+                                <div className="flex-1 min-h-0 flex flex-col justify-center w-full">
+                                    <BackgroundPreviewer ref={bgPreviewerRef} imageUrl={result} className="w-full" />
+                                </div>
+
+                                {/* Bottom bar: info + actions */}
+                                <div className="flex items-center justify-between gap-3 flex-wrap py-1 mt-2">
+                                    {/* Info bên trái */}
+                                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                                        <Badge variant="secondary" className="text-[10px] h-5 px-2 font-mono">
+                                            PNG Trong Suốt / Tùy chỉnh
+                                        </Badge>
+                                        <span className="text-muted-foreground/60">·</span>
+                                        <span className="font-medium">Chất lượng cao</span>
+                                    </div>
+
+                                    {/* Actions bên phải */}
+                                    <div className="flex items-center gap-2.5">
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80 text-primary"
+                                            onClick={handleDownloadWithBg}
+                                        >
+                                            <Download className="size-3.5" />
+                                            <span className="text-xs font-semibold">Tải ảnh ghép</span>
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                            onClick={() => { setImages([result]); setResult(null) }}
+                                        >
+                                            <Eraser className="size-3.5" />
+                                            <span className="text-xs font-semibold">Dùng làm đầu vào</span>
+                                        </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                                >
+                                                    <ArrowRight className="size-3.5" />
+                                                    <span className="text-xs font-semibold">Tiếp tục với...</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="rounded-xl border-border/40 shadow-xl">
+                                                {CROSS_TOOLS.filter(t => t.path !== "/app/tools/remove-bg").map((tool) => (
+                                                    <DropdownMenuItem
+                                                        key={tool.path}
+                                                        onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(result)}`)}
+                                                        className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
+                                                    >
+                                                        <tool.icon className="size-3.5 text-muted-foreground" />
+                                                        <span className="font-medium">{tool.label}</span>
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </div>
                             </div>
+                        ) : (
+                            <ToolResultDisplay
+                                imageUrl={result}
+                                loading={loading}
+                                beforeImageUrl={images[0]}
+                                onUseAsInput={(url) => { setImages([url]); setResult(null) }}
+                                emptyHint="Ảnh đã được tải lên. Nhấn 'Xóa nền' để bắt đầu xử lý."
+                            />
                         )}
                     </>
                 )

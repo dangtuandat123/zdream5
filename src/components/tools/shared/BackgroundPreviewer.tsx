@@ -81,16 +81,17 @@ export const BackgroundPreviewer = forwardRef<BackgroundPreviewerHandle, Backgro
         }
 
         return (
-            <div className={cn("space-y-3", className)}>
-                <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
-                    Xem trước nền
+            <div className={cn("space-y-4 w-full flex flex-col h-full", className)}>
+                <div className="flex items-center justify-between text-sm font-medium text-muted-foreground px-1">
+                    <span>Trình ghép nền ảnh trực tiếp</span>
+                    <span className="text-[10px] bg-muted/60 px-2 py-0.5 rounded flex items-center gap-1.5"><Upload className="size-3" />Bạn có thể dùng ảnh của riêng mình làm nền</span>
                 </div>
 
                 <div
-                    className={cn("relative rounded-xl overflow-hidden border min-h-[200px] flex items-center justify-center", bgClass)}
+                    className={cn("relative rounded-xl overflow-hidden border min-h-[350px] flex-1 flex items-center justify-center shadow-inner", bgClass)}
                     style={bgStyle}
                 >
-                    <img ref={imgRef} src={imageUrl} alt="Result" className="max-h-[300px] object-contain" crossOrigin="anonymous" />
+                    <img ref={imgRef} src={imageUrl} alt="Result" className="w-full max-h-[500px] object-contain drop-shadow-2xl" crossOrigin="anonymous" />
                 </div>
 
                 <div className="flex gap-1.5 flex-wrap">
