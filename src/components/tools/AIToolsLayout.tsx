@@ -14,7 +14,6 @@ import {
   Sparkles,
   ArrowLeft,
   ImageIcon,
-  ChevronRight,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -202,59 +201,18 @@ function ToolListCard({ tool }: { tool: AITool }) {
   return <div className="cursor-not-allowed">{card}</div>
 }
 
+// === Welcome Screen khi chưa chọn tool ===
 export function AIToolsIndex() {
-  const availableTools = tools.filter(t => t.available)
-
   return (
-    <ScrollArea className="w-full h-full bg-muted/10">
-        <div className="p-8 md:p-12 lg:p-16 max-w-6xl mx-auto min-h-full flex flex-col animate-in fade-in zoom-in-95 duration-500">
-            <div className="flex flex-col items-center text-center space-y-4 mb-12">
-                <div className="inline-flex items-center justify-center p-3 mb-2 rounded-2xl bg-primary/10 text-primary border border-primary/20 shadow-inner">
-                    <Sparkles className="size-8" />
-                </div>
-                <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60">
-                    Khám phá AI ZDream5
-                </h1>
-                <p className="text-lg text-muted-foreground/80 max-w-xl mx-auto font-medium">
-                    Biến mọi định dạng nội dung thành kiệt tác sống động với bộ công cụ đa năng chuẩn Studio.
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {availableTools.map(tool => {
-                    const Icon = iconMap[tool.id]
-                    return (
-                        <Link key={tool.id} to={tool.path!} className="group relative flex flex-col p-6 rounded-[2rem] border bg-background/50 hover:bg-background/90 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-500 outline-none backdrop-blur-sm">
-                            <div className="flex items-center gap-4 mb-5">
-                                <div className="shrink-0 size-14 rounded-2xl overflow-hidden border border-black/5 dark:border-white/5 relative shadow-sm">
-                                    <div className={cn("absolute inset-0 bg-gradient-to-br opacity-80", gradientMap[tool.id] ?? "from-gray-600 to-gray-800")} />
-                                    {Icon && <Icon className="absolute inset-0 m-auto size-6 text-white drop-shadow-md" />}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">{tool.name}</h3>
-                                    <Badge variant="secondary" className="px-2 py-0 mt-1 text-[10px] uppercase tracking-wider font-semibold bg-muted/60 text-muted-foreground">{tool.category}</Badge>
-                                </div>
-                            </div>
-                            <p className="text-sm text-foreground/60 leading-relaxed font-medium flex-1">
-                                {tool.description}
-                            </p>
-                            <div className="mt-6 flex items-center justify-end text-xs font-bold text-primary opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300 ease-out">
-                                Khởi tạo ngay 
-                                <div className="ml-2 bg-primary/10 rounded-full p-1 border border-primary/20">
-                                    <ChevronRight className="size-3.5" strokeWidth={3} />
-                                </div>
-                            </div>
-                        </Link>
-                    )
-                })}
-            </div>
-            
-            <div className="text-center mt-16 text-xs text-muted-foreground font-medium flex-col flex items-center justify-center gap-2">
-                <LayoutTemplate className="size-5 opacity-50" />
-                Dự án liên tục cập nhật công cụ AI thế hệ mới nhất hàng tháng.
-            </div>
-        </div>
-    </ScrollArea>
+    <div className="flex flex-col items-center justify-center w-full h-full text-center p-8 text-muted-foreground animate-in fade-in duration-500">
+      <div className="size-24 rounded-3xl bg-muted border border-border/50 flex items-center justify-center mb-6 shadow-sm">
+        <Sparkles className="size-10 text-muted-foreground/60" />
+      </div>
+      <h2 className="text-xl font-bold tracking-tight text-foreground mb-2">Bộ Công Cụ AI ZDream5</h2>
+      <p className="max-w-[280px] text-sm text-muted-foreground leading-relaxed">
+        Vui lòng chọn một công cụ ở danh sách bên trái để bắt đầu sáng tạo.
+      </p>
+    </div>
   )
 }
 
