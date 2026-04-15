@@ -30,17 +30,17 @@ function LoadingProgress() {
     return (
         <div className="flex flex-col items-center justify-center gap-7 py-16 px-10 rounded-2xl border border-border/40 min-h-[360px] relative overflow-hidden bg-background">
 
-            {/* Animated color-shifting blobs */}
+            {/* Animated color-shifting blobs — opacity cao cho dark mode */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
                 <div
-                    className="absolute size-72 rounded-full blur-[100px] opacity-[0.07] top-0 -left-10"
+                    className="absolute size-96 rounded-full blur-[80px] top-[-20%] left-[-15%]"
                     style={{
                         background: 'linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4)',
                         animation: 'loadingBlob1 6s ease-in-out infinite alternate',
                     }}
                 />
                 <div
-                    className="absolute size-64 rounded-full blur-[100px] opacity-[0.06] bottom-0 -right-10"
+                    className="absolute size-80 rounded-full blur-[80px] bottom-[-20%] right-[-10%]"
                     style={{
                         background: 'linear-gradient(225deg, #f472b6, #8b5cf6, #6366f1)',
                         animation: 'loadingBlob2 8s ease-in-out infinite alternate',
@@ -51,35 +51,35 @@ function LoadingProgress() {
             {/* Inline keyframes */}
             <style>{`
                 @keyframes loadingBlob1 {
-                    0% { transform: translate(0, 0) scale(1); opacity: 0.07; }
-                    33% { transform: translate(30%, 20%) scale(1.2); opacity: 0.1; }
-                    66% { transform: translate(-10%, 40%) scale(0.9); opacity: 0.06; }
-                    100% { transform: translate(20%, 10%) scale(1.1); opacity: 0.09; }
+                    0% { transform: translate(0, 0) scale(1); opacity: 0.25; }
+                    33% { transform: translate(25%, 15%) scale(1.15); opacity: 0.35; }
+                    66% { transform: translate(-10%, 30%) scale(0.95); opacity: 0.2; }
+                    100% { transform: translate(15%, 5%) scale(1.1); opacity: 0.3; }
                 }
                 @keyframes loadingBlob2 {
-                    0% { transform: translate(0, 0) scale(1); opacity: 0.06; }
-                    50% { transform: translate(-30%, -20%) scale(1.3); opacity: 0.09; }
-                    100% { transform: translate(10%, -30%) scale(0.8); opacity: 0.05; }
+                    0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
+                    50% { transform: translate(-25%, -15%) scale(1.2); opacity: 0.35; }
+                    100% { transform: translate(10%, -20%) scale(0.9); opacity: 0.15; }
                 }
             `}</style>
 
             {/* Spinner */}
             <div className="relative size-[72px] z-10">
                 {/* Vòng ngoài quay chậm */}
-                <div className="absolute inset-0 rounded-full border-[1.5px] border-primary/15" />
+                <div className="absolute inset-0 rounded-full border-[1.5px] border-primary/20" />
                 <div
-                    className="absolute inset-0 rounded-full border-[1.5px] border-transparent border-t-primary/60 animate-spin"
+                    className="absolute inset-0 rounded-full border-[1.5px] border-transparent border-t-primary/70 animate-spin"
                     style={{ animationDuration: '1.8s' }}
                 />
                 {/* Vòng trong quay ngược */}
-                <div className="absolute inset-2.5 rounded-full border border-primary/10" />
+                <div className="absolute inset-2.5 rounded-full border border-primary/15" />
                 <div
-                    className="absolute inset-2.5 rounded-full border border-transparent border-b-primary/40 animate-spin"
+                    className="absolute inset-2.5 rounded-full border border-transparent border-b-primary/50 animate-spin"
                     style={{ animationDuration: '2.5s', animationDirection: 'reverse' }}
                 />
                 {/* Center icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <Sparkles className="size-5 text-primary/70 animate-pulse" style={{ animationDuration: '2s' }} />
+                    <Sparkles className="size-5 text-primary animate-pulse" style={{ animationDuration: '2s' }} />
                 </div>
             </div>
 
