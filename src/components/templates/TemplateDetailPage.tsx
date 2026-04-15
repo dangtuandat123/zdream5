@@ -8,7 +8,6 @@ import {
     Wand2,
     Check,
     Copy,
-    AlertCircle,
     Settings2,
     ChevronDown,
     Ban,
@@ -25,7 +24,6 @@ import { ImageLightbox } from "@/components/ui/image-lightbox"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
@@ -33,6 +31,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
 import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
 import { ToolResultDisplay } from "@/components/tools/shared/ToolResultDisplay"
+import { ToolSubmitButton } from "@/components/tools/shared/ToolSubmitButton"
 
 import { useToolPanel } from "@/components/tools/ToolPanelContext"
 
@@ -110,7 +109,7 @@ interface GeneratedImage {
 
 export function TemplateDetailPage() {
     const { slug } = useParams<{ slug: string }>()
-    const { updateGems } = useAuth()
+    const { refreshUser, gems } = useAuth()
     const [template, setTemplate] = useState<TemplateData | null>(null)
     const [templateLoading, setTemplateLoading] = useState(true)
 
@@ -130,7 +129,6 @@ export function TemplateDetailPage() {
     // === State ===
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
     const [isGenerating, setIsGenerating] = useState(false)
-    const [generateProgress, setGenerateProgress] = useState(0)
     const [generatedImages, setGeneratedImages] = useState<GeneratedImage[]>([]) // Chỉ ảnh tạo trong session hiện tại
     const [historyImages, setHistoryImages] = useState<GeneratedImage[]>([]) // Lịch sử từ API
     const [historyLoading, setHistoryLoading] = useState(true)
@@ -182,16 +180,7 @@ export function TemplateDetailPage() {
     const handleGenerate = useCallback(async () => {
         if (!uploadedImage || isGenerating || !template) return
         setIsGenerating(true)
-        setGenerateProgress(0)
         setHasError(false)
-
-        // Progress bar giả lập trong khi chờ API
-        const interval = setInterval(() => {
-            setGenerateProgress(prev => {
-                if (prev >= 90) { clearInterval(interval); return 90 }
-                return prev + Math.random() * 6
-            })
-        }, 200)
 
         try {
             // Ghép prompt từ system_prompt + hiệu ứng đã chọn + mô tả thêm
@@ -230,11 +219,8 @@ export function TemplateDetailPage() {
                 template_slug: slug,
             })
 
-            clearInterval(interval)
-            setGenerateProgress(100)
-
             // Cập nhật gems
-            updateGems(response.gems_remaining)
+            refreshUser()
 
             // Thêm ảnh kết quả vào danh sách
             const newImages: GeneratedImage[] = response.images.map((img) => ({
@@ -252,7 +238,6 @@ export function TemplateDetailPage() {
             setHistoryImages(prev => [...newImages, ...prev])
             toast.success(`Tạo ${newImages.length} ảnh thành công!`)
         } catch (err) {
-            clearInterval(interval)
             setHasError(true)
             const msg = err instanceof Error ? err.message : ''
             if (msg.includes('429') || msg.includes('Too Many')) {
@@ -264,9 +249,8 @@ export function TemplateDetailPage() {
             }
         } finally {
             setIsGenerating(false)
-            setGenerateProgress(0)
         }
-    }, [uploadedImage, isGenerating, template, outputSize, imageSize, imageCount, effectSelections, extraPrompt, effectGroups, updateGems, slug])
+    }, [uploadedImage, isGenerating, template, outputSize, imageSize, imageCount, effectSelections, extraPrompt, effectGroups, refreshUser, slug])
 
     // Download ảnh — dùng cho lightbox viewer
     const handleDownload = useCallback(async (url: string) => {
@@ -466,38 +450,16 @@ export function TemplateDetailPage() {
         </div>
     )
 
-    // === Generate Button Block ===
-    const GenerateButton = (
-        <div className="space-y-2">
-            {/* Error state */}
-            {hasError && (
-                <div className="flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-2">
-                    <AlertCircle className="size-4 shrink-0" />
-                    <span>Tạo ảnh thất bại.</span>
-                </div>
-            )}
-
-            {isGenerating ? (
-                <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Đang tạo ảnh...</span>
-                        <span>{Math.round(generateProgress)}%</span>
-                    </div>
-                    <Progress value={generateProgress} className="h-2" />
-                </div>
-            ) : (
-                <Button
-                    id="generate-button"
-                    className="w-full gap-2"
-                    size="lg"
-                    disabled={!uploadedImage}
-                    onClick={handleGenerate}
-                >
-                    <Wand2 className="size-4" />
-                    {hasError ? "Thử lại" : "Tạo ảnh"}
-                </Button>
-            )}
-        </div>
+    // === Submit Button Block using shared component ===
+    const SubmitButton = (
+        <ToolSubmitButton
+            onClick={handleGenerate}
+            loading={isGenerating}
+            disabled={!uploadedImage}
+            gemsCost={2}
+            label={hasError ? "Thử lại" : "Tạo ảnh"}
+            gemsBalance={gems}
+        />
     )
 
 
@@ -547,9 +509,9 @@ export function TemplateDetailPage() {
         title: template?.name || "Template",
         icon: LayoutTemplate,
         controls: template ? ControlsBlock : null,
-        submitButton: template ? GenerateButton : null,
+        submitButton: template ? SubmitButton : null,
         historyPanel: HistoryPanel,
-    }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress, historyImages, historyLoading])
+    }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, historyImages, historyLoading, gems])
 
     // Loading / not found guard
     if (templateLoading) {
