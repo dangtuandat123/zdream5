@@ -224,9 +224,20 @@ function GenerateSkeleton({ progress, aspectRatio }: { progress: number, aspectR
     )
 }
 
-// Helper: Dynamic Grid cho Canvas dựa trên số lượng ảnh
-function getDynamicGridClass(count: number) {
-    if (count === 1) return "grid grid-cols-1 max-w-2xl mx-auto gap-4"
+// Helper: Dynamic Grid cho Canvas dựa trên số lượng ảnh và tỷ lệ
+function getDynamicGridClass(count: number, aspectRatio?: string) {
+    if (count === 1) {
+        // Nhóm tỉ lệ dọc (Portrait)
+        if (["9:16", "4:5", "2:3", "3:4"].includes(aspectRatio || "")) {
+            return "grid grid-cols-1 w-full max-w-sm mx-auto gap-4" // ~384px
+        }
+        // Nhóm tỉ lệ vuông (Square)
+        if (aspectRatio === "1:1") {
+            return "grid grid-cols-1 w-full max-w-md mx-auto gap-4" // ~448px
+        }
+        // Mặc định dọc ngang (Landscape / Base)
+        return "grid grid-cols-1 w-full max-w-2xl mx-auto gap-4" // ~672px
+    }
     if (count === 2) return "grid grid-cols-1 sm:grid-cols-2 max-w-4xl mx-auto gap-4"
     if (count === 3) return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-6xl mx-auto gap-4"
     return "grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 max-w-7xl mx-auto gap-4"
@@ -651,7 +662,7 @@ export function TemplateDetailPage() {
                             <Wand2 className="size-4 text-primary animate-pulse" />
                             <span className="text-sm font-medium">Đang tạo {imageCount} ảnh...</span>
                         </div>
-                        <div className={getDynamicGridClass(imageCount)}>
+                        <div className={getDynamicGridClass(imageCount, outputSize)}>
                             {Array.from({ length: imageCount }).map((_, i) => (
                                 <GenerateSkeleton key={`gen-skeleton-${i}`} progress={generateProgress} aspectRatio={outputSize} />
                             ))}
@@ -678,7 +689,7 @@ export function TemplateDetailPage() {
                                 <Badge variant="outline" className="text-xs">{generatedImages.length} ảnh</Badge>
                             </div>
                         </div>
-                        <div className={getDynamicGridClass(generatedImages.length)}>
+                        <div className={getDynamicGridClass(generatedImages.length, generatedImages[0]?.aspectRatio || outputSize)}>
                             {generatedImages.map((img, idx) => (
                                 <div
                                     key={img.id}
