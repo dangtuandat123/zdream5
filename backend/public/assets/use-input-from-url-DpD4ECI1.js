@@ -1,1 +1,0 @@
-import{s as u,r as c}from"./index-CGYWUQ_f.js";function o(r){const[e,t]=u(),s=c.useRef(!1);c.useEffect(()=>{const a=e.get("input");a&&!s.current&&(s.current=!0,r(a),e.delete("input"),t(e,{replace:!0}))},[e,t,r])}export{o as u};

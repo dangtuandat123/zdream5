@@ -124,6 +124,7 @@ class ToolController extends Controller
         $denoise = $v['denoise'] ?? false;
         $faceEnhance = $v['face_enhance'] ?? false;
         $creativeDetail = $v['creative_detail'] ?? false;
+        $colorEnhance = $v['color_enhance'] ?? false;
 
         // Map scale_factor → OpenRouter image_size
         $imageSizeMap = ['1x' => '1K', '2x' => '2K', '4x' => '4K'];
@@ -143,6 +144,7 @@ class ToolController extends Controller
         if ($denoise) $promptParts[] = 'Reduce noise, grain and artifacts from the original image.';
         if ($faceEnhance) $promptParts[] = 'Restore and enhance facial features: fix blurry eyes, refine skin texture, correct any AI-generated face distortions.';
         if ($creativeDetail) $promptParts[] = 'Intelligently add fine details: individual hair strands, fabric textures, skin pores, material surfaces.';
+        if ($colorEnhance) $promptParts[] = 'Enhance color vibrancy, improve contrast and saturation. Make colors more vivid and dynamic while keeping them natural.';
         $promptParts[] = 'Maximize sharpness, enhance edges and textures. Maintain the original composition, colors, and style exactly.';
 
         return $this->processImageTool(

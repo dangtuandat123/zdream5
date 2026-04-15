@@ -19,6 +19,7 @@ class UpscaleRequest extends FormRequest
             'denoise' => ['nullable', 'boolean'],
             'face_enhance' => ['nullable', 'boolean'],
             'creative_detail' => ['nullable', 'boolean'],
+            'color_enhance' => ['nullable', 'boolean'],
         ];
     }
 }
