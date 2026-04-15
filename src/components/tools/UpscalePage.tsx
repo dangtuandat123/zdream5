@@ -19,9 +19,9 @@ import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
 const ENHANCE_MODES = [
-    { id: "realistic", label: "Ảnh thật", icon: Camera, desc: "Chân dung, cảnh thật" },
-    { id: "art", label: "Tranh & 2D", icon: Brush, desc: "Mượt nét vẽ, Anime" },
-    { id: "texture", label: "3D & Chi tiết", icon: Focus, desc: "Kết cấu, kiến trúc" },
+    { id: "soft", label: "Ảnh thật", icon: Camera, desc: "Chân dung, cảnh thật" },
+    { id: "sharp", label: "Tranh & 2D", icon: Brush, desc: "Mượt nét vẽ, Anime" },
+    { id: "detail", label: "3D & Chi tiết", icon: Focus, desc: "Kết cấu, kiến trúc" },
 ] as const
 
 export function UpscalePage() {
@@ -31,7 +31,7 @@ export function UpscalePage() {
     // Core parameters
     const [images, setImages] = useState<string[]>([])
     const [scaleFactor, setScaleFactor] = useState("2x")
-    const [enhanceMode, setEnhanceMode] = useState("realistic")
+    const [enhanceMode, setEnhanceMode] = useState("soft")
     
     // AI Enhancements
     const [denoise, setDenoise] = useState(true)
