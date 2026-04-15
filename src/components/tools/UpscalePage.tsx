@@ -19,7 +19,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
@@ -182,49 +181,53 @@ export function UpscalePage() {
                         </Card>
                     )}
 
-                    {/* Độ phân giải đầu ra — ToggleGroup */}
+                    {/* Độ phân giải đầu ra */}
                     <div className="space-y-2">
                         <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Độ phân giải đầu ra</Label>
-                        <ToggleGroup
-                            type="single"
-                            value={scaleFactor}
-                            onValueChange={(v) => { if (v) setScaleFactor(v) }}
-                            className="grid grid-cols-3 gap-0 rounded-xl border bg-muted/30 p-1"
-                        >
+                        <div className="space-y-1.5">
                             {([
-                                { value: "1x", label: "HD", sub: "1K", tier: "Làm nét" },
-                                { value: "2x", label: "Full HD", sub: "2K", tier: "Tiêu chuẩn" },
-                                { value: "4x", label: "Ultra HD", sub: "4K", tier: "Cao cấp" },
+                                { value: "1x", label: "HD", sub: "1K", cost: 1, desc: "Làm nét" },
+                                { value: "2x", label: "Full HD", sub: "2K", cost: 2, desc: "Tiêu chuẩn" },
+                                { value: "4x", label: "Ultra HD", sub: "4K", cost: 5, desc: "Cao cấp" },
                             ] as const).map((opt) => {
+                                const active = scaleFactor === opt.value
                                 const dims = imageDims ? getOutputDims(imageDims.w, imageDims.h, opt.value === "4x" ? 2 : opt.value === "2x" ? 1 : 0) : null
                                 return (
-                                    <ToggleGroupItem
+                                    <button
                                         key={opt.value}
-                                        value={opt.value}
+                                        onClick={() => setScaleFactor(opt.value)}
                                         className={cn(
-                                            "flex flex-col items-center gap-0.5 py-2.5 px-1 rounded-lg text-xs transition-all h-auto data-[state=on]:bg-background data-[state=on]:shadow-sm data-[state=on]:border data-[state=on]:border-primary/20",
+                                            "w-full flex items-center justify-between px-3.5 py-3 rounded-xl border transition-all text-left group",
+                                            active
+                                                ? "border-primary bg-primary/5 shadow-[0_0_0_1px_hsl(var(--primary)/0.2)]"
+                                                : "border-border/50 hover:border-border hover:bg-muted/40"
                                         )}
                                     >
-                                        <span className="font-bold text-[13px] flex items-center gap-1">
-                                            {opt.label}
-                                            {opt.value === "4x" && <Sparkles className="size-3 text-primary" />}
-                                        </span>
-                                        <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
-                                            {dims ? `${dims.w}×${dims.h}` : `~${opt.sub}`}
-                                        </span>
-                                        <Badge variant={scaleFactor === opt.value ? "default" : "secondary"} className="text-[9px] h-4 px-1.5 mt-0.5">
-                                            {GEMS_COST[opt.value]} 💎 · {opt.tier}
+                                        <div className="flex items-center gap-3">
+                                            {/* Radio dot */}
+                                            <div className={cn(
+                                                "size-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors",
+                                                active ? "border-primary" : "border-muted-foreground/30"
+                                            )}>
+                                                {active && <div className="size-2 rounded-full bg-primary" />}
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className={cn("text-sm font-semibold flex items-center gap-1.5", active ? "text-primary" : "text-foreground")}>
+                                                    {opt.label}
+                                                    {opt.value === "4x" && <Sparkles className={cn("size-3.5", active && "animate-pulse")} />}
+                                                </span>
+                                                <span className="text-[11px] text-muted-foreground">
+                                                    {dims ? `${dims.w} × ${dims.h} px` : `~${opt.sub} resolution`}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <Badge variant={active ? "default" : "outline"} className={cn("text-[10px] h-5 px-2 shrink-0", !active && "opacity-60 group-hover:opacity-100")}>
+                                            {opt.cost} 💎
                                         </Badge>
-                                    </ToggleGroupItem>
+                                    </button>
                                 )
                             })}
-                        </ToggleGroup>
-                        {/* Hiển thị output resolution tóm tắt */}
-                        {outputDims && (
-                            <p className="text-[10px] text-muted-foreground text-center">
-                                Đầu ra: <span className="font-semibold text-foreground/80">{outputDims.w}×{outputDims.h} px</span>
-                            </p>
-                        )}
+                        </div>
                     </div>
 
                     <Separator className="opacity-50" />
