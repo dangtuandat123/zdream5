@@ -77,8 +77,8 @@ export function RemoveBgPage() {
                 image: images[0],
                 subject_type: subjectType,
                 edge_refine: edgeRefine,
-                ...(bboxes && bboxes.length > 0 ? { bboxes } : {}),
-                ...(maskBase64 ? { mask_image: maskBase64 } : {})
+                ...(selectionMode === "bbox" && bboxes && bboxes.length > 0 ? { bboxes } : {}),
+                ...(selectionMode === "brush" && maskBase64 ? { mask_image: maskBase64 } : {})
             })
             setResult(res.image.file_url)
             refreshUser()
@@ -205,11 +205,12 @@ export function RemoveBgPage() {
                         </div>
 
                         {/* Interactive Canvas */}
-                        {selectionMode === "bbox" ? (
+                        <div className={cn("w-full", selectionMode !== "bbox" && "hidden")}>
                             <BoundingBoxImage src={images[0]} onBboxesChange={setBboxes} className="w-full" />
-                        ) : (
-                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} className="w-full max-w-lg mt-2 ring-1 ring-border/40 shadow-sm" />
-                        )}
+                        </div>
+                        <div className={cn("w-full max-w-lg mt-2 ring-1 ring-border/40 shadow-sm rounded-xl overflow-hidden", selectionMode !== "brush" && "hidden")}>
+                            <MaskPainter imageUrl={images[0]} onMaskChange={setMaskBase64} className="w-full" />
+                        </div>
 
                         {/* Status Hints */}
                         <div className="flex items-center justify-center w-full mt-2">
