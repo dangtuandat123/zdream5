@@ -191,8 +191,6 @@ export function RemoveBgPage() {
                                 onValueChange={(v) => { 
                                     if(v) { 
                                         setSelectionMode(v as "bbox" | "brush"); 
-                                        setBboxes(null); 
-                                        setMaskBase64(""); 
                                     } 
                                 }} 
                                 className="bg-muted p-1 rounded-full"

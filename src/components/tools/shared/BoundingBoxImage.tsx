@@ -1,6 +1,6 @@
 import { useState, useRef } from "react"
 import { cn } from "@/lib/utils"
-import { Maximize } from "lucide-react"
+import { Maximize, Undo2, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface BoundingBoxImageProps {
@@ -155,91 +155,69 @@ export function BoundingBoxImage({ src, onBboxesChange, className }: BoundingBox
     }
 
     return (
-        <div className={cn("relative flex items-center justify-center p-2 border border-dashed rounded-xl bg-muted/20", className)}>
-            <div 
-                ref={containerRef}
-                className="relative inline-block select-none cursor-crosshair touch-none"
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={endDrawing}
-                onMouseLeave={endDrawing}
-                onTouchStart={startDrawing}
-                onTouchMove={draw}
-                onTouchEnd={endDrawing}
-            >
-                <img 
-                    ref={imgRef}
-                    src={src} 
-                    alt="Target" 
-                    className="max-h-[500px] w-auto h-auto rounded-md pointer-events-none"
-                    onLoad={handleImageLoad}
-                    draggable={false}
-                />
-                
-                {/* Overlay darkening outside the box when saved */}
-                {boxes.length > 0 && (
-                    <div className="absolute inset-0 bg-black/40 pointer-events-none rounded-md" style={{ clipPath: "url(#boxesClip)" }}>
-                        <svg width="0" height="0">
-                            <defs>
-                                <clipPath id="boxesClip" clipPathUnits="userSpaceOnUse">
-                                    <rect width="100%" height="100%" fill="white" />
-                                    {/* Subtractive trick in SVG does not work this way simply, so we disable the overlay darkening or just keep it simple. Let's keep it simple and just use an overlay layer with basic opacity for now, but without clip paths for cross-browser simplicity. Actually, we can remove the full darkening to prevent UI issues when multiple boxes are overlapping. */}
-                                </clipPath>
-                            </defs>
-                        </svg>
-                    </div>
-                )}
+        <div className={cn("space-y-2", className)}>
+            {/* Toolbar */}
+            <div className="flex items-center gap-2 flex-wrap h-9">
+                <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mr-auto bg-muted/60 px-3 h-8 rounded-md">
+                    <Maximize className="size-3.5" />
+                    Kéo chuột để khoanh vùng vật thể
+                </div>
 
-                {/* Wrapper for unified opacity logic - prevents overlapping multiplier */}
-                <div className="absolute inset-0 pointer-events-none opacity-[0.45]">
-                    {/* Render Saved Boxes */}
-                    {boxes.map((b, idx) => (
-                        <div
-                            key={idx}
-                            className="absolute bg-[#ff3c50] pointer-events-none transition-all duration-200"
-                            style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
-                        />
-                    ))}
+                <div className="w-px h-5 bg-border" />
 
-                    {/* The Current Drawing Box */}
-                    <div 
-                        className="absolute bg-[#ff3c50] pointer-events-none"
-                        style={boxStyle}
+                <Button size="icon" variant="ghost" className="size-8" onClick={undoBox} disabled={boxes.length === 0 || isDrawing}>
+                    <Undo2 className="size-3.5" />
+                </Button>
+                <Button size="icon" variant="ghost" className="size-8" onClick={clearAllBoxes} disabled={boxes.length === 0 || isDrawing}>
+                    <Trash2 className="size-3.5" />
+                </Button>
+            </div>
+
+            {/* Canvas */}
+            <div className="relative rounded-xl overflow-hidden border bg-muted select-none flex items-center justify-center min-h-[100px]">
+                <div 
+                    ref={containerRef}
+                    className="relative inline-block select-none cursor-crosshair touch-none"
+                    onMouseDown={startDrawing}
+                    onMouseMove={draw}
+                    onMouseUp={endDrawing}
+                    onMouseLeave={endDrawing}
+                    onTouchStart={startDrawing}
+                    onTouchMove={draw}
+                    onTouchEnd={endDrawing}
+                >
+                    <img 
+                        ref={imgRef}
+                        src={src} 
+                        alt="Target" 
+                        className="max-h-[500px] w-auto h-auto pointer-events-none"
+                        onLoad={handleImageLoad}
+                        draggable={false}
                     />
+                    
+                    {/* Wrapper for unified opacity logic - prevents overlapping multiplier */}
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.45]">
+                        {/* Render Saved Boxes */}
+                        {boxes.map((b, idx) => (
+                            <div
+                                key={idx}
+                                className="absolute bg-[#ff3c50] pointer-events-none transition-all duration-200"
+                                style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
+                            />
+                        ))}
+
+                        {/* The Current Drawing Box */}
+                        <div 
+                            className="absolute bg-[#ff3c50] pointer-events-none"
+                            style={boxStyle}
+                        />
+                    </div>
                 </div>
             </div>
 
-            {/* Top Toolbar (Undo / Clear) */}
-            {boxes.length > 0 && (
-                <div className="absolute top-4 right-4 pointer-events-auto flex items-center gap-1.5 bg-background/90 backdrop-blur-md shadow-md border px-1.5 py-1.5 rounded-full">
-                    <Button 
-                        size="sm" 
-                        variant="secondary" 
-                        className="h-7 text-xs rounded-full px-3"
-                        onClick={undoBox}
-                    >
-                        Hoàn tác
-                    </Button>
-                    <Button 
-                        size="sm" 
-                        variant="destructive" 
-                        className="h-7 text-xs rounded-full px-3"
-                        onClick={clearAllBoxes}
-                    >
-                        Xóa tất cả
-                    </Button>
-                </div>
-            )}
-
-            {/* Instruction tooltip when empty */}
-            {boxes.length === 0 && !isDrawing && (
-                <div className="absolute top-4 inset-x-0 flex justify-center pointer-events-none">
-                    <div className="bg-background/80 backdrop-blur-md border shadow-sm px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-medium text-foreground animate-pulse">
-                        <Maximize className="size-3.5 text-primary" />
-                        Kéo chuột khoanh vùng vật thể cần lấy
-                    </div>
-                </div>
-            )}
+            <p className="text-[10px] text-muted-foreground">
+                Khoanh vùng để chọn nhiều đối tượng cùng lúc
+            </p>
         </div>
     )
 }
