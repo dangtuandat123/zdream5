@@ -561,6 +561,7 @@ export function TemplateDetailPage() {
                             loading={isGenerating}
                             expectedCount={imageCount}
                             aspectRatio={outputSize}
+                            prompt={generatedImages[0]?.prompt || null}
                             emptyHint="Ảnh đầu ra sẽ hiển thị tại đây"
                             onUseAsInput={(url) => setUploadedImage(url)}
                         />

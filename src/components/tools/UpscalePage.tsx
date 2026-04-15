@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Sparkles, ZoomIn, Smile, Wand2, Scan, Palette, Info, RotateCcw } from "lucide-react"
+import { Download, Sparkles, ZoomIn, Smile, Wand2, Scan, Palette, Info, RotateCcw, ArrowRight, Eraser, PenTool, Expand } from "lucide-react"
+import { useNavigate, useLocation } from "react-router-dom"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -19,8 +20,17 @@ import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
+
+// Cross-tool navigation config (đồng bộ với ToolResultDisplay)
+const CROSS_TOOLS = [
+    { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
+    { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
+    { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
+    { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
+]
 
 
 /**
@@ -108,6 +118,9 @@ const AI_TOGGLES = [
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
+    const navigate = useNavigate()
+    const location = useLocation()
+    const crossTools = CROSS_TOOLS.filter(t => !location.pathname.startsWith(t.path))
 
     
     // Core parameters
@@ -343,8 +356,32 @@ export function UpscalePage() {
                                             onClick={() => setResult(null)}
                                         >
                                             <RotateCcw className="size-3.5" />
-                                            <span className="text-xs font-semibold">Thử lại</span>
+                                            <span className="text-xs font-semibold">Đổi ảnh gốc</span>
                                         </Button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                                                >
+                                                    <ArrowRight className="size-3.5" />
+                                                    <span className="text-xs font-semibold">Tiếp tục với...</span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="rounded-xl border-border/40 shadow-xl">
+                                                {crossTools.map((tool) => (
+                                                    <DropdownMenuItem
+                                                        key={tool.path}
+                                                        onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(result)}`)}
+                                                        className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
+                                                    >
+                                                        <tool.icon className="size-3.5 text-muted-foreground" />
+                                                        <span className="font-medium">{tool.label}</span>
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </div>
                             </div>
