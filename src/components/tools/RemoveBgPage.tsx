@@ -3,6 +3,7 @@ import { toast } from "sonner"
 import { Download, Eraser, Sparkles, ArrowRight, Wand2, PenTool, Expand, ZoomIn, User, Package, Cat, Feather, Scissors } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
+import { BoundingBoxImage } from "./shared/BoundingBoxImage"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
 import { ToolSubmitButton } from "./shared/ToolSubmitButton"
 import { ToolHistoryPanel } from "./shared/ToolHistoryPanel"
@@ -54,8 +55,9 @@ export function RemoveBgPage() {
     const [loading, setLoading] = useState(false)
     const [subjectType, setSubjectType] = useState("auto")
     const [edgeRefine, setEdgeRefine] = useState("standard")
+    const [bbox, setBbox] = useState<[number, number, number, number] | null>(null)
 
-    useInputFromUrl(useCallback((url: string) => setImages([url]), []))
+    useInputFromUrl(useCallback((url: string) => { setImages([url]); setBbox(null) }, []))
     const bgPreviewerRef = useRef<{ getCompositeDataUrl: () => string | null }>(null)
 
     const handleSubmit = async () => {
@@ -67,6 +69,7 @@ export function RemoveBgPage() {
                 image: images[0],
                 subject_type: subjectType,
                 edge_refine: edgeRefine,
+                ...(bbox ? { bbox } : {})
             })
             setResult(res.image.file_url)
             refreshUser()
@@ -165,11 +168,25 @@ export function RemoveBgPage() {
                 !images[0] ? (
                     <ToolImageUpload images={images} onImagesChange={setImages} variant="huge" className="w-full max-w-2xl mx-auto" label="Ảnh Gốc Cần Xóa Nền" />
                 ) : !result && !loading ? (
-                    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
-                        <ToolImageUpload images={images} onImagesChange={setImages} className="border-0 bg-transparent shadow-none p-0" />
-                        <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
-                            <Sparkles className="size-4 animate-pulse text-primary" />
-                            <span>Ảnh đã tải lên. Hãy thiết lập thông số bên trái và nhấn xử lý!</span>
+                    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto items-center animate-in fade-in zoom-in-95 duration-300">
+                        <BoundingBoxImage src={images[0]} onBboxChange={setBbox} className="w-full" />
+                        <div className="flex items-center justify-between w-full">
+                            <Button variant="ghost" size="sm" onClick={() => { setImages([]); setBbox(null) }} className="text-muted-foreground hover:text-foreground">
+                                Đổi ảnh khác
+                            </Button>
+                            <div className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground bg-muted/60 px-3 py-1.5 rounded-full">
+                                {bbox ? (
+                                    <>
+                                        <div className="size-2 rounded-full bg-primary animate-pulse" />
+                                        <span>Đã khoanh vùng tọa độ: {bbox.join(', ')}</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="size-3.5 text-primary animate-pulse" />
+                                        <span>Tự động nhận diện (Hoặc thao tác khoanh vùng)</span>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 ) : (

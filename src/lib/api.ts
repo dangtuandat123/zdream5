@@ -344,7 +344,7 @@ export const toolsApi = {
     upscale: (data: { image: string; scale_factor?: string; enhance_mode?: string; denoise?: boolean; face_enhance?: boolean; creative_detail?: boolean; color_enhance?: boolean }) =>
         request<ToolImageResponse>('/tools/upscale', { method: 'POST', body: JSON.stringify(data) }),
 
-    removeBg: (data: { image: string; subject_type?: string; edge_refine?: string }) =>
+    removeBg: (data: { image: string; subject_type?: string; edge_refine?: string; bbox?: number[] }) =>
         request<ToolImageResponse>('/tools/remove-bg', { method: 'POST', body: JSON.stringify(data) }),
 
     removeObject: (data: { image: string; description: string }) =>
