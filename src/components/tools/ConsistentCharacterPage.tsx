@@ -52,15 +52,15 @@ export function ConsistentCharacterPage() {
         setLoading(true)
         setResult(null)
         try {
-            const payload: any = { images, scene_description: scene }
+            const payload: { images: string[]; scene_description: string; aspect_ratio?: string } = { images, scene_description: scene }
             if (aspectRatio !== "auto") payload.aspect_ratio = aspectRatio
             const res = await toolsApi.consistentCharacter(payload)
             setResult(res.image.file_url)
             refreshUser()
             refreshHistory()
             toast.success(res.message)
-        } catch (e: any) {
-            toast.error(e.message)
+        } catch (e) {
+            toast.error((e as Error).message)
         } finally {
             setLoading(false)
         }

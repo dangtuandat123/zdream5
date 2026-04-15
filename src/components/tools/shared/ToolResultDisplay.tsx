@@ -32,6 +32,8 @@ function LoadingProgress() {
 
             {/* Animated color-shifting blobs — opacity cao cho dark mode */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+                
                 <div
                     className="absolute size-96 rounded-full blur-[80px] top-[-20%] left-[-15%]"
                     style={{
@@ -46,6 +48,9 @@ function LoadingProgress() {
                         animation: 'loadingBlob2 8s ease-in-out infinite alternate',
                     }}
                 />
+                
+                {/* Sweep light */}
+                <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_rgba(var(--primary),0.5)] animate-sweep" />
             </div>
 
             {/* Inline keyframes */}
@@ -60,6 +65,12 @@ function LoadingProgress() {
                     0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
                     50% { transform: translate(-25%, -15%) scale(1.2); opacity: 0.35; }
                     100% { transform: translate(10%, -20%) scale(0.9); opacity: 0.15; }
+                }
+                @keyframes sweep {
+                    0% { top: 0%; opacity: 0; }
+                    20% { opacity: 1; }
+                    80% { opacity: 1; }
+                    100% { top: 100%; opacity: 0; }
                 }
             `}</style>
 

@@ -60,8 +60,8 @@ export function StyleTransferPage() {
             refreshUser()
             refreshHistory()
             toast.success(res.message)
-        } catch (e: any) {
-            toast.error(e.message)
+        } catch (e) {
+            toast.error((e as Error).message)
         } finally {
             setLoading(false)
         }

@@ -44,8 +44,8 @@ export function ImageToPromptPage() {
             refreshUser()
             refreshHistory()
             toast.success(res.message)
-        } catch (e: any) {
-            toast.error(e.message)
+        } catch (e) {
+            toast.error((e as Error).message)
         } finally {
             setLoading(false)
         }
@@ -69,8 +69,8 @@ export function ImageToPromptPage() {
                 refreshUser()
                 toast.success("Tạo ảnh thành công!")
             }
-        } catch (e: any) {
-            toast.error(e.message)
+        } catch (e) {
+            toast.error((e as Error).message)
         } finally {
             setGenerating(false)
         }

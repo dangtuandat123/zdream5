@@ -33,6 +33,7 @@ export function ToolPanelProvider({ children }: { children: ReactNode }) {
  * Đã sửa lỗi re-render bằng cách sử dụng ref để track active id hoặc để user tự control.
  * - dependencies: Mảng các biến ảnh hưởng đến controls (vd: loading, result, images, v.v.)
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToolPanel(config: ToolPanelState, dependencies: React.DependencyList = []) {
     const { setPanel } = useContext(ToolPanelContext)
 
@@ -46,6 +47,7 @@ export function useToolPanel(config: ToolPanelState, dependencies: React.Depende
 /**
  * Hook dành cho AIToolsLayout: đọc panel state từ context.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToolPanelState() {
     return useContext(ToolPanelContext)
 }

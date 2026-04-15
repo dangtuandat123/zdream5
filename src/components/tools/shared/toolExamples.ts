@@ -1,3 +1,38 @@
+export interface ToolExample {
+    before: string
+    after: string
+    label: string
+}
+
+export const TOOL_EXAMPLES: Record<string, ToolExample[]> = {
+    'remove-bg': [
+        { before: "/images/examples/removebg-before-1.jpg", after: "/images/examples/removebg-after-1.png", label: "Chân dung → nền trong suốt" },
+        { before: "/images/examples/removebg-before-2.jpg", after: "/images/examples/removebg-after-2.png", label: "Sản phẩm → tách nền" },
+        { before: "/images/examples/removebg-before-3.jpg", after: "/images/examples/removebg-after-3.png", label: "Thú cưng → xóa nền" },
+    ],
+    'upscale': [
+        { before: "/images/examples/upscale-before-1.jpg", after: "/images/examples/upscale-after-1.jpg", label: "Ảnh mờ → sắc nét 2x" },
+        { before: "/images/examples/upscale-before-2.jpg", after: "/images/examples/upscale-after-2.jpg", label: "Ảnh nhỏ → phóng to 4x" },
+    ],
+    'style-transfer': [
+        { before: "/images/examples/style-before-1.jpg", after: "/images/examples/style-after-anime.jpg", label: "Chân dung → Anime" },
+        { before: "/images/examples/style-before-1.jpg", after: "/images/examples/style-after-oil.jpg", label: "Chân dung → Sơn dầu" },
+        { before: "/images/examples/style-before-2.jpg", after: "/images/examples/style-after-cyber.jpg", label: "Phong cảnh → Cyberpunk" },
+    ],
+    'image-edit': [
+        { before: "/images/examples/edit-before-1.jpg", after: "/images/examples/edit-after-remove.jpg", label: "Xóa người khỏi ảnh" },
+        { before: "/images/examples/edit-before-2.jpg", after: "/images/examples/edit-after-replace.jpg", label: "Thay đổi vật thể" },
+    ],
+    'extend': [
+        { before: "/images/examples/extend-before-1.jpg", after: "/images/examples/extend-after-1.jpg", label: "Mở rộng bầu trời" },
+        { before: "/images/examples/extend-before-2.jpg", after: "/images/examples/extend-after-2.jpg", label: "Dọc → ngang" },
+    ],
+    'image-to-prompt': [
+        { before: "/images/examples/prompt-input-1.jpg", after: "/images/examples/prompt-input-1.jpg", label: "Phân tích phong cảnh" },
+        { before: "/images/examples/prompt-input-2.jpg", after: "/images/examples/prompt-input-2.jpg", label: "Phân tích nhân vật" },
+    ],
+}
+
 export const TOOL_TIPS: Record<string, string[]> = {
     'style-transfer': [
         'Ảnh chân dung rõ nét cho kết quả tốt nhất khi chuyển sang anime hoặc sơn dầu.',
