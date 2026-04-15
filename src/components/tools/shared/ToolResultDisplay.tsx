@@ -217,7 +217,7 @@ export function ToolResultDisplay({
                                                 <DropdownMenuTrigger asChild>
                                                     <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors px-3">
                                                         <ArrowRight className="size-3.5 shrink-0" />
-                                                        Dùng tiếp
+                                                        Xử lý tiếp
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent side="top" align="center" className="rounded-xl border-border/40 shadow-xl mb-1">
