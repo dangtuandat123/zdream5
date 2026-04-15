@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { toast } from "sonner"
-import { Download, Sparkles, Focus, Brush, ZoomIn, Camera, Smile, Wand2 } from "lucide-react"
+import { Download, Sparkles, ZoomIn, Smile, Wand2 } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -18,12 +18,6 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 
-const ENHANCE_MODES = [
-    { id: "soft", label: "Ảnh thật", icon: Camera, desc: "Chân dung, cảnh thật" },
-    { id: "sharp", label: "Tranh & 2D", icon: Brush, desc: "Mượt nét vẽ, Anime" },
-    { id: "detail", label: "3D & Chi tiết", icon: Focus, desc: "Kết cấu, kiến trúc" },
-] as const
-
 export function UpscalePage() {
     const { refreshUser, gems } = useAuth()
     const { history, loading: historyLoading, refresh: refreshHistory } = useToolHistory("upscale")
@@ -31,7 +25,6 @@ export function UpscalePage() {
     // Core parameters
     const [images, setImages] = useState<string[]>([])
     const [scaleFactor, setScaleFactor] = useState("2x")
-    const [enhanceMode, setEnhanceMode] = useState("soft")
     
     // AI Enhancements
     const [denoise, setDenoise] = useState(true)
@@ -60,7 +53,7 @@ export function UpscalePage() {
             const res = await toolsApi.upscale({
                 image: images[0],
                 scale_factor: scaleFactor,
-                enhance_mode: enhanceMode,
+                enhance_mode: "soft", // Backend Vision model sẽ tự động phân tích và ghi đè
                 denoise,
                 // @ts-ignore
                 face_enhance: faceEnhance,
@@ -112,29 +105,6 @@ export function UpscalePage() {
                             <span className={cn("text-[10px] font-medium transition-colors", scaleFactor === "4x" ? "text-primary/80" : "text-muted-foreground")}>Siêu nét 4K/8K</span>
                             <span className="text-[9px] text-muted-foreground/80 mt-1 uppercase">Cao Cấp</span>
                         </button>
-                    </div>
-                </div>
-
-                {/* 2. Thể loại ảnh */}
-                <div className="space-y-2.5">
-                    <Label className="text-xs font-semibold text-foreground/90 uppercase tracking-wider">Phân loại ảnh</Label>
-                    <div className="grid grid-cols-3 gap-2">
-                        {ENHANCE_MODES.map((m) => (
-                            <button
-                                key={m.id}
-                                onClick={() => setEnhanceMode(m.id)}
-                                className={cn(
-                                    "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all text-center",
-                                    enhanceMode === m.id ? "border-primary bg-primary/10 shadow-sm" : "border-border/50 hover:border-primary/40 bg-card"
-                                )}
-                            >
-                                <m.icon className={cn("size-5", enhanceMode === m.id ? "text-primary" : "text-muted-foreground/60")} />
-                                <div className="flex flex-col gap-0.5">
-                                    <span className={cn("text-[11px] font-bold leading-none", enhanceMode === m.id ? "text-primary": "text-foreground")}>{m.label}</span>
-                                    <span className="text-[9px] text-muted-foreground leading-tight">{m.desc}</span>
-                                </div>
-                            </button>
-                        ))}
                     </div>
                 </div>
 
@@ -191,7 +161,7 @@ export function UpscalePage() {
         ),
         submitButton: <ToolSubmitButton onClick={handleSubmit} loading={loading} disabled={!images[0]} gemsCost={scaleFactor === "4x" ? 5 : 2} label={scaleFactor === "4x" ? "Upscale 4K" : "Upscale Cơ Bản"} gemsBalance={gems} />,
         historyPanel: <ToolHistoryPanel history={history} loading={historyLoading} onSelectImage={(url) => setResult(url)} selectedUrl={result} />
-    }, [images, scaleFactor, enhanceMode, denoise, faceEnhance, creativeDetail, loading, result, history, historyLoading, gems])
+    }, [images, scaleFactor, denoise, faceEnhance, creativeDetail, loading, result, history, historyLoading, gems])
 
     return (
         <ToolWorkspaceLayout
