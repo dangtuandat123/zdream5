@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { toast } from "sonner"
-import { Info, UserCheck, Sparkles, Image as ImageIcon, Download, RotateCcw } from "lucide-react"
+import { Info, UserCheck, Sparkles, Image as ImageIcon } from "lucide-react"
 import { ToolWorkspaceLayout } from "./ToolWorkspaceLayout"
 import { ToolImageUpload } from "./shared/ToolImageUpload"
 import { ToolResultDisplay } from "./shared/ToolResultDisplay"
@@ -12,7 +12,6 @@ import { useAuth } from "@/contexts/AuthContext"
 import { useToolHistory } from "@/hooks/use-tool-history"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -166,48 +165,20 @@ export function ConsistentCharacterPage() {
                             <span>Ảnh đã tải lên. Mô tả bối cảnh mới bên trái rồi nhấn Tạo!</span>
                         </div>
                     </div>
-                ) : result ? (
-                    <div className="w-full h-full flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-500 delay-100">
-                        <div className="flex-1 min-h-0 flex items-center justify-center">
-                            <div className="relative rounded-xl overflow-hidden border border-border/60 bg-muted/30">
-                                <img src={result} alt="Kết quả" className="w-full max-h-[55vh] object-contain" draggable={false} />
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between gap-3 flex-wrap py-1">
-                            <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
-                                <Badge variant="secondary" className="text-[10px] h-5 px-2">{aspectRatio === "auto" ? "Tự động" : aspectRatio}</Badge>
-                                <span className="text-muted-foreground/60">·</span>
-                                <span className="font-medium">Nhân vật AI</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button size="sm" className="gap-1.5 h-8 px-4 text-xs" onClick={async () => {
-                                    if (!result) return
-                                    try {
-                                        const response = await fetch(result)
-                                        const blob = await response.blob()
-                                        const url = URL.createObjectURL(blob)
-                                        const a = document.createElement("a")
-                                        a.href = url
-                                        a.download = `zdream-character-${Date.now()}.png`
-                                        a.click()
-                                        URL.revokeObjectURL(url)
-                                    } catch { /* ignore */ }
-                                }}>
-                                    <Download className="size-3.5" />
-                                    Tải ảnh
-                                </Button>
-                                <Button size="sm" variant="outline" className="gap-1.5 h-8 text-xs" onClick={() => setResult(null)}>
-                                    <RotateCcw className="size-3.5" />
-                                    Thử lại
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
                 ) : (
                     <ToolResultDisplay
                         imageUrl={result}
                         loading={loading}
                         emptyHint="Đang tạo ảnh nhân vật..."
+                        infoContent={
+                            result ? (
+                                <>
+                                    <Badge variant="secondary" className="text-[10px] h-5 px-2">{aspectRatio === "auto" ? "Tự động" : aspectRatio}</Badge>
+                                    <span className="text-muted-foreground/60">·</span>
+                                    <span className="font-medium">Nhân vật AI</span>
+                                </>
+                            ) : null
+                        }
                     />
                 )
             }

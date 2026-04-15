@@ -116,6 +116,7 @@ interface ToolResultDisplayProps {
     onUseAsInput?: (url: string) => void
     emptyHint?: string
     showGenerateFromPrompt?: boolean
+    infoContent?: React.ReactNode
 }
 
 export function ToolResultDisplay({
@@ -127,6 +128,7 @@ export function ToolResultDisplay({
     onUseAsInput,
     emptyHint,
     showGenerateFromPrompt,
+    infoContent,
 }: ToolResultDisplayProps) {
     const [copied, setCopied] = useState(false)
     const navigate = useNavigate()
@@ -191,6 +193,11 @@ export function ToolResultDisplay({
                 ) : (
                     <div className="relative rounded-xl overflow-hidden border bg-muted">
                         <img src={imageUrl} alt="Result" className="w-full max-h-[500px] object-contain" />
+                    </div>
+                )}
+                {infoContent && (
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-1 mb-1">
+                        {infoContent}
                     </div>
                 )}
                 <div className="flex gap-2 flex-wrap">
