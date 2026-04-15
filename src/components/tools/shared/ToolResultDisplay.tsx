@@ -229,46 +229,70 @@ export function ToolResultDisplay({
                         {infoContent}
                     </div>
                 )}
-                <div className="flex gap-2 flex-wrap items-center">
+                <div className="flex gap-2.5 flex-wrap items-center pt-2">
                     {displayImages.length === 1 ? (
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleDownloadUrl(displayImages[0])}>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            onClick={() => handleDownloadUrl(displayImages[0])}
+                        >
                             <Download className="size-3.5" />
-                            Tải về
+                            <span className="text-xs font-semibold">Tải về</span>
                         </Button>
                     ) : (
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => displayImages.forEach(src => handleDownloadUrl(src))}>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            onClick={() => displayImages.forEach(src => handleDownloadUrl(src))}
+                        >
                             <Download className="size-3.5" />
-                            Tải tất cả ({displayImages.length})
+                            <span className="text-xs font-semibold">Tải tất cả ({displayImages.length})</span>
                         </Button>
                     )}
                     {prompt && (
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleCopy(prompt)}>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            onClick={() => handleCopy(prompt)}
+                        >
                             {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-                            Prompt
+                            <span className="text-xs font-semibold">Prompt</span>
                         </Button>
                     )}
                     {onUseAsInput && (
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onUseAsInput(displayImages[0])}>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            onClick={() => onUseAsInput(displayImages[0])}
+                        >
                             <RotateCcw className="size-3.5" />
-                            Dùng làm đầu vào
+                            <span className="text-xs font-semibold">Dùng làm đầu vào</span>
                         </Button>
                     )}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button size="sm" variant="outline" className="gap-1.5">
+                            <Button
+                                size="sm"
+                                variant="secondary"
+                                className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            >
                                 <ArrowRight className="size-3.5" />
-                                Tiếp tục với...
+                                <span className="text-xs font-semibold">Tiếp tục với...</span>
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
+                        <DropdownMenuContent align="start" className="rounded-xl border-border/40 shadow-xl">
                             {crossTools.map((tool) => (
                                 <DropdownMenuItem
                                     key={tool.path}
                                     onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(displayImages[0])}`)}
-                                    className="gap-2 text-xs"
+                                    className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
                                 >
-                                    <tool.icon className="size-3.5" />
-                                    {tool.label}
+                                    <tool.icon className="size-3.5 text-muted-foreground" />
+                                    <span className="font-medium">{tool.label}</span>
                                 </DropdownMenuItem>
                             ))}
                         </DropdownMenuContent>
