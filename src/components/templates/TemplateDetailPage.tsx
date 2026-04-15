@@ -147,7 +147,7 @@ function ImageWithSkeleton({ src, alt, className }: { src: string; alt: string; 
 }
 
 // === Loading skeleton khi đang tạo ảnh — color-shifting blobs ===
-function GenerateSkeleton({ progress }: { progress: number }) {
+function GenerateSkeleton({ progress, aspectRatio }: { progress: number, aspectRatio?: string }) {
     const [elapsed, setElapsed] = useState(0)
     useEffect(() => {
         const t = setInterval(() => setElapsed(s => s + 1), 1000)
@@ -155,34 +155,49 @@ function GenerateSkeleton({ progress }: { progress: number }) {
     }, [])
 
     return (
-        <div className="relative w-full aspect-square rounded-xl overflow-hidden bg-background border border-border/40 flex flex-col items-center justify-center isolate">
-            {/* Animated color-shifting blobs */}
+        <div 
+            className={`relative w-full rounded-2xl overflow-hidden border border-border/20 shadow-xl flex flex-col items-center justify-center isolate bg-[#050505] ${!aspectRatio ? 'aspect-square' : ''}`}
+            style={aspectRatio ? { aspectRatio: aspectRatio.replace(":", "/") } : undefined}
+        >
+            {/* Cinematic sweeps and moving grids */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
+                
                 <div
-                    className="absolute size-48 rounded-full blur-[60px] top-[-15%] left-[-10%]"
+                    className="absolute size-[250px] rounded-full blur-[80px]"
                     style={{
-                        background: 'linear-gradient(135deg, #a855f7, #3b82f6, #06b6d4)',
-                        animation: 'loadingBlob1 6s ease-in-out infinite alternate',
+                        background: 'radial-gradient(circle, rgba(139,92,246,0.3) 0%, rgba(59,130,246,0.1) 100%)',
+                        animation: 'loadingBlob1 8s ease-in-out infinite alternate',
                     }}
                 />
                 <div
-                    className="absolute size-40 rounded-full blur-[60px] bottom-[-15%] right-[-10%]"
+                    className="absolute size-[200px] rounded-full blur-[80px]"
                     style={{
-                        background: 'linear-gradient(225deg, #f472b6, #8b5cf6, #6366f1)',
-                        animation: 'loadingBlob2 8s ease-in-out infinite alternate',
+                        background: 'radial-gradient(circle, rgba(236,72,153,0.2) 0%, rgba(99,102,241,0.1) 100%)',
+                        animation: 'loadingBlob2 10s ease-in-out infinite alternate',
                     }}
                 />
+                
+                {/* Sweep light */}
+                <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_15px_rgba(var(--primary),0.5)] animate-sweep" />
             </div>
+            
             <style>{`
                 @keyframes loadingBlob1 {
-                    0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
-                    50% { transform: translate(20%, 15%) scale(1.1); opacity: 0.3; }
-                    100% { transform: translate(-5%, 25%) scale(0.95); opacity: 0.15; }
+                    0% { transform: translate(-20%, -20%) scale(1); opacity: 0.5; }
+                    50% { transform: translate(30%, 15%) scale(1.2); opacity: 0.8; }
+                    100% { transform: translate(-5%, 40%) scale(0.9); opacity: 0.4; }
                 }
                 @keyframes loadingBlob2 {
-                    0% { transform: translate(0, 0) scale(1); opacity: 0.15; }
-                    50% { transform: translate(-20%, -10%) scale(1.2); opacity: 0.3; }
-                    100% { transform: translate(10%, -15%) scale(0.9); opacity: 0.1; }
+                    0% { transform: translate(20%, 30%) scale(1); opacity: 0.4; }
+                    50% { transform: translate(-30%, -10%) scale(1.3); opacity: 0.7; }
+                    100% { transform: translate(15%, -20%) scale(0.85); opacity: 0.3; }
+                }
+                @keyframes sweep {
+                    0% { top: 0%; opacity: 0; }
+                    20% { opacity: 1; }
+                    80% { opacity: 1; }
+                    100% { top: 100%; opacity: 0; }
                 }
             `}</style>
 
@@ -207,6 +222,14 @@ function GenerateSkeleton({ progress }: { progress: number }) {
             </div>
         </div>
     )
+}
+
+// Helper: Dynamic Grid cho Canvas dựa trên số lượng ảnh
+function getDynamicGridClass(count: number) {
+    if (count === 1) return "grid grid-cols-1 max-w-2xl mx-auto gap-4"
+    if (count === 2) return "grid grid-cols-1 sm:grid-cols-2 max-w-4xl mx-auto gap-4"
+    if (count === 3) return "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 max-w-6xl mx-auto gap-4"
+    return "grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 max-w-7xl mx-auto gap-4"
 }
 
 export function TemplateDetailPage() {
@@ -619,9 +642,9 @@ export function TemplateDetailPage() {
                             <Wand2 className="size-4 text-primary animate-pulse" />
                             <span className="text-sm font-medium">Đang tạo {imageCount} ảnh...</span>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                        <div className={getDynamicGridClass(imageCount)}>
                             {Array.from({ length: imageCount }).map((_, i) => (
-                                <GenerateSkeleton key={`gen-skeleton-${i}`} progress={generateProgress} />
+                                <GenerateSkeleton key={`gen-skeleton-${i}`} progress={generateProgress} aspectRatio={outputSize} />
                             ))}
                         </div>
                     </div>
@@ -646,7 +669,7 @@ export function TemplateDetailPage() {
                                 <Badge variant="outline" className="text-xs">{generatedImages.length} ảnh</Badge>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
+                        <div className={getDynamicGridClass(generatedImages.length)}>
                             {generatedImages.map((img, idx) => (
                                 <div
                                     key={img.id}
