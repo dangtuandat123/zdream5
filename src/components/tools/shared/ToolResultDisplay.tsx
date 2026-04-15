@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { BeforeAfterSlider } from "./BeforeAfterSlider"
+import { getDynamicGridClass } from "./ToolHelpers"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,7 +20,7 @@ const CROSS_TOOLS = [
 ]
 
 // Loading với hiệu ứng background đổi màu
-function LoadingProgress() {
+function LoadingProgress({ expectedCount = 1 }: { expectedCount?: number }) {
     const [elapsed, setElapsed] = useState(0)
 
     useEffect(() => {
@@ -97,7 +98,8 @@ function LoadingProgress() {
             {/* Text */}
             <div className="text-center space-y-1.5 relative z-10">
                 <p className="text-[13px] font-medium text-foreground/90">
-                    AI đang xử lý<span className="animate-pulse">...</span>
+                    {expectedCount > 1 ? `AI đang xử lý ${expectedCount} ảnh` : 'AI đang xử lý'}
+                    <span className="animate-pulse">...</span>
                 </p>
                 <p className="text-[11px] text-muted-foreground/70 tabular-nums">
                     {elapsed > 0 && <>{elapsed}s · </>}Thường mất 15–40 giây
@@ -109,6 +111,9 @@ function LoadingProgress() {
 
 interface ToolResultDisplayProps {
     imageUrl?: string | null
+    images?: string[] | null
+    expectedCount?: number
+    aspectRatio?: string
     textResult?: string | null
     loading?: boolean
     prompt?: string | null
@@ -121,6 +126,9 @@ interface ToolResultDisplayProps {
 
 export function ToolResultDisplay({
     imageUrl,
+    images: imagesProp,
+    expectedCount = 1,
+    aspectRatio,
     textResult,
     loading,
     prompt,
@@ -134,17 +142,16 @@ export function ToolResultDisplay({
     const navigate = useNavigate()
     const location = useLocation()
 
-    const handleDownload = async () => {
-        if (!imageUrl) return
+    const handleDownloadUrl = async (url: string) => {
         try {
-            const response = await fetch(imageUrl)
+            const response = await fetch(url)
             const blob = await response.blob()
-            const url = URL.createObjectURL(blob)
+            const blobUrl = URL.createObjectURL(blob)
             const a = document.createElement("a")
-            a.href = url
+            a.href = blobUrl
             a.download = `zdream-${Date.now()}.png`
             a.click()
-            URL.revokeObjectURL(url)
+            URL.revokeObjectURL(blobUrl)
         } catch { /* ignore */ }
     }
 
@@ -156,8 +163,10 @@ export function ToolResultDisplay({
 
     const crossTools = CROSS_TOOLS.filter(t => !location.pathname.startsWith(t.path))
 
+    const displayImages = imagesProp && imagesProp.length > 0 ? imagesProp : (imageUrl ? [imageUrl] : [])
+
     if (loading) {
-        return <LoadingProgress />
+        return <LoadingProgress expectedCount={expectedCount} />
     }
 
     if (textResult) {
@@ -185,14 +194,34 @@ export function ToolResultDisplay({
         )
     }
 
-    if (imageUrl) {
+    if (displayImages.length > 0) {
         return (
-            <div className="space-y-3 animate-in fade-in duration-300">
-                {beforeImageUrl ? (
-                    <BeforeAfterSlider beforeUrl={beforeImageUrl} afterUrl={imageUrl} />
+            <div className="space-y-4 animate-in fade-in duration-300 w-full">
+                {beforeImageUrl && displayImages[0] ? (
+                    <BeforeAfterSlider beforeUrl={beforeImageUrl} afterUrl={displayImages[0]} />
                 ) : (
-                    <div className="relative rounded-xl overflow-hidden border bg-muted">
-                        <img src={imageUrl} alt="Result" className="w-full max-h-[500px] object-contain" />
+                    <div className={displayImages.length > 1 ? getDynamicGridClass(displayImages.length, aspectRatio) : "relative w-full overflow-hidden"}>
+                        {displayImages.map((src, idx) => (
+                            <div key={idx} className="relative rounded-xl overflow-hidden border bg-muted shadow-sm group">
+                                <img src={src} alt={`Result ${idx + 1}`} className="w-full max-h-[500px] object-contain" />
+                                
+                                {/* Image Overlay Actions for Multi-image */}
+                                {displayImages.length > 1 && (
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                        <Button size="sm" variant="secondary" onClick={() => handleDownloadUrl(src)} className="gap-1.5 h-8 text-xs">
+                                            <Download className="size-3.5" />
+                                            Tải xuống
+                                        </Button>
+                                        {onUseAsInput && (
+                                            <Button size="sm" variant="secondary" onClick={() => onUseAsInput(src)} className="gap-1.5 h-8 text-xs">
+                                                <RotateCcw className="size-3.5" />
+                                                Làm đầu vào
+                                            </Button>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
                     </div>
                 )}
                 {infoContent && (
@@ -200,11 +229,18 @@ export function ToolResultDisplay({
                         {infoContent}
                     </div>
                 )}
-                <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" variant="outline" className="gap-1.5" onClick={handleDownload}>
-                        <Download className="size-3.5" />
-                        Tải về
-                    </Button>
+                <div className="flex gap-2 flex-wrap items-center">
+                    {displayImages.length === 1 ? (
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleDownloadUrl(displayImages[0])}>
+                            <Download className="size-3.5" />
+                            Tải về
+                        </Button>
+                    ) : (
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => displayImages.forEach(src => handleDownloadUrl(src))}>
+                            <Download className="size-3.5" />
+                            Tải tất cả ({displayImages.length})
+                        </Button>
+                    )}
                     {prompt && (
                         <Button size="sm" variant="outline" className="gap-1.5" onClick={() => handleCopy(prompt)}>
                             {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
@@ -212,7 +248,7 @@ export function ToolResultDisplay({
                         </Button>
                     )}
                     {onUseAsInput && (
-                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onUseAsInput(imageUrl)}>
+                        <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onUseAsInput(displayImages[0])}>
                             <RotateCcw className="size-3.5" />
                             Dùng làm đầu vào
                         </Button>
@@ -228,7 +264,7 @@ export function ToolResultDisplay({
                             {crossTools.map((tool) => (
                                 <DropdownMenuItem
                                     key={tool.path}
-                                    onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(imageUrl)}`)}
+                                    onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(displayImages[0])}`)}
                                     className="gap-2 text-xs"
                                 >
                                     <tool.icon className="size-3.5" />

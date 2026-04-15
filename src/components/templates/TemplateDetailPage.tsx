@@ -32,6 +32,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
 import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
+import { ToolResultDisplay } from "@/components/tools/shared/ToolResultDisplay"
 
 import { useToolPanel } from "@/components/tools/ToolPanelContext"
 
@@ -39,8 +40,7 @@ import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/li
 import { useAuth } from "@/contexts/AuthContext"
 
 import { ASPECT_RATIOS, IMAGE_COUNTS, RESOLUTIONS } from "@/components/tools/shared/ToolConstants"
-import { ImageWithSkeleton, GenerateSkeleton } from "@/components/tools/shared/ToolGrid"
-import { getDynamicGridClass } from "@/components/tools/shared/ToolHelpers"
+import { ImageWithSkeleton } from "@/components/tools/shared/ToolGrid"
 
 // Hook cho drag-to-scroll ngang (giống app chỉnh ảnh)
 function useDragScroll() {
@@ -268,9 +268,9 @@ export function TemplateDetailPage() {
         }
     }, [uploadedImage, isGenerating, template, outputSize, imageSize, imageCount, effectSelections, extraPrompt, effectGroups, updateGems, slug])
 
+    // Download ảnh — dùng cho lightbox viewer
     const handleDownload = useCallback(async (url: string) => {
         try {
-            // Fetch blob để tránh lỗi cross-origin download
             const res = await fetch(url)
             const blob = await res.blob()
             const blobUrl = URL.createObjectURL(blob)
@@ -279,12 +279,12 @@ export function TemplateDetailPage() {
             a.download = `zdream-${(template?.name ?? "template").replace(/\s+/g, "-")}-${Date.now()}.png`
             a.click()
             URL.revokeObjectURL(blobUrl)
-            toast.success("Đang tải xuống")
         } catch {
-            // Fallback: mở tab mới
             window.open(url, "_blank")
         }
     }, [template?.name])
+
+
 
     // Viewer helpers — tách biệt sample vs generated
     const openSampleViewer = (index: number) => {
@@ -292,11 +292,7 @@ export function TemplateDetailPage() {
         setViewerIndex(index)
         setViewerOpen(true)
     }
-    const openGeneratedViewer = (index: number) => {
-        setViewerSource("generated")
-        setViewerIndex(index)
-        setViewerOpen(true)
-    }
+
     const openHistoryViewer = (index: number) => {
         setViewerSource("history")
         setViewerIndex(index)
@@ -520,76 +516,16 @@ export function TemplateDetailPage() {
                     </div>
                 )}
 
-                {/* State: Đang tạo ảnh — blob loading skeleton */}
-                {isGenerating && (
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                            <Wand2 className="size-4 text-primary animate-pulse" />
-                            <span className="text-sm font-medium">Đang tạo {imageCount} ảnh...</span>
-                        </div>
-                        <div className={getDynamicGridClass(imageCount, outputSize)}>
-                            {Array.from({ length: imageCount }).map((_, i) => (
-                                <GenerateSkeleton key={`gen-skeleton-${i}`} progress={generateProgress} aspectRatio={outputSize} />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* State: Có kết quả — result grid */}
-                {generatedImages.length > 0 && (
-                    <div className="space-y-3">
-                        {/* Header + compact change image */}
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="size-4 text-primary" />
-                                <span className="text-sm font-medium">Kết quả</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {uploadedImage && (
-                                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                                        <img src={uploadedImage} alt="" className="size-6 rounded object-cover border" />
-                                        <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => setUploadedImage(null)}>Đổi ảnh</Button>
-                                    </div>
-                                )}
-                                <Badge variant="outline" className="text-xs">{generatedImages.length} ảnh</Badge>
-                            </div>
-                        </div>
-                        <div className={getDynamicGridClass(generatedImages.length, generatedImages[0]?.aspectRatio || outputSize)}>
-                            {generatedImages.map((img, idx) => (
-                                <div
-                                    key={img.id}
-                                    className="group relative rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-[1.02] ring-1 ring-border/20 hover:ring-primary/50 bg-muted/20"
-                                    onClick={() => openGeneratedViewer(idx)}
-                                >
-                                    <div className="relative w-full">
-                                        <img
-                                            src={img.url}
-                                            alt={`Kết quả ${idx + 1}`}
-                                            className="w-full h-auto max-h-[400px] object-contain transition-transform duration-500 group-hover:scale-105"
-                                            draggable={false}
-                                        />
-                                        {/* Gradient overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
-                                        {/* Action bar */}
-                                        <div className="absolute bottom-0 inset-x-0 flex items-center justify-between px-2.5 py-2 translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
-                                            <Badge variant="secondary" className="text-[10px] bg-black/40 backdrop-blur-sm text-white border-0 shadow-sm">
-                                                {new Date(img.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                            </Badge>
-                                            <Button size="icon" variant="ghost" className="size-7 text-white hover:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); handleDownload(img.url) }}>
-                                                <Download className="size-3.5" />
-                                            </Button>
-                                        </div>
-                                        {/* Zoom hint */}
-                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <div className="size-7 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
-                                                <ZoomIn className="size-3.5 text-white" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                {/* State: Đang tạo hoặc đã có kết quả — dùng ToolResultDisplay chuẩn */}
+                {(isGenerating || generatedImages.length > 0) && (
+                    <ToolResultDisplay
+                        images={generatedImages.map(img => img.url)}
+                        loading={isGenerating}
+                        expectedCount={imageCount}
+                        aspectRatio={outputSize}
+                        emptyHint="Ảnh đầu ra sẽ hiển thị tại đây"
+                        onUseAsInput={(url) => setUploadedImage(url)}
+                    />
                 )}
             </div>
         </div>
