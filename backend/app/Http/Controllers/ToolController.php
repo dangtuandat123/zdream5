@@ -158,13 +158,12 @@ class ToolController extends Controller
     }
 
     /**
-     * Lấy kích thước thực của ảnh từ base64 data.
+     * Lấy kích thước thực của ảnh từ base64 data hoặc URL.
      */
-    private function getImageDimensions(string $base64): ?array
+    private function getImageDimensions(string $imageInput): ?array
     {
-        $data = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
-        $decoded = base64_decode($data);
-        if ($decoded === false) return null;
+        $decoded = $this->resolveImageData($imageInput);
+        if ($decoded === null) return null;
 
         $img = @imagecreatefromstring($decoded);
         if (!$img) return null;
@@ -417,14 +416,34 @@ class ToolController extends Controller
     }
 
     /**
-     * Detect aspect ratio from base64 image data.
+     * Resolve image input (base64 hoặc URL) thành raw binary data.
+     */
+    private function resolveImageData(string $imageInput): ?string
+    {
+        // HTTP URL → tải về
+        if (str_starts_with($imageInput, 'http://') || str_starts_with($imageInput, 'https://')) {
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(15)->get($imageInput);
+                return $response->successful() ? $response->body() : null;
+            } catch (\Throwable) {
+                return null;
+            }
+        }
+
+        // Base64 data URL
+        $data = preg_replace('/^data:image\/\w+;base64,/', '', $imageInput);
+        $decoded = base64_decode($data);
+        return $decoded !== false ? $decoded : null;
+    }
+
+    /**
+     * Detect aspect ratio from image data (base64 hoặc URL).
      * Returns closest standard ratio string (e.g. '16:9', '4:3', '1:1').
      */
-    private function detectAspectRatio(string $base64): string
+    private function detectAspectRatio(string $imageInput): string
     {
-        $data = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
-        $decoded = base64_decode($data);
-        if ($decoded === false) return '1:1';
+        $decoded = $this->resolveImageData($imageInput);
+        if ($decoded === null) return '1:1';
 
         $img = @imagecreatefromstring($decoded);
         if (!$img) return '1:1';
@@ -437,7 +456,6 @@ class ToolController extends Controller
 
         $ratio = $w / $h;
 
-        // Map to closest standard ratio
         $standards = [
             '1:1'  => 1.0,
             '4:5'  => 0.8,

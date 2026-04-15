@@ -73,15 +73,26 @@ class OpenRouterService
                 ]
             ];
 
-            foreach ($referenceImages as $imgBase64) {
-                // Thêm tiền tố data:image nếu có lỗi thiếu từ Frontend
-                if (!str_starts_with($imgBase64, 'data:image/')) {
-                    $imgBase64 = "data:image/jpeg;base64," . $imgBase64;
+            foreach ($referenceImages as $imgData) {
+                // URL trực tiếp (ảnh từ thư viện/MinIO) → gửi thẳng cho OpenRouter
+                if (str_starts_with($imgData, 'http://') || str_starts_with($imgData, 'https://')) {
+                    $finalContent[] = [
+                        'type' => 'image_url',
+                        'image_url' => [
+                            'url' => $imgData,
+                        ],
+                    ];
+                    continue;
+                }
+
+                // Base64 data URL → gửi trực tiếp
+                if (!str_starts_with($imgData, 'data:image/')) {
+                    $imgData = "data:image/jpeg;base64," . $imgData;
                 }
                 $finalContent[] = [
                     'type' => 'image_url',
                     'image_url' => [
-                        'url' => $imgBase64,
+                        'url' => $imgData,
                     ],
                 ];
             }
