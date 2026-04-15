@@ -26,7 +26,6 @@ import {
 import { ImageLightbox } from "@/components/ui/image-lightbox"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Card } from "@/components/ui/card"
@@ -421,20 +420,6 @@ export function TemplateDetailPage() {
                 </div>
             )}
 
-            {/* Tương tác Controls cho ảnh đầu vào: CHỈ HIỂN THỊ khi ĐÃ CÓ ẢNH */}
-            {uploadedImage && (
-                <>
-                    <div className="space-y-2">
-                        <ToolImageUpload 
-                            images={[uploadedImage]} 
-                            onImagesChange={(urls) => setUploadedImage(urls[0] || null)} 
-                            label="Ảnh đầu vào gốc"
-                        />
-                    </div>
-                    <Separator />
-                </>
-            )}
-
             {/* Tỷ lệ khung hình */}
             <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">TỶ LỆ KHUNG HÌNH</Label>
@@ -594,16 +579,28 @@ export function TemplateDetailPage() {
         </div>
     )
 
-    // === Canvas content — ảnh mẫu luôn hiện, kết quả nằm trên ảnh mẫu ===
+    // === Canvas content — redesigned to match other tools ===
     const CanvasContent = (
         <div className="w-full max-w-5xl mx-auto space-y-6">
             <div className="space-y-6 pb-20">
-                {/* Skeleton khi đang tạo ảnh */}
+
+                {/* State: Ảnh đã upload, chưa tạo, không loading — hiện ảnh preview + hint */}
+                {uploadedImage && !isGenerating && generatedImages.length === 0 && !historyLoading && (
+                    <div className="flex flex-col gap-4 w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+                        <ToolImageUpload images={[uploadedImage]} onImagesChange={(urls) => setUploadedImage(urls[0] || null)} className="border-0 bg-transparent shadow-none p-0" />
+                        <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground bg-muted/50 py-2.5 rounded-lg w-full">
+                            <Sparkles className="size-4 animate-pulse text-primary" />
+                            <span>Ảnh đã tải lên. Thiết lập thông số bên trái rồi nhấn <strong>Tạo ảnh</strong>!</span>
+                        </div>
+                    </div>
+                )}
+
+                {/* State: Đang tạo ảnh — blob loading skeleton */}
                 {isGenerating && (
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
                             <Wand2 className="size-4 text-primary animate-pulse" />
-                            <span className="text-sm font-medium">Đang tạo ảnh...</span>
+                            <span className="text-sm font-medium">Đang tạo {imageCount} ảnh...</span>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
                             {Array.from({ length: imageCount }).map((_, i) => (
@@ -613,15 +610,24 @@ export function TemplateDetailPage() {
                     </div>
                 )}
 
-                {/* Kết quả đã tạo */}
+                {/* State: Có kết quả — result grid */}
                 {generatedImages.length > 0 && (
                     <div className="space-y-3">
+                        {/* Header + compact change image */}
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="size-4 text-primary" />
                                 <span className="text-sm font-medium">Kết quả</span>
                             </div>
-                            <Badge variant="outline" className="text-xs">{generatedImages.length} ảnh</Badge>
+                            <div className="flex items-center gap-2">
+                                {uploadedImage && (
+                                    <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                                        <img src={uploadedImage} alt="" className="size-6 rounded object-cover border" />
+                                        <Button size="sm" variant="ghost" className="h-6 text-[10px] px-2" onClick={() => setUploadedImage(null)}>Đổi ảnh</Button>
+                                    </div>
+                                )}
+                                <Badge variant="outline" className="text-xs">{generatedImages.length} ảnh</Badge>
+                            </div>
                         </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
                             {generatedImages.map((img, idx) => (
@@ -669,19 +675,6 @@ export function TemplateDetailPage() {
                         ))}
                     </div>
                 )}
-
-                {/* Empty state — chỉ hiện khi chưa có kết quả và không loading */}
-                {!isGenerating && !historyLoading && generatedImages.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
-                        <div className="rounded-full bg-muted p-4 mb-4">
-                            <Sparkles className="size-8 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-base font-semibold mb-1">Thiết kế mẫu siêu tốc</h3>
-                        <p className="text-sm text-muted-foreground max-w-xs">
-                            Kéo ảnh vào giao diện này, sau đó nhấn <strong>Tạo ảnh</strong> để sáng tạo bức ảnh độc nhất theo filter có sẵn.
-                        </p>
-                    </div>
-                )}
             </div>
         </div>
     )
@@ -690,11 +683,7 @@ export function TemplateDetailPage() {
     useToolPanel({
         title: template?.name || "Template",
         icon: LayoutTemplate,
-        controls: template ? (
-            <div className={`transition-all duration-300 ${!uploadedImage ? "opacity-40 grayscale-[0.5] pointer-events-none select-none" : ""}`}>
-                {ControlsBlock}
-            </div>
-        ) : null,
+        controls: template ? ControlsBlock : null,
         submitButton: template ? GenerateButton : null,
     }, [template, uploadedImage, effectSelections, outputSize, imageCount, imageSize, optionsOpen, extraPrompt, isGenerating, hasError, generateProgress])
 
@@ -724,7 +713,7 @@ export function TemplateDetailPage() {
         <>
             <ToolWorkspaceLayout
                 canvas={
-                    !uploadedImage ? (
+                    !uploadedImage && generatedImages.length === 0 && !historyLoading ? (
                         <div className="flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-10 space-y-8 animate-in fade-in zoom-in-95 duration-500">
                             <div className="text-center space-y-2">
                                 <h3 className="text-xl font-semibold">Tạo ảnh với mẫu: <span className="text-primary">{template.name}</span></h3>
