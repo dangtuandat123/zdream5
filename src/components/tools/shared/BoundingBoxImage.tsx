@@ -194,7 +194,7 @@ export function BoundingBoxImage({ src, onBboxesChange, className }: BoundingBox
                 {boxes.map((b, idx) => (
                     <div
                         key={idx}
-                        className="absolute border-2 border-primary/50 bg-primary/10 pointer-events-none transition-all duration-200"
+                        className="absolute border-2 border-[#ff3c50]/60 bg-[#ff3c50]/20 pointer-events-none transition-all duration-200"
                         style={{ left: b.x, top: b.y, width: b.w, height: b.h }}
                     >
                     </div>
@@ -203,16 +203,16 @@ export function BoundingBoxImage({ src, onBboxesChange, className }: BoundingBox
                 {/* The Current Drawing Box */}
                 <div 
                     className={cn(
-                        "absolute border-2 border-primary bg-primary/20 pointer-events-none",
+                        "absolute border-2 border-[#ff3c50] bg-[#ff3c50]/40 pointer-events-none",
                         isDrawing && "border-dashed"
                     )}
                     style={boxStyle}
                 >
                     {/* Corner handles (visual only) */}
-                    <div className="absolute top-0 left-0 w-2 h-2 bg-primary -translate-x-1 -translate-y-1" />
-                    <div className="absolute top-0 right-0 w-2 h-2 bg-primary translate-x-1 -translate-y-1" />
-                    <div className="absolute bottom-0 left-0 w-2 h-2 bg-primary -translate-x-1 translate-y-1" />
-                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-primary translate-x-1 translate-y-1" />
+                    <div className="absolute top-0 left-0 w-2 h-2 bg-[#ff3c50] -translate-x-1 -translate-y-1" />
+                    <div className="absolute top-0 right-0 w-2 h-2 bg-[#ff3c50] translate-x-1 -translate-y-1" />
+                    <div className="absolute bottom-0 left-0 w-2 h-2 bg-[#ff3c50] -translate-x-1 translate-y-1" />
+                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-[#ff3c50] translate-x-1 translate-y-1" />
                 </div>
             </div>
 
