@@ -1,6 +1,6 @@
 import { Download, Copy, Check, ArrowRight, RotateCcw, Wand2, ZoomIn, Eraser, Expand, PenTool, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { BeforeAfterSlider } from "./BeforeAfterSlider"
 import {
@@ -17,6 +17,53 @@ const CROSS_TOOLS = [
     { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
     { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
 ]
+
+// Bước progress loading
+function LoadingProgress() {
+    const [elapsed, setElapsed] = useState(0)
+
+    useEffect(() => {
+        const timer = setInterval(() => setElapsed(s => s + 1), 1000)
+        return () => clearInterval(timer)
+    }, [])
+
+    return (
+        <div className="flex flex-col items-center justify-center gap-7 py-16 px-10 rounded-2xl border border-border/40 bg-gradient-to-b from-muted/40 via-background to-background min-h-[360px] relative overflow-hidden">
+            {/* Ambient glow */}
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 size-48 rounded-full bg-primary/[0.04] blur-[60px]" />
+
+            {/* Spinner */}
+            <div className="relative size-[72px]">
+                {/* Vòng ngoài quay chậm */}
+                <div className="absolute inset-0 rounded-full border-[1.5px] border-primary/15" />
+                <div
+                    className="absolute inset-0 rounded-full border-[1.5px] border-transparent border-t-primary/60 animate-spin"
+                    style={{ animationDuration: '1.8s' }}
+                />
+                {/* Vòng trong quay ngược */}
+                <div className="absolute inset-2.5 rounded-full border border-primary/10" />
+                <div
+                    className="absolute inset-2.5 rounded-full border border-transparent border-b-primary/40 animate-spin"
+                    style={{ animationDuration: '2.5s', animationDirection: 'reverse' }}
+                />
+                {/* Center icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <Sparkles className="size-5 text-primary/70 animate-pulse" style={{ animationDuration: '2s' }} />
+                </div>
+            </div>
+
+            {/* Text */}
+            <div className="text-center space-y-1.5 relative z-10">
+                <p className="text-[13px] font-medium text-foreground/90">
+                    AI đang xử lý<span className="animate-pulse">...</span>
+                </p>
+                <p className="text-[11px] text-muted-foreground/70 tabular-nums">
+                    {elapsed > 0 && <>{elapsed}s · </>}Thường mất 15–40 giây
+                </p>
+            </div>
+        </div>
+    )
+}
 
 interface ToolResultDisplayProps {
     imageUrl?: string | null
@@ -66,20 +113,7 @@ export function ToolResultDisplay({
     const crossTools = CROSS_TOOLS.filter(t => !location.pathname.startsWith(t.path))
 
     if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center gap-5 p-10 rounded-2xl border bg-gradient-to-b from-muted/50 to-muted/20 min-h-[300px]">
-                <div className="relative">
-                    <div className="size-14 rounded-full bg-primary/5" />
-                    <div className="absolute inset-0 size-14 rounded-full border-2 border-primary/20" />
-                    <div className="absolute inset-0 size-14 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                    <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-5 text-primary animate-pulse" />
-                </div>
-                <div className="text-center space-y-1">
-                    <p className="text-sm font-semibold">AI đang xử lý<span className="animate-pulse">...</span></p>
-                    <p className="text-[11px] text-muted-foreground">Thường mất 10–30 giây</p>
-                </div>
-            </div>
-        )
+        return <LoadingProgress />
     }
 
     if (textResult) {
