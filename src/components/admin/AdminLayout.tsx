@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, Image, SwatchBook, Cpu, Settings, Hammer } from 'lucide-react';
+import { LayoutDashboard, Users, Image, Cpu, Settings, Hammer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
