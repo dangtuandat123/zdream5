@@ -203,7 +203,7 @@ function EffectGroupBuilder({ groups, onChange }: { groups: EffectGroup[]; onCha
 
 // === Main Page ===
 const emptyForm = {
-    name: '', category: '', description: '', system_prompt: '', model: 'google/gemini-2.5-flash-preview-image-generation',
+    name: '', category: '', description: '', system_prompt: '', model: 'google/gemini-2.5-flash-image',
     thumbnail: '', effect_groups: [] as EffectGroup[],
     is_active: true, sort_order: 0,
 };
