@@ -149,6 +149,7 @@ class ImageController extends Controller
                     model: $model,
                     style: $wasDesigned ? null : $style,
                     referenceImages: $validated['reference_images'] ?? null,
+                    modalities: $aiModel?->getModalities(),
                 );
 
                 $image = Image::create([

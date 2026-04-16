@@ -26,6 +26,7 @@ class Image extends Model
         'gems_cost',
         'template_slug',
         'reference_images',
+        'tool_name',
     ];
 
     protected function casts(): array

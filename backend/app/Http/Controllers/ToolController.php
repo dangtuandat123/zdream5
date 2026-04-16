@@ -367,12 +367,17 @@ class ToolController extends Controller
             }
 
             // 4. Generate image via OpenRouter
+            // Lấy model hiện tại và modalities để gửi đúng chuẩn OpenRouter
+            $currentModelId = Setting::get('default_model', config('services.openrouter.default_model'));
+            $currentAiModel = \App\Models\AiModel::where('model_id', $currentModelId)->first();
+
             $result = $this->openRouterService->generateImage(
                 prompt: $designedPrompt,
                 negativePrompt: $designedNegative,
                 aspectRatio: $aspectRatio,
                 imageSize: $imageSize,
                 referenceImages: $referenceImages, // Send original base64 to OpenRouter
+                modalities: $currentAiModel?->getModalities(),
             );
 
             // 5. Save to DB

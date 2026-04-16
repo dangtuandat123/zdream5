@@ -15,6 +15,7 @@ class AiModel extends Model
         'name',
         'model_id',
         'provider',
+        'output_modalities',
         'gems_cost',
         'is_active',
         'sort_order',
@@ -28,10 +29,21 @@ class AiModel extends Model
     {
         return [
             'config' => 'array',
+            'output_modalities' => 'array',
             'is_active' => 'boolean',
             'gems_cost' => 'integer',
             'sort_order' => 'integer',
         ];
+    }
+
+
+
+    /**
+     * Lấy modalities array đúng chuẩn OpenRouter docs.
+     */
+    public function getModalities(): array
+    {
+        return $this->output_modalities ?? ['image', 'text'];
     }
 
     /**

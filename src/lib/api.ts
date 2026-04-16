@@ -406,6 +406,7 @@ export interface AdminTemplateData extends TemplateData {
 
 export interface AdminAiModelData extends AiModelData {
     provider: string;
+    output_modalities: string[] | null;
     is_active: boolean;
     sort_order: number;
     config: Record<string, unknown> | null;

@@ -12,7 +12,7 @@ import { adminApi, type AdminAiModelData } from '@/lib/api';
 import { toast } from 'sonner';
 
 const emptyForm = {
-    name: '', model_id: '', provider: 'openrouter', gems_cost: 1, is_active: true, sort_order: 0, config: {} as Record<string, unknown>,
+    name: '', model_id: '', provider: 'openrouter', output_modalities: 'image+text' as string, gems_cost: 1, is_active: true, sort_order: 0, config: {} as Record<string, unknown>,
 };
 
 export default function AdminModelsPage() {
@@ -46,7 +46,8 @@ export default function AdminModelsPage() {
 
     const openEdit = (m: AdminAiModelData) => {
         setEditId(m.id);
-        setForm({ name: m.name, model_id: m.model_id, provider: m.provider, gems_cost: m.gems_cost, is_active: m.is_active, sort_order: m.sort_order ?? 0, config: m.config ?? {} });
+        const modType = (m.output_modalities && m.output_modalities.length === 1 && m.output_modalities[0] === 'image') ? 'image' : 'image+text';
+        setForm({ name: m.name, model_id: m.model_id, provider: m.provider, output_modalities: modType, gems_cost: m.gems_cost, is_active: m.is_active, sort_order: m.sort_order ?? 0, config: m.config ?? {} });
         setConfigText(JSON.stringify(m.config ?? {}, null, 2));
         setDialogOpen(true);
     };
@@ -56,7 +57,8 @@ export default function AdminModelsPage() {
         try {
             let config = form.config;
             try { config = JSON.parse(configText); } catch { /* keep */ }
-            const payload = { ...form, config };
+            const outputModalities = form.output_modalities === 'image' ? ['image'] : ['image', 'text'];
+            const payload = { ...form, config, output_modalities: outputModalities };
 
             if (editId) {
                 await adminApi.updateModel(editId, payload);
@@ -171,6 +173,17 @@ export default function AdminModelsPage() {
                             <Label>Xu / ảnh</Label>
                                 <Input type="number" min={0} value={form.gems_cost} onChange={(e) => setForm({ ...form, gems_cost: parseInt(e.target.value) || 0 })} />
                             </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label>Loại output</Label>
+                            <select
+                                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                value={form.output_modalities}
+                                onChange={(e) => setForm({ ...form, output_modalities: e.target.value })}
+                            >
+                                <option value="image+text">Ảnh + Text (Gemini)</option>
+                                <option value="image">Chỉ Ảnh (FLUX, Sourceful)</option>
+                            </select>
                         </div>
                         <div className="space-y-1.5">
                             <Label>Cấu hình (JSON)</Label>

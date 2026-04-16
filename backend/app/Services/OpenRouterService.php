@@ -26,7 +26,7 @@ class OpenRouterService
         $this->apiKey = config('services.openrouter.api_key', '');
         $this->baseUrl = config('services.openrouter.base_url', 'https://openrouter.ai/api/v1');
         $this->defaultModel = Setting::get('default_model')
-            ?? config('services.openrouter.default_model', 'google/gemini-2.5-flash-image-preview');
+            ?? config('services.openrouter.default_model', 'google/gemini-2.5-flash-image');
     }
 
     /**
@@ -39,6 +39,8 @@ class OpenRouterService
      * @param string|null $model Model AI (mặc định từ config)
      * @param string|null $style Phong cách ảnh — nhúng vào prompt text
      * @param array|null $referenceImages Mảng ảnh tham chiếu (base64 data URL)
+     * @param array|null $modalities Output modalities theo OpenRouter docs:
+     *                               ['image', 'text'] cho Gemini, ['image'] cho FLUX/Sourceful
      * @return array{file_path: string, file_url: string} Đường dẫn và URL ảnh
      *
      * @throws \RuntimeException Nếu API lỗi hoặc không trả ảnh
@@ -51,6 +53,7 @@ class OpenRouterService
         ?string $model = null,
         ?string $style = null,
         ?array $referenceImages = null,
+        ?array $modalities = null,
     ): array {
         $model = $model ?? $this->defaultModel;
 
@@ -100,7 +103,12 @@ class OpenRouterService
             $finalContent = $messageText;
         }
 
-        // Payload gửi đến OpenRouter — sử dụng image_config theo API docs
+        // Xác định modalities theo loại model:
+        // - Gemini: ['image', 'text'] — output cả ảnh và text
+        // - FLUX, Sourceful: ['image'] — chỉ output ảnh
+        $resolvedModalities = $modalities ?? ['image', 'text'];
+
+        // Payload gửi đến OpenRouter — chuẩn theo API docs
         $payload = [
             'model' => $model,
             'messages' => [
@@ -109,11 +117,13 @@ class OpenRouterService
                     'content' => $finalContent,
                 ],
             ],
-            'modalities' => ['image', 'text'],
-            'image_config' => [
-                'aspect_ratio' => $aspectRatio,
-                'image_size' => $imageSize,
-            ],
+            'modalities' => $resolvedModalities,
+        ];
+
+        // image_config — luôn gửi để đảm bảo OpenRouter xử lý đúng aspect ratio và size
+        $payload['image_config'] = [
+            'aspect_ratio' => $aspectRatio,
+            'image_size' => $imageSize,
         ];
 
         // Gọi API OpenRouter
@@ -148,22 +158,19 @@ class OpenRouterService
             );
         }
 
-        // Trích xuất ảnh từ response
-        $images = data_get($data, 'choices.0.message.images', []);
+        // Trích xuất ảnh từ response — robust cho nhiều loại model
+        $imageDataUrl = $this->extractImageFromResponse($data);
 
-        if (empty($images)) {
-            // Log lại payload để debug nếu cần
-            \Illuminate\Support\Facades\Log::error('OpenRouter Response missing images', ['response' => $data]);
+        if (empty($imageDataUrl)) {
+            Log::error('OpenRouter Response missing images', [
+                'model' => $model,
+                'modalities' => $resolvedModalities,
+                'response_keys' => array_keys($data),
+                'message_keys' => array_keys(data_get($data, 'choices.0.message', [])),
+            ]);
             throw new \RuntimeException(
                 "OpenRouter không trả về ảnh. Có thể model này chưa hỗ trợ tạo ảnh trực tiếp."
             );
-        }
-
-        // Lấy base64 data URL từ ảnh đầu tiên
-        $imageDataUrl = data_get($images, '0.image_url.url', '');
-
-        if (empty($imageDataUrl)) {
-            throw new \RuntimeException("Không tìm thấy URL ảnh trong response.");
         }
 
         // Xử lý cả Base64 Data URL và HTTP URL
@@ -214,6 +221,45 @@ class OpenRouterService
         }
 
         return data_get($data, 'choices.0.message.content', '');
+    }
+
+    /**
+     * Trích xuất image URL/base64 từ response OpenRouter.
+     *
+     * Thử nhiều vị trí vì các model khác nhau trả response format khác nhau:
+     * 1. choices.0.message.images.0.image_url.url — Chuẩn theo docs (Gemini, v.v.)
+     * 2. choices.0.message.content (inline base64) — Một số model trả trực tiếp
+     */
+    private function extractImageFromResponse(array $data): ?string
+    {
+        // Strategy 1: Chuẩn OpenRouter — images array trong message
+        $images = data_get($data, 'choices.0.message.images', []);
+        if (!empty($images)) {
+            $url = data_get($images, '0.image_url.url', '');
+            if (!empty($url)) {
+                return $url;
+            }
+        }
+
+        // Strategy 2: Check content nếu nó là base64 data URL
+        $content = data_get($data, 'choices.0.message.content', '');
+        if (is_string($content) && str_starts_with($content, 'data:image/')) {
+            return $content;
+        }
+
+        // Strategy 3: Check content nếu là array (multimodal response)
+        if (is_array($content)) {
+            foreach ($content as $part) {
+                if (($part['type'] ?? '') === 'image_url') {
+                    $url = $part['image_url']['url'] ?? '';
+                    if (!empty($url)) {
+                        return $url;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**

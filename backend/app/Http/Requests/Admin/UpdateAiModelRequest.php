@@ -22,6 +22,8 @@ class UpdateAiModelRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'model_id' => ['sometimes', 'string', 'max:255', "unique:ai_models,model_id,{$id}"],
             'provider' => ['nullable', 'string', 'max:50'],
+            'output_modalities' => ['nullable', 'array'],
+            'output_modalities.*' => ['string', 'in:image,text'],
             'gems_cost' => ['sometimes', 'integer', 'min:0'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
