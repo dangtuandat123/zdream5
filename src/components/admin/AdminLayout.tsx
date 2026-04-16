@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, Image, SwatchBook, Cpu, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Image, SwatchBook, Cpu, Settings, Hammer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
@@ -7,7 +7,7 @@ const adminTabs = [
     { icon: LayoutDashboard, label: 'Tổng quan', path: '/app/admin', end: true },
     { icon: Users, label: 'Người dùng', path: '/app/admin/users', end: false },
     { icon: Image, label: 'Tạo ảnh', path: '/app/admin/generate', end: false },
-    { icon: SwatchBook, label: 'Kiểu mẫu', path: '/app/admin/templates', end: false },
+    { icon: Hammer, label: 'Công cụ', path: '/app/admin/tools', end: false },
     { icon: Cpu, label: 'Mô hình AI', path: '/app/admin/models', end: false },
     { icon: Settings, label: 'Cài đặt', path: '/app/admin/settings', end: false },
 ];

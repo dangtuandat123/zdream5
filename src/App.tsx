@@ -28,7 +28,7 @@ const AdImagePage = lazy(() => import("@/components/tools/AdImagePage").then(m =
 // Lazy load admin components
 const AdminDashboard = lazy(() => import("@/components/admin/AdminDashboard"));
 const AdminUsersPage = lazy(() => import("@/components/admin/AdminUsersPage"));
-const AdminTemplatesPage = lazy(() => import("@/components/admin/AdminTemplatesPage"));
+const AdminToolsPage = lazy(() => import("@/components/admin/AdminToolsPage"));
 const AdminModelsPage = lazy(() => import("@/components/admin/AdminModelsPage"));
 const AdminGeneratePage = lazy(() => import("@/components/admin/AdminGeneratePage"));
 const AdminSettingsPage = lazy(() => import("@/components/admin/AdminSettingsPage"));
@@ -90,7 +90,7 @@ function App() {
               <Route index element={<Suspense fallback={null}><AdminDashboard /></Suspense>} />
               <Route path="users" element={<Suspense fallback={null}><AdminUsersPage /></Suspense>} />
               <Route path="generate" element={<Suspense fallback={null}><AdminGeneratePage /></Suspense>} />
-              <Route path="templates" element={<Suspense fallback={null}><AdminTemplatesPage /></Suspense>} />
+              <Route path="tools" element={<Suspense fallback={null}><AdminToolsPage /></Suspense>} />
               <Route path="models" element={<Suspense fallback={null}><AdminModelsPage /></Suspense>} />
               <Route path="settings" element={<Suspense fallback={null}><AdminSettingsPage /></Suspense>} />
             </Route>
