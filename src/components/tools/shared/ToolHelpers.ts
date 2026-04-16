@@ -1,7 +1,7 @@
 export function getDynamicGridClass(count: number, aspectRatio?: string) {
     if (count === 1) {
         // Nhóm tỉ lệ dọc (Portrait)
-        if (["9:16", "4:5", "2:3", "3:4"].includes(aspectRatio || "")) {
+        if (["9:16", "4:5", "2:3", "3:4", "1:4", "1:8"].includes(aspectRatio || "")) {
             return "grid grid-cols-1 w-full max-w-sm mx-auto gap-4" // ~384px
         }
         // Nhóm tỉ lệ vuông (Square)

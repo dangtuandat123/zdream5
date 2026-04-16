@@ -31,8 +31,8 @@ class GenerateImageRequest extends FormRequest
             // model phải nằm trong danh sách active — chống gọi model trái phép
             'model' => ['nullable', 'string', Rule::in(AiModel::active()->pluck('model_id'))],
             'style' => ['nullable', 'string', 'max:50', 'regex:/^[a-zA-Z0-9\-_ ]+$/'],
-            'aspect_ratio' => ['nullable', 'string', 'in:1:1,2:3,3:2,3:4,4:3,4:5,5:4,9:16,16:9,21:9'],
-            'image_size' => ['nullable', 'string', 'in:1K,2K,4K'],
+            'aspect_ratio' => ['nullable', 'string', 'in:1:1,2:3,3:2,3:4,4:3,4:5,5:4,9:16,16:9,21:9,1:4,4:1,1:8,8:1'],
+            'image_size' => ['nullable', 'string', 'in:0.5K,1K,2K,4K'],
             'seed' => ['nullable', 'integer', 'min:0'],
             'count' => ['nullable', 'integer', 'min:1', 'max:4'],
             'reference_images' => ['nullable', 'array', 'max:6'],
