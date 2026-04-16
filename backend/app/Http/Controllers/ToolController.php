@@ -366,9 +366,11 @@ class ToolController extends Controller
                 $designedNegative = $designResult['negative_prompt'];
             }
 
-            // 4. Generate image via OpenRouter
-            // Lấy model hiện tại và modalities để gửi đúng chuẩn OpenRouter
-            $currentModelId = Setting::get('default_model', config('services.openrouter.default_model'));
+            // Lấy cấu hình model riêng cho tool này, nếu không có thì fallback về default_model
+            $specificModelId = Setting::get("tool_{$toolName}_model");
+            $currentModelId = !empty($specificModelId) && $specificModelId !== 'auto' 
+                ? $specificModelId 
+                : Setting::get('default_model', config('services.openrouter.default_model'));
             $currentAiModel = \App\Models\AiModel::where('model_id', $currentModelId)->first();
 
             $result = $this->openRouterService->generateImage(
@@ -387,7 +389,7 @@ class ToolController extends Controller
                 'prompt' => $prompt,
                 'designed_prompt' => $taskType ? $designedPrompt : null,
                 'negative_prompt' => $designedNegative,
-                'model' => Setting::get('default_model', config('services.openrouter.default_model')),
+                'model' => $currentModelId,
                 'style' => $toolName,
                 'aspect_ratio' => $aspectRatio,
                 'file_path' => $result['file_path'],

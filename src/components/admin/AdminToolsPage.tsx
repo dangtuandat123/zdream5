@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { adminApi } from '@/lib/api';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { adminApi, type AdminAiModelData } from '@/lib/api';
 import { toast } from 'sonner';
 import AdminTemplatesPage from './AdminTemplatesPage';
 
@@ -28,17 +29,23 @@ const TOOLS_CONFIG: ToolSetting[] = [
 
 export default function AdminToolsPage() {
     const [settings, setSettings] = useState<Record<string, string>>({});
+    const [models, setModels] = useState<AdminAiModelData[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const allSettings = await adminApi.settings();
+            const [allSettings, modelData] = await Promise.all([
+                adminApi.settings(),
+                adminApi.models()
+            ]);
+            
             const toolsSettings = allSettings['tools'] ?? [];
             const initial: Record<string, string> = {};
             toolsSettings.forEach((s: any) => { initial[s.key] = s.value ?? ''; });
             setSettings(initial);
+            setModels(modelData);
         } catch {
             toast.error('Không thể tải cấu hình công cụ');
         } finally {
@@ -51,10 +58,11 @@ export default function AdminToolsPage() {
     const handleSave = async (keyBase: string) => {
         setSaving(true);
         try {
-            // Save enabled switch and gems cost for this specific tool
+            // Save enabled switch, gems cost, and model for this specific tool
             const items = [
                 { key: `tool_${keyBase}_enabled`, value: settings[`tool_${keyBase}_enabled`] ?? '1', group: 'tools' },
                 { key: `tool_${keyBase}_gems_cost`, value: settings[`tool_${keyBase}_gems_cost`] ?? '2', group: 'tools' },
+                { key: `tool_${keyBase}_model`, value: settings[`tool_${keyBase}_model`] ?? 'auto', group: 'tools' },
             ];
             await adminApi.updateSettings(items);
             toast.success('Đã lưu cấu hình công cụ');
@@ -151,6 +159,28 @@ export default function AdminToolsPage() {
                                                 />
                                             </div>
                                             
+                                            
+                                            <div className="space-y-2">
+                                                <Label>Model xử lý AI</Label>
+                                                <Select
+                                                    value={settings[`tool_${tool.keyBase}_model`] || 'auto'}
+                                                    onValueChange={(v) => updateSetting(`tool_${tool.keyBase}_model`, v)}
+                                                >
+                                                    <SelectTrigger className="max-w-sm">
+                                                        <SelectValue placeholder="Theo cấu hình mặc định (Auto)" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="auto">Mặc định của hệ thống</SelectItem>
+                                                        {models.filter(m => m.is_active).map(m => (
+                                                            <SelectItem key={m.model_id} value={m.model_id}>
+                                                                {m.name} ({m.provider})
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <p className="text-[11px] text-muted-foreground">Chọn model cụ thể cho chức năng này hoặc để "Tự động" dùng cấu hình mặc định.</p>
+                                            </div>
+
                                             <div className="space-y-2">
                                                 <Label>Chi phí cơ bản (Gems / Lượt)</Label>
                                                 <Input 
@@ -194,7 +224,26 @@ export default function AdminToolsPage() {
                                                     onChange={(e) => updateSetting(`tool_${tool.keyBase}_gems_cost`, e.target.value)} 
                                                 />
                                             </div>
-                                            <Button onClick={() => handleSave(tool.keyBase)} disabled={saving} size="sm" variant="secondary" className="w-full mt-2">
+                                            <div className="space-y-1.5 mt-2">
+                                                <Label className="text-sm">Model xử lý AI</Label>
+                                                <Select
+                                                    value={settings[`tool_${tool.keyBase}_model`] || 'auto'}
+                                                    onValueChange={(v) => updateSetting(`tool_${tool.keyBase}_model`, v)}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Tự động" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="auto">Hệ thống</SelectItem>
+                                                        {models.filter(m => m.is_active).map(m => (
+                                                            <SelectItem key={m.model_id} value={m.model_id}>
+                                                                {m.name}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <Button onClick={() => handleSave(tool.keyBase)} disabled={saving} size="sm" variant="secondary" className="w-full mt-4">
                                                 <Save className="size-3.5 mr-2" /> Lưu
                                             </Button>
                                         </CardContent>
