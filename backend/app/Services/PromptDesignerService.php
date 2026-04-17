@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Ai\Agents\AdImageDesigner;
 use App\Ai\Agents\BasePromptDesigner;
-use App\Ai\Agents\CharacterDesigner;
 use App\Ai\Agents\GenerateDesigner;
-use App\Ai\Agents\StyleTransferDesigner;
-use App\Ai\Agents\VariationDesigner;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Log;
 use Laravel\Ai\Files\Base64Image;
@@ -42,7 +38,7 @@ class PromptDesignerService
      * @param string|null $templateSystemPrompt System prompt từ template (nếu dùng template)
      * @param array|null  $referenceImages     Ảnh tham chiếu (base64 data URL hoặc HTTP URL)
      * @param string|null $aspectRatio         Tỉ lệ ảnh
-     * @param string      $taskType            Loại task: generate|template|style-transfer|variation|ad-image|character
+     * @param string      $taskType            Loại task: generate|template
      *
      * @return array{prompt: string, negative_prompt: string|null, designed: bool}
      */
@@ -142,14 +138,8 @@ class PromptDesignerService
      */
     private function resolveAgent(string $taskType): BasePromptDesigner
     {
-        return match ($taskType) {
-            'generate', 'template' => new GenerateDesigner(),
-            'style-transfer'       => new StyleTransferDesigner(),
-            'variation'            => new VariationDesigner(),
-            'ad-image'             => new AdImageDesigner(),
-            'character'            => new CharacterDesigner(),
-            default                => new GenerateDesigner(),
-        };
+        // Tất cả tasks đều dùng GenerateDesigner
+        return new GenerateDesigner();
     }
 
     /**
@@ -174,10 +164,6 @@ class PromptDesignerService
         $taskLabel = match ($taskType) {
             'generate'       => $hasTemplate ? 'TEMPLATE-GUIDED generation' : ($hasRefs ? 'REFERENCE-BASED generation' : 'TEXT-ONLY generation'),
             'template'       => 'TEMPLATE-GUIDED generation',
-            'style-transfer' => 'STYLE TRANSFER',
-            'variation'      => 'IMAGE VARIATION',
-            'ad-image'       => 'ADVERTISING IMAGE',
-            'character'      => 'CONSISTENT CHARACTER',
             default          => 'IMAGE GENERATION',
         };
         $parts[] = "## Task: {$taskLabel}";

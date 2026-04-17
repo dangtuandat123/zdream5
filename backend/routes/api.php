@@ -7,7 +7,6 @@ use App\Http\Controllers\ImageController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\WalletController;
-use App\Http\Controllers\ToolController;
 use App\Http\Controllers\Admin\AdminAiModelController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminSettingController;
@@ -59,20 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects', [\App\Http\Controllers\ProjectController::class, 'index']);
     Route::post('/projects', [\App\Http\Controllers\ProjectController::class, 'store']);
     Route::delete('/projects/{id}', [\App\Http\Controllers\ProjectController::class, 'destroy']);
-
-    // AI Tools
-    Route::prefix('tools')->middleware('throttle:5,1')->group(function () {
-        Route::post('/style-transfer', [ToolController::class, 'styleTransfer']);
-        Route::post('/image-variation', [ToolController::class, 'imageVariation']);
-        Route::post('/ad-image', [ToolController::class, 'adImage']);
-        Route::post('/consistent-character', [ToolController::class, 'consistentCharacter']);
-        Route::post('/upscale', [ToolController::class, 'upscale']);
-        Route::post('/remove-bg', [ToolController::class, 'removeBg']);
-        Route::post('/remove-object', [ToolController::class, 'removeObject']);
-        Route::post('/inpainting', [ToolController::class, 'inpainting']);
-        Route::post('/extend', [ToolController::class, 'extend']);
-        Route::post('/image-to-prompt', [ToolController::class, 'imageToPrompt']);
-    });
 
     // Wallet / Gems
     Route::get('/wallet', [WalletController::class, 'show']);

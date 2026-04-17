@@ -1,23 +1,8 @@
-import { Download, Copy, Check, ArrowRight, RotateCcw, Wand2, ZoomIn, Eraser, Expand, PenTool, Sparkles } from "lucide-react"
+import { Download, Copy, Check, RotateCcw, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useEffect } from "react"
-import { useNavigate, useLocation } from "react-router-dom"
 import { BeforeAfterSlider } from "./BeforeAfterSlider"
 import { getDynamicGridClass } from "./ToolHelpers"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-
-const CROSS_TOOLS = [
-    { path: "/app/tools/style-transfer", label: "Chuyển phong cách", icon: Wand2 },
-    { path: "/app/tools/upscale", label: "Upscale ảnh", icon: ZoomIn },
-    { path: "/app/tools/remove-bg", label: "Xóa nền", icon: Eraser },
-    { path: "/app/tools/image-edit", label: "Chỉnh sửa ảnh", icon: PenTool },
-    { path: "/app/tools/extend", label: "Mở rộng ảnh", icon: Expand },
-]
 
 // Loading với hiệu ứng background đổi màu
 function LoadingProgress({ expectedCount = 1 }: { expectedCount?: number }) {
@@ -120,7 +105,6 @@ interface ToolResultDisplayProps {
     beforeImageUrl?: string | null
     onUseAsInput?: (url: string) => void
     emptyHint?: string
-    showGenerateFromPrompt?: boolean
     infoContent?: React.ReactNode
 }
 
@@ -135,12 +119,9 @@ export function ToolResultDisplay({
     beforeImageUrl,
     onUseAsInput,
     emptyHint,
-    showGenerateFromPrompt,
     infoContent,
 }: ToolResultDisplayProps) {
     const [copied, setCopied] = useState(false)
-    const navigate = useNavigate()
-    const location = useLocation()
 
     const handleDownloadUrl = async (url: string) => {
         try {
@@ -161,8 +142,6 @@ export function ToolResultDisplay({
         setTimeout(() => setCopied(false), 2000)
     }
 
-    const crossTools = CROSS_TOOLS.filter(t => !location.pathname.startsWith(t.path))
-
     const displayImages = imagesProp && imagesProp.length > 0 ? imagesProp : (imageUrl ? [imageUrl] : [])
 
     if (loading) {
@@ -179,17 +158,6 @@ export function ToolResultDisplay({
                         {copied ? "Đã sao chép" : "Sao chép"}
                     </Button>
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{textResult}</p>
-                {showGenerateFromPrompt && (
-                    <Button
-                        size="sm"
-                        className="gap-1.5"
-                        onClick={() => navigate(`/app/generate?prompt=${encodeURIComponent(textResult)}`)}
-                    >
-                        <ArrowRight className="size-3.5" />
-                        Tạo ảnh từ prompt này
-                    </Button>
-                )}
             </div>
         )
     }
@@ -213,26 +181,6 @@ export function ToolResultDisplay({
                                                 <Download className="size-3.5 shrink-0" />
                                                 Tải xuống
                                             </Button>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button size="sm" variant="secondary" className="gap-1.5 h-8 text-xs rounded-lg hover:bg-white hover:text-black transition-colors px-3">
-                                                        <ArrowRight className="size-3.5 shrink-0" />
-                                                        Xử lý tiếp
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent side="top" align="center" className="rounded-xl border-border/40 shadow-xl mb-1">
-                                                    {crossTools.map((tool) => (
-                                                        <DropdownMenuItem
-                                                            key={tool.path}
-                                                            onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(src)}`)}
-                                                            className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
-                                                        >
-                                                            <tool.icon className="size-3.5 text-muted-foreground" />
-                                                            <span className="font-medium">{tool.label}</span>
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
                                         </div>
                                     </div>
                                 )}
@@ -287,45 +235,17 @@ export function ToolResultDisplay({
                         </Button>
                     )}
 
-                    {/* [3] Single Image Only Actions: Làm đầu vào & Tiếp tục với */}
-                    {displayImages.length === 1 && (
-                        <>
-                            {onUseAsInput && (
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
-                                    onClick={() => onUseAsInput(displayImages[0])}
-                                >
-                                    <RotateCcw className="size-3.5" />
-                                    <span className="text-xs font-semibold">Dùng làm đầu vào</span>
-                                </Button>
-                            )}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        size="sm"
-                                        variant="secondary"
-                                        className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
-                                    >
-                                        <ArrowRight className="size-3.5" />
-                                        <span className="text-xs font-semibold">Tiếp tục với...</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="rounded-xl border-border/40 shadow-xl">
-                                    {crossTools.map((tool) => (
-                                        <DropdownMenuItem
-                                            key={tool.path}
-                                            onClick={() => navigate(`${tool.path}?input=${encodeURIComponent(displayImages[0])}`)}
-                                            className="gap-2.5 text-xs py-2 px-3 cursor-pointer"
-                                        >
-                                            <tool.icon className="size-3.5 text-muted-foreground" />
-                                            <span className="font-medium">{tool.label}</span>
-                                        </DropdownMenuItem>
-                                    ))}
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </>
+                    {/* [3] Single Image Only Actions: Dùng làm đầu vào */}
+                    {displayImages.length === 1 && onUseAsInput && (
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            className="gap-2 h-9 rounded-xl px-4 border border-border/40 shadow-sm transition-all hover:bg-secondary/80"
+                            onClick={() => onUseAsInput(displayImages[0])}
+                        >
+                            <RotateCcw className="size-3.5" />
+                            <span className="text-xs font-semibold">Dùng làm đầu vào</span>
+                        </Button>
                     )}
                 </div>
             </div>

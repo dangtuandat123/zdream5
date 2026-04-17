@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import {
   LayoutDashboard,
-  Sparkles,
   WandSparkles,
   Images,
   Hexagon,
@@ -37,7 +36,6 @@ import {
 const navItems = [
   { icon: LayoutDashboard, label: "Home", desc: "Trang chủ", path: "/app/home" },
   { icon: WandSparkles, label: "Tạo ảnh", desc: "Tạo ảnh bằng AI", path: "/app/generate" },
-  { icon: Sparkles, label: "Công cụ AI", desc: "Bộ công cụ AI sáng tạo", path: "/app/tools" },
   { icon: Images, label: "Thư viện", desc: "Ảnh đã tạo và tải lên", path: "/app/library" },
 ]
 
@@ -64,9 +62,6 @@ export function AppSidebar() {
   const isActive = (path: string) => {
     if (path === "/app/home") return location.pathname.includes("home")
     if (path === "/app/admin") return location.pathname.startsWith("/app/admin")
-    if (path === "/app/tools") {
-      return location.pathname.startsWith("/app/tools")
-    }
     return location.pathname.startsWith(path)
   }
 

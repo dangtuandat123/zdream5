@@ -11,9 +11,6 @@ import {
     Plus,
     Library,
     Zap,
-    Eraser,
-    ArrowUpFromLine,
-    Palette,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -51,7 +48,7 @@ const bannerSlides = [
         subtitle: "Hàng trăm template sẵn có cho mọi phong cách sáng tạo",
         badge: "Nổi bật",
         gradient: "from-blue-600 via-cyan-600 to-teal-600",
-        cta: { label: "Xem kiểu mẫu", to: "/app/tools/templates" },
+        cta: { label: "Xem kiểu mẫu", to: "/app/templates" },
     },
     {
         title: "Nạp Gems - Sáng tạo không giới hạn",
@@ -64,11 +61,8 @@ const bannerSlides = [
 
 const featureNav = [
     { to: "/app/generate", label: "Tạo ảnh AI", icon: Sparkles, highlight: true },
-    { to: "/app/tools/templates", label: "Kiểu mẫu", icon: SwatchBook },
+    { to: "/app/templates", label: "Kiểu mẫu", icon: SwatchBook },
     { to: "/app/library", label: "Thư viện", icon: Library },
-    { to: "/app/tools", label: "Xóa nền", icon: Eraser, badge: "Sắp ra mắt" },
-    { to: "/app/tools", label: "Upscale", icon: ArrowUpFromLine, badge: "Sắp ra mắt" },
-    { to: "/app/tools", label: "Style Transfer", icon: Palette, badge: "Sắp ra mắt" },
 ]
 
 export function Dashboard() {
@@ -191,13 +185,7 @@ export function Dashboard() {
                         }`}>
                             <item.icon className={`size-4 shrink-0 ${item.highlight ? "text-violet-400" : "text-muted-foreground"}`} />
                             <span className={`text-sm font-medium whitespace-nowrap ${item.highlight ? "text-violet-300" : ""}`}>{item.label}</span>
-                            {item.badge ? (
-                                <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 border-amber-500/50 text-amber-400 font-medium ml-0.5">
-                                    {item.badge}
-                                </Badge>
-                            ) : (
-                                <ArrowRight className="size-3.5 text-muted-foreground/50" />
-                            )}
+                            <ArrowRight className="size-3.5 text-muted-foreground/50" />
                         </div>
                     </Link>
                 ))}
@@ -230,7 +218,7 @@ export function Dashboard() {
             <div className="space-y-3">
                 <div className="flex items-center justify-between">
                     <h2 className="text-sm sm:text-base font-semibold">Kiểu mẫu nổi bật</h2>
-                    <Link to="/app/tools/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
+                    <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
                         Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
                 </div>
@@ -257,7 +245,7 @@ export function Dashboard() {
                             <CarouselContent className="-ml-3">
                                 {templates.map((tpl) => (
                                     <CarouselItem key={tpl.id} className="pl-3 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                                        <Link to={`/app/tools/templates/${tpl.slug}`} className="group relative block overflow-hidden rounded-xl sm:rounded-2xl bg-muted aspect-[3/4]">
+                                        <Link to={`/app/templates/${tpl.slug}`} className="group relative block overflow-hidden rounded-xl sm:rounded-2xl bg-muted aspect-[3/4]">
                                             {tpl.thumbnail && (
                                                 <img
                                                     src={tpl.thumbnail}

@@ -312,53 +312,6 @@ export const modelApi = {
     listActive: () => request<{ data: AiModelData[] }>('/models'),
 };
 
-// ========================
-// Tools API
-// ========================
-
-export interface ToolImageResponse {
-    message: string;
-    image: GeneratedImageData;
-    gems_remaining: number;
-}
-
-export interface ToolTextResponse {
-    message: string;
-    result: { prompt: string };
-    gems_remaining: number;
-}
-
-export const toolsApi = {
-    styleTransfer: (data: { image: string; target_style: string; intensity?: string }) =>
-        request<ToolImageResponse>('/tools/style-transfer', { method: 'POST', body: JSON.stringify(data) }),
-
-    imageVariation: (data: { image: string; strength?: number }) =>
-        request<ToolImageResponse>('/tools/image-variation', { method: 'POST', body: JSON.stringify(data) }),
-
-    adImage: (data: { image: string; description: string; platform?: string; aspect_ratio?: string }) =>
-        request<ToolImageResponse>('/tools/ad-image', { method: 'POST', body: JSON.stringify(data) }),
-
-    consistentCharacter: (data: { images: string[]; scene_description: string; aspect_ratio?: string }) =>
-        request<ToolImageResponse>('/tools/consistent-character', { method: 'POST', body: JSON.stringify(data) }),
-
-    upscale: (data: { image: string; scale_factor?: string; enhance_mode?: string; denoise?: boolean; face_enhance?: boolean; creative_detail?: boolean; color_enhance?: boolean }) =>
-        request<ToolImageResponse>('/tools/upscale', { method: 'POST', body: JSON.stringify(data) }),
-
-    removeBg: (data: { image: string; subject_type?: string; edge_refine?: string; bbox?: number[]; bboxes?: number[][]; mask_image?: string }) =>
-        request<ToolImageResponse>('/tools/remove-bg', { method: 'POST', body: JSON.stringify(data) }),
-
-    removeObject: (data: { image: string; description: string }) =>
-        request<ToolImageResponse>('/tools/remove-object', { method: 'POST', body: JSON.stringify(data) }),
-
-    inpainting: (data: { image: string; mask: string; description: string }) =>
-        request<ToolImageResponse>('/tools/inpainting', { method: 'POST', body: JSON.stringify(data) }),
-
-    extend: (data: { image: string; directions: string[]; extend_ratio?: string; description?: string }) =>
-        request<ToolImageResponse>('/tools/extend', { method: 'POST', body: JSON.stringify(data) }),
-
-    imageToPrompt: (data: { image: string; language?: string }) =>
-        request<ToolTextResponse>('/tools/image-to-prompt', { method: 'POST', body: JSON.stringify(data) }),
-};
 
 // ========================
 // Admin API

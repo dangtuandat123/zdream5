@@ -827,8 +827,8 @@ const TEMPLATE_CARDS = [
     { name: "Phong Cách Ghibli", category: "Nghệ thuật", image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?q=80&w=300&auto=format&fit=crop", color: "from-emerald-500 to-teal-600" },
 ]
 const TEMPLATE_NAME = "Render Sản Phẩm 3D"
-const TEMPLATE_BROWSE_URL = "zdream.vn/app/tools/templates"
-const TEMPLATE_URL = "zdream.vn/app/tools/templates/render-san-pham-3d"
+const TEMPLATE_BROWSE_URL = "zdream.vn/app/templates"
+const TEMPLATE_URL = "zdream.vn/app/templates/render-san-pham-3d"
 // Ảnh đầu vào giả lập (sản phẩm)
 const TEMPLATE_INPUT_IMG = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=400&auto=format&fit=crop"
 // Effect groups giả lập

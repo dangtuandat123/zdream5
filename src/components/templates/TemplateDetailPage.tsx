@@ -28,18 +28,18 @@ import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { ToolWorkspaceLayout } from "@/components/tools/ToolWorkspaceLayout"
-import { ToolImageUpload } from "@/components/tools/shared/ToolImageUpload"
-import { ToolResultDisplay } from "@/components/tools/shared/ToolResultDisplay"
-import { ToolSubmitButton } from "@/components/tools/shared/ToolSubmitButton"
+import { ToolWorkspaceLayout } from "@/components/templates/shared/ToolWorkspaceLayout"
+import { ToolImageUpload } from "@/components/templates/shared/ToolImageUpload"
+import { ToolResultDisplay } from "@/components/templates/shared/ToolResultDisplay"
+import { ToolSubmitButton } from "@/components/templates/shared/ToolSubmitButton"
 
-import { useToolPanel } from "@/components/tools/ToolPanelContext"
+import { useToolPanel } from "@/components/templates/shared/ToolPanelContext"
 
 import { templateApi, imageApi, type TemplateData, type EffectGroup } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 
-import { ASPECT_RATIOS, IMAGE_COUNTS, RESOLUTIONS } from "@/components/tools/shared/ToolConstants"
-import { ImageWithSkeleton } from "@/components/tools/shared/ToolGrid"
+import { ASPECT_RATIOS, IMAGE_COUNTS, RESOLUTIONS } from "@/components/templates/shared/ToolConstants"
+import { ImageWithSkeleton } from "@/components/templates/shared/ToolGrid"
 
 // Hook cho drag-to-scroll ngang (giống app chỉnh ảnh)
 function useDragScroll() {
@@ -317,7 +317,7 @@ export function TemplateDetailPage() {
                         </div>
                     </Card>
                     <div className="flex justify-start">
-                        <Link to="/app/tools/templates" className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors py-1">
+                        <Link to="/app/templates" className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-primary transition-colors py-1">
                             <ArrowLeft className="size-3" />
                             Đổi mẫu thiết kế khác
                         </Link>
@@ -527,7 +527,7 @@ export function TemplateDetailPage() {
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 bg-background">
                 <LayoutTemplate className="size-10 text-muted-foreground/30" />
                 <p className="text-muted-foreground font-medium">Không tìm thấy mẫu thiết kế</p>
-                <Link to="/app/tools" className="text-sm text-primary underline hover:text-primary/80 transition-colors">← Quay lại công cụ AI</Link>
+                <Link to="/app/templates" className="text-sm text-primary underline hover:text-primary/80 transition-colors">← Quay lại kiểu mẫu</Link>
             </div>
         )
     }

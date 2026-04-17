@@ -17,7 +17,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import { templateApi, type TemplateData } from "@/lib/api"
-import { useToolPanel } from "@/components/tools/ToolPanelContext"
+import { useToolPanel } from "@/components/templates/shared/ToolPanelContext"
 
 const PER_PAGE = 12
 
@@ -226,7 +226,7 @@ export function TemplatesPage() {
                             {paginatedTemplates.map((template) => (
                                 <Link
                                     key={template.id}
-                                    to={`/app/tools/templates/${template.slug}`}
+                                    to={`/app/templates/${template.slug}`}
                                     className="group relative flex flex-col overflow-hidden rounded-2xl bg-card border shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/30"
                                 >
                                     <div className="relative aspect-[4/5] bg-muted overflow-hidden">
