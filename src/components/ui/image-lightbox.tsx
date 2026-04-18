@@ -352,7 +352,7 @@ export function ImageLightbox({
                 </div>
 
                 {/* === Phần chính: ảnh + controls === */}
-                <div className="relative flex-1 flex items-center justify-center">
+                <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
 
                     {/* Action Bar (Góc dưới) — safe-area cho iPhone */}
                     <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
