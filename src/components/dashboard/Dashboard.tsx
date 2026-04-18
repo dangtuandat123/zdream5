@@ -3,7 +3,6 @@ import { Link } from "react-router-dom"
 import Autoplay from "embla-carousel-autoplay"
 import {
     Sparkles,
-    SwatchBook,
     Images,
     ImageIcon,
     Gem,
@@ -20,13 +19,11 @@ import {
     Carousel,
     CarouselContent,
     CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
     type CarouselApi,
 } from "@/components/ui/carousel"
 import { useAuth } from "@/contexts/AuthContext"
-import { imageApi, templateApi, walletApi } from "@/lib/api"
-import type { GeneratedImageData, TemplateData } from "@/lib/api"
+import { imageApi, walletApi } from "@/lib/api"
+import type { GeneratedImageData } from "@/lib/api"
 
 function getGreeting(): string {
     const h = new Date().getHours()
@@ -44,13 +41,6 @@ const bannerSlides = [
         cta: { label: "Tạo ảnh ngay", to: "/app/generate" },
     },
     {
-        title: "Khám phá Kiểu mẫu",
-        subtitle: "Hàng trăm template sẵn có cho mọi phong cách sáng tạo",
-        badge: "Nổi bật",
-        gradient: "from-blue-600 via-cyan-600 to-teal-600",
-        cta: { label: "Xem kiểu mẫu", to: "/app/templates" },
-    },
-    {
         title: "Nạp Gems - Sáng tạo không giới hạn",
         subtitle: "Nhiều gói ưu đãi hấp dẫn, bonus lên đến 25%",
         badge: "Ưu đãi",
@@ -61,7 +51,6 @@ const bannerSlides = [
 
 const featureNav = [
     { to: "/app/generate", label: "Tạo ảnh AI", icon: Sparkles, highlight: true },
-    { to: "/app/templates", label: "Kiểu mẫu", icon: SwatchBook },
     { to: "/app/library", label: "Thư viện", icon: Library },
 ]
 
@@ -69,7 +58,6 @@ export function Dashboard() {
     const { user, gems } = useAuth()
 
     const [recentImages, setRecentImages] = useState<GeneratedImageData[]>([])
-    const [templates, setTemplates] = useState<TemplateData[]>([])
     const [totalImages, setTotalImages] = useState(0)
     const [totalSpent, setTotalSpent] = useState(0)
     const [loading, setLoading] = useState(true)
@@ -80,15 +68,11 @@ export function Dashboard() {
         setLoading(true)
         Promise.allSettled([
             imageApi.list(1, 8),
-            templateApi.list(),
             walletApi.show(),
-        ]).then(([imgRes, tplRes, walRes]) => {
+        ]).then(([imgRes, walRes]) => {
             if (imgRes.status === "fulfilled") {
                 setRecentImages(imgRes.value.data)
                 setTotalImages(imgRes.value.total)
-            }
-            if (tplRes.status === "fulfilled") {
-                setTemplates(tplRes.value.data.slice(0, 15))
             }
             if (walRes.status === "fulfilled") {
                 const spent = walRes.value.transactions
@@ -214,71 +198,6 @@ export function Dashboard() {
                 ))}
             </div>
 
-            {/* ===== TEMPLATES CAROUSEL ===== */}
-            <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-sm sm:text-base font-semibold">Kiểu mẫu nổi bật</h2>
-                    <Link to="/app/templates" className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 group">
-                        Xem tất cả <ArrowRight className="size-3 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <div className="flex gap-2.5">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                            <Skeleton key={i} className="shrink-0 w-36 sm:w-44 aspect-[4/5] rounded-xl" />
-                        ))}
-                    </div>
-                ) : templates.length === 0 ? (
-                    <div className="flex items-center justify-center gap-2 py-8 rounded-xl border border-dashed border-border/50">
-                        <SwatchBook className="size-5 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Chưa có kiểu mẫu nào</p>
-                    </div>
-                ) : (
-                    <div className="relative">
-                        <Carousel
-                            opts={{ loop: true, align: "start" }}
-                            plugins={[Autoplay({ delay: 2000, stopOnInteraction: false })]}
-
-                            className="w-full"
-                        >
-                            <CarouselContent className="-ml-3">
-                                {templates.map((tpl) => (
-                                    <CarouselItem key={tpl.id} className="pl-3 basis-1/3 sm:basis-1/3 md:basis-1/4 lg:basis-1/5">
-                                        <Link to={`/app/templates/${tpl.slug}`} className="group relative block overflow-hidden rounded-xl sm:rounded-2xl bg-muted aspect-[3/4]">
-                                            {tpl.thumbnail && (
-                                                <img
-                                                    src={tpl.thumbnail}
-                                                    alt={tpl.name}
-                                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
-                                                    loading="lazy"
-                                                />
-                                            )}
-                                            <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5 z-10">
-                                                <span className="inline-flex items-center px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[11px] font-medium bg-black/40 text-white backdrop-blur-md">
-                                                    {tpl.category}
-                                                </span>
-                                            </div>
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                                            <div className="absolute bottom-0 left-0 right-0 z-10 p-1.5 sm:p-3 space-y-0.5">
-                                                <h3 className="text-[11px] sm:text-sm font-semibold text-white truncate drop-shadow-md">{tpl.name}</h3>
-                                                <p className="text-[9px] sm:text-[11px] text-white/70 truncate drop-shadow-sm hidden sm:block">{tpl.description}</p>
-                                                <div className="hidden sm:flex items-center gap-1 pt-1 text-white/50 group-hover:text-white/80 transition-colors">
-                                                    <span className="text-[10px] font-medium">Xem chi tiết</span>
-                                                    <ArrowRight className="size-3 transition-transform duration-300 group-hover:translate-x-0.5" />
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    </CarouselItem>
-                                ))}
-                            </CarouselContent>
-                            <CarouselPrevious className="hidden sm:flex -left-3 size-8 bg-background/80 backdrop-blur-sm border-border/50" />
-                            <CarouselNext className="hidden sm:flex -right-3 size-8 bg-background/80 backdrop-blur-sm border-border/50" />
-                        </Carousel>
-                    </div>
-                )}
-            </div>
 
             {/* ===== RECENT IMAGES ===== */}
             <div className="space-y-3">

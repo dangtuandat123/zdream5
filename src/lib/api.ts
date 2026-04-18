@@ -184,19 +184,15 @@ export const imageApi = {
         seed?: number;
         count?: number;
         reference_images?: string[];
-        template_slug?: string;
     }) => request<GenerateResponse>('/images/generate', {
         method: 'POST',
         body: JSON.stringify(data),
     }),
 
-    list: (page = 1, perPage = 20, projectId?: string | null, type?: string | null, templateSlug?: string | null, excludeTemplate = false, toolName?: string | null) => {
+    list: (page = 1, perPage = 20, projectId?: string | null, type?: string | null) => {
         let url = `/images?page=${page}&per_page=${perPage}`;
         if (projectId) url += `&project_id=${projectId}`;
         if (type) url += `&type=${type}`;
-        if (templateSlug) url += `&template_slug=${encodeURIComponent(templateSlug)}`;
-        if (excludeTemplate) url += `&exclude_template=1`;
-        if (toolName) url += `&tool_name=${encodeURIComponent(toolName)}`;
         return request<{
             data: GeneratedImageData[];
             current_page: number;
@@ -264,38 +260,6 @@ export const walletApi = {
         ),
 };
 
-// ========================
-// Template API (Public)
-// ========================
-
-export interface EffectOption {
-    value: string;
-    label: string;
-    prompt: string;
-    image: string;
-}
-
-export interface EffectGroup {
-    name: string;
-    options: EffectOption[];
-}
-
-export interface TemplateData {
-    id: number;
-    name: string;
-    slug: string;
-    category: string;
-    description: string | null;
-    system_prompt: string;
-    model: string;
-    thumbnail: string | null;
-    effect_groups: EffectGroup[] | null;
-}
-
-export const templateApi = {
-    list: () => request<{ data: TemplateData[] }>('/templates'),
-    get: (slug: string) => request<TemplateData>(`/templates/${slug}`),
-};
 
 // ========================
 // AI Model API (Public)
@@ -349,13 +313,6 @@ export interface AdminUserData {
     created_at: string;
 }
 
-export interface AdminTemplateData extends TemplateData {
-    is_active: boolean;
-    sort_order: number;
-    created_by: number | null;
-    created_at: string;
-    updated_at: string;
-}
 
 export interface AdminAiModelData extends AiModelData {
     provider: string;
@@ -385,27 +342,6 @@ export const adminApi = {
     updateUserLevel: (id: number, level: number) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/level`, { method: 'PATCH', body: JSON.stringify({ level }) }),
     adjustGems: (id: number, data: { amount: number; reason: string }) => request<{ message: string; user: AdminUserData }>(`/admin/users/${id}/gems`, { method: 'POST', body: JSON.stringify(data) }),
 
-    // Templates
-    templates: (params?: { search?: string; category?: string }) => {
-        const sp = new URLSearchParams();
-        if (params?.search) sp.set('search', params.search);
-        if (params?.category) sp.set('category', params.category);
-        return request<AdminTemplateData[]>(`/admin/templates?${sp}`);
-    },
-    getTemplate: (id: number) => request<AdminTemplateData>(`/admin/templates/${id}`),
-    createTemplate: (data: Record<string, unknown>) => request<{ message: string; data: AdminTemplateData }>('/admin/templates', { method: 'POST', body: JSON.stringify(data) }),
-    updateTemplate: (id: number, data: Record<string, unknown>) => request<{ message: string; data: AdminTemplateData }>(`/admin/templates/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-    deleteTemplate: (id: number) => request<{ message: string }>(`/admin/templates/${id}`, { method: 'DELETE' }),
-    reorderTemplates: (items: Array<{ id: number; sort_order: number }>) => request<{ message: string }>('/admin/templates/reorder', { method: 'POST', body: JSON.stringify({ items }) }),
-    uploadTemplateImage: (file: File) => {
-        const formData = new FormData();
-        formData.append('image', file);
-        return request<{ url: string; path: string }>('/admin/templates/upload-image', {
-            method: 'POST',
-            body: formData,
-            headers: {},
-        });
-    },
 
     // AI Models
     models: () => request<AdminAiModelData[]>('/admin/models'),

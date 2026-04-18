@@ -5,12 +5,10 @@ declare(strict_types=1);
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\SocialAuthController;
-use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\Admin\AdminAiModelController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminSettingController;
-use App\Http\Controllers\Admin\AdminTemplateController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Models\AiModel;
 use Illuminate\Support\Facades\Route;
@@ -30,9 +28,7 @@ use Illuminate\Support\Facades\Route;
 // ========================
 Route::get('/auth/google/redirect', [SocialAuthController::class, 'redirectToGoogle']);
 
-// Templates & Models public (cho frontend)
-Route::get('/templates', [TemplateController::class, 'publicIndex']);
-Route::get('/templates/{slug}', [TemplateController::class, 'publicShow']);
+// Models public (cho frontend)
 Route::get('/models', function () {
     return response()->json(['data' => AiModel::active()->get(['id', 'name', 'model_id', 'gems_cost'])]);
 });
@@ -77,10 +73,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/users/{id}/level', [AdminUserController::class, 'updateLevel']);
         Route::post('/users/{id}/gems', [AdminUserController::class, 'adjustGems']);
 
-        // Quản lý Templates
-        Route::post('/templates/upload-image', [AdminTemplateController::class, 'uploadImage']);
-        Route::apiResource('templates', AdminTemplateController::class);
-        Route::post('/templates/reorder', [AdminTemplateController::class, 'reorder']);
 
         // Quản lý AI Models
         Route::apiResource('models', AdminAiModelController::class);

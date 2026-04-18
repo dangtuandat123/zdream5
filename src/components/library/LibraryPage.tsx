@@ -70,7 +70,7 @@ import { useIsMobile } from "@/hooks/use-mobile"
 import { imageApi, type GeneratedImageData } from "@/lib/api"
 
 // === Kiểu dữ liệu ===
-type MediaType = "ai" | "template" | "upload"
+type MediaType = "ai" | "upload"
 
 interface MediaItem {
     id: string
@@ -101,7 +101,6 @@ const TABS = [
 // === Badge config theo loại — dùng chuẩn Shadcn UI ===
 const TYPE_CONFIG: Record<MediaType, { label: string; icon: typeof SparklesIcon; variant: "default" | "secondary" | "destructive" | "outline" }> = {
     ai: { label: "AI", icon: SparklesIcon, variant: "default" },
-    template: { label: "Mẫu", icon: PaletteIcon, variant: "secondary" },
     upload: { label: "Tải lên", icon: UploadIcon, variant: "secondary" },
 }
 
@@ -141,7 +140,6 @@ function apiToMediaItem(img: GeneratedImageData): MediaItem {
 const EMPTY_STATES: Record<string, { icon: typeof ImageIcon; title: string; desc: string; cta?: { label: string; to: string } }> = {
     all: { icon: ImageIcon, title: "Thư viện trống", desc: "Bắt đầu tạo ảnh AI hoặc tải ảnh lên để xây dựng bộ sưu tập của bạn.", cta: { label: "Tạo ảnh đầu tiên", to: "/app/generate" } },
     ai: { icon: SparklesIcon, title: "Chưa có ảnh AI nào", desc: "Hãy tạo ảnh bằng cách nhập prompt sáng tạo của bạn.", cta: { label: "Tạo ảnh ngay", to: "/app/generate" } },
-    template: { icon: PaletteIcon, title: "Chưa có ảnh từ mẫu", desc: "Khám phá các mẫu thiết kế để tạo ảnh nhanh chóng.", cta: { label: "Xem mẫu", to: "/app/templates" } },
     upload: { icon: UploadIcon, title: "Chưa có ảnh tải lên", desc: "Tải ảnh lên để sử dụng làm tài liệu tham khảo." },
 }
 
@@ -674,7 +672,7 @@ export function LibraryPage() {
                         )
                     })() : undefined}
                     actions={selectedItem ? <>
-                        {(selectedItem.type === "ai" || selectedItem.type === "template") && (
+                        {selectedItem.type === "ai" && (
                             <Button variant="ghost" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3">
                                 <WandIcon className="size-4" />
                                 <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
