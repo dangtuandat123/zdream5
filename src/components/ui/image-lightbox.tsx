@@ -423,7 +423,7 @@ export function ImageLightbox({
                             ref={imgRef}
                             src={currentImgUrl}
                             alt="Xem ảnh"
-                            className={`max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform ${isImageLoading ? 'invisible' : 'visible'}`}
+                            className={`max-w-[90%] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform ${isImageLoading ? 'invisible' : 'visible'}`}
                             style={{
                                 transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
                                 transitionProperty: 'transform',
