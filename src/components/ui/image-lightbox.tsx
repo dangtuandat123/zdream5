@@ -8,7 +8,7 @@ import { createPortal } from "react-dom"
 import { Button } from "@/components/ui/button"
 import {
     X, Info, ZoomIn, ZoomOut, Maximize2,
-    ChevronLeft, ChevronRight,
+    ChevronLeft, ChevronRight, Loader2,
 } from "lucide-react"
 
 export interface ImageLightboxProps {
@@ -46,6 +46,7 @@ export function ImageLightbox({
     showInfoButton,
 }: ImageLightboxProps) {
     const [showInfo, setShowInfo] = useState(false)
+    const [isImageLoading, setIsImageLoading] = useState(true)
     const [zoom, setZoom] = useState(1)
     const [position, setPosition] = useState({ x: 0, y: 0 })
 
@@ -128,6 +129,7 @@ export function ImageLightbox({
 
     // ── Reset zoom khi thay đổi ảnh ──
     useEffect(() => {
+        setIsImageLoading(true)
         transformRef.current = { x: 0, y: 0, zoom: 1 }
         applyTransformDOM()
         syncToState()
@@ -315,7 +317,7 @@ export function ImageLightbox({
     if (!open || images.length === 0) return null
 
     return createPortal(
-        <div className="fixed inset-0 z-50 bg-black/95 text-slate-200" style={{ touchAction: 'none' }}>
+        <div className="fixed inset-0 z-50 bg-black text-slate-200" style={{ touchAction: 'none' }}>
             <div className="relative w-full h-[100dvh] flex overflow-hidden">
                 {/* === Phần chính: ảnh + controls === */}
                 <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
@@ -325,7 +327,7 @@ export function ImageLightbox({
                         <div className="flex items-center gap-2.5 pointer-events-auto">
                             {badge}
                             {images.length > 1 && (
-                                <span className="text-xs text-white/50 font-medium tabular-nums">
+                                <span className="text-xs text-white/70 font-medium tabular-nums bg-white/10 rounded-full px-2.5 py-0.5">
                                     {safeIndex + 1} / {images.length}
                                 </span>
                             )}
@@ -358,7 +360,7 @@ export function ImageLightbox({
                     {/* Action Bar (Góc dưới) — safe-area cho iPhone */}
                     <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
                         {/* Group: Zoom Controls */}
-                        <div className="flex items-center gap-0.5 sm:gap-1 border-r border-white/10 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1">
+                        <div className="hidden sm:flex items-center gap-0.5 sm:gap-1 border-r border-white/10 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1">
                             <Button variant="ghost" size="icon" title="Thu nhỏ" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={handleZoomOut} disabled={zoom <= 1}>
                                 <ZoomOut className="size-4" />
                             </Button>
@@ -415,17 +417,24 @@ export function ImageLightbox({
                         onMouseLeave={handleMouseUpPan}
                         onDoubleClick={zoom > 1 ? resetZoom : handleZoomIn}
                     >
+                        {/* Loading spinner khi ảnh chưa tải xong */}
+                        {isImageLoading && (
+                            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                                <Loader2 className="size-8 animate-spin text-white/30" />
+                            </div>
+                        )}
                         <img
                             ref={imgRef}
                             src={currentImgUrl}
                             alt="Xem ảnh"
-                            className="max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform"
+                            className={`max-w-[90vw] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform ${isImageLoading ? 'invisible' : 'visible'}`}
                             style={{
                                 transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
                                 transitionProperty: 'transform',
                                 transitionTimingFunction: 'ease-out',
                                 transitionDuration: '0ms',
                             }}
+                            onLoad={() => setIsImageLoading(false)}
                             draggable={false}
                         />
                     </div>
@@ -437,8 +446,12 @@ export function ImageLightbox({
                         className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300 max-h-[70vh] lg:max-h-none rounded-t-2xl lg:rounded-t-none"
                         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
+                        {/* Mobile grab handle */}
+                        <div className="lg:hidden flex justify-center pt-2">
+                            <div className="w-10 h-1 rounded-full bg-white/20" />
+                        </div>
                         {/* Header panel */}
-                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
+                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 lg:py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
                             <h3 className="text-sm font-semibold text-white">Chi tiết ảnh</h3>
                             <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-white/60 hover:text-white hover:bg-white/10" onClick={() => setShowInfo(false)}>
                                 <X className="size-4" />

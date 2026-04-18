@@ -3,7 +3,7 @@
  * Kết hợp ImageLightbox + info panel + action bar.
  * Dùng chung cho GeneratePage, LibraryPage, và các trang khác.
  */
-import { useMemo, useCallback } from "react"
+import { useMemo, useCallback, useState, useEffect } from "react"
 import { ImageLightbox } from "@/components/ui/image-lightbox"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -126,10 +126,25 @@ function MetaField({ icon: Icon, label, value, title, truncate, capitalize, tabu
 
 /** Panel thông tin chi tiết ảnh — sidebar phải trên desktop, bottom sheet trên mobile */
 function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
+    const [promptExpanded, setPromptExpanded] = useState(false)
+    const [designedPromptExpanded, setDesignedPromptExpanded] = useState(false)
+
+    // Reset collapsed state khi chuyển ảnh
+    useEffect(() => {
+        setPromptExpanded(false)
+        setDesignedPromptExpanded(false)
+    }, [item.id])
+
     const handleCopy = useCallback((text: string, label: string) => {
         navigator.clipboard.writeText(text)
         toast.success(`Đã sao chép ${label}`, { id: `copy-${label}` })
     }, [])
+
+    // Kiểm tra có metadata nào không
+    const hasMetadata = item.model || item.style || item.aspectRatio ||
+        (item.seed !== undefined && item.seed !== null) ||
+        (item.gemsCost !== undefined && item.gemsCost > 0) ||
+        item.createdAt
 
     return (
         <>
@@ -148,7 +163,20 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
                             Sao chép
                         </Button>
                     </div>
-                    <HighlightedPrompt text={item.prompt} />
+                    <div className={promptExpanded ? '' : 'max-h-[100px] overflow-hidden relative'}>
+                        <HighlightedPrompt text={item.prompt} />
+                        {!promptExpanded && item.prompt.length > 200 && (
+                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-neutral-900 to-transparent pointer-events-none" />
+                        )}
+                    </div>
+                    {item.prompt.length > 200 && (
+                        <button
+                            onClick={() => setPromptExpanded(!promptExpanded)}
+                            className="text-[11px] text-violet-400 hover:text-violet-300 transition-colors font-medium"
+                        >
+                            {promptExpanded ? '△ Thu gọn' : '▽ Xem thêm'}
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -167,7 +195,20 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
                             Sao chép
                         </button>
                     </div>
-                    <p className="text-sm text-white/75 leading-relaxed">{item.designedPrompt}</p>
+                    <div className={designedPromptExpanded ? '' : 'max-h-[100px] overflow-hidden relative'}>
+                        <p className="text-sm text-white/75 leading-relaxed">{item.designedPrompt}</p>
+                        {!designedPromptExpanded && item.designedPrompt.length > 200 && (
+                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-neutral-900 to-transparent pointer-events-none" />
+                        )}
+                    </div>
+                    {item.designedPrompt.length > 200 && (
+                        <button
+                            onClick={() => setDesignedPromptExpanded(!designedPromptExpanded)}
+                            className="text-[11px] text-violet-400 hover:text-violet-300 transition-colors font-medium"
+                        >
+                            {designedPromptExpanded ? '△ Thu gọn' : '▽ Xem thêm'}
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -204,29 +245,31 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             )}
 
             {/* ── Metadata Grid ── */}
-            <div className="px-5 py-3 border-t border-white/5">
-                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
-                <div className="grid grid-cols-2 gap-3">
-                    {item.model && (
-                        <MetaField icon={Box} label="Model" value={item.model.split("/").pop() || item.model} title={item.model} truncate />
-                    )}
-                    {item.style && (
-                        <MetaField icon={Palette} label="Style" value={item.style} capitalize />
-                    )}
-                    {item.aspectRatio && (
-                        <MetaField icon={Ruler} label="Tỷ lệ" value={item.aspectRatio} />
-                    )}
-                    {item.seed !== undefined && item.seed !== null && (
-                        <MetaField icon={Hash} label="Seed" value={String(item.seed)} tabular />
-                    )}
-                    {item.gemsCost !== undefined && item.gemsCost > 0 && (
-                        <MetaField icon={Gem} label="Chi phí" value={`${item.gemsCost} 💎`} />
-                    )}
-                    {item.createdAt && (
-                        <MetaField icon={Clock} label="Ngày tạo" value={item.createdAt} />
-                    )}
+            {hasMetadata && (
+                <div className="px-5 py-3 border-t border-white/5">
+                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
+                    <div className="grid grid-cols-2 gap-3">
+                        {item.model && (
+                            <MetaField icon={Box} label="Model" value={item.model.split("/").pop() || item.model} title={item.model} truncate />
+                        )}
+                        {item.style && (
+                            <MetaField icon={Palette} label="Style" value={item.style} capitalize />
+                        )}
+                        {item.aspectRatio && (
+                            <MetaField icon={Ruler} label="Tỷ lệ" value={item.aspectRatio} />
+                        )}
+                        {item.seed !== undefined && item.seed !== null && (
+                            <MetaField icon={Hash} label="Seed" value={String(item.seed)} tabular />
+                        )}
+                        {item.gemsCost !== undefined && item.gemsCost > 0 && (
+                            <MetaField icon={Gem} label="Chi phí" value={`${item.gemsCost} 💎`} />
+                        )}
+                        {item.createdAt && (
+                            <MetaField icon={Clock} label="Ngày tạo" value={item.createdAt} />
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </>
     )
 }
@@ -308,13 +351,16 @@ export function ImageViewer({
                         </Button>
                     )}
 
-                    {/* Xoá — luôn ở cuối */}
+                    {/* Xoá — luôn ở cuối, tách biệt tránh bấm nhầm */}
                     {onDelete && (
-                        <Button variant="ghost" size="icon" title="Xoá ảnh"
-                            className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5"
-                            onClick={() => onDelete(currentItem)}>
-                            <Trash2 className="size-4" />
-                        </Button>
+                        <>
+                            <div className="w-px h-5 bg-white/10 mx-0.5" />
+                            <Button variant="ghost" size="icon" title="Xoá ảnh"
+                                className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5"
+                                onClick={() => onDelete(currentItem)}>
+                                <Trash2 className="size-4" />
+                            </Button>
+                        </>
                     )}
                 </>
             }
