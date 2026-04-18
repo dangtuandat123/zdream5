@@ -316,43 +316,42 @@ export function ImageLightbox({
     return createPortal(
         <div className="fixed inset-0 z-50 bg-black text-slate-200" style={{ touchAction: 'none' }}>
             <div className="relative w-full h-[100dvh] flex overflow-hidden">
-                {/* Top bar — luôn hiển thị trên info panel */}
-                <div className="absolute top-0 left-0 right-0 z-[70] flex items-center justify-between p-3 sm:p-4 pointer-events-none">
-                    {/* Trái: counter */}
-                    <div className="flex items-center gap-2.5 pointer-events-auto">
-                        {images.length > 1 && (
-                            <span className="text-xs text-white/70 font-medium tabular-nums bg-white/10 rounded-full px-2.5 py-0.5">
-                                {safeIndex + 1} / {images.length}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* Phải: info toggle + close */}
-                    <div className="flex items-center gap-1.5 pointer-events-auto">
-                        {hasInfoButton && (
-                            <Button
-                                variant="ghost"
-                                title="Chi tiết ảnh"
-                                className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'border border-white bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-black/60 text-white hover:bg-black/80'}`}
-                                onClick={() => setShowInfo(!showInfo)}
-                            >
-                                <Info className="size-3.5" />
-                                <span>Chi tiết ảnh</span>
-                            </Button>
-                        )}
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            className="rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg h-9 w-9"
-                            onClick={handleClose}
-                        >
-                            <X className="size-5" />
-                        </Button>
-                    </div>
-                </div>
-
                 {/* === Phần chính: ảnh + controls === */}
                 <div className={`relative flex-1 flex items-center justify-center transition-all duration-300 ${showInfo ? 'lg:mr-[360px]' : ''}`}>
+                    {/* Top bar — counter, info toggle, close */}
+                    <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 pointer-events-none">
+                        {/* Trái: badge + counter */}
+                        <div className="flex items-center gap-2.5 pointer-events-auto">
+                            {images.length > 1 && (
+                                <span className="text-xs text-white/70 font-medium tabular-nums bg-white/10 rounded-full px-2.5 py-0.5">
+                                    {safeIndex + 1} / {images.length}
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Phải: info toggle + close */}
+                        <div className="flex items-center gap-1.5 pointer-events-auto">
+                            {hasInfoButton && (
+                                <Button
+                                    variant="ghost"
+                                    title="Chi tiết ảnh"
+                                    className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'border border-white bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                                    onClick={() => setShowInfo(!showInfo)}
+                                >
+                                    <Info className="size-3.5" />
+                                    <span>Chi tiết ảnh</span>
+                                </Button>
+                            )}
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg h-9 w-9"
+                                onClick={handleClose}
+                            >
+                                <X className="size-5" />
+                            </Button>
+                        </div>
+                    </div>
 
                     {/* Action Bar (Góc dưới) — safe-area cho iPhone */}
                     <div className="absolute bottom-[max(1rem,env(safe-area-inset-bottom))] sm:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1.5 sm:gap-2 p-1 sm:p-1.5 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto">
