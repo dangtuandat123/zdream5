@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
     Download, Trash2, RotateCcw, ImageIcon, Wand2, Copy,
-    Sparkles, Box, Palette, Ruler, Hash, Clock, Gem, Loader2,
+    Box, Palette, Ruler, Hash, Clock, Gem, Loader2,
 } from "lucide-react"
 
 // ══════════════════════════════════════════════════════════════
@@ -165,9 +165,8 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {item.designedPrompt && (
                 <div className="px-5 py-3 space-y-2 border-t border-white/5">
                     <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider flex items-center gap-1">
-                            <Sparkles className="size-2.5 text-violet-400/50" />
-                            AI Prompt
+                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">
+                            Prompt nâng cao
                         </p>
                         <button
                             className="flex items-center gap-1 text-[10px] text-white/35 hover:text-white/70 transition-colors"
@@ -197,7 +196,7 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {/* ── Negative Prompt ── */}
             {item.negativePrompt && (
                 <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                    <p className="text-[11px] font-medium text-white/50 uppercase tracking-wider">Negative Prompt</p>
+                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Từ khoá loại trừ</p>
                     <p className="text-sm text-white/65 leading-relaxed">{item.negativePrompt}</p>
                 </div>
             )}
