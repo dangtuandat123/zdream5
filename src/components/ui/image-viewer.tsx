@@ -8,7 +8,7 @@ import { ImageLightbox } from "@/components/ui/image-lightbox"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
-    Download, Trash2, RotateCcw, ImageIcon, Wand2, Upload,
+    Download, Trash2, RotateCcw, ImageIcon, Wand2,
     Copy, Sparkles, Box, Palette, Ruler, Hash, Clock, Gem, Loader2,
 } from "lucide-react"
 
@@ -80,23 +80,6 @@ function HighlightedPrompt({ text }: { text: string }) {
     )
 }
 
-/** Badge hiển thị loại ảnh (AI / Tải lên) */
-function ViewerBadge({ type }: { type: "ai" | "upload" }) {
-    if (type === "ai") {
-        return (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                <Sparkles className="size-3.5" />
-                AI
-            </div>
-        )
-    }
-    return (
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm bg-white/10 text-white/70 border border-white/20">
-            <Upload className="size-3.5" />
-            Tải lên
-        </div>
-    )
-}
 
 /** Một ô metadata nhỏ (Model, Style, Seed, ...) */
 function MetaField({ icon: Icon, label, value, title, truncate, capitalize, tabular }: {
@@ -308,7 +291,6 @@ export function ImageViewer({
             currentIndex={safeIndex}
             onIndexChange={onIndexChange}
             maxZoom={maxZoom}
-            badge={<ViewerBadge type={currentItem.type} />}
             actions={
                 <>
                     {/* Tải xuống */}

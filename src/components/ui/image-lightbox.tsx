@@ -23,8 +23,6 @@ export interface ImageLightboxProps {
     onIndexChange: (index: number) => void
     /** Max zoom level (default 5) */
     maxZoom?: number
-    /** Badge góc trên trái (e.g. "AI", type badge) */
-    badge?: ReactNode
     /** Custom action buttons trong bottom bar (sau zoom controls) */
     actions?: ReactNode
     /** Nội dung info panel (không bao gồm header — header đã có sẵn) */
@@ -40,7 +38,6 @@ export function ImageLightbox({
     currentIndex,
     onIndexChange,
     maxZoom = 5,
-    badge,
     actions,
     infoPanel,
     showInfoButton,
@@ -325,7 +322,6 @@ export function ImageLightbox({
                     <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-3 sm:p-4 pointer-events-none">
                         {/* Trái: badge + counter */}
                         <div className="flex items-center gap-2.5 pointer-events-auto">
-                            {badge}
                             {images.length > 1 && (
                                 <span className="text-xs text-white/70 font-medium tabular-nums bg-white/10 rounded-full px-2.5 py-0.5">
                                     {safeIndex + 1} / {images.length}
