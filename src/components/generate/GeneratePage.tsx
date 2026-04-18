@@ -2183,7 +2183,7 @@ export function GeneratePage() {
 
                         {/* Pill Container — with Drag & Drop */}
                         <div
-                            className={`relative flex flex-col w-full transition-all duration-300 rounded-[30px] backdrop-blur-xl ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border border-white/10 bg-[#2a2d31]/95 shadow-xl ring-1 ring-black/5'}`}
+                            className={`relative flex flex-col w-full transition-all duration-300 rounded-[30px] backdrop-blur-xl ${isDragging ? 'border-primary/80 border-2 bg-primary/5 scale-[1.02] shadow-[0_0_40px_-10px_rgba(255,255,255,0.2)]' : 'border border-white/10 bg-[#2a2d31]/95 shadow-xl ring-1 ring-black/5 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-white/20'}`}
                             onDragOver={handleDragOver}
                             onDragLeave={handleDragLeave}
                             onDrop={handleDrop}
@@ -2564,9 +2564,9 @@ export function GeneratePage() {
                                     <div className="hidden sm:block ml-1">
                                         <Popover open={isModelPopoverOpen} onOpenChange={setIsModelPopoverOpen}>
                                             <PopoverTrigger asChild>
-                                                <Button variant="ghost" className="h-9 border-transparent bg-transparent hover:bg-white/10 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0 text-foreground transition-colors gap-1.5 outline-none">
-                                                    {availableModels.find(m => m.model_id === model)?.name || "Model"}
-                                                    <ChevronDown className="size-3 opacity-50" />
+                                                <Button variant="ghost" className="h-9 border-transparent bg-transparent hover:bg-white/10 text-xs font-medium rounded-full px-3 shadow-none focus:ring-0 text-foreground transition-colors gap-1.5 outline-none max-w-[180px]">
+                                                    <span className="truncate">{availableModels.find(m => m.model_id === model)?.name || "Model"}</span>
+                                                    <ChevronDown className="size-3 opacity-50 shrink-0" />
                                                 </Button>
                                             </PopoverTrigger>
                                             <PopoverContent className="w-[180px] p-1 bg-[#2a2d31]/95 backdrop-blur-xl border-white/10 rounded-2xl shadow-2xl ring-1 ring-black/5 text-white overflow-hidden" side="top" align="center">
@@ -2592,10 +2592,10 @@ export function GeneratePage() {
                                     </div>
 
                                     {/* Badges */}
-                                    <Badge variant="secondary" className="hidden lg:inline-flex items-center justify-center text-[10px] leading-none py-0 h-6 pt-[1px] rounded-full font-medium px-2.5 bg-background/50 border-border/50">
+                                    <Badge variant="secondary" className="hidden lg:inline-flex items-center justify-center text-[11px] leading-none py-0 h-[26px] rounded-full font-medium px-2.5 bg-white/[0.08] border-white/[0.1] text-white/80">
                                         {getAspectRatio(aspectRatioValue).label}
                                     </Badge>
-                                    <Badge variant="secondary" className="hidden lg:inline-flex items-center justify-center text-[10px] leading-none py-0 h-6 pt-[1px] rounded-full font-medium px-2 bg-background/50 border-border/50">
+                                    <Badge variant="secondary" className="hidden lg:inline-flex items-center justify-center text-[11px] leading-none py-0 h-[26px] rounded-full font-semibold px-2.5 bg-white/[0.08] border-white/[0.1] text-white/80 tabular-nums">
                                         ×{imageCount}
                                     </Badge>
                                 </div>
