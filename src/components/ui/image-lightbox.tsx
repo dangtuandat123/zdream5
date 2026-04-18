@@ -404,7 +404,7 @@ export function ImageLightbox({
                     {/* Container Hình Ảnh (Pan & Zoom Wrapper) */}
                     <div
                         ref={imageContainerRef}
-                        className={`w-full h-full p-0 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
+                        className={`w-full h-full px-4 sm:px-10 lg:px-14 pt-16 pb-20 flex items-center justify-center relative overflow-hidden select-none ${zoom > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'}`}
                         style={{ touchAction: 'none' }}
                         onWheel={handleWheelZoom}
                         onMouseDown={handleMouseDownPan}
@@ -423,7 +423,7 @@ export function ImageLightbox({
                             ref={imgRef}
                             src={currentImgUrl}
                             alt="Xem ảnh"
-                            className={`max-w-[90%] max-h-[80dvh] object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform ${isImageLoading ? 'invisible' : 'visible'}`}
+                            className={`max-w-full max-h-full object-contain filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] will-change-transform ${isImageLoading ? 'invisible' : 'visible'}`}
                             style={{
                                 transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
                                 transitionProperty: 'transform',
