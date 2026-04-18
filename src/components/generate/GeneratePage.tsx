@@ -11,19 +11,15 @@ import {
     Settings2,
     ArrowUp,
     Trash2,
-    RotateCcw,
     RectangleHorizontal,
     RectangleVertical,
     Square,
-
     ImageIcon,
     X,
     Link,
     Upload,
     Check,
     Plus,
-    Copy,
-
     ChevronUp,
     ChevronDown,
     History,
@@ -33,12 +29,6 @@ import {
     FolderOpen,
     LayoutGrid,
     ChevronsUpDown,
-    Box,
-    Palette,
-    Ruler,
-    Hash,
-    Clock,
-    Sparkles,
     MoreHorizontal
 } from "lucide-react"
 
@@ -60,7 +50,7 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Spinner } from "@/components/ui/spinner"
-import { ImageLightbox } from "@/components/ui/image-lightbox"
+import { ImageViewer, type ImageViewerItem } from "@/components/ui/image-viewer"
 
 
 import {
@@ -590,14 +580,24 @@ export function GeneratePage() {
     const touchDragActiveRef = useRef(false)
     const longPressTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-    // ── Lightbox helpers (index-based cho ImageLightbox) ──
+    // ── ImageViewer data mapping ──
+    const viewerItems = useMemo<ImageViewerItem[]>(() => images.map(img => ({
+        id: img.id,
+        url: img.url,
+        type: "ai" as const,
+        prompt: img.prompt,
+        designedPrompt: img.designedPrompt,
+        negativePrompt: img.negativePrompt,
+        referenceImages: img.referenceImages,
+        model: img.model,
+        style: img.style,
+        aspectRatio: img.aspectLabel,
+        seed: img.seed,
+        createdAt: img.createdAt.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + img.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+    })), [images])
     const lbCurrentIdx = selectedImage ? images.findIndex(img => img.id === selectedImage.id) : -1
-    // Mobile keyboard: dùng interactive-widget=resizes-content trong viewport meta
-    // (Lightbox logic đã chuyển sang ImageLightbox shared component)
 
 
-
-    // Mobile keyboard: dùng interactive-widget=resizes-content trong viewport meta
     // để browser tự co layout khi bàn phím mở → sticky bottom-0 tự hoạt động đúng
 
     // Load danh sách projects
@@ -2019,168 +2019,22 @@ export function GeneratePage() {
                     </div>
                 </div>
 
-                {/* === IMAGE VIEWER — Fullscreen Portal Lightbox === */}
-                {/* === LIGHTBOX — dùng shared ImageLightbox component === */}
-                <ImageLightbox
+                {/* === IMAGE VIEWER — shared ImageViewer component === */}
+                <ImageViewer
                     open={!!selectedImage}
                     onClose={() => setSelectedImage(null)}
-                    images={images.map(img => img.url)}
+                    items={viewerItems}
                     currentIndex={lbCurrentIdx >= 0 ? lbCurrentIdx : 0}
                     onIndexChange={(i) => setSelectedImage(images[i])}
                     maxZoom={MAX_ZOOM}
-                    badge={
-                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                            <Wand2 className="size-3.5" />
-                            AI
-                        </div>
-                    }
-                    actions={selectedImage ? <>
-                        <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl" onClick={() => downloadImage(selectedImage.url, `zdream-${selectedImage.id}.jpg`)}>
-                            <Download className="size-4" />
-                        </Button>
-                        <Button variant="ghost" title="Ảnh tham chiếu" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3" onClick={() => {
-                            addReferenceImages([selectedImage.url])
-                        }}>
-                            <ImageIcon className="size-4" />
-                            <span className="hidden sm:inline text-xs font-medium">Tham chiếu</span>
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            title="Tạo lại"
-                            className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3"
-                            disabled={isGenerating}
-                            onClick={() => handleRegenerate(selectedImage)}
-                        >
-                            {isGenerating ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
-                            <span className="hidden sm:inline text-xs font-medium">{isGenerating ? 'Đang tạo...' : 'Tạo lại'}</span>
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Xoá ảnh" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5" onClick={() => handleDelete(selectedImage.id)}>
-                            <Trash2 className="size-4" />
-                        </Button>
-                    </> : undefined}
-                    infoPanel={selectedImage ? <>
-                        {/* Prompt */}
-                        <div className="px-5 pt-4 pb-3 space-y-2">
-                            <div className="flex items-center justify-between">
-                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(selectedImage.prompt)
-                                        toast.success('Đã sao chép prompt', { id: 'copy-prompt' })
-                                    }}
-                                >
-                                    <Copy className="size-3" />
-                                    Sao chép
-                                </Button>
-                            </div>
-                            <p className="text-sm text-white/85 leading-relaxed">
-                                {selectedImage.prompt.split(/(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)/gi).map((part, i) =>
-                                    /^(\[Ảnh tham chiếu \d+\]|@(?:Ảnh|anh|ảnh)\s*\d+)$/i.test(part)
-                                        ? <span key={i} className="text-violet-400 bg-violet-500/15 rounded px-1 py-0.5 text-xs font-semibold">{part}</span>
-                                        : <span key={i}>{part}</span>
-                                )}
-                            </p>
-                        </div>
-
-                        {/* AI Designed Prompt */}
-                        {selectedImage.designedPrompt && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
-                                        <Sparkles className="size-3" />
-                                        AI Designed Prompt
-                                    </p>
-                                    <button
-                                        className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(selectedImage.designedPrompt || '')
-                                            toast.success('Đã sao chép AI prompt')
-                                        }}
-                                    >
-                                        Sao chép
-                                    </button>
-                                </div>
-                                <p className="text-sm text-white/75 leading-relaxed">{selectedImage.designedPrompt}</p>
-                            </div>
-                        )}
-
-                        {/* Negative Prompt */}
-                        {selectedImage.negativePrompt && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Negative Prompt</p>
-                                <p className="text-sm text-white/65 leading-relaxed">{selectedImage.negativePrompt}</p>
-                            </div>
-                        )}
-
-                        {/* Ảnh tham chiếu */}
-                        {selectedImage.referenceImages && selectedImage.referenceImages.length > 0 && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <div className="flex items-center gap-1.5">
-                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
-                                    <span className="text-[9px] font-bold bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{selectedImage.referenceImages.length}</span>
-                                </div>
-                                <div className="grid grid-cols-5 gap-2">
-                                    {selectedImage.referenceImages.map((src, i) => (
-                                        <div key={i} className="aspect-square relative">
-                                            <img src={src} className="absolute inset-0 w-full h-full rounded-lg object-cover border border-white/10" alt="ref" />
-                                            <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
-                                                {i + 1}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Metadata grid */}
-                        <div className="px-5 py-3 border-t border-white/5">
-                            <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 text-white/40">
-                                        <Box className="size-3" />
-                                        <span className="text-[11px]">Model</span>
-                                    </div>
-                                    <p className="text-xs text-white/80 font-medium truncate" title={selectedImage.model}>
-                                        {selectedImage.model.split('/').pop() || selectedImage.model}
-                                    </p>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 text-white/40">
-                                        <Palette className="size-3" />
-                                        <span className="text-[11px]">Style</span>
-                                    </div>
-                                    <p className="text-xs text-white/80 font-medium capitalize">{selectedImage.style}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 text-white/40">
-                                        <Ruler className="size-3" />
-                                        <span className="text-[11px]">Tỷ lệ</span>
-                                    </div>
-                                    <p className="text-xs text-white/80 font-medium">{selectedImage.aspectLabel}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 text-white/40">
-                                        <Hash className="size-3" />
-                                        <span className="text-[11px]">Seed</span>
-                                    </div>
-                                    <p className="text-xs text-white/80 font-medium tabular-nums">{selectedImage.seed}</p>
-                                </div>
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 text-white/40">
-                                        <Clock className="size-3" />
-                                        <span className="text-[11px]">Ngày tạo</span>
-                                    </div>
-                                    <p className="text-xs text-white/80 font-medium">
-                                        {selectedImage.createdAt.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" })} {selectedImage.createdAt.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </> : undefined}
+                    onDownload={(item) => downloadImage(item.url, `zdream-${item.id}.jpg`)}
+                    onUseAsReference={(item) => addReferenceImages([item.url])}
+                    onRegenerate={(item) => {
+                        const img = images.find(i => i.id === item.id)
+                        if (img) handleRegenerate(img)
+                    }}
+                    onDelete={(item) => handleDelete(item.id)}
+                    isRegenerating={isGenerating}
                 />
 
 {/* === XÁC NHẬN XOÁ === */}

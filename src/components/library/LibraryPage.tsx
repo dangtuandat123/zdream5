@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react"
-import { ImageLightbox } from "@/components/ui/image-lightbox"
+import { ImageViewer, type ImageViewerItem } from "@/components/ui/image-viewer"
 import { Link } from "react-router-dom"
 import {
     SearchIcon,
@@ -12,12 +12,6 @@ import {
     DownloadIcon,
     Trash2Icon,
     MoreHorizontalIcon,
-    PaletteIcon,
-    CopyIcon,
-    ClockIcon,
-    BoxIcon,
-    RulerIcon,
-    HashIcon,
 } from "lucide-react"
 
 import { Input } from "@/components/ui/input"
@@ -372,7 +366,22 @@ export function LibraryPage() {
 
     const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null
 
-    // NOTE: All zoom/pan/gesture logic is now handled by ImageLightbox component
+    // Map sang ImageViewerItem cho shared ImageViewer component
+    const viewerItems = useMemo<ImageViewerItem[]>(() => filteredItems.map(item => ({
+        id: item.id,
+        url: item.thumbnail,
+        type: item.type,
+        prompt: item.prompt,
+        designedPrompt: item.designedPrompt,
+        negativePrompt: item.negativePrompt,
+        referenceImages: item.referenceImages,
+        model: item.model,
+        style: item.style,
+        aspectRatio: item.aspectRatio,
+        seed: item.seed,
+        gemsCost: item.gemsCost,
+        createdAt: item.createdAtFull,
+    })), [filteredItems])
 
     const emptyState = EMPTY_STATES[tab] || EMPTY_STATES.all
 
@@ -655,180 +664,25 @@ export function LibraryPage() {
                 </div>
             )}
 
-            {/* === LIGHTBOX — shared ImageLightbox component === */}
-                <ImageLightbox
-                    open={selectedIndex !== null && !!selectedItem}
-                    onClose={() => setSelectedIndex(null)}
-                    images={filteredItems.map(item => item.thumbnail)}
-                    currentIndex={selectedIndex ?? 0}
-                    onIndexChange={setSelectedIndex}
-                    maxZoom={3}
-                    badge={selectedItem ? (() => {
-                        const cfg = TYPE_CONFIG[selectedItem.type]; const Icon = cfg.icon; return (
-                            <Badge variant={cfg.variant} className="flex flex-row items-center gap-1.5 px-2.5 py-1 text-xs shadow-sm">
-                                <Icon className="size-3.5" />
-                                {cfg.label}
-                            </Badge>
-                        )
-                    })() : undefined}
-                    actions={selectedItem ? <>
-                        <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl"
-                            onClick={() => selectedItem && handleDownload(selectedItem)}>
-                            <DownloadIcon className="size-4" />
-                        </Button>
-                        {selectedItem.type === "ai" && selectedItem.prompt && (
-                            <Button variant="ghost" title="Tạo tương tự" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3"
-                                onClick={() => { window.location.href = `/app/generate?prompt=${encodeURIComponent(selectedItem.prompt || "")}` }}>
-                                <WandIcon className="size-4" />
-                                <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
-                            </Button>
-                        )}
-                        <Button variant="ghost" size="icon" title="Xóa ảnh" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5"
-                            onClick={(e) => selectedItem && confirmDelete(selectedItem, e)}>
-                            <Trash2Icon className="size-4" />
-                        </Button>
-                    </> : undefined}
-                    infoPanel={selectedItem ? <>
-                        {/* Prompt */}
-                        {selectedItem.prompt && (
-                            <div className="px-5 pt-4 pb-3 space-y-2">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(selectedItem.prompt || '')
-                                            toast({ title: "Đã sao chép prompt" })
-                                        }}
-                                    >
-                                        <CopyIcon className="size-3" />
-                                        Sao chép
-                                    </Button>
-                                </div>
-                                <p className="text-sm text-white/85 leading-relaxed">
-                                    {selectedItem.prompt}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* AI Designed Prompt */}
-                        {selectedItem.designedPrompt && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
-                                        <SparklesIcon className="size-3" />
-                                        AI Designed Prompt
-                                    </p>
-                                    <button
-                                        className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(selectedItem.designedPrompt || '')
-                                            toast({ title: "Đã sao chép AI prompt" })
-                                        }}
-                                    >
-                                        Sao chép
-                                    </button>
-                                </div>
-                                <p className="text-sm text-white/75 leading-relaxed">{selectedItem.designedPrompt}</p>
-                            </div>
-                        )}
-
-                        {/* Negative Prompt */}
-                        {selectedItem.negativePrompt && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Negative Prompt</p>
-                                <p className="text-sm text-white/65 leading-relaxed">
-                                    {selectedItem.negativePrompt}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* Reference Images */}
-                        {selectedItem.referenceImages && selectedItem.referenceImages.length > 0 && (
-                            <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <div className="flex items-center gap-1.5">
-                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Ảnh tham chiếu</p>
-                                    <span className="text-[9px] font-bold bg-white/10 text-white/60 px-1.5 py-0.5 rounded">{selectedItem.referenceImages.length}</span>
-                                </div>
-                                <div className="grid grid-cols-5 gap-2">
-                                    {selectedItem.referenceImages.map((refImg, i) => (
-                                        <div key={i} className="aspect-square relative">
-                                            <a href={refImg} target="_blank" rel="noreferrer" className="block w-full h-full relative cursor-pointer hover:opacity-80 transition-opacity">
-                                                <img src={refImg} className="absolute inset-0 w-full h-full rounded-lg object-cover border border-white/10" alt="ref" />
-                                                <div className="absolute top-1 left-1 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[9px] font-bold h-4 w-4 rounded-full shadow-sm flex items-center justify-center z-10">
-                                                    {i + 1}
-                                                </div>
-                                            </a>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Metadata grid */}
-                        <div className="px-5 py-3 border-t border-white/5">
-                            <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
-                            <div className="grid grid-cols-2 gap-3">
-                                {selectedItem.model && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-white/40">
-                                            <BoxIcon className="size-3" />
-                                            <span className="text-[11px]">Model</span>
-                                        </div>
-                                        <p className="text-xs text-white/80 font-medium truncate" title={selectedItem.model}>
-                                            {selectedItem.model.split('/').pop() || selectedItem.model}
-                                        </p>
-                                    </div>
-                                )}
-                                {selectedItem.style && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-white/40">
-                                            <PaletteIcon className="size-3" />
-                                            <span className="text-[11px]">Style</span>
-                                        </div>
-                                        <p className="text-xs text-white/80 font-medium">{selectedItem.style}</p>
-                                    </div>
-                                )}
-                                {selectedItem.aspectRatio && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-white/40">
-                                            <RulerIcon className="size-3" />
-                                            <span className="text-[11px]">Tỷ lệ</span>
-                                        </div>
-                                        <p className="text-xs text-white/80 font-medium">{selectedItem.aspectRatio}</p>
-                                    </div>
-                                )}
-                                {selectedItem.seed !== undefined && selectedItem.seed !== null && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-white/40">
-                                            <HashIcon className="size-3" />
-                                            <span className="text-[11px]">Seed</span>
-                                        </div>
-                                        <p className="text-xs text-white/80 font-medium tabular-nums">{selectedItem.seed}</p>
-                                    </div>
-                                )}
-                                {selectedItem.gemsCost !== undefined && selectedItem.gemsCost > 0 && (
-                                    <div className="space-y-1">
-                                        <div className="flex items-center gap-1.5 text-white/40">
-                                            <SparklesIcon className="size-3" />
-                                            <span className="text-[11px]">Chi phí</span>
-                                        </div>
-                                        <p className="text-xs text-white/80 font-medium">{selectedItem.gemsCost} 💎</p>
-                                    </div>
-                                )}
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5 text-white/40">
-                                        <ClockIcon className="size-3" />
-                                        <span className="text-[11px]">Ngày tạo</span>
-                                    </div>
-                                    <p className="text-xs text-white/80 font-medium">{selectedItem.createdAtFull}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </> : undefined}
-                />
+            {/* === IMAGE VIEWER — shared ImageViewer component === */}
+            <ImageViewer
+                open={selectedIndex !== null && !!selectedItem}
+                onClose={() => setSelectedIndex(null)}
+                items={viewerItems}
+                currentIndex={selectedIndex ?? 0}
+                onIndexChange={setSelectedIndex}
+                onDownload={(item) => {
+                    const original = filteredItems.find(i => i.id === item.id)
+                    if (original) handleDownload(original)
+                }}
+                onCreateSimilar={(item) => {
+                    window.location.href = `/app/generate?prompt=${encodeURIComponent(item.prompt || "")}`
+                }}
+                onDelete={(item) => {
+                    const original = filteredItems.find(i => i.id === item.id)
+                    if (original) confirmDelete(original)
+                }}
+            />
 
             {/* Mobile Action Drawer — bottom sheet dễ bấm trên điện thoại */}
             <Drawer open={!!actionItem} onOpenChange={(open) => !open && setActionItem(null)}>
