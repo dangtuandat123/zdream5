@@ -16,7 +16,7 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
@@ -91,12 +91,6 @@ const TABS = [
     { value: "ai", label: "AI", icon: SparklesIcon },
     { value: "upload", label: "Tải lên", icon: UploadIcon },
 ] as const
-
-// === Badge config theo loại — dùng chuẩn Shadcn UI ===
-const TYPE_CONFIG: Record<MediaType, { label: string; icon: typeof SparklesIcon; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-    ai: { label: "AI", icon: SparklesIcon, variant: "default" },
-    upload: { label: "Tải lên", icon: UploadIcon, variant: "secondary" },
-}
 
 // === Map API data → MediaItem ===
 /** Format ISO date → "dd/MM/yyyy HH:mm" */
@@ -413,19 +407,18 @@ export function LibraryPage() {
                     </p>
                 </div>
                 <div className="flex w-full sm:w-auto items-center gap-2">
-                    <div className="relative flex-1 sm:w-[240px]">
-                        <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <div className="relative flex-1 sm:w-[260px]">
+                        <SearchIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
                         <Input
                             placeholder="Tìm theo prompt, mẫu..."
-                            className="pl-9 h-9 border-white/10 bg-white/5 focus-visible:ring-1 focus-visible:ring-primary/50 transition-colors"
+                            className="pl-9 h-9 rounded-lg border-white/[0.08] bg-white/[0.06] placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-primary/40 focus-visible:bg-white/[0.08] transition-all"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
                     </div>
                     <Button
-                        variant="secondary"
                         onClick={handleUploadClick}
-                        className="h-9 px-3 sm:px-4 shrink-0 transition-transform active:scale-95 bg-white/10 hover:bg-white/15 text-white border border-white/10"
+                        className="h-9 px-3 sm:px-4 shrink-0 transition-all active:scale-95"
                         disabled={isUploading}
                     >
                         {isUploading ? (
@@ -448,11 +441,11 @@ export function LibraryPage() {
             </div>
 
             {/* Tabs filter + Sort */}
-            <div className="flex items-center gap-2 border-b border-border pb-3 w-full">
+            <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3 w-full">
                 <Tabs value={tab} onValueChange={setTab} className="flex-1">
-                    <TabsList className="grid w-full grid-cols-3 sm:w-[360px] bg-[#1a1c20] border border-white/5 p-1 rounded-lg">
+                    <TabsList className="w-auto inline-flex bg-white/[0.04] border border-white/[0.06] p-1 rounded-lg gap-0.5">
                         {TABS.map((t) => (
-                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs py-1.5 data-[state=active]:bg-[#2a2d31] data-[state=active]:text-white">
+                            <TabsTrigger key={t.value} value={t.value} className="gap-1.5 text-xs px-3.5 py-1.5 rounded-md text-white/50 data-[state=active]:bg-white/[0.1] data-[state=active]:text-white data-[state=active]:shadow-sm transition-all">
                                 <t.icon className="size-3.5" />
                                 {t.label}
                             </TabsTrigger>
@@ -481,12 +474,10 @@ export function LibraryPage() {
             ) : filteredItems.length > 0 ? (
                 <><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 pt-1">
                     {filteredItems.map((item, index) => {
-                        const typeConfig = TYPE_CONFIG[item.type]
-                        const TypeIcon = typeConfig.icon
                         return (
                             <Card
                                 key={item.id}
-                                className="group cursor-pointer overflow-hidden border-transparent transition-all duration-200 hover:shadow-lg hover:border-border"
+                                className="group cursor-pointer overflow-hidden border-white/[0.06] bg-white/[0.02] transition-all duration-200 hover:shadow-lg hover:border-white/[0.15] hover:ring-1 hover:ring-white/[0.06]"
                                 onClick={() => setSelectedIndex(index)}
                             >
                                 <CardContent className="p-0">
@@ -498,12 +489,6 @@ export function LibraryPage() {
                                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                                             loading="lazy"
                                         />
-
-                                        {/* Type badge — pill nhỏ gọn, chuẩn Shadcn UI */}
-                                        <Badge variant={typeConfig.variant} className="absolute top-2 left-2 flex items-center gap-1.5 px-2.5 py-1 shadow-sm text-[10px] pointer-events-none">
-                                            <TypeIcon className="size-3" />
-                                            {typeConfig.label}
-                                        </Badge>
 
                                         {/* Nút ⋯ .— luôn hiện trên mobile, hover hiện trên desktop */}
                                         {isMobile ? (
@@ -547,7 +532,7 @@ export function LibraryPage() {
                                                             Tạo tương tự
                                                         </DropdownMenuItem>
                                                     )}
-                                                    <div className="border-t border-white/10 my-1 mx-1" />
+                                                    <div className="border-t border-white/[0.08] my-1.5 mx-2" />
                                                     <DropdownMenuItem
                                                         className="rounded-xl px-3 py-2.5 text-red-400 focus:text-red-400 focus:bg-red-500/10 cursor-pointer gap-3"
                                                         onClick={(e) => confirmDelete(item, e)}
@@ -563,12 +548,12 @@ export function LibraryPage() {
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
                                     </div>
 
-                                    {/* Footer — prompt + date, gọn gàng */}
-                                    <div className="px-2.5 py-2 space-y-0.5">
-                                        <p className="text-xs font-medium truncate leading-tight">
+                                    {/* Footer — prompt + date */}
+                                    <div className="px-3 py-2.5 space-y-1">
+                                        <p className="text-[13px] font-medium truncate leading-snug">
                                             {item.prompt || item.templateName || "Tài nguyên tải lên"}
                                         </p>
-                                        <p className="text-[11px] text-muted-foreground">{item.createdAt}</p>
+                                        <p className="text-[11px] text-muted-foreground/70">{item.createdAt}</p>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -704,14 +689,7 @@ export function LibraryPage() {
                                 <div className="min-w-0 flex-1">
                                     <p className="text-xs font-medium truncate text-white">{actionItem.prompt || actionItem.templateName || "Tài nguyên tải lên"}</p>
                                     <div className="flex items-center gap-2 mt-1">
-                                        {(() => {
-                                            const cfg = TYPE_CONFIG[actionItem.type]; const Icon = cfg.icon; return (
-                                                <Badge variant={cfg.variant} className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px]">
-                                                    <Icon className="size-3" />
-                                                    {cfg.label}
-                                                </Badge>
-                                            )
-                                        })()}
+                                        <span className="text-[10px] text-white/50 uppercase tracking-wider">{actionItem.type === "ai" ? "AI" : "Tải lên"}</span>
                                         <span className="text-[11px] text-white/50">{actionItem.createdAt}</span>
                                     </div>
                                 </div>
