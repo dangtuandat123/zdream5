@@ -330,26 +330,28 @@ export function ImageLightbox({
                         </div>
 
                         {/* Phải: info toggle + close */}
-                        <div className="flex items-center gap-1.5 pointer-events-auto">
+                        <div className="flex items-center gap-2 pointer-events-auto">
                             {hasInfoButton && (
-                                <Button
-                                    variant="ghost"
+                                <button
                                     title="Chi tiết ảnh"
-                                    className={`rounded-full h-9 px-3.5 shadow-lg transition-colors gap-1.5 text-xs font-medium ${showInfo ? 'border border-white bg-white text-black hover:bg-neutral-200 hover:text-black' : 'bg-black/60 text-white hover:bg-black/80'}`}
+                                    className={`flex items-center gap-1.5 rounded-full h-8 px-3 text-[11px] font-medium transition-all duration-200 backdrop-blur-xl shadow-lg border ${
+                                        showInfo
+                                            ? 'bg-white/95 text-neutral-900 border-white/80 hover:bg-white'
+                                            : 'bg-white/10 text-white/80 border-white/10 hover:bg-white/20 hover:text-white'
+                                    }`}
                                     onClick={() => setShowInfo(!showInfo)}
                                 >
                                     <Info className="size-3.5" />
-                                    <span>Chi tiết ảnh</span>
-                                </Button>
+                                    <span className="hidden sm:inline">Chi tiết ảnh</span>
+                                </button>
                             )}
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                className="rounded-full bg-white text-black hover:bg-neutral-200 hover:text-black border-none shadow-lg h-9 w-9"
+                            <button
+                                title="Đóng"
+                                className="flex items-center justify-center rounded-full h-8 w-8 bg-white/10 backdrop-blur-xl text-white/80 border border-white/10 hover:bg-white/20 hover:text-white transition-all duration-200 shadow-lg"
                                 onClick={handleClose}
                             >
-                                <X className="size-5" />
-                            </Button>
+                                <X className="size-4" />
+                            </button>
                         </div>
                     </div>
 
@@ -447,11 +449,14 @@ export function ImageLightbox({
                             <div className="w-10 h-1 rounded-full bg-white/20" />
                         </div>
                         {/* Header panel */}
-                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 lg:py-4 bg-neutral-900/80 backdrop-blur-md border-b border-white/5">
-                            <h3 className="text-sm font-semibold text-white">Chi tiết ảnh</h3>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full text-white/60 hover:text-white hover:bg-white/10" onClick={() => setShowInfo(false)}>
-                                <X className="size-4" />
-                            </Button>
+                        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-3 lg:py-3.5 bg-neutral-900/90 backdrop-blur-xl border-b border-white/[0.06]">
+                            <h3 className="text-[13px] font-semibold text-white/90 tracking-tight">Chi tiết ảnh</h3>
+                            <button
+                                className="flex items-center justify-center h-7 w-7 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-colors"
+                                onClick={() => setShowInfo(false)}
+                            >
+                                <X className="size-3.5" />
+                            </button>
                         </div>
 
                         {/* Nội dung info từ parent */}

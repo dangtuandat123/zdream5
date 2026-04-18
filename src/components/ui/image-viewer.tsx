@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
     Download, Trash2, RotateCcw, ImageIcon, Wand2,
-    Copy, Sparkles, Box, Palette, Ruler, Hash, Clock, Gem, Loader2,
+    Sparkles, Box, Palette, Ruler, Hash, Clock, Gem, Loader2,
 } from "lucide-react"
 
 // ══════════════════════════════════════════════════════════════
@@ -81,7 +81,7 @@ function HighlightedPrompt({ text }: { text: string }) {
 }
 
 
-/** Một ô metadata nhỏ (Model, Style, Seed, ...) */
+/** Một ô metadata nhỏ (Model, Style, Seed, ...) — card style */
 function MetaField({ icon: Icon, label, value, title, truncate, capitalize, tabular }: {
     icon: typeof Box
     label: string
@@ -92,13 +92,13 @@ function MetaField({ icon: Icon, label, value, title, truncate, capitalize, tabu
     tabular?: boolean
 }) {
     return (
-        <div className="space-y-1">
+        <div className="bg-white/[0.04] rounded-lg px-3 py-2.5 space-y-1 border border-white/[0.06]">
             <div className="flex items-center gap-1.5 text-white/40">
                 <Icon className="size-3" />
-                <span className="text-[11px]">{label}</span>
+                <span className="text-[10px] uppercase tracking-wider">{label}</span>
             </div>
             <p
-                className={`text-xs text-white/80 font-medium ${truncate ? "truncate" : ""} ${capitalize ? "capitalize" : ""} ${tabular ? "tabular-nums" : ""}`}
+                className={`text-[13px] text-white/85 font-medium leading-snug ${truncate ? "truncate" : ""} ${capitalize ? "capitalize" : ""} ${tabular ? "tabular-nums" : ""}`}
                 title={title}
             >
                 {value}
@@ -135,12 +135,9 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {item.prompt && (
                 <div className="px-5 pt-4 pb-3 space-y-2">
                     <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-medium text-white/50 uppercase tracking-wider flex items-center gap-1.5">
-                            <Copy className="size-3 text-white/30" />
-                            Prompt
-                        </p>
+                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
                         <button
-                            className="text-[10px] text-white/40 hover:text-white/70 transition-colors font-medium"
+                            className="text-[10px] text-white/35 hover:text-white/70 transition-colors"
                             onClick={() => handleCopy(item.prompt!, "prompt")}
                         >
                             Sao chép
@@ -167,12 +164,12 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {item.designedPrompt && (
                 <div className="px-5 py-3 space-y-2 border-t border-white/5">
                     <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-medium text-violet-400/60 uppercase tracking-wider flex items-center gap-1.5">
-                            <Sparkles className="size-3 text-violet-400/40" />
-                            AI Designed Prompt
+                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="size-2.5 text-violet-400/50" />
+                            AI Prompt
                         </p>
                         <button
-                            className="text-[10px] text-white/40 hover:text-white/70 transition-colors font-medium"
+                            className="text-[10px] text-white/35 hover:text-white/70 transition-colors"
                             onClick={() => handleCopy(item.designedPrompt!, "AI prompt")}
                         >
                             Sao chép
@@ -229,9 +226,9 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
 
             {/* ── Metadata Grid ── */}
             {hasMetadata && (
-                <div className="px-5 py-3 border-t border-white/5">
+                <div className="px-5 py-3 border-t border-white/[0.06]">
                     <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider mb-3">Thông số</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                         {item.model && (
                             <MetaField icon={Box} label="Model" value={item.model.split("/").pop() || item.model} title={item.model} truncate />
                         )}
