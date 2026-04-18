@@ -85,7 +85,7 @@ function ViewerBadge({ type }: { type: "ai" | "upload" }) {
     if (type === "ai") {
         return (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium backdrop-blur-md shadow-sm bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                <Wand2 className="size-3.5" />
+                <Sparkles className="size-3.5" />
                 AI
             </div>
         )
@@ -152,16 +152,16 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {item.prompt && (
                 <div className="px-5 pt-4 pb-3 space-y-2">
                     <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
+                        <p className="text-[11px] font-medium text-white/50 uppercase tracking-wider flex items-center gap-1.5">
+                            <Copy className="size-3 text-white/30" />
+                            Prompt
+                        </p>
+                        <button
+                            className="text-[10px] text-white/40 hover:text-white/70 transition-colors font-medium"
                             onClick={() => handleCopy(item.prompt!, "prompt")}
                         >
-                            <Copy className="size-3" />
                             Sao chép
-                        </Button>
+                        </button>
                     </div>
                     <div className={promptExpanded ? '' : 'max-h-[100px] overflow-hidden relative'}>
                         <HighlightedPrompt text={item.prompt} />
@@ -184,12 +184,12 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {item.designedPrompt && (
                 <div className="px-5 py-3 space-y-2 border-t border-white/5">
                     <div className="flex items-center justify-between">
-                        <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
-                            <Sparkles className="size-3" />
+                        <p className="text-[11px] font-medium text-violet-400/60 uppercase tracking-wider flex items-center gap-1.5">
+                            <Sparkles className="size-3 text-violet-400/40" />
                             AI Designed Prompt
                         </p>
                         <button
-                            className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
+                            className="text-[10px] text-white/40 hover:text-white/70 transition-colors font-medium"
                             onClick={() => handleCopy(item.designedPrompt!, "AI prompt")}
                         >
                             Sao chép
@@ -215,7 +215,7 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
             {/* ── Negative Prompt ── */}
             {item.negativePrompt && (
                 <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Negative Prompt</p>
+                    <p className="text-[11px] font-medium text-white/50 uppercase tracking-wider">Negative Prompt</p>
                     <p className="text-sm text-white/65 leading-relaxed">{item.negativePrompt}</p>
                 </div>
             )}
