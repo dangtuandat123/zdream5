@@ -441,7 +441,7 @@ export function ImageLightbox({
                 {/* === Info Panel — sidebar trên desktop, bottom sheet trên mobile === */}
                 {showInfo && infoPanel && (
                     <div
-                        className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto animate-in slide-in-from-bottom lg:slide-in-from-right duration-300 max-h-[70vh] lg:max-h-none rounded-t-2xl lg:rounded-t-none"
+                        className="fixed lg:absolute inset-x-0 bottom-0 lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[360px] z-[60] bg-neutral-900/95 backdrop-blur-xl border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto custom-scrollbar animate-in slide-in-from-bottom lg:slide-in-from-right duration-300 max-h-[70vh] lg:max-h-none rounded-t-2xl lg:rounded-t-none"
                         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
                     >
                         {/* Mobile grab handle */}
