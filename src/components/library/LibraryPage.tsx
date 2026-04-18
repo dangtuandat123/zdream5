@@ -672,16 +672,17 @@ export function LibraryPage() {
                         )
                     })() : undefined}
                     actions={selectedItem ? <>
-                        {selectedItem.type === "ai" && (
-                            <Button variant="ghost" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3">
-                                <WandIcon className="size-4" />
-                                <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
-                            </Button>
-                        )}
                         <Button variant="ghost" size="icon" title="Tải xuống" className="text-white hover:bg-white/20 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl"
                             onClick={() => selectedItem && handleDownload(selectedItem)}>
                             <DownloadIcon className="size-4" />
                         </Button>
+                        {selectedItem.type === "ai" && selectedItem.prompt && (
+                            <Button variant="ghost" title="Tạo tương tự" className="text-white hover:bg-white/20 gap-1.5 h-8 sm:h-9 rounded-xl px-2 sm:px-3"
+                                onClick={() => { window.location.href = `/app/generate?prompt=${encodeURIComponent(selectedItem.prompt || "")}` }}>
+                                <WandIcon className="size-4" />
+                                <span className="hidden sm:inline text-xs font-medium">Tạo tương tự</span>
+                            </Button>
+                        )}
                         <Button variant="ghost" size="icon" title="Xóa ảnh" className="text-red-400 hover:bg-red-500/20 hover:text-red-400 h-8 w-8 sm:h-9 sm:w-9 py-0 rounded-xl mr-0.5"
                             onClick={(e) => selectedItem && confirmDelete(selectedItem, e)}>
                             <Trash2Icon className="size-4" />
@@ -691,47 +692,46 @@ export function LibraryPage() {
                         {/* Prompt */}
                         {selectedItem.prompt && (
                             <div className="px-5 pt-4 pb-3 space-y-2">
-                                <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(selectedItem.prompt || '')
+                                            toast({ title: "Đã sao chép prompt" })
+                                        }}
+                                    >
+                                        <CopyIcon className="size-3" />
+                                        Sao chép
+                                    </Button>
+                                </div>
                                 <p className="text-sm text-white/85 leading-relaxed">
                                     {selectedItem.prompt}
                                 </p>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(selectedItem.prompt || '')
-                                        toast({ title: "Đã sao chép prompt" })
-                                    }}
-                                >
-                                    <CopyIcon className="size-3" />
-                                    Sao chép
-                                </Button>
                             </div>
                         )}
 
                         {/* AI Designed Prompt */}
                         {selectedItem.designedPrompt && (
                             <div className="px-5 py-3 space-y-2 border-t border-white/5">
-                                <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
-                                    <SparklesIcon className="size-3" />
-                                    AI Designed Prompt
-                                </p>
-                                <p className="text-sm text-white/75 leading-relaxed">
-                                    {selectedItem.designedPrompt}
-                                </p>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-7 px-2.5 text-xs text-white/50 hover:text-white hover:bg-white/10 gap-1.5"
-                                    onClick={() => {
-                                        navigator.clipboard.writeText(selectedItem.designedPrompt || '')
-                                        toast({ title: "Đã sao chép AI prompt" })
-                                    }}
-                                >
-                                    <CopyIcon className="size-3" />
-                                    Sao chép
-                                </Button>
+                                <div className="flex items-center justify-between">
+                                    <p className="text-[11px] font-medium text-violet-400/70 uppercase tracking-wider flex items-center gap-1.5">
+                                        <SparklesIcon className="size-3" />
+                                        AI Designed Prompt
+                                    </p>
+                                    <button
+                                        className="text-[10px] text-white/40 hover:text-white/70 transition-colors"
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(selectedItem.designedPrompt || '')
+                                            toast({ title: "Đã sao chép AI prompt" })
+                                        }}
+                                    >
+                                        Sao chép
+                                    </button>
+                                </div>
+                                <p className="text-sm text-white/75 leading-relaxed">{selectedItem.designedPrompt}</p>
                             </div>
                         )}
 

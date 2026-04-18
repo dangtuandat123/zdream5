@@ -1240,22 +1240,7 @@ export function GeneratePage() {
         setSelectedImage(null)
     }, [])
 
-    // Keyboard navigation trong lightbox (← → ESC)
-    useEffect(() => {
-        if (!selectedImage) return
-        const handler = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') { setSelectedImage(null); return }
-            const idx = images.findIndex(img => img.id === selectedImage.id)
-            if (idx === -1) return
-            if (e.key === 'ArrowLeft' && idx > 0) {
-                setSelectedImage(images[idx - 1])
-            } else if (e.key === 'ArrowRight' && idx < images.length - 1) {
-                setSelectedImage(images[idx + 1])
-            }
-        }
-        window.addEventListener('keydown', handler)
-        return () => window.removeEventListener('keydown', handler)
-    }, [selectedImage, images])
+    // Keyboard navigation trong lightbox (← → ESC) — đã chuyển sang ImageLightbox component
 
     // Batch actions
     const toggleSelection = useCallback((id: string) => {
