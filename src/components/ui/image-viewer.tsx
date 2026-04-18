@@ -8,7 +8,7 @@ import { ImageLightbox } from "@/components/ui/image-lightbox"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import {
-    Download, Trash2, RotateCcw, ImageIcon, Wand2,
+    Download, Trash2, RotateCcw, ImageIcon, Wand2, Copy,
     Sparkles, Box, Palette, Ruler, Hash, Clock, Gem, Loader2,
 } from "lucide-react"
 
@@ -137,9 +137,10 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
                     <div className="flex items-center justify-between">
                         <p className="text-[11px] font-medium text-white/40 uppercase tracking-wider">Prompt</p>
                         <button
-                            className="text-[10px] text-white/35 hover:text-white/70 transition-colors"
+                            className="flex items-center gap-1 text-[10px] text-white/35 hover:text-white/70 transition-colors"
                             onClick={() => handleCopy(item.prompt!, "prompt")}
                         >
+                            <Copy className="size-3" />
                             Sao chép
                         </button>
                     </div>
@@ -169,9 +170,10 @@ function ViewerInfoPanel({ item }: { item: ImageViewerItem }) {
                             AI Prompt
                         </p>
                         <button
-                            className="text-[10px] text-white/35 hover:text-white/70 transition-colors"
+                            className="flex items-center gap-1 text-[10px] text-white/35 hover:text-white/70 transition-colors"
                             onClick={() => handleCopy(item.designedPrompt!, "AI prompt")}
                         >
+                            <Copy className="size-3" />
                             Sao chép
                         </button>
                     </div>
